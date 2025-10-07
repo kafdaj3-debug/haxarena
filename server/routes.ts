@@ -169,7 +169,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (status === "approved") {
         const user = await storage.getUser(application.userId);
-        await storage.updateUser(application.userId, { isAdmin: true });
+        await storage.updateUser(application.userId, { isAdmin: true, role: "Game Admin" });
         
         // Add to staff roles if not already exists
         if (user) {
