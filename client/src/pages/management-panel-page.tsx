@@ -157,6 +157,19 @@ export default function ManagementPanelPage() {
     },
   });
 
+  const toggleStaffAccessMutation = useMutation({
+    mutationFn: async ({ id, managementAccess }: { id: string; managementAccess: boolean }) => {
+      return await apiRequest("PATCH", `/api/staff-roles/${id}`, { managementAccess });
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Yönetim erişimi güncellendi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/staff-roles"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "İşlem başarısız", variant: "destructive" });
+    },
+  });
+
   const deleteStaffMutation = useMutation({
     mutationFn: async (id: string) => {
       return await apiRequest("DELETE", `/api/staff-roles/${id}`, {});
@@ -468,23 +481,41 @@ export default function ManagementPanelPage() {
                 </div>
                 <div className="space-y-2">
                   {staffRoles?.map((staff) => (
-                    <div key={staff.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">{staff.name}</p>
-                        <p className="text-sm text-muted-foreground">{staff.role}</p>
-                        {staff.managementAccess && (
-                          <Badge variant="secondary" className="mt-1">Yönetim Erişimi</Badge>
-                        )}
+                    <div key={staff.id} className="p-3 border rounded-lg space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{staff.name}</p>
+                          <p className="text-sm text-muted-foreground">{staff.role}</p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteStaffMutation.mutate(staff.id)}
+                          disabled={deleteStaffMutation.isPending}
+                          data-testid={`button-delete-staff-${staff.id}`}
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => deleteStaffMutation.mutate(staff.id)}
-                        disabled={deleteStaffMutation.isPending}
-                        data-testid={`button-delete-staff-${staff.id}`}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor={`access-${staff.id}`} className="cursor-pointer">
+                          <div>
+                            <p className="font-medium text-sm">Yönetim Erişimi</p>
+                            <p className="text-xs text-muted-foreground">
+                              {staff.managementAccess ? "Aktif" : "Pasif"}
+                            </p>
+                          </div>
+                        </Label>
+                        <Switch
+                          id={`access-${staff.id}`}
+                          checked={staff.managementAccess || false}
+                          onCheckedChange={(checked) => 
+                            toggleStaffAccessMutation.mutate({ id: staff.id, managementAccess: checked })
+                          }
+                          disabled={toggleStaffAccessMutation.isPending}
+                          data-testid={`switch-staff-access-${staff.id}`}
+                        />
+                      </div>
                     </div>
                   ))}
                   {!staffRoles?.length && (

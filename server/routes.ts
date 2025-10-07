@@ -388,6 +388,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/staff-roles/:id", isAdmin, async (req, res) => {
+    try {
+      const { managementAccess } = req.body;
+      if (typeof managementAccess !== "boolean") {
+        return res.status(400).json({ error: "Geçersiz değer" });
+      }
+
+      const staffRole = await storage.updateStaffRole(req.params.id, { managementAccess });
+      if (!staffRole) {
+        return res.status(404).json({ error: "Staff rolü bulunamadı" });
+      }
+      return res.json(staffRole);
+    } catch (error) {
+      return res.status(500).json({ error: "Staff rolü güncellenemedi" });
+    }
+  });
+
   app.delete("/api/staff-roles/:id", isAdmin, async (req, res) => {
     try {
       await storage.deleteStaffRole(req.params.id);

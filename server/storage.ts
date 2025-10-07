@@ -51,6 +51,7 @@ export interface IStorage {
   // Staff role operations
   createStaffRole(role: InsertStaffRole): Promise<StaffRole>;
   getStaffRoles(): Promise<StaffRole[]>;
+  updateStaffRole(id: string, updates: Partial<InsertStaffRole>): Promise<StaffRole | undefined>;
   deleteStaffRole(id: string): Promise<void>;
   
   // Notification operations
@@ -186,6 +187,14 @@ export class DBStorage implements IStorage {
 
   async getStaffRoles(): Promise<StaffRole[]> {
     return await db.select().from(staffRoles).orderBy(desc(staffRoles.createdAt));
+  }
+
+  async updateStaffRole(id: string, updates: Partial<InsertStaffRole>): Promise<StaffRole | undefined> {
+    const [updated] = await db.update(staffRoles)
+      .set(updates)
+      .where(eq(staffRoles.id, id))
+      .returning();
+    return updated;
   }
 
   async deleteStaffRole(id: string): Promise<void> {
