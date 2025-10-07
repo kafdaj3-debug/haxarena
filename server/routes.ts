@@ -331,9 +331,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/management/users/:id", isSuperAdmin, async (req, res) => {
     try {
+      // Kullanıcı kendi hesabını silemez
+      console.log(`[DELETE USER] Attempting to delete user ${req.params.id}, current user: ${req.user?.id}`);
+      if (req.params.id === req.user!.id) {
+        console.log(`[DELETE USER] Blocked: User trying to delete themselves`);
+        return res.status(400).json({ error: "Kendi hesabınızı silemezsiniz" });
+      }
       await storage.deleteUser(req.params.id);
+      console.log(`[DELETE USER] Successfully deleted user ${req.params.id}`);
       return res.json({ message: "Kullanıcı silindi" });
     } catch (error) {
+      console.error(`[DELETE USER] Error:`, error);
       return res.status(500).json({ error: "Kullanıcı silinemedi" });
     }
   });

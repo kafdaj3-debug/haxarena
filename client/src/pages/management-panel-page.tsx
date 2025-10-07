@@ -12,11 +12,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Shield, ShieldOff, CheckCircle, XCircle, User, Eye, Trash2, Plus, Lock, Unlock, Archive, ArchiveRestore } from "lucide-react";
+import { Shield, ShieldOff, CheckCircle, XCircle, User, Trash2, Plus, Lock, Unlock, Archive, ArchiveRestore } from "lucide-react";
 
 const ROLES = ["DIAMOND VIP", "GOLD VIP", "SILVER VIP", "Lig Oyuncusu", "HaxArena Üye"];
 const PLAYER_ROLES = ["Kaleci", "Defans", "Orta Saha", "Forvet", "Yedek"];
 const STAFF_ROLES = [
+  "Founder",
   "Master Coordinator",
   "Coordinator Admin",
   "Head Overseer Admin",
@@ -28,7 +29,6 @@ const STAFF_ROLES = [
 export default function ManagementPanelPage() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
-  const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
   const [staffName, setStaffName] = useState("");
   const [staffRole, setStaffRole] = useState("");
 
@@ -453,21 +453,6 @@ export default function ManagementPanelPage() {
                           <Badge variant="secondary">{u.role}</Badge>
                           {u.isAdmin && <Badge variant="default">Admin</Badge>}
                         </div>
-                        {user?.isSuperAdmin && (
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setShowPasswords({ ...showPasswords, [u.id]: !showPasswords[u.id] })}
-                              data-testid={`button-show-password-${u.id}`}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            {showPasswords[u.id] && (
-                              <code className="text-xs bg-muted px-2 py-1 rounded">{u.password}</code>
-                            )}
-                          </div>
-                        )}
                       </div>
                       <div className="flex items-center gap-4 flex-wrap">
                         <div className="flex items-center gap-2">
@@ -580,7 +565,7 @@ export default function ManagementPanelPage() {
                         addStaffMutation.mutate({
                           name: staffName,
                           role: staffRole,
-                          managementAccess: staffRole === "Master Coordinator" || staffRole === "Coordinator Admin"
+                          managementAccess: staffRole === "Founder" || staffRole === "Master Coordinator" || staffRole === "Coordinator Admin"
                         });
                       }
                     }}
@@ -592,44 +577,51 @@ export default function ManagementPanelPage() {
                   </Button>
                 </div>
                 <div className="space-y-2">
-                  {staffRoles?.map((staff) => (
-                    <div key={staff.id} className="p-3 border rounded-lg space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">{staff.name}</p>
-                          <p className="text-sm text-muted-foreground">{staff.role}</p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => deleteStaffMutation.mutate(staff.id)}
-                          disabled={deleteStaffMutation.isPending}
-                          data-testid={`button-delete-staff-${staff.id}`}
-                        >
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor={`access-${staff.id}`} className="cursor-pointer">
+                  {staffRoles?.map((staff) => {
+                    const isFounder = staff.role === "Founder";
+                    const canManageFounder = user?.isSuperAdmin; // Sadece super admin Founder'ı yönetebilir
+                    
+                    return (
+                      <div key={staff.id} className="p-3 border rounded-lg space-y-3">
+                        <div className="flex items-center justify-between">
                           <div>
-                            <p className="font-medium text-sm">Yönetim Erişimi</p>
-                            <p className="text-xs text-muted-foreground">
-                              {staff.managementAccess ? "Aktif" : "Pasif"}
-                            </p>
+                            <p className="font-medium">{staff.name}</p>
+                            <p className="text-sm text-muted-foreground">{staff.role}</p>
                           </div>
-                        </Label>
-                        <Switch
-                          id={`access-${staff.id}`}
-                          checked={staff.managementAccess || false}
-                          onCheckedChange={(checked) => 
-                            toggleStaffAccessMutation.mutate({ id: staff.id, managementAccess: checked })
-                          }
-                          disabled={toggleStaffAccessMutation.isPending}
-                          data-testid={`switch-staff-access-${staff.id}`}
-                        />
+                          {(!isFounder || canManageFounder) && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteStaffMutation.mutate(staff.id)}
+                              disabled={deleteStaffMutation.isPending}
+                              data-testid={`button-delete-staff-${staff.id}`}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          )}
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor={`access-${staff.id}`} className="cursor-pointer">
+                            <div>
+                              <p className="font-medium text-sm">Yönetim Erişimi</p>
+                              <p className="text-xs text-muted-foreground">
+                                {staff.managementAccess ? "Aktif" : "Pasif"}
+                              </p>
+                            </div>
+                          </Label>
+                          <Switch
+                            id={`access-${staff.id}`}
+                            checked={staff.managementAccess || false}
+                            onCheckedChange={(checked) => 
+                              toggleStaffAccessMutation.mutate({ id: staff.id, managementAccess: checked })
+                            }
+                            disabled={toggleStaffAccessMutation.isPending || (isFounder && !canManageFounder)}
+                            data-testid={`switch-staff-access-${staff.id}`}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   {!staffRoles?.length && (
                     <p className="text-center text-muted-foreground py-4">Henüz staff eklenmedi</p>
                   )}
