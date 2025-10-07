@@ -8,10 +8,18 @@ import { Link } from "wouter";
 import { Trophy, Users, MessageSquare, Shield } from "lucide-react";
 
 export default function HomePage() {
-  const featuredRooms = [
+  const allRooms = [
     {
       matchName: "Beşiktaş vs Trabzonspor",
       link: "https://www.haxball.com/play?c=S94fRiqX_MI"
+    },
+    {
+      matchName: "Kocaelispor vs Gaziantepspor",
+      link: "https://www.haxball.com/play?c=SQiZbOZdvCU"
+    },
+    {
+      matchName: "Karşıyaka vs Göztepe",
+      link: "https://www.haxball.com/play?c=0nc3iNzdT78"
     },
     {
       matchName: "Galatasaray vs Fenerbahçe",
@@ -117,41 +125,30 @@ export default function HomePage() {
 
             <div className="mb-12">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-heading font-bold">Aktif Odalar</h2>
-                <Link href="/aktif-odalar">
-                  <a>
-                    <Button variant="ghost" className="hover-elevate active-elevate-2" data-testid="button-view-all-rooms">
-                      Tümünü Gör
-                    </Button>
-                  </a>
+                <h2 className="text-3xl font-heading font-bold">Son Forum Konuları</h2>
+                <Link href="/forum">
+                  <Button variant="ghost" className="hover-elevate active-elevate-2" data-testid="button-view-forum">
+                    Foruma Git
+                  </Button>
                 </Link>
               </div>
+              <div className="space-y-4 max-w-4xl">
+                {recentPosts.map((post) => (
+                  <ForumPostCard key={post.id} {...post} />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-3xl font-heading font-bold mb-6">Aktif Odalar</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {featuredRooms.map((room, index) => (
+                {allRooms.map((room, index) => (
                   <ActiveRoomCard
                     key={index}
                     matchName={room.matchName}
                     link={room.link}
                     isActive={true}
                   />
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-heading font-bold">Son Forum Konuları</h2>
-                <Link href="/forum">
-                  <a>
-                    <Button variant="ghost" className="hover-elevate active-elevate-2" data-testid="button-view-forum">
-                      Foruma Git
-                    </Button>
-                  </a>
-                </Link>
-              </div>
-              <div className="space-y-4 max-w-4xl">
-                {recentPosts.map((post) => (
-                  <ForumPostCard key={post.id} {...post} />
                 ))}
               </div>
             </div>

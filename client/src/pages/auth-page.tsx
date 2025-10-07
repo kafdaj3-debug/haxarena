@@ -4,24 +4,93 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AuthPage() {
   const [loginData, setLoginData] = useState({ username: "", password: "" });
   const [registerData, setRegisterData] = useState({ username: "", email: "", password: "" });
   const [registerSuccess, setRegisterSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [, navigate] = useLocation();
+  const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login attempt:", loginData);
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify(loginData),
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        toast({
+          title: "Giriş Başarısız",
+          description: error.error || "Kullanıcı adı veya şifre hatalı",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const user = await response.json();
+      toast({
+        title: "Giriş Başarılı",
+        description: `Hoş geldin, ${user.username}!`,
+      });
+      navigate("/");
+      window.location.reload(); // Reload to update header
+    } catch (error) {
+      toast({
+        title: "Hata",
+        description: "Bir hata oluştu, lütfen tekrar deneyin",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Register attempt:", registerData);
-    setRegisterSuccess(true);
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify(registerData),
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        toast({
+          title: "Kayıt Başarısız",
+          description: error.error || "Kayıt işlemi başarısız oldu",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setRegisterSuccess(true);
+      toast({
+        title: "Kayıt Başarılı",
+        description: "Hesabınız oluşturuldu, şimdi giriş yapabilirsiniz",
+      });
+    } catch (error) {
+      toast({
+        title: "Hata",
+        description: "Bir hata oluştu, lütfen tekrar deneyin",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -78,8 +147,13 @@ export default function AuthPage() {
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button type="submit" className="w-full hover-elevate active-elevate-2" data-testid="button-login">
-                      Giriş Yap
+                    <Button 
+                      type="submit" 
+                      className="w-full hover-elevate active-elevate-2" 
+                      data-testid="button-login"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Giriş yapılıyor..." : "Giriş Yap"}
                     </Button>
                   </CardFooter>
                 </form>
@@ -142,8 +216,13 @@ export default function AuthPage() {
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button type="submit" className="w-full hover-elevate active-elevate-2" data-testid="button-register">
-                      Kayıt Ol
+                    <Button 
+                      type="submit" 
+                      className="w-full hover-elevate active-elevate-2" 
+                      data-testid="button-register"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Kayıt olunuyor..." : "Kayıt Ol"}
                     </Button>
                   </CardFooter>
                 </form>

@@ -54,12 +54,14 @@ export default function VIPPage() {
               price={90}
               features={silverFeatures}
               purchaseLink="https://www.shopier.com/40044747"
+              showDiscordWarning={true}
             />
             <VIPPackageCard
               tier="gold"
               price={120}
               features={goldFeatures}
               purchaseLink="https://www.shopier.com/40044867"
+              showDiscordWarning={true}
             />
             <VIPPackageCard
               tier="diamond"
