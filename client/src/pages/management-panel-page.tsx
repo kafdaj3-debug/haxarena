@@ -31,6 +31,8 @@ export default function ManagementPanelPage() {
   const { toast } = useToast();
   const [staffName, setStaffName] = useState("");
   const [staffRole, setStaffRole] = useState("");
+  const [ipAddress, setIpAddress] = useState("");
+  const [ipReason, setIpReason] = useState("");
 
   const { data: users } = useQuery<any[]>({
     queryKey: ["/api/management/users"],
@@ -54,6 +56,11 @@ export default function ManagementPanelPage() {
   const { data: forumPosts } = useQuery<any[]>({
     queryKey: ["/api/forum-posts"],
     enabled: !!user?.isAdmin,
+  });
+
+  const { data: bannedIps } = useQuery<any[]>({
+    queryKey: ["/api/banned-ips"],
+    enabled: !!user?.isSuperAdmin,
   });
 
   const settingsMutation = useMutation({
@@ -251,6 +258,38 @@ export default function ManagementPanelPage() {
     },
     onError: () => {
       toast({ title: "Hata", description: "Konu arşiv durumu güncellenemedi", variant: "destructive" });
+    },
+  });
+
+  const banIpMutation = useMutation({
+    mutationFn: async (data: { ipAddress: string; reason?: string }) => {
+      return await apiRequest("POST", "/api/banned-ips", data);
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "IP adresi engellendi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/banned-ips"] });
+      setIpAddress("");
+      setIpReason("");
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Hata", 
+        description: error.message || "IP engellenemedi", 
+        variant: "destructive" 
+      });
+    },
+  });
+
+  const unbanIpMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest("DELETE", `/api/banned-ips/${id}`, {});
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "IP ban kaldırıldı" });
+      queryClient.invalidateQueries({ queryKey: ["/api/banned-ips"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "IP ban kaldırılamadı", variant: "destructive" });
     },
   });
 
@@ -624,6 +663,71 @@ export default function ManagementPanelPage() {
                   })}
                   {!staffRoles?.length && (
                     <p className="text-center text-muted-foreground py-4">Henüz staff eklenmedi</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* IP Ban Yönetimi */}
+            <Card>
+              <CardHeader>
+                <CardTitle>IP Ban Yönetimi</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="IP Adresi (örn: 192.168.1.1)"
+                    value={ipAddress}
+                    onChange={(e) => setIpAddress(e.target.value)}
+                    data-testid="input-ip-address"
+                  />
+                  <Input
+                    placeholder="Sebep (opsiyonel)"
+                    value={ipReason}
+                    onChange={(e) => setIpReason(e.target.value)}
+                    data-testid="input-ip-reason"
+                  />
+                  <Button
+                    onClick={() => {
+                      if (ipAddress.trim()) {
+                        banIpMutation.mutate({ 
+                          ipAddress: ipAddress.trim(),
+                          reason: ipReason.trim() || undefined
+                        });
+                      }
+                    }}
+                    disabled={!ipAddress.trim() || banIpMutation.isPending}
+                    data-testid="button-ban-ip"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Engelle
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {bannedIps?.map((banned) => (
+                    <div key={banned.id} className="p-3 border rounded-lg flex items-center justify-between" data-testid={`card-banned-ip-${banned.id}`}>
+                      <div>
+                        <p className="font-mono font-medium" data-testid={`text-banned-ip-${banned.id}`}>{banned.ipAddress}</p>
+                        {banned.reason && (
+                          <p className="text-sm text-muted-foreground">Sebep: {banned.reason}</p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          Engelleyen: {banned.bannedByUser?.username || "Bilinmeyen"} • {new Date(banned.createdAt).toLocaleDateString('tr-TR')}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => unbanIpMutation.mutate(banned.id)}
+                        disabled={unbanIpMutation.isPending}
+                        data-testid={`button-unban-ip-${banned.id}`}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </div>
+                  ))}
+                  {!bannedIps?.length && (
+                    <p className="text-center text-muted-foreground py-4" data-testid="text-no-banned-ips">Hiç engellenmiş IP yok</p>
                   )}
                 </div>
               </CardContent>
