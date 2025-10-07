@@ -25,8 +25,8 @@ const roleColors: Record<string, string> = {
   "Arena Admin": "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
 };
 
-type PostWithUser = ForumPost & { user: User };
-type ReplyWithUser = ForumReply & { user: User };
+type PostWithUser = ForumPost & { user: User; staffRole?: string | null };
+type ReplyWithUser = ForumReply & { user: User; staffRole?: string | null };
 
 export default function ForumPostDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -228,7 +228,15 @@ export default function ForumPostDetailPage() {
                 </span>
                 <span>•</span>
                 <span data-testid="text-post-author">{post.user.username}</span>
-                {post.user.role && post.user.role !== "HaxArena Üye" && (
+                {post.staffRole && (
+                  <Badge 
+                    variant="outline" 
+                    className={`${roleColors[post.staffRole] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                  >
+                    {post.staffRole}
+                  </Badge>
+                )}
+                {!post.staffRole && post.user.role && post.user.role !== "HaxArena Üye" && (
                   <Badge 
                     variant="outline" 
                     className={`${roleColors[post.user.role] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
@@ -304,7 +312,15 @@ export default function ForumPostDetailPage() {
                       <span className="font-medium" data-testid={`text-reply-author-${reply.id}`}>
                         {reply.user.username}
                       </span>
-                      {reply.user.role && reply.user.role !== "HaxArena Üye" && (
+                      {reply.staffRole && (
+                        <Badge 
+                          variant="outline" 
+                          className={`${roleColors[reply.staffRole] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                        >
+                          {reply.staffRole}
+                        </Badge>
+                      )}
+                      {!reply.staffRole && reply.user.role && reply.user.role !== "HaxArena Üye" && (
                         <Badge 
                           variant="outline" 
                           className={`${roleColors[reply.user.role] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}

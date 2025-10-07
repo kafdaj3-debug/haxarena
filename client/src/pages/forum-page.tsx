@@ -49,7 +49,7 @@ const postSchema = z.object({
 
 type PostFormData = z.infer<typeof postSchema>;
 
-type PostWithUser = ForumPost & { user: User; replyCount: number };
+type PostWithUser = ForumPost & { user: User; replyCount: number; staffRole?: string | null };
 
 export default function ForumPage() {
   const { user, logout } = useAuth();
@@ -302,7 +302,15 @@ export default function ForumPage() {
                           </span>
                           <span>•</span>
                           <span>{post.user.username}</span>
-                          {post.user.role && post.user.role !== "HaxArena Üye" && (
+                          {post.staffRole && (
+                            <Badge 
+                              variant="outline" 
+                              className={`${roleColors[post.staffRole] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                            >
+                              {post.staffRole}
+                            </Badge>
+                          )}
+                          {!post.staffRole && post.user.role && post.user.role !== "HaxArena Üye" && (
                             <Badge 
                               variant="outline" 
                               className={`${roleColors[post.user.role] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
@@ -374,7 +382,15 @@ export default function ForumPage() {
                           </span>
                           <span>•</span>
                           <span>{post.user.username}</span>
-                          {post.user.role && post.user.role !== "HaxArena Üye" && (
+                          {post.staffRole && (
+                            <Badge 
+                              variant="outline" 
+                              className={`${roleColors[post.staffRole] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                            >
+                              {post.staffRole}
+                            </Badge>
+                          )}
+                          {!post.staffRole && post.user.role && post.user.role !== "HaxArena Üye" && (
                             <Badge 
                               variant="outline" 
                               className={`${roleColors[post.user.role] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
@@ -446,7 +462,15 @@ export default function ForumPage() {
                           </span>
                           <span>•</span>
                           <span>{post.user.username}</span>
-                          {post.user.role && post.user.role !== "HaxArena Üye" && (
+                          {post.staffRole && (
+                            <Badge 
+                              variant="outline" 
+                              className={`${roleColors[post.staffRole] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                            >
+                              {post.staffRole}
+                            </Badge>
+                          )}
+                          {!post.staffRole && post.user.role && post.user.role !== "HaxArena Üye" && (
                             <Badge 
                               variant="outline" 
                               className={`${roleColors[post.user.role] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
@@ -518,7 +542,15 @@ export default function ForumPage() {
                           </span>
                           <span>•</span>
                           <span>{post.user.username}</span>
-                          {post.user.role && post.user.role !== "HaxArena Üye" && (
+                          {post.staffRole && (
+                            <Badge 
+                              variant="outline" 
+                              className={`${roleColors[post.staffRole] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                            >
+                              {post.staffRole}
+                            </Badge>
+                          )}
+                          {!post.staffRole && post.user.role && post.user.role !== "HaxArena Üye" && (
                             <Badge 
                               variant="outline" 
                               className={`${roleColors[post.user.role] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
@@ -590,7 +622,15 @@ export default function ForumPage() {
                           </span>
                           <span>•</span>
                           <span>{post.user.username}</span>
-                          {post.user.role && post.user.role !== "HaxArena Üye" && (
+                          {post.staffRole && (
+                            <Badge 
+                              variant="outline" 
+                              className={`${roleColors[post.staffRole] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                            >
+                              {post.staffRole}
+                            </Badge>
+                          )}
+                          {!post.staffRole && post.user.role && post.user.role !== "HaxArena Üye" && (
                             <Badge 
                               variant="outline" 
                               className={`${roleColors[post.user.role] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}

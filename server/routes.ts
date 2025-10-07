@@ -496,7 +496,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const category = req.query.category as string | undefined;
       const posts = await storage.getForumPosts(category);
-      return res.json(posts);
+      const staffRoles = await storage.getStaffRoles();
+      const staffMap = new Map(staffRoles.map(s => [s.name, s.role]));
+      
+      const postsWithStaffRole = posts.map(post => ({
+        ...post,
+        staffRole: staffMap.get(post.user.username) || null,
+      }));
+      
+      return res.json(postsWithStaffRole);
     } catch (error) {
       return res.status(500).json({ error: "Konular yüklenemedi" });
     }
@@ -508,7 +516,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!post) {
         return res.status(404).json({ error: "Konu bulunamadı" });
       }
-      return res.json(post);
+      
+      const staffRoles = await storage.getStaffRoles();
+      const staffMap = new Map(staffRoles.map(s => [s.name, s.role]));
+      
+      const postWithStaffRole = {
+        ...post,
+        staffRole: staffMap.get(post.user.username) || null,
+      };
+      
+      return res.json(postWithStaffRole);
     } catch (error) {
       return res.status(500).json({ error: "Konu yüklenemedi" });
     }
@@ -584,7 +601,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/forum-posts/:id/replies", async (req, res) => {
     try {
       const replies = await storage.getForumReplies(req.params.id);
-      return res.json(replies);
+      const staffRoles = await storage.getStaffRoles();
+      const staffMap = new Map(staffRoles.map(s => [s.name, s.role]));
+      
+      const repliesWithStaffRole = replies.map(reply => ({
+        ...reply,
+        staffRole: staffMap.get(reply.user.username) || null,
+      }));
+      
+      return res.json(repliesWithStaffRole);
     } catch (error) {
       return res.status(500).json({ error: "Cevaplar yüklenemedi" });
     }
