@@ -52,12 +52,10 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-8">
       <div className="w-full max-w-md">
-        <Link href="/">
-          <a className="flex items-center justify-center mb-8">
-            <div className="text-3xl font-heading font-bold text-primary">
-              HaxArena V6
-            </div>
-          </a>
+        <Link href="/" className="flex items-center justify-center mb-8">
+          <div className="text-3xl font-heading font-bold text-primary">
+            HaxArena V6
+          </div>
         </Link>
 
         <Card>
@@ -105,8 +103,8 @@ export default function LoginPage() {
               </Button>
               <div className="text-sm text-center text-muted-foreground">
                 Hesabınız yok mu?{" "}
-                <Link href="/kayit">
-                  <a className="text-primary hover:underline">Kayıt Ol</a>
+                <Link href="/kayit" className="text-primary hover:underline">
+                  Kayıt Ol
                 </Link>
               </div>
             </CardFooter>

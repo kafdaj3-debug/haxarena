@@ -61,12 +61,10 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-8">
       <div className="w-full max-w-md">
-        <Link href="/">
-          <a className="flex items-center justify-center mb-8">
-            <div className="text-3xl font-heading font-bold text-primary">
-              HaxArena V6
-            </div>
-          </a>
+        <Link href="/" className="flex items-center justify-center mb-8">
+          <div className="text-3xl font-heading font-bold text-primary">
+            HaxArena V6
+          </div>
         </Link>
 
         <Card>
@@ -122,8 +120,8 @@ export default function RegisterPage() {
               </Button>
               <div className="text-sm text-center text-muted-foreground">
                 Zaten hesabınız var mı?{" "}
-                <Link href="/giris">
-                  <a className="text-primary hover:underline">Giriş Yap</a>
+                <Link href="/giris" className="text-primary hover:underline">
+                  Giriş Yap
                 </Link>
               </div>
             </CardFooter>

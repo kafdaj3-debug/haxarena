@@ -66,10 +66,8 @@ export default function ForumPostCard({
             </Avatar>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <Link href={`/konu/${id}`}>
-                  <a className="font-semibold hover:text-primary transition-colors" data-testid={`link-post-${id}`}>
-                    {title}
-                  </a>
+                <Link href={`/konu/${id}`} className="font-semibold hover:text-primary transition-colors" data-testid={`link-post-${id}`}>
+                  {title}
                 </Link>
                 {isLocked && (
                   <Badge variant="secondary" className="gap-1" data-testid="badge-locked">

@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Trophy, Users, MessageSquare, Shield } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { useQuery } from "@tanstack/react-query";
+import { formatDistanceToNow } from "date-fns";
+import { tr } from "date-fns/locale";
 
 export default function HomePage() {
   const { user, logout } = useAuth();
@@ -29,26 +32,9 @@ export default function HomePage() {
     }
   ];
 
-  const recentPosts = [
-    {
-      id: 1,
-      title: "Yeni sezon başlıyor! Katılmak isteyen var mı?",
-      content: "Merhaba arkadaşlar, yeni sezon için takım arıyorum. İyi bir savunma oyuncusuyum ve aktif olarak oynuyorum.",
-      author: "futbolsever42",
-      category: "Genel Sohbet",
-      replyCount: 12,
-      createdAt: "2 saat önce"
-    },
-    {
-      id: 2,
-      title: "Takım başvurusu - Beşiktaş Espor",
-      content: "Takımımızın logosu ve kadrosu hazır. Lig için başvurmak istiyoruz.",
-      author: "bjk_admin",
-      category: "Takım Başvuruları",
-      replyCount: 3,
-      createdAt: "5 saat önce"
-    }
-  ];
+  const { data: forumPosts = [] } = useQuery<any[]>({
+    queryKey: ["/api/forum-posts"],
+  });
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -123,21 +109,32 @@ export default function HomePage() {
               </Card>
             </div>
 
-            <div className="mb-12">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-heading font-bold">Son Forum Konuları</h2>
-                <Link href="/forum">
-                  <Button variant="ghost" className="hover-elevate active-elevate-2" data-testid="button-view-forum">
-                    Foruma Git
-                  </Button>
-                </Link>
+            {forumPosts.length > 0 && (
+              <div className="mb-12">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-3xl font-heading font-bold">Son Forum Konuları</h2>
+                  <Link href="/forum">
+                    <Button variant="ghost" className="hover-elevate active-elevate-2" data-testid="button-view-forum">
+                      Foruma Git
+                    </Button>
+                  </Link>
+                </div>
+                <div className="space-y-4 max-w-4xl">
+                  {forumPosts.slice(0, 2).map((post: any) => (
+                    <ForumPostCard 
+                      key={post.id} 
+                      id={post.id}
+                      title={post.title}
+                      content={post.content}
+                      author={post.authorUsername}
+                      category={post.category}
+                      replyCount={post.replyCount}
+                      createdAt={formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: tr })}
+                    />
+                  ))}
+                </div>
               </div>
-              <div className="space-y-4 max-w-4xl">
-                {recentPosts.map((post) => (
-                  <ForumPostCard key={post.id} {...post} />
-                ))}
-              </div>
-            </div>
+            )}
 
             <div>
               <h2 className="text-3xl font-heading font-bold mb-6">Aktif Odalar</h2>

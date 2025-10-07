@@ -101,12 +101,10 @@ export default function AuthPage() {
     <div className="flex min-h-screen">
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-5xl">
-          <Link href="/">
-            <a className="flex items-center justify-center mb-12">
-              <div className="text-3xl font-heading font-bold text-primary">
-                HaxArena V6
-              </div>
-            </a>
+          <Link href="/" className="flex items-center justify-center mb-12">
+            <div className="text-3xl font-heading font-bold text-primary">
+              HaxArena V6
+            </div>
           </Link>
 
           <div className="grid md:grid-cols-2 gap-8">
