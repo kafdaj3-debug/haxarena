@@ -169,11 +169,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (status === "approved") {
         await storage.updateUser(application.userId, { isAdmin: true });
+        await storage.createNotification({
+          userId: application.userId,
+          message: "Admin başvurunuz onaylandı! Artık admin yetkileriniz var.",
+        });
+      } else {
+        await storage.createNotification({
+          userId: application.userId,
+          message: "Admin başvurunuz reddedildi.",
+        });
       }
 
       return res.json(application);
     } catch (error) {
       return res.status(500).json({ error: "Başvuru güncellenemedi" });
+    }
+  });
+
+  app.delete("/api/applications/admin/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteAdminApplication(req.params.id);
+      return res.json({ message: "Başvuru silindi" });
+    } catch (error) {
+      return res.status(500).json({ error: "Başvuru silinemedi" });
     }
   });
 
@@ -241,9 +259,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Başvuru bulunamadı" });
       }
 
+      if (status === "approved") {
+        await storage.createNotification({
+          userId: application.userId,
+          message: `Takım başvurunuz (${application.teamName}) onaylandı!`,
+        });
+      } else {
+        await storage.createNotification({
+          userId: application.userId,
+          message: `Takım başvurunuz (${application.teamName}) reddedildi.`,
+        });
+      }
+
       return res.json(application);
     } catch (error) {
       return res.status(500).json({ error: "Başvuru güncellenemedi" });
+    }
+  });
+
+  app.delete("/api/applications/team/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteTeamApplication(req.params.id);
+      return res.json({ message: "Başvuru silindi" });
+    } catch (error) {
+      return res.status(500).json({ error: "Başvuru silinemedi" });
     }
   });
 
@@ -317,6 +356,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(userWithoutPassword);
     } catch (error) {
       return res.status(500).json({ error: "Admin yetkisi güncellenemedi" });
+    }
+  });
+
+  // Staff role routes
+  app.post("/api/staff-roles", isAdmin, async (req, res) => {
+    try {
+      const { name, role, managementAccess } = req.body;
+      if (!name || !role) {
+        return res.status(400).json({ error: "İsim ve rol gerekli" });
+      }
+
+      const staffRole = await storage.createStaffRole({
+        name,
+        role,
+        managementAccess: managementAccess || false,
+      });
+
+      return res.json(staffRole);
+    } catch (error) {
+      return res.status(500).json({ error: "Staff rolü oluşturulamadı" });
+    }
+  });
+
+  app.get("/api/staff-roles", async (req, res) => {
+    try {
+      const staffRoles = await storage.getStaffRoles();
+      return res.json(staffRoles);
+    } catch (error) {
+      return res.status(500).json({ error: "Staff rolleri yüklenemedi" });
+    }
+  });
+
+  app.delete("/api/staff-roles/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteStaffRole(req.params.id);
+      return res.json({ message: "Staff rolü silindi" });
+    } catch (error) {
+      return res.status(500).json({ error: "Staff rolü silinemedi" });
+    }
+  });
+
+  // Notification routes
+  app.get("/api/notifications", isAuthenticated, async (req, res) => {
+    try {
+      const notifications = await storage.getUserNotifications(req.user!.id);
+      return res.json(notifications);
+    } catch (error) {
+      return res.status(500).json({ error: "Bildirimler yüklenemedi" });
+    }
+  });
+
+  app.patch("/api/notifications/:id/read", isAuthenticated, async (req, res) => {
+    try {
+      await storage.markNotificationAsRead(req.params.id);
+      return res.json({ message: "Bildirim okundu olarak işaretlendi" });
+    } catch (error) {
+      return res.status(500).json({ error: "Bildirim güncellenemedi" });
+    }
+  });
+
+  app.delete("/api/notifications/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteNotification(req.params.id);
+      return res.json({ message: "Bildirim silindi" });
+    } catch (error) {
+      return res.status(500).json({ error: "Bildirim silinemedi" });
     }
   });
 

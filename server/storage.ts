@@ -7,10 +7,16 @@ import {
   type InsertTeamApplication,
   type Settings,
   type UpdateSettings,
+  type StaffRole,
+  type InsertStaffRole,
+  type Notification,
+  type InsertNotification,
   users,
   adminApplications,
   teamApplications,
-  settings
+  settings,
+  staffRoles,
+  notifications
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -29,16 +35,29 @@ export interface IStorage {
   getAdminApplications(): Promise<AdminApplication[]>;
   getUserAdminApplications(userId: string): Promise<AdminApplication[]>;
   updateAdminApplication(id: string, status: string): Promise<AdminApplication | undefined>;
+  deleteAdminApplication(id: string): Promise<void>;
   
   // Team application operations
   createTeamApplication(app: InsertTeamApplication): Promise<TeamApplication>;
   getTeamApplications(): Promise<TeamApplication[]>;
   getUserTeamApplications(userId: string): Promise<TeamApplication[]>;
   updateTeamApplication(id: string, status: string): Promise<TeamApplication | undefined>;
+  deleteTeamApplication(id: string): Promise<void>;
   
   // Settings operations
   getSettings(): Promise<Settings>;
   updateSettings(updates: UpdateSettings): Promise<Settings>;
+  
+  // Staff role operations
+  createStaffRole(role: InsertStaffRole): Promise<StaffRole>;
+  getStaffRoles(): Promise<StaffRole[]>;
+  deleteStaffRole(id: string): Promise<void>;
+  
+  // Notification operations
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  getUserNotifications(userId: string): Promise<Notification[]>;
+  markNotificationAsRead(id: string): Promise<void>;
+  deleteNotification(id: string): Promise<void>;
 }
 
 export class DBStorage implements IStorage {
@@ -95,6 +114,10 @@ export class DBStorage implements IStorage {
     return app;
   }
 
+  async deleteAdminApplication(id: string): Promise<void> {
+    await db.delete(adminApplications).where(eq(adminApplications.id, id));
+  }
+
   // Team application operations
   async createTeamApplication(app: InsertTeamApplication): Promise<TeamApplication> {
     const [application] = await db.insert(teamApplications).values(app).returning();
@@ -117,6 +140,10 @@ export class DBStorage implements IStorage {
       .where(eq(teamApplications.id, id))
       .returning();
     return app;
+  }
+
+  async deleteTeamApplication(id: string): Promise<void> {
+    await db.delete(teamApplications).where(eq(teamApplications.id, id));
   }
 
   // Settings operations
@@ -149,6 +176,42 @@ export class DBStorage implements IStorage {
       .where(eq(settings.id, setting.id))
       .returning();
     return updated;
+  }
+
+  // Staff role operations
+  async createStaffRole(role: InsertStaffRole): Promise<StaffRole> {
+    const [staffRole] = await db.insert(staffRoles).values(role).returning();
+    return staffRole;
+  }
+
+  async getStaffRoles(): Promise<StaffRole[]> {
+    return await db.select().from(staffRoles).orderBy(desc(staffRoles.createdAt));
+  }
+
+  async deleteStaffRole(id: string): Promise<void> {
+    await db.delete(staffRoles).where(eq(staffRoles.id, id));
+  }
+
+  // Notification operations
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [notif] = await db.insert(notifications).values(notification).returning();
+    return notif;
+  }
+
+  async getUserNotifications(userId: string): Promise<Notification[]> {
+    return await db.select().from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt));
+  }
+
+  async markNotificationAsRead(id: string): Promise<void> {
+    await db.update(notifications)
+      .set({ read: true })
+      .where(eq(notifications.id, id));
+  }
+
+  async deleteNotification(id: string): Promise<void> {
+    await db.delete(notifications).where(eq(notifications.id, id));
   }
 }
 
