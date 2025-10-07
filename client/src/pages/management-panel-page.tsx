@@ -485,14 +485,17 @@ export default function ManagementPanelPage() {
                         <div className="flex items-center gap-2">
                           <Label htmlFor={`player-role-${u.id}`} className="text-sm">Oyuncu Rolü:</Label>
                           <Select
-                            value={u.playerRole || ""}
-                            onValueChange={(playerRole) => playerRoleUpdateMutation.mutate({ userId: u.id, playerRole })}
+                            value={u.playerRole || "none"}
+                            onValueChange={(playerRole) => {
+                              const actualRole = playerRole === "none" ? "" : playerRole;
+                              playerRoleUpdateMutation.mutate({ userId: u.id, playerRole: actualRole });
+                            }}
                           >
                             <SelectTrigger className="w-40" id={`player-role-${u.id}`} data-testid={`select-player-role-${u.id}`}>
                               <SelectValue placeholder="Seçiniz" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">Yok</SelectItem>
+                              <SelectItem value="none">Yok</SelectItem>
                               {PLAYER_ROLES.map((role) => (
                                 <SelectItem key={role} value={role}>
                                   {role}
