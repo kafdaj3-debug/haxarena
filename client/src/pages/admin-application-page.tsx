@@ -37,6 +37,7 @@ export default function AdminApplicationPage() {
 
   const { data: applications } = useQuery<any[]>({
     queryKey: ["/api/applications/admin"],
+    enabled: !!user?.isAdmin || !!user?.isSuperAdmin,
   });
 
   const { data: myApplications } = useQuery<any[]>({

@@ -129,7 +129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/applications/admin", async (req, res) => {
+  app.get("/api/applications/admin", isAdmin, async (req, res) => {
     try {
       const applications = await storage.getAdminApplications();
       const users = await storage.getAllUsers();
