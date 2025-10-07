@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Shield, ShieldOff, CheckCircle, XCircle, User, Eye, Trash2, Plus } from "lucide-react";
+import { Shield, ShieldOff, CheckCircle, XCircle, User, Eye, Trash2, Plus, Lock, Unlock, Archive, ArchiveRestore } from "lucide-react";
 
 const ROLES = ["DIAMOND VIP", "GOLD VIP", "SILVER VIP", "Lig Oyuncusu", "HaxArena Üye"];
 const STAFF_ROLES = [
@@ -48,6 +48,11 @@ export default function ManagementPanelPage() {
 
   const { data: staffRoles } = useQuery<any[]>({
     queryKey: ["/api/staff-roles"],
+  });
+
+  const { data: forumPosts } = useQuery<any[]>({
+    queryKey: ["/api/forum-posts"],
+    enabled: !!user?.isAdmin,
   });
 
   const settingsMutation = useMutation({
@@ -180,6 +185,45 @@ export default function ManagementPanelPage() {
     },
     onError: () => {
       toast({ title: "Hata", description: "İşlem başarısız", variant: "destructive" });
+    },
+  });
+
+  const deleteForumPostMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest("DELETE", `/api/forum-posts/${id}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/forum-posts"] });
+      toast({ title: "Başarılı", description: "Konu silindi" });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Konu silinemedi", variant: "destructive" });
+    },
+  });
+
+  const toggleForumPostLockMutation = useMutation({
+    mutationFn: async ({ id, isLocked }: { id: string; isLocked: boolean }) => {
+      return await apiRequest("PATCH", `/api/forum-posts/${id}`, { isLocked });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/forum-posts"] });
+      toast({ title: "Başarılı", description: "Konu durumu güncellendi" });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Konu durumu güncellenemedi", variant: "destructive" });
+    },
+  });
+
+  const toggleForumPostArchiveMutation = useMutation({
+    mutationFn: async ({ id, isArchived }: { id: string; isArchived: boolean }) => {
+      return await apiRequest("PATCH", `/api/forum-posts/${id}`, { isArchived });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/forum-posts"] });
+      toast({ title: "Başarılı", description: "Konu arşiv durumu güncellendi" });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Konu arşiv durumu güncellenemedi", variant: "destructive" });
     },
   });
 
@@ -524,6 +568,102 @@ export default function ManagementPanelPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Forum Yönetimi */}
+            {user?.isAdmin && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Forum Yönetimi</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {forumPosts?.map((post) => (
+                      <div key={post.id} className="p-4 border rounded-lg space-y-3" data-testid={`card-forum-post-${post.id}`}>
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs px-2 py-1 rounded-md bg-primary/10 text-primary font-medium">
+                                {post.category}
+                              </span>
+                              {post.isLocked && (
+                                <span className="text-xs px-2 py-1 rounded-md bg-orange-500/10 text-orange-500 font-medium">
+                                  Kilitli
+                                </span>
+                              )}
+                              {post.isArchived && (
+                                <span className="text-xs px-2 py-1 rounded-md bg-muted text-muted-foreground font-medium">
+                                  Arşivlendi
+                                </span>
+                              )}
+                            </div>
+                            <h4 className="font-semibold text-base mb-1" data-testid={`text-forum-post-title-${post.id}`}>
+                              {post.title}
+                            </h4>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              Yazar: {post.user?.username || "Bilinmeyen"} • {post.replyCount || 0} cevap
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deleteForumPostMutation.mutate(post.id)}
+                            disabled={deleteForumPostMutation.isPending}
+                            data-testid={`button-delete-forum-post-${post.id}`}
+                          >
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toggleForumPostLockMutation.mutate({ id: post.id, isLocked: !post.isLocked })}
+                            disabled={toggleForumPostLockMutation.isPending}
+                            data-testid={`button-toggle-lock-${post.id}`}
+                          >
+                            {post.isLocked ? (
+                              <>
+                                <Unlock className="w-4 h-4 mr-1" />
+                                Kilidi Aç
+                              </>
+                            ) : (
+                              <>
+                                <Lock className="w-4 h-4 mr-1" />
+                                Kilitle
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toggleForumPostArchiveMutation.mutate({ id: post.id, isArchived: !post.isArchived })}
+                            disabled={toggleForumPostArchiveMutation.isPending}
+                            data-testid={`button-toggle-archive-${post.id}`}
+                          >
+                            {post.isArchived ? (
+                              <>
+                                <ArchiveRestore className="w-4 h-4 mr-1" />
+                                Arşivden Çıkar
+                              </>
+                            ) : (
+                              <>
+                                <Archive className="w-4 h-4 mr-1" />
+                                Arşivle
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    {!forumPosts?.length && (
+                      <p className="text-center text-muted-foreground py-4" data-testid="text-no-forum-posts">
+                        Henüz forum konusu bulunmamaktadır
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </main>
