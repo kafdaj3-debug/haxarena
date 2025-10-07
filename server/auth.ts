@@ -47,11 +47,18 @@ export function setupAuth(app: Express) {
           return done(null, false, { message: "Kullanıcı adı veya şifre hatalı" });
         }
 
+        if (!user.isApproved) {
+          return done(null, false, { message: "Hesabınız henüz onaylanmadı" });
+        }
+
         return done(null, {
           id: user.id,
           username: user.username,
           email: user.email,
           isAdmin: user.isAdmin,
+          isSuperAdmin: user.isSuperAdmin,
+          isApproved: user.isApproved,
+          role: user.role,
         });
       } catch (err) {
         return done(err);
@@ -74,6 +81,9 @@ export function setupAuth(app: Express) {
         username: user.username,
         email: user.email,
         isAdmin: user.isAdmin,
+        isSuperAdmin: user.isSuperAdmin,
+        isApproved: user.isApproved,
+        role: user.role,
       });
     } catch (err) {
       done(err);
@@ -100,25 +110,15 @@ export function setupAuth(app: Express) {
         password: hashedPassword,
       });
 
-      req.login(
-        {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          isAdmin: user.isAdmin,
-        },
-        (err) => {
-          if (err) {
-            return res.status(500).json({ error: "Giriş yapılamadı" });
-          }
-          return res.json({
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            isAdmin: user.isAdmin,
-          });
-        }
-      );
+      return res.json({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        isSuperAdmin: user.isSuperAdmin,
+        isApproved: user.isApproved,
+        role: user.role,
+      });
     } catch (error) {
       console.error("Register error:", error);
       return res.status(500).json({ error: "Kayıt başarısız" });

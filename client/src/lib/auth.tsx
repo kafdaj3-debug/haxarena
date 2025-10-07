@@ -5,8 +5,11 @@ import { queryClient } from "./queryClient";
 interface User {
   id: string;
   username: string;
-  email: string;
+  email: string | null;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
+  isApproved: boolean;
+  role: string;
 }
 
 interface AuthContextType {
