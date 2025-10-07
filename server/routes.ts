@@ -461,6 +461,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Forum routes
+  app.post("/api/forum-posts", isAuthenticated, async (req, res) => {
+    try {
+      const { title, content, category } = req.body;
+      const post = await storage.createForumPost({
+        userId: req.user!.id,
+        title,
+        content,
+        category,
+      });
+      return res.json(post);
+    } catch (error) {
+      return res.status(500).json({ error: "Konu oluşturulamadı" });
+    }
+  });
+
+  app.get("/api/forum-posts", async (req, res) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const posts = await storage.getForumPosts(category);
+      return res.json(posts);
+    } catch (error) {
+      return res.status(500).json({ error: "Konular yüklenemedi" });
+    }
+  });
+
+  app.get("/api/forum-posts/:id", async (req, res) => {
+    try {
+      const post = await storage.getForumPost(req.params.id);
+      if (!post) {
+        return res.status(404).json({ error: "Konu bulunamadı" });
+      }
+      return res.json(post);
+    } catch (error) {
+      return res.status(500).json({ error: "Konu yüklenemedi" });
+    }
+  });
+
+  app.patch("/api/forum-posts/:id", isAdmin, async (req, res) => {
+    try {
+      const { isLocked, isArchived } = req.body;
+      const updates: Partial<{ isLocked: boolean; isArchived: boolean }> = {};
+      
+      if (typeof isLocked === "boolean") updates.isLocked = isLocked;
+      if (typeof isArchived === "boolean") updates.isArchived = isArchived;
+
+      const post = await storage.updateForumPost(req.params.id, updates);
+      if (!post) {
+        return res.status(404).json({ error: "Konu bulunamadı" });
+      }
+      return res.json(post);
+    } catch (error) {
+      return res.status(500).json({ error: "Konu güncellenemedi" });
+    }
+  });
+
+  app.delete("/api/forum-posts/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteForumPost(req.params.id);
+      return res.json({ message: "Konu silindi" });
+    } catch (error) {
+      return res.status(500).json({ error: "Konu silinemedi" });
+    }
+  });
+
+  app.post("/api/forum-posts/:id/replies", isAuthenticated, async (req, res) => {
+    try {
+      const { content } = req.body;
+      const reply = await storage.createForumReply({
+        postId: req.params.id,
+        userId: req.user!.id,
+        content,
+      });
+      return res.json(reply);
+    } catch (error) {
+      return res.status(500).json({ error: "Cevap oluşturulamadı" });
+    }
+  });
+
+  app.get("/api/forum-posts/:id/replies", async (req, res) => {
+    try {
+      const replies = await storage.getForumReplies(req.params.id);
+      return res.json(replies);
+    } catch (error) {
+      return res.status(500).json({ error: "Cevaplar yüklenemedi" });
+    }
+  });
+
+  app.delete("/api/forum-replies/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteForumReply(req.params.id);
+      return res.json({ message: "Cevap silindi" });
+    } catch (error) {
+      return res.status(500).json({ error: "Cevap silinemedi" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
