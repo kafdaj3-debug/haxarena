@@ -73,6 +73,7 @@ export const forumPosts = pgTable("forum_posts", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   category: text("category").notNull(),
+  imageUrl: text("image_url"),
   isLocked: boolean("is_locked").notNull().default(false),
   isArchived: boolean("is_archived").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -83,6 +84,8 @@ export const forumReplies = pgTable("forum_replies", {
   postId: varchar("post_id").notNull().references(() => forumPosts.id, { onDelete: "cascade" }),
   userId: varchar("user_id").notNull().references(() => users.id),
   content: text("content").notNull(),
+  imageUrl: text("image_url"),
+  quotedReplyId: varchar("quoted_reply_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -90,6 +93,22 @@ export const chatMessages = pgTable("chat_messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id),
   message: text("message").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const bannedIps = pgTable("banned_ips", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ipAddress: text("ip_address").notNull().unique(),
+  reason: text("reason"),
+  bannedBy: varchar("banned_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -145,6 +164,16 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   createdAt: true,
 });
 
+export const insertBannedIpSchema = createInsertSchema(bannedIps).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type AdminApplication = typeof adminApplications.$inferSelect;
@@ -163,3 +192,7 @@ export type ForumReply = typeof forumReplies.$inferSelect;
 export type InsertForumReply = z.infer<typeof insertForumReplySchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+export type BannedIp = typeof bannedIps.$inferSelect;
+export type InsertBannedIp = z.infer<typeof insertBannedIpSchema>;
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;

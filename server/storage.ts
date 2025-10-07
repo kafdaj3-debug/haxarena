@@ -17,6 +17,10 @@ import {
   type InsertForumReply,
   type ChatMessage,
   type InsertChatMessage,
+  type BannedIp,
+  type InsertBannedIp,
+  type PasswordResetToken,
+  type InsertPasswordResetToken,
   users,
   adminApplications,
   teamApplications,
@@ -25,7 +29,9 @@ import {
   notifications,
   forumPosts,
   forumReplies,
-  chatMessages
+  chatMessages,
+  bannedIps,
+  passwordResetTokens
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -85,6 +91,18 @@ export interface IStorage {
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
   getChatMessages(limit?: number): Promise<(ChatMessage & { user: User })[]>;
   deleteChatMessage(id: string): Promise<void>;
+  
+  // IP ban operations
+  createBannedIp(bannedIp: InsertBannedIp): Promise<BannedIp>;
+  getBannedIps(): Promise<(BannedIp & { bannedByUser: User })[]>;
+  getBannedIpByAddress(ipAddress: string): Promise<BannedIp | undefined>;
+  deleteBannedIp(id: string): Promise<void>;
+  
+  // Password reset operations
+  createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken>;
+  getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
+  deletePasswordResetToken(id: string): Promise<void>;
+  deleteUserPasswordResetTokens(userId: string): Promise<void>;
 }
 
 export class DBStorage implements IStorage {
@@ -351,6 +369,53 @@ export class DBStorage implements IStorage {
 
   async deleteChatMessage(id: string): Promise<void> {
     await db.delete(chatMessages).where(eq(chatMessages.id, id));
+  }
+
+  // IP ban operations
+  async createBannedIp(bannedIp: InsertBannedIp): Promise<BannedIp> {
+    const [banned] = await db.insert(bannedIps).values(bannedIp).returning();
+    return banned;
+  }
+
+  async getBannedIps(): Promise<(BannedIp & { bannedByUser: User })[]> {
+    const banned = await db.select().from(bannedIps).orderBy(desc(bannedIps.createdAt));
+    
+    const bannedWithUser = await Promise.all(
+      banned.map(async (ban) => {
+        const [user] = await db.select().from(users).where(eq(users.id, ban.bannedBy)).limit(1);
+        return { ...ban, bannedByUser: user };
+      })
+    );
+
+    return bannedWithUser;
+  }
+
+  async getBannedIpByAddress(ipAddress: string): Promise<BannedIp | undefined> {
+    const [banned] = await db.select().from(bannedIps).where(eq(bannedIps.ipAddress, ipAddress)).limit(1);
+    return banned;
+  }
+
+  async deleteBannedIp(id: string): Promise<void> {
+    await db.delete(bannedIps).where(eq(bannedIps.id, id));
+  }
+
+  // Password reset operations
+  async createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken> {
+    const [resetToken] = await db.insert(passwordResetTokens).values(token).returning();
+    return resetToken;
+  }
+
+  async getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined> {
+    const [resetToken] = await db.select().from(passwordResetTokens).where(eq(passwordResetTokens.token, token)).limit(1);
+    return resetToken;
+  }
+
+  async deletePasswordResetToken(id: string): Promise<void> {
+    await db.delete(passwordResetTokens).where(eq(passwordResetTokens.id, id));
+  }
+
+  async deleteUserPasswordResetTokens(userId: string): Promise<void> {
+    await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, userId));
   }
 }
 
