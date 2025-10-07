@@ -17,7 +17,16 @@ export const users = pgTable("users", {
 export const adminApplications = pgTable("admin_applications", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id),
-  reason: text("reason").notNull(),
+  name: text("name").notNull(),
+  age: text("age").notNull(),
+  gameNick: text("game_nick").notNull(),
+  discordNick: text("discord_nick").notNull(),
+  playDuration: text("play_duration").notNull(),
+  activeServers: text("active_servers").notNull(),
+  previousExperience: text("previous_experience").notNull(),
+  dailyHours: text("daily_hours").notNull(),
+  activeTimeZones: text("active_time_zones").notNull(),
+  aboutYourself: text("about_yourself").notNull(),
   status: text("status").notNull().default("pending"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
@@ -28,8 +37,15 @@ export const teamApplications = pgTable("team_applications", {
   teamName: text("team_name").notNull(),
   teamLogo: text("team_logo"),
   description: text("description").notNull(),
+  players: text("players").array(),
   status: text("status").notNull().default("pending"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const settings = pgTable("settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  adminApplicationsOpen: boolean("admin_applications_open").notNull().default(false),
+  teamApplicationsOpen: boolean("team_applications_open").notNull().default(false),
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({
@@ -52,9 +68,15 @@ export const insertTeamApplicationSchema = createInsertSchema(teamApplications).
   createdAt: true,
 });
 
+export const updateSettingsSchema = createInsertSchema(settings).omit({
+  id: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type AdminApplication = typeof adminApplications.$inferSelect;
 export type InsertAdminApplication = z.infer<typeof insertAdminApplicationSchema>;
 export type TeamApplication = typeof teamApplications.$inferSelect;
 export type InsertTeamApplication = z.infer<typeof insertTeamApplicationSchema>;
+export type Settings = typeof settings.$inferSelect;
+export type UpdateSettings = z.infer<typeof updateSettingsSchema>;
