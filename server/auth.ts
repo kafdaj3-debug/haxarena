@@ -13,6 +13,9 @@ declare global {
       username: string;
       email: string | null;
       isAdmin: boolean;
+      isSuperAdmin: boolean;
+      isApproved: boolean;
+      role: string;
     }
   }
 }
