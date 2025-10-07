@@ -3,6 +3,17 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
 
+async function checkIpBan(req: any, res: any, next: any) {
+  const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  const cleanIp = Array.isArray(ip) ? ip[0] : ip;
+  
+  const banned = await storage.getBannedIpByAddress(cleanIp);
+  if (banned) {
+    return res.status(403).json({ error: "Bu IP adresi engellenmiştir" });
+  }
+  next();
+}
+
 function isAuthenticated(req: any, res: any, next: any) {
   if (req.isAuthenticated()) {
     return next();
@@ -25,6 +36,8 @@ function isSuperAdmin(req: any, res: any, next: any) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // IP ban middleware - tüm route'larda kontrol edilir
+  app.use(checkIpBan);
   // Profile routes
   app.get("/api/profile", isAuthenticated, async (req, res) => {
     try {
@@ -714,6 +727,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json({ message: "Mesaj silindi" });
     } catch (error) {
       return res.status(500).json({ error: "Mesaj silinemedi" });
+    }
+  });
+
+  // IP Ban routes
+  app.get("/api/banned-ips", isSuperAdmin, async (req, res) => {
+    try {
+      const bannedIps = await storage.getBannedIps();
+      return res.json(bannedIps);
+    } catch (error) {
+      return res.status(500).json({ error: "IP listesi yüklenemedi" });
+    }
+  });
+
+  app.post("/api/banned-ips", isSuperAdmin, async (req, res) => {
+    try {
+      const { ipAddress, reason } = req.body;
+      if (!ipAddress) {
+        return res.status(400).json({ error: "IP adresi gerekli" });
+      }
+
+      const existing = await storage.getBannedIpByAddress(ipAddress);
+      if (existing) {
+        return res.status(400).json({ error: "Bu IP adresi zaten engellenmiş" });
+      }
+
+      const bannedIp = await storage.createBannedIp({
+        ipAddress,
+        reason: reason || null,
+        bannedBy: req.user!.id,
+      });
+
+      return res.json(bannedIp);
+    } catch (error) {
+      return res.status(500).json({ error: "IP engellenemedi" });
+    }
+  });
+
+  app.delete("/api/banned-ips/:id", isSuperAdmin, async (req, res) => {
+    try {
+      await storage.deleteBannedIp(req.params.id);
+      return res.json({ message: "IP ban kaldırıldı" });
+    } catch (error) {
+      return res.status(500).json({ error: "IP ban kaldırılamadı" });
+    }
+  });
+
+  // Password reset routes
+  app.post("/api/password-reset/request", async (req, res) => {
+    try {
+      const { username } = req.body;
+      if (!username) {
+        return res.status(400).json({ error: "Kullanıcı adı gerekli" });
+      }
+
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        // Güvenlik için kullanıcı bulunamasa bile başarılı mesajı göster
+        return res.json({ message: "Şifre sıfırlama talebi alındı" });
+      }
+
+      // Eski tokenları sil
+      await storage.deleteUserPasswordResetTokens(user.id);
+
+      // Yeni token oluştur (6 haneli rastgele kod)
+      const token = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 dakika
+
+      await storage.createPasswordResetToken({
+        userId: user.id,
+        token,
+        expiresAt,
+      });
+
+      // TODO: Token'ı kullanıcıya göster veya gönder (şimdilik response'da döndürüyoruz)
+      return res.json({ message: "Şifre sıfırlama kodu: " + token });
+    } catch (error) {
+      return res.status(500).json({ error: "İşlem başarısız" });
+    }
+  });
+
+  app.post("/api/password-reset/verify", async (req, res) => {
+    try {
+      const { username, token, newPassword } = req.body;
+      if (!username || !token || !newPassword) {
+        return res.status(400).json({ error: "Tüm alanları doldurun" });
+      }
+
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(400).json({ error: "Geçersiz bilgiler" });
+      }
+
+      const resetToken = await storage.getPasswordResetToken(token);
+      if (!resetToken || resetToken.userId !== user.id) {
+        return res.status(400).json({ error: "Geçersiz kod" });
+      }
+
+      if (new Date() > resetToken.expiresAt) {
+        await storage.deletePasswordResetToken(resetToken.id);
+        return res.status(400).json({ error: "Kod süresi dolmuş" });
+      }
+
+      // Şifreyi güncelle
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await storage.updateUser(user.id, { password: hashedPassword });
+
+      // Token'ı sil
+      await storage.deletePasswordResetToken(resetToken.id);
+
+      return res.json({ message: "Şifre başarıyla değiştirildi" });
+    } catch (error) {
+      return res.status(500).json({ error: "Şifre değiştirilemedi" });
     }
   });
 
