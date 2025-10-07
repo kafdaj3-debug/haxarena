@@ -9,6 +9,7 @@ import ActiveRoomsPage from "@/pages/active-rooms-page";
 import VIPPage from "@/pages/vip-page";
 import LeaguePage from "@/pages/league-page";
 import ForumPage from "@/pages/forum-page";
+import ForumPostDetailPage from "@/pages/forum-post-detail-page";
 import AdminStaffPage from "@/pages/admin-staff-page";
 import LoginPage from "@/pages/login-page";
 import RegisterPage from "@/pages/register-page";
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/vip" component={VIPPage} />
       <Route path="/lig" component={LeaguePage} />
       <Route path="/forum" component={ForumPage} />
+      <Route path="/forum/:id" component={ForumPostDetailPage} />
       <Route path="/admin-kadrosu" component={AdminStaffPage} />
       <Route path="/giris" component={LoginPage} />
       <Route path="/kayit" component={RegisterPage} />
