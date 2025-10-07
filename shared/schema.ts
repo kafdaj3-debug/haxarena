@@ -6,7 +6,6 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
-  email: text("email").unique(),
   password: text("password").notNull(),
   isAdmin: boolean("is_admin").notNull().default(false),
   isSuperAdmin: boolean("is_super_admin").notNull().default(false),
@@ -48,6 +47,22 @@ export const settings = pgTable("settings", {
   teamApplicationsOpen: boolean("team_applications_open").notNull().default(false),
 });
 
+export const staffRoles = pgTable("staff_roles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  role: text("role").notNull(),
+  managementAccess: boolean("management_access").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  message: text("message").notNull(),
+  read: boolean("read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   isAdmin: true,
@@ -72,6 +87,17 @@ export const updateSettingsSchema = createInsertSchema(settings).omit({
   id: true,
 });
 
+export const insertStaffRoleSchema = createInsertSchema(staffRoles).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  read: true,
+  createdAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type AdminApplication = typeof adminApplications.$inferSelect;
@@ -80,3 +106,7 @@ export type TeamApplication = typeof teamApplications.$inferSelect;
 export type InsertTeamApplication = z.infer<typeof insertTeamApplicationSchema>;
 export type Settings = typeof settings.$inferSelect;
 export type UpdateSettings = z.infer<typeof updateSettingsSchema>;
+export type StaffRole = typeof staffRoles.$inferSelect;
+export type InsertStaffRole = z.infer<typeof insertStaffRoleSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
