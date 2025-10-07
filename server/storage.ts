@@ -37,8 +37,8 @@ export interface IStorage {
   updateTeamApplication(id: string, status: string): Promise<TeamApplication | undefined>;
   
   // Settings operations
-  getSettings(): Promise<Settings | undefined>;
-  updateSettings(updates: UpdateSettings): Promise<Settings | undefined>;
+  getSettings(): Promise<Settings>;
+  updateSettings(updates: UpdateSettings): Promise<Settings>;
 }
 
 export class DBStorage implements IStorage {
@@ -120,14 +120,29 @@ export class DBStorage implements IStorage {
   }
 
   // Settings operations
-  async getSettings(): Promise<Settings | undefined> {
+  async getSettings(): Promise<Settings> {
     const [setting] = await db.select().from(settings).limit(1);
+    if (!setting) {
+      // Varsayılan olarak başvurular açık
+      return {
+        id: "",
+        adminApplicationsOpen: true,
+        teamApplicationsOpen: true,
+      };
+    }
     return setting;
   }
 
-  async updateSettings(updates: UpdateSettings): Promise<Settings | undefined> {
+  async updateSettings(updates: UpdateSettings): Promise<Settings> {
     const [setting] = await db.select().from(settings).limit(1);
-    if (!setting) return undefined;
+    
+    if (!setting) {
+      // İlk ayarı oluştur
+      const [created] = await db.insert(settings)
+        .values(updates)
+        .returning();
+      return created;
+    }
     
     const [updated] = await db.update(settings)
       .set(updates)

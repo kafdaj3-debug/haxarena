@@ -92,6 +92,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin application routes
   app.post("/api/applications/admin", isAuthenticated, async (req, res) => {
     try {
+      const settings = await storage.getSettings();
+      if (!settings.adminApplicationsOpen) {
+        return res.status(403).json({ error: "Admin başvuruları şu anda kapalı" });
+      }
+
       const { name, age, gameNick, discordNick, playDuration, activeServers, previousExperience, dailyHours, activeTimeZones, aboutYourself } = req.body;
       
       if (!name || !age || !gameNick || !discordNick || !playDuration || !activeServers || !previousExperience || !dailyHours || !activeTimeZones || !aboutYourself) {
@@ -175,6 +180,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Team application routes
   app.post("/api/applications/team", isAuthenticated, async (req, res) => {
     try {
+      const settings = await storage.getSettings();
+      if (!settings.teamApplicationsOpen) {
+        return res.status(403).json({ error: "Takım başvuruları şu anda kapalı" });
+      }
+
       const { teamName, teamLogo, description } = req.body;
       if (!teamName || !description) {
         return res.status(400).json({ error: "Takım adı ve açıklama gerekli" });
@@ -314,9 +324,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/settings", async (req, res) => {
     try {
       const settings = await storage.getSettings();
-      if (!settings) {
-        return res.status(404).json({ error: "Ayarlar bulunamadı" });
-      }
       return res.json(settings);
     } catch (error) {
       return res.status(500).json({ error: "Ayarlar yüklenemedi" });
@@ -326,9 +333,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/settings", isSuperAdmin, async (req, res) => {
     try {
       const settings = await storage.updateSettings(req.body);
-      if (!settings) {
-        return res.status(404).json({ error: "Ayarlar bulunamadı" });
-      }
       return res.json(settings);
     } catch (error) {
       return res.status(500).json({ error: "Ayarlar güncellenemedi" });
