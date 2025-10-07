@@ -499,26 +499,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/forum-posts/:id", isAdmin, async (req, res) => {
+  app.patch("/api/forum-posts/:id", isAuthenticated, async (req, res) => {
     try {
       const { isLocked, isArchived } = req.body;
-      const updates: Partial<{ isLocked: boolean; isArchived: boolean }> = {};
+      const post = await storage.getForumPost(req.params.id);
       
-      if (typeof isLocked === "boolean") updates.isLocked = isLocked;
-      if (typeof isArchived === "boolean") updates.isArchived = isArchived;
-
-      const post = await storage.updateForumPost(req.params.id, updates);
       if (!post) {
         return res.status(404).json({ error: "Konu bulunamadı" });
       }
-      return res.json(post);
+      
+      // Only post owner can archive, only admins can lock
+      const isOwner = post.userId === req.user!.id;
+      const isAdminUser = req.user!.isAdmin || req.user!.isSuperAdmin;
+      
+      const updates: Partial<{ isLocked: boolean; isArchived: boolean }> = {};
+      
+      if (typeof isLocked === "boolean" && isAdminUser) {
+        updates.isLocked = isLocked;
+      }
+      
+      if (typeof isArchived === "boolean" && (isOwner || isAdminUser)) {
+        updates.isArchived = isArchived;
+      }
+
+      const updatedPost = await storage.updateForumPost(req.params.id, updates);
+      return res.json(updatedPost);
     } catch (error) {
       return res.status(500).json({ error: "Konu güncellenemedi" });
     }
   });
 
-  app.delete("/api/forum-posts/:id", isAdmin, async (req, res) => {
+  app.delete("/api/forum-posts/:id", isAuthenticated, async (req, res) => {
     try {
+      const post = await storage.getForumPost(req.params.id);
+      
+      if (!post) {
+        return res.status(404).json({ error: "Konu bulunamadı" });
+      }
+      
+      // Only post owner or admin can delete
+      const isOwner = post.userId === req.user!.id;
+      const isAdminUser = req.user!.isAdmin || req.user!.isSuperAdmin;
+      
+      if (!isOwner && !isAdminUser) {
+        return res.status(403).json({ error: "Bu konuyu silme yetkiniz yok" });
+      }
+      
       await storage.deleteForumPost(req.params.id);
       return res.json({ message: "Konu silindi" });
     } catch (error) {

@@ -2,9 +2,16 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AdminStaffList from "@/components/AdminStaffList";
 import { useAuth } from "@/lib/auth";
+import { useQuery } from "@tanstack/react-query";
+import type { StaffRole } from "@shared/schema";
 
 export default function AdminStaffPage() {
   const { user, logout } = useAuth();
+  
+  const { data: staffRoles, isLoading } = useQuery<StaffRole[]>({
+    queryKey: ["/api/staff-roles"],
+  });
+
   const roles = [
     "Founder",
     "Master Coordinator",
@@ -15,28 +22,15 @@ export default function AdminStaffPage() {
     "Arena Admin"
   ];
 
-  const staffByRole = {
-    "Founder": [
-      { id: 1, name: "alwes1", role: "Founder" }
-    ],
-    "Master Coordinator": [
-      { id: 2, name: "Moderator1", role: "Master Coordinator" },
-      { id: 3, name: "Moderator2", role: "Master Coordinator" }
-    ],
-    "Game Admin": [
-      { id: 4, name: "GameAdmin1", role: "Game Admin" },
-      { id: 5, name: "GameAdmin2", role: "Game Admin" },
-      { id: 6, name: "GameAdmin3", role: "Game Admin" }
-    ],
-    "Arena Admin": [
-      { id: 7, name: "ArenaAdmin1", role: "Arena Admin" }
-    ],
-    "Coordinator Admin": [],
-    "Head Overseer Admin": [
-      { id: 8, name: "Overseer1", role: "Head Overseer Admin" }
-    ],
-    "Inspector Admin": []
-  };
+  // Group staff members by role
+  const staffByRole = roles.reduce((acc, role) => {
+    acc[role] = staffRoles?.filter(staff => staff.role === role).map((staff, index) => ({
+      id: index,
+      name: staff.name,
+      role: staff.role
+    })) || [];
+    return acc;
+  }, {} as Record<string, any[]>);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -53,11 +47,15 @@ export default function AdminStaffPage() {
             </p>
           </div>
 
-          <AdminStaffList
-            staffByRole={staffByRole}
-            roles={roles}
-            isEditable={false}
-          />
+          {isLoading ? (
+            <p className="text-center text-muted-foreground">Yükleniyor...</p>
+          ) : (
+            <AdminStaffList
+              staffByRole={staffByRole}
+              roles={roles}
+              isEditable={false}
+            />
+          )}
         </div>
       </main>
 

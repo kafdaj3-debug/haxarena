@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Calendar, Archive, Lock as LockIcon, MessageSquare } from "lucide-react";
+import { ArrowLeft, Calendar, Archive, Lock as LockIcon, MessageSquare, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
@@ -13,6 +13,17 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { ForumPost, ForumReply, User } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
+import { Badge } from "@/components/ui/badge";
+
+const roleColors: Record<string, string> = {
+  "Founder": "bg-purple-500/20 text-purple-300 border-purple-500/30",
+  "Master Coordinator": "bg-red-500/20 text-red-300 border-red-500/30",
+  "Coordinator Admin": "bg-orange-500/20 text-orange-300 border-orange-500/30",
+  "Head Overseer Admin": "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",
+  "Inspector Admin": "bg-green-500/20 text-green-300 border-green-500/30",
+  "Game Admin": "bg-blue-500/20 text-blue-300 border-blue-500/30",
+  "Arena Admin": "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
+};
 
 type PostWithUser = ForumPost & { user: User };
 type ReplyWithUser = ForumReply & { user: User };
@@ -59,6 +70,47 @@ export default function ForumPostDetailPage() {
       toast({
         title: "Hata",
         description: "Cevap eklenemedi",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deletePostMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("DELETE", `/api/forum-posts/${id}`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Başarılı",
+        description: "Konu silindi",
+      });
+      navigate("/forum");
+    },
+    onError: () => {
+      toast({
+        title: "Hata",
+        description: "Konu silinemedi",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const archivePostMutation = useMutation({
+    mutationFn: async (archived: boolean) => {
+      return await apiRequest("PATCH", `/api/forum-posts/${id}`, { isArchived: archived });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/forum-posts", id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/forum-posts"] });
+      toast({
+        title: "Başarılı",
+        description: post?.isArchived ? "Arşivden çıkarıldı" : "Arşivlendi",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Hata",
+        description: "İşlem başarısız",
         variant: "destructive",
       });
     },
@@ -122,33 +174,68 @@ export default function ForumPostDetailPage() {
 
           <Card className="mb-6" data-testid="card-post-detail">
             <CardHeader>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-xs px-2 py-1 rounded-md bg-primary/10 text-primary font-medium">
-                  {post.category}
-                </span>
-                {post.isLocked && (
-                  <span className="text-xs px-2 py-1 rounded-md bg-orange-500/10 text-orange-500 font-medium flex items-center gap-1">
-                    <LockIcon className="w-3 h-3" />
-                    Kilitli
+              <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs px-2 py-1 rounded-md bg-primary/10 text-primary font-medium">
+                    {post.category}
                   </span>
-                )}
-                {post.isArchived && (
-                  <span className="text-xs px-2 py-1 rounded-md bg-muted text-muted-foreground font-medium flex items-center gap-1">
-                    <Archive className="w-3 h-3" />
-                    Arşivlendi
-                  </span>
+                  {post.isLocked && (
+                    <span className="text-xs px-2 py-1 rounded-md bg-orange-500/10 text-orange-500 font-medium flex items-center gap-1">
+                      <LockIcon className="w-3 h-3" />
+                      Kilitli
+                    </span>
+                  )}
+                  {post.isArchived && (
+                    <span className="text-xs px-2 py-1 rounded-md bg-muted text-muted-foreground font-medium flex items-center gap-1">
+                      <Archive className="w-3 h-3" />
+                      Arşivlendi
+                    </span>
+                  )}
+                </div>
+                {user && post.userId === user.id && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => archivePostMutation.mutate(!post.isArchived)}
+                      disabled={archivePostMutation.isPending}
+                      data-testid="button-archive-post"
+                    >
+                      <Archive className="w-4 h-4 mr-1" />
+                      {post.isArchived ? "Arşivden Çıkar" : "Arşivle"}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deletePostMutation.mutate()}
+                      disabled={deletePostMutation.isPending}
+                      className="text-destructive"
+                      data-testid="button-delete-post"
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Sil
+                    </Button>
+                  </div>
                 )}
               </div>
               <h1 className="text-3xl font-heading font-bold mb-3" data-testid="text-post-title">
                 {post.title}
               </h1>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 flex-wrap text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
                   {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: tr })}
                 </span>
                 <span>•</span>
                 <span data-testid="text-post-author">{post.user.username}</span>
+                {post.user.role && post.user.role !== "HaxArena Üye" && (
+                  <Badge 
+                    variant="outline" 
+                    className={`${roleColors[post.user.role] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                  >
+                    {post.user.role}
+                  </Badge>
+                )}
               </div>
             </CardHeader>
             <CardContent>
@@ -213,10 +300,18 @@ export default function ForumPostDetailPage() {
               replies.map((reply) => (
                 <Card key={reply.id} data-testid={`card-reply-${reply.id}`}>
                   <CardHeader className="pb-3">
-                    <div className="flex items-center gap-3 text-sm">
+                    <div className="flex items-center gap-2 flex-wrap text-sm">
                       <span className="font-medium" data-testid={`text-reply-author-${reply.id}`}>
                         {reply.user.username}
                       </span>
+                      {reply.user.role && reply.user.role !== "HaxArena Üye" && (
+                        <Badge 
+                          variant="outline" 
+                          className={`${roleColors[reply.user.role] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                        >
+                          {reply.user.role}
+                        </Badge>
+                      )}
                       <span>•</span>
                       <span className="text-muted-foreground flex items-center gap-1">
                         <Calendar className="w-3 h-3" />

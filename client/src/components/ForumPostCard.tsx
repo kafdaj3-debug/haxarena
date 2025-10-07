@@ -10,6 +10,7 @@ interface ForumPostCardProps {
   title: string;
   content: string;
   author: string;
+  authorRole?: string;
   category: string;
   replyCount: number;
   createdAt: string;
@@ -20,11 +21,23 @@ interface ForumPostCardProps {
   onToggleLock?: () => void;
 }
 
+const roleColors: Record<string, string> = {
+  "Founder": "bg-purple-500/20 text-purple-300 border-purple-500/30",
+  "Master Coordinator": "bg-red-500/20 text-red-300 border-red-500/30",
+  "Coordinator Admin": "bg-orange-500/20 text-orange-300 border-orange-500/30",
+  "Head Overseer Admin": "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",
+  "Inspector Admin": "bg-green-500/20 text-green-300 border-green-500/30",
+  "Game Admin": "bg-blue-500/20 text-blue-300 border-blue-500/30",
+  "Arena Admin": "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
+  "HaxArena Üye": "bg-slate-500/20 text-slate-300 border-slate-500/30",
+};
+
 export default function ForumPostCard({
   id,
   title,
   content,
   author,
+  authorRole,
   category,
   replyCount,
   createdAt,
@@ -70,8 +83,21 @@ export default function ForumPostCard({
                   </Badge>
                 )}
               </div>
-              <div className="text-sm text-muted-foreground">
-                <span data-testid="text-author">{author}</span> • <span data-testid="text-category">{category}</span> • {createdAt}
+              <div className="flex items-center gap-2 flex-wrap text-sm text-muted-foreground">
+                <span data-testid="text-author">{author}</span>
+                {authorRole && authorRole !== "HaxArena Üye" && (
+                  <Badge 
+                    variant="outline" 
+                    className={`${roleColors[authorRole] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                    data-testid="badge-author-role"
+                  >
+                    {authorRole}
+                  </Badge>
+                )}
+                <span>•</span>
+                <span data-testid="text-category">{category}</span>
+                <span>•</span>
+                <span>{createdAt}</span>
               </div>
             </div>
           </div>

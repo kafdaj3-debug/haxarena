@@ -22,6 +22,17 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { ForumPost, User } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
+import { Badge } from "@/components/ui/badge";
+
+const roleColors: Record<string, string> = {
+  "Founder": "bg-purple-500/20 text-purple-300 border-purple-500/30",
+  "Master Coordinator": "bg-red-500/20 text-red-300 border-red-500/30",
+  "Coordinator Admin": "bg-orange-500/20 text-orange-300 border-orange-500/30",
+  "Head Overseer Admin": "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",
+  "Inspector Admin": "bg-green-500/20 text-green-300 border-green-500/30",
+  "Game Admin": "bg-blue-500/20 text-blue-300 border-blue-500/30",
+  "Arena Admin": "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
+};
 
 const categories = [
   { value: "Genel Sohbet", label: "Genel Sohbet" },
@@ -284,13 +295,21 @@ export default function ForumPage() {
                         <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                           {post.content}
                         </p>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
                             {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: tr })}
                           </span>
                           <span>•</span>
                           <span>{post.user.username}</span>
+                          {post.user.role && post.user.role !== "HaxArena Üye" && (
+                            <Badge 
+                              variant="outline" 
+                              className={`${roleColors[post.user.role] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                            >
+                              {post.user.role}
+                            </Badge>
+                          )}
                           <span>•</span>
                           <span className="flex items-center gap-1">
                             <MessageSquare className="w-3 h-3" />
@@ -348,13 +367,21 @@ export default function ForumPage() {
                         <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                           {post.content}
                         </p>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
                             {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: tr })}
                           </span>
                           <span>•</span>
                           <span>{post.user.username}</span>
+                          {post.user.role && post.user.role !== "HaxArena Üye" && (
+                            <Badge 
+                              variant="outline" 
+                              className={`${roleColors[post.user.role] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                            >
+                              {post.user.role}
+                            </Badge>
+                          )}
                           <span>•</span>
                           <span className="flex items-center gap-1">
                             <MessageSquare className="w-3 h-3" />
@@ -412,13 +439,21 @@ export default function ForumPage() {
                         <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                           {post.content}
                         </p>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
                             {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: tr })}
                           </span>
                           <span>•</span>
                           <span>{post.user.username}</span>
+                          {post.user.role && post.user.role !== "HaxArena Üye" && (
+                            <Badge 
+                              variant="outline" 
+                              className={`${roleColors[post.user.role] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                            >
+                              {post.user.role}
+                            </Badge>
+                          )}
                           <span>•</span>
                           <span className="flex items-center gap-1">
                             <MessageSquare className="w-3 h-3" />
@@ -476,13 +511,21 @@ export default function ForumPage() {
                         <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                           {post.content}
                         </p>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
                             {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: tr })}
                           </span>
                           <span>•</span>
                           <span>{post.user.username}</span>
+                          {post.user.role && post.user.role !== "HaxArena Üye" && (
+                            <Badge 
+                              variant="outline" 
+                              className={`${roleColors[post.user.role] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                            >
+                              {post.user.role}
+                            </Badge>
+                          )}
                           <span>•</span>
                           <span className="flex items-center gap-1">
                             <MessageSquare className="w-3 h-3" />
@@ -540,13 +583,21 @@ export default function ForumPage() {
                         <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                           {post.content}
                         </p>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
                             {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: tr })}
                           </span>
                           <span>•</span>
                           <span>{post.user.username}</span>
+                          {post.user.role && post.user.role !== "HaxArena Üye" && (
+                            <Badge 
+                              variant="outline" 
+                              className={`${roleColors[post.user.role] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                            >
+                              {post.user.role}
+                            </Badge>
+                          )}
                           <span>•</span>
                           <span className="flex items-center gap-1">
                             <MessageSquare className="w-3 h-3" />
