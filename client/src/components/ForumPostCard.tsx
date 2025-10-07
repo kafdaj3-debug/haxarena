@@ -12,6 +12,8 @@ interface ForumPostCardProps {
   author: string;
   authorRole?: string;
   authorPlayerRole?: string;
+  authorIsAdmin?: boolean;
+  authorIsSuperAdmin?: boolean;
   category: string;
   replyCount: number;
   createdAt: string;
@@ -40,6 +42,8 @@ export default function ForumPostCard({
   author,
   authorRole,
   authorPlayerRole,
+  authorIsAdmin,
+  authorIsSuperAdmin,
   category,
   replyCount,
   createdAt,
@@ -57,6 +61,10 @@ export default function ForumPostCard({
       .toUpperCase()
       .slice(0, 2);
   };
+
+  // Admin rolleri (öncelikli)
+  const adminRoles = ["Founder", "Master Coordinator", "Coordinator Admin", "Head Overseer Admin", "Inspector Admin", "Game Admin", "Arena Admin"];
+  const isAdminRole = authorRole && adminRoles.includes(authorRole);
 
   return (
     <Card className={`hover-elevate overflow-visible ${isArchived ? 'opacity-60' : ''}`}>
@@ -85,7 +93,20 @@ export default function ForumPostCard({
               </div>
               <div className="flex items-center gap-2 flex-wrap text-sm text-muted-foreground">
                 <span data-testid="text-author">{author}</span>
-                {authorRole && (
+                
+                {/* Yönetim etiketi (en öncelikli) */}
+                {authorIsSuperAdmin && (
+                  <Badge 
+                    variant="outline" 
+                    className="bg-red-500/20 text-red-300 border-red-500/30 text-xs font-bold"
+                    data-testid="badge-management"
+                  >
+                    YÖNETİM
+                  </Badge>
+                )}
+                
+                {/* Admin/Staff rolü */}
+                {authorRole && isAdminRole && (
                   <Badge 
                     variant="outline" 
                     className={`${roleColors[authorRole] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
@@ -94,6 +115,8 @@ export default function ForumPostCard({
                     {authorRole}
                   </Badge>
                 )}
+                
+                {/* Oyuncu rolü (admin rolünden sonra) */}
                 {authorPlayerRole && (
                   <Badge 
                     variant="outline" 
@@ -103,6 +126,18 @@ export default function ForumPostCard({
                     {authorPlayerRole}
                   </Badge>
                 )}
+                
+                {/* Normal üye rolü (eğer admin rolü yoksa) */}
+                {authorRole && !isAdminRole && (
+                  <Badge 
+                    variant="outline" 
+                    className={`${roleColors[authorRole] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                    data-testid="badge-author-role"
+                  >
+                    {authorRole}
+                  </Badge>
+                )}
+                
                 <span>•</span>
                 <span data-testid="text-category">{category}</span>
                 <span>•</span>

@@ -382,6 +382,10 @@ export default function ManagementPanelPage() {
                         <div><strong>Discord:</strong> {app.discordNick}</div>
                         <div className="col-span-2"><strong>Süre:</strong> {app.playDuration}</div>
                         <div className="col-span-2"><strong>Günlük Saat:</strong> {app.dailyHours}</div>
+                        <div className="col-span-2"><strong>Aktif Sunucular:</strong> {app.activeServers}</div>
+                        <div className="col-span-2"><strong>Önceki Deneyim:</strong> {app.previousExperience}</div>
+                        <div className="col-span-2"><strong>Aktif Zaman Dilimleri:</strong> {app.activeTimeZones}</div>
+                        <div className="col-span-2"><strong>Kendinden Bahseder misin:</strong> {app.aboutYourself}</div>
                       </div>
                     </div>
                   ))}
@@ -449,19 +453,21 @@ export default function ManagementPanelPage() {
                           <Badge variant="secondary">{u.role}</Badge>
                           {u.isAdmin && <Badge variant="default">Admin</Badge>}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowPasswords({ ...showPasswords, [u.id]: !showPasswords[u.id] })}
-                            data-testid={`button-show-password-${u.id}`}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          {showPasswords[u.id] && (
-                            <code className="text-xs bg-muted px-2 py-1 rounded">{u.password}</code>
-                          )}
-                        </div>
+                        {user?.isSuperAdmin && (
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setShowPasswords({ ...showPasswords, [u.id]: !showPasswords[u.id] })}
+                              data-testid={`button-show-password-${u.id}`}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            {showPasswords[u.id] && (
+                              <code className="text-xs bg-muted px-2 py-1 rounded">{u.password}</code>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-4 flex-wrap">
                         <div className="flex items-center gap-2">

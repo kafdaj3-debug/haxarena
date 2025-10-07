@@ -639,6 +639,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Chat routes
+  const userLastMessageTime = new Map<string, number>();
+
+  app.get("/api/chat/messages", async (req, res) => {
+    try {
+      const messages = await storage.getChatMessages(50);
+      const staffRoles = await storage.getStaffRoles();
+      const staffMap = new Map(staffRoles.map(s => [s.name, s.role]));
+      
+      const messagesWithStaffRole = messages.map(msg => ({
+        ...msg,
+        staffRole: staffMap.get(msg.user.username) || null,
+      }));
+      
+      return res.json(messagesWithStaffRole);
+    } catch (error) {
+      return res.status(500).json({ error: "Mesajlar yüklenemedi" });
+    }
+  });
+
+  app.post("/api/chat/messages", isAuthenticated, async (req, res) => {
+    try {
+      const { message } = req.body;
+      if (!message || !message.trim()) {
+        return res.status(400).json({ error: "Mesaj boş olamaz" });
+      }
+
+      // Rate limiting: 5 saniye
+      const userId = req.user!.id;
+      const now = Date.now();
+      const lastMessageTime = userLastMessageTime.get(userId) || 0;
+      
+      if (now - lastMessageTime < 5000) {
+        const remainingSeconds = Math.ceil((5000 - (now - lastMessageTime)) / 1000);
+        return res.status(429).json({ 
+          error: `Lütfen ${remainingSeconds} saniye bekleyin` 
+        });
+      }
+
+      userLastMessageTime.set(userId, now);
+
+      const chatMessage = await storage.createChatMessage({
+        userId: req.user!.id,
+        message: message.trim(),
+      });
+
+      const [user] = await Promise.all([
+        storage.getUser(req.user!.id)
+      ]);
+
+      return res.json({ ...chatMessage, user });
+    } catch (error) {
+      return res.status(500).json({ error: "Mesaj gönderilemedi" });
+    }
+  });
+
+  app.delete("/api/chat/messages/:id", async (req, res) => {
+    try {
+      if (!req.user || (!req.user.isAdmin && !req.user.isSuperAdmin)) {
+        return res.status(403).json({ error: "Yetkiniz yok" });
+      }
+
+      await storage.deleteChatMessage(req.params.id);
+      return res.json({ message: "Mesaj silindi" });
+    } catch (error) {
+      return res.status(500).json({ error: "Mesaj silinemedi" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

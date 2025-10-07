@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ActiveRoomCard from "@/components/ActiveRoomCard";
 import ForumPostCard from "@/components/ForumPostCard";
+import LiveChat from "@/components/LiveChat";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -109,34 +110,41 @@ export default function HomePage() {
               </Card>
             </div>
 
-            {forumPosts.length > 0 && (
-              <div className="mb-12">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-3xl font-heading font-bold">Son Forum Konuları</h2>
-                  <Link href="/forum">
-                    <Button variant="ghost" className="hover-elevate active-elevate-2" data-testid="button-view-forum">
-                      Foruma Git
-                    </Button>
-                  </Link>
+            <div className="mb-12 grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {forumPosts.length > 0 && (
+                <div className="lg:col-span-2">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-3xl font-heading font-bold">Son Forum Konuları</h2>
+                    <Link href="/forum">
+                      <Button variant="ghost" className="hover-elevate active-elevate-2" data-testid="button-view-forum">
+                        Foruma Git
+                      </Button>
+                    </Link>
+                  </div>
+                  <div className="space-y-4">
+                    {forumPosts.slice(0, 2).map((post: any) => (
+                      <ForumPostCard 
+                        key={post.id} 
+                        id={post.id}
+                        title={post.title}
+                        content={post.content}
+                        author={post.user?.username || 'Bilinmeyen'}
+                        authorRole={post.staffRole}
+                        authorPlayerRole={post.user?.playerRole}
+                        authorIsAdmin={post.user?.isAdmin}
+                        authorIsSuperAdmin={post.user?.isSuperAdmin}
+                        category={post.category}
+                        replyCount={post.replyCount}
+                        createdAt={formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: tr })}
+                      />
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-4 max-w-4xl">
-                  {forumPosts.slice(0, 2).map((post: any) => (
-                    <ForumPostCard 
-                      key={post.id} 
-                      id={post.id}
-                      title={post.title}
-                      content={post.content}
-                      author={post.user?.username || 'Bilinmeyen'}
-                      authorRole={post.staffRole}
-                      authorPlayerRole={post.user?.playerRole}
-                      category={post.category}
-                      replyCount={post.replyCount}
-                      createdAt={formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: tr })}
-                    />
-                  ))}
-                </div>
+              )}
+              <div className="lg:col-span-1">
+                <LiveChat />
               </div>
-            )}
+            </div>
 
             <div>
               <h2 className="text-3xl font-heading font-bold mb-6">Aktif Odalar</h2>

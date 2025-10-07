@@ -222,12 +222,19 @@ export default function ForumPostDetailPage() {
                 {post.title}
               </h1>
               <div className="flex items-center gap-2 flex-wrap text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: tr })}
-                </span>
-                <span>•</span>
                 <span data-testid="text-post-author">{post.user.username}</span>
+                
+                {/* Yönetim etiketi (en öncelikli) */}
+                {post.user.isSuperAdmin && (
+                  <Badge 
+                    variant="outline" 
+                    className="bg-red-500/20 text-red-300 border-red-500/30 text-xs font-bold"
+                  >
+                    YÖNETİM
+                  </Badge>
+                )}
+                
+                {/* Admin/Staff rolü */}
                 {post.staffRole && (
                   <Badge 
                     variant="outline" 
@@ -236,6 +243,8 @@ export default function ForumPostDetailPage() {
                     {post.staffRole}
                   </Badge>
                 )}
+                
+                {/* Oyuncu rolü */}
                 {post.user.playerRole && (
                   <Badge 
                     variant="outline" 
@@ -244,6 +253,12 @@ export default function ForumPostDetailPage() {
                     {post.user.playerRole}
                   </Badge>
                 )}
+                
+                <span>•</span>
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-4 h-4" />
+                  {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: tr })}
+                </span>
               </div>
             </CardHeader>
             <CardContent>
@@ -312,6 +327,18 @@ export default function ForumPostDetailPage() {
                       <span className="font-medium" data-testid={`text-reply-author-${reply.id}`}>
                         {reply.user.username}
                       </span>
+                      
+                      {/* Yönetim etiketi (en öncelikli) */}
+                      {reply.user.isSuperAdmin && (
+                        <Badge 
+                          variant="outline" 
+                          className="bg-red-500/20 text-red-300 border-red-500/30 text-xs font-bold"
+                        >
+                          YÖNETİM
+                        </Badge>
+                      )}
+                      
+                      {/* Admin/Staff rolü */}
                       {reply.staffRole && (
                         <Badge 
                           variant="outline" 
@@ -320,6 +347,8 @@ export default function ForumPostDetailPage() {
                           {reply.staffRole}
                         </Badge>
                       )}
+                      
+                      {/* Oyuncu rolü */}
                       {reply.user.playerRole && (
                         <Badge 
                           variant="outline" 
@@ -328,6 +357,7 @@ export default function ForumPostDetailPage() {
                           {reply.user.playerRole}
                         </Badge>
                       )}
+                      
                       <span>•</span>
                       <span className="text-muted-foreground flex items-center gap-1">
                         <Calendar className="w-3 h-3" />

@@ -15,6 +15,8 @@ import {
   type InsertForumPost,
   type ForumReply,
   type InsertForumReply,
+  type ChatMessage,
+  type InsertChatMessage,
   users,
   adminApplications,
   teamApplications,
@@ -22,7 +24,8 @@ import {
   staffRoles,
   notifications,
   forumPosts,
-  forumReplies
+  forumReplies,
+  chatMessages
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -77,6 +80,11 @@ export interface IStorage {
   createForumReply(reply: InsertForumReply): Promise<ForumReply>;
   getForumReplies(postId: string): Promise<(ForumReply & { user: User })[]>;
   deleteForumReply(id: string): Promise<void>;
+  
+  // Chat message operations
+  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+  getChatMessages(limit?: number): Promise<(ChatMessage & { user: User })[]>;
+  deleteChatMessage(id: string): Promise<void>;
 }
 
 export class DBStorage implements IStorage {
@@ -102,6 +110,15 @@ export class DBStorage implements IStorage {
   }
 
   async deleteUser(id: string): Promise<void> {
+    // İlk önce kullanıcıya ait tüm bağlı kayıtları sil
+    await db.delete(forumReplies).where(eq(forumReplies.userId, id));
+    await db.delete(forumPosts).where(eq(forumPosts.userId, id));
+    await db.delete(adminApplications).where(eq(adminApplications.userId, id));
+    await db.delete(teamApplications).where(eq(teamApplications.userId, id));
+    await db.delete(notifications).where(eq(notifications.userId, id));
+    await db.delete(chatMessages).where(eq(chatMessages.userId, id));
+    
+    // Son olarak kullanıcıyı sil
     await db.delete(users).where(eq(users.id, id));
   }
 
@@ -309,6 +326,31 @@ export class DBStorage implements IStorage {
 
   async deleteForumReply(id: string): Promise<void> {
     await db.delete(forumReplies).where(eq(forumReplies.id, id));
+  }
+
+  // Chat message operations
+  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+    const [chatMessage] = await db.insert(chatMessages).values(message).returning();
+    return chatMessage;
+  }
+
+  async getChatMessages(limit: number = 50): Promise<(ChatMessage & { user: User })[]> {
+    const messages = await db.select().from(chatMessages)
+      .orderBy(desc(chatMessages.createdAt))
+      .limit(limit);
+
+    const messagesWithUser = await Promise.all(
+      messages.map(async (message) => {
+        const [user] = await db.select().from(users).where(eq(users.id, message.userId)).limit(1);
+        return { ...message, user };
+      })
+    );
+
+    return messagesWithUser.reverse(); // Reverse to show oldest first
+  }
+
+  async deleteChatMessage(id: string): Promise<void> {
+    await db.delete(chatMessages).where(eq(chatMessages.id, id));
   }
 }
 
