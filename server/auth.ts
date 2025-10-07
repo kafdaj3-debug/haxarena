@@ -11,7 +11,7 @@ declare global {
     interface User {
       id: string;
       username: string;
-      email: string;
+      email: string | null;
       isAdmin: boolean;
     }
   }
@@ -82,10 +82,10 @@ export function setupAuth(app: Express) {
 
   app.post("/api/auth/register", async (req, res) => {
     try {
-      const { username, email, password } = req.body;
+      const { username, password } = req.body;
 
-      if (!username || !email || !password) {
-        return res.status(400).json({ error: "Tüm alanları doldurun" });
+      if (!username || !password) {
+        return res.status(400).json({ error: "Kullanıcı adı ve şifre gereklidir" });
       }
 
       const existingUser = await storage.getUserByUsername(username);
@@ -97,7 +97,6 @@ export function setupAuth(app: Express) {
 
       const user = await storage.createUser({
         username,
-        email,
         password: hashedPassword,
       });
 
