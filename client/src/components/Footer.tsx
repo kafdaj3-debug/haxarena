@@ -23,24 +23,18 @@ export default function Footer({ onlineCount = 0 }: FooterProps) {
             <h3 className="font-semibold mb-4">Hızlı Linkler</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/aktif-odalar">
-                  <a className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-rooms">
-                    Aktif Odalar
-                  </a>
+                <Link href="/aktif-odalar" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-rooms">
+                  Aktif Odalar
                 </Link>
               </li>
               <li>
-                <Link href="/vip">
-                  <a className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-vip">
-                    VIP Üyelik
-                  </a>
+                <Link href="/vip" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-vip">
+                  VIP Üyelik
                 </Link>
               </li>
               <li>
-                <Link href="/lig">
-                  <a className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-league">
-                    Lig
-                  </a>
+                <Link href="/lig" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-league">
+                  Lig
                 </Link>
               </li>
               <li>

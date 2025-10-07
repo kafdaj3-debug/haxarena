@@ -66,11 +66,9 @@ export default function HomePage() {
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
               <Link href="/aktif-odalar">
-                <a>
-                  <Button size="lg" className="hover-elevate active-elevate-2" data-testid="button-hero-rooms">
-                    Aktif Odalara Katıl
-                  </Button>
-                </a>
+                <Button size="lg" className="hover-elevate active-elevate-2" data-testid="button-hero-rooms">
+                  Aktif Odalara Katıl
+                </Button>
               </Link>
               <a href="https://discord.gg/haxarena" target="_blank" rel="noopener noreferrer">
                 <Button size="lg" variant="outline" className="hover-elevate active-elevate-2" data-testid="button-hero-discord">
