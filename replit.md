@@ -96,11 +96,25 @@ Preferred communication style: Simple, everyday language.
 - Reply system with counts
 - Post locking and archiving functionality
 - Admin moderation capabilities
+- Role badge display with priority ordering (Admin/Management roles first, then player roles)
+- "YÖNETİM" badge for super admin users in posts and replies
+
+**Live Chat System:**
+- Real-time community chat on homepage (displayed next to forum posts)
+- Emoji support via @emoji-mart/react with picker interface
+- 5-second rate limiting per user to prevent spam
+- Auto-polling (2-second interval) for new messages
+- Message deletion permissions for admin and management users only
+- Auto-scroll to latest messages
+- Authenticated users only
 
 **Admin Panel:**
 - Staff hierarchy management with 7 role levels (Founder → Arena Admin)
 - User registration approval workflow
 - Content moderation tools
+- User deletion with complete cascade handling (removes all forum posts, replies, applications, notifications, and chat messages)
+- Password viewing feature (restricted to super admin/management only)
+- Admin application "about yourself" field display in management interface
 
 ## External Dependencies
 
@@ -128,6 +142,7 @@ Preferred communication style: Simple, everyday language.
 - `class-variance-authority` - Type-safe variant styling
 - `lucide-react` - Icon library
 - `react-icons` - Additional icons (SiDiscord)
+- `@emoji-mart/react` & `@emoji-mart/data` - Emoji picker for live chat
 
 **Data Management:**
 - `@tanstack/react-query` - Server state management
