@@ -5,9 +5,12 @@ import {
   type InsertAdminApplication,
   type TeamApplication,
   type InsertTeamApplication,
+  type Settings,
+  type UpdateSettings,
   users,
   adminApplications,
-  teamApplications
+  teamApplications,
+  settings
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -18,6 +21,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
+  deleteUser(id: string): Promise<void>;
   getAllUsers(): Promise<User[]>;
   
   // Admin application operations
@@ -31,6 +35,10 @@ export interface IStorage {
   getTeamApplications(): Promise<TeamApplication[]>;
   getUserTeamApplications(userId: string): Promise<TeamApplication[]>;
   updateTeamApplication(id: string, status: string): Promise<TeamApplication | undefined>;
+  
+  // Settings operations
+  getSettings(): Promise<Settings | undefined>;
+  updateSettings(updates: UpdateSettings): Promise<Settings | undefined>;
 }
 
 export class DBStorage implements IStorage {
@@ -53,6 +61,10 @@ export class DBStorage implements IStorage {
   async updateUser(id: string, updates: Partial<User>): Promise<User | undefined> {
     const [user] = await db.update(users).set(updates).where(eq(users.id, id)).returning();
     return user;
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
   }
 
   async getAllUsers(): Promise<User[]> {
@@ -105,6 +117,23 @@ export class DBStorage implements IStorage {
       .where(eq(teamApplications.id, id))
       .returning();
     return app;
+  }
+
+  // Settings operations
+  async getSettings(): Promise<Settings | undefined> {
+    const [setting] = await db.select().from(settings).limit(1);
+    return setting;
+  }
+
+  async updateSettings(updates: UpdateSettings): Promise<Settings | undefined> {
+    const [setting] = await db.select().from(settings).limit(1);
+    if (!setting) return undefined;
+    
+    const [updated] = await db.update(settings)
+      .set(updates)
+      .where(eq(settings.id, setting.id))
+      .returning();
+    return updated;
   }
 }
 

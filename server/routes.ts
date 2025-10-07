@@ -92,9 +92,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin application routes
   app.post("/api/applications/admin", isAuthenticated, async (req, res) => {
     try {
-      const { reason } = req.body;
-      if (!reason) {
-        return res.status(400).json({ error: "Başvuru nedeni gerekli" });
+      const { name, age, gameNick, discordNick, playDuration, activeServers, previousExperience, dailyHours, activeTimeZones, aboutYourself } = req.body;
+      
+      if (!name || !age || !gameNick || !discordNick || !playDuration || !activeServers || !previousExperience || !dailyHours || !activeTimeZones || !aboutYourself) {
+        return res.status(400).json({ error: "Tüm alanları doldurun" });
       }
 
       const existing = await storage.getUserAdminApplications(req.user!.id);
@@ -105,7 +106,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const application = await storage.createAdminApplication({
         userId: req.user!.id,
-        reason,
+        name,
+        age,
+        gameNick,
+        discordNick,
+        playDuration,
+        activeServers,
+        previousExperience,
+        dailyHours,
+        activeTimeZones,
+        aboutYourself,
       });
 
       return res.json(application);
@@ -231,8 +241,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/management/users", isSuperAdmin, async (req, res) => {
     try {
       const users = await storage.getAllUsers();
-      const usersWithoutPassword = users.map(({ password, ...user }) => user);
-      return res.json(usersWithoutPassword);
+      // Super adminler şifreleri görebilir
+      return res.json(users);
     } catch (error) {
       return res.status(500).json({ error: "Kullanıcılar yüklenemedi" });
     }
@@ -251,6 +261,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(userWithoutPassword);
     } catch (error) {
       return res.status(500).json({ error: "Kullanıcı onaylanamadı" });
+    }
+  });
+
+  app.delete("/api/management/users/:id", isSuperAdmin, async (req, res) => {
+    try {
+      await storage.deleteUser(req.params.id);
+      return res.json({ message: "Kullanıcı silindi" });
+    } catch (error) {
+      return res.status(500).json({ error: "Kullanıcı silinemedi" });
     }
   });
 
@@ -288,6 +307,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(userWithoutPassword);
     } catch (error) {
       return res.status(500).json({ error: "Admin yetkisi güncellenemedi" });
+    }
+  });
+
+  // Settings routes
+  app.get("/api/settings", async (req, res) => {
+    try {
+      const settings = await storage.getSettings();
+      if (!settings) {
+        return res.status(404).json({ error: "Ayarlar bulunamadı" });
+      }
+      return res.json(settings);
+    } catch (error) {
+      return res.status(500).json({ error: "Ayarlar yüklenemedi" });
+    }
+  });
+
+  app.patch("/api/settings", isSuperAdmin, async (req, res) => {
+    try {
+      const settings = await storage.updateSettings(req.body);
+      if (!settings) {
+        return res.status(404).json({ error: "Ayarlar bulunamadı" });
+      }
+      return res.json(settings);
+    } catch (error) {
+      return res.status(500).json({ error: "Ayarlar güncellenemedi" });
     }
   });
 

@@ -47,11 +47,6 @@ export default function Header({ user, onLogout }: HeaderProps) {
               Lig
             </Button>
           </Link>
-          <Link href="/takim-basvuru" data-testid="link-nav-team-application">
-            <Button variant="ghost" className="hover-elevate active-elevate-2">
-              Takım Başvurusu
-            </Button>
-          </Link>
           <Link href="/forum" data-testid="link-nav-forum">
             <Button variant="ghost" className="hover-elevate active-elevate-2">
               Forum
@@ -65,6 +60,11 @@ export default function Header({ user, onLogout }: HeaderProps) {
           <Link href="/admin-basvuru" data-testid="link-nav-admin-application">
             <Button variant="ghost" className="hover-elevate active-elevate-2">
               Admin Başvurusu
+            </Button>
+          </Link>
+          <Link href="/takim-basvuru" data-testid="link-nav-team-application">
+            <Button variant="ghost" className="hover-elevate active-elevate-2">
+              Takım Başvurusu
             </Button>
           </Link>
         </nav>

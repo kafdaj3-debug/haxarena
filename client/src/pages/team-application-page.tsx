@@ -21,6 +21,10 @@ export default function TeamApplicationPage() {
   const [teamLogo, setTeamLogo] = useState("");
   const [description, setDescription] = useState("");
 
+  const { data: settings } = useQuery<any>({
+    queryKey: ["/api/settings"],
+  });
+
   const { data: applications } = useQuery<any[]>({
     queryKey: ["/api/applications/team"],
   });
@@ -53,6 +57,8 @@ export default function TeamApplicationPage() {
     applyMutation.mutate({ teamName, teamLogo, description });
   };
 
+  const applicationsOpen = settings?.teamApplicationsOpen;
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header user={user} onLogout={logout} />
@@ -73,6 +79,14 @@ export default function TeamApplicationPage() {
                 </CardHeader>
                 <form onSubmit={handleSubmit}>
                   <CardContent className="space-y-4">
+                    {!applicationsOpen && (
+                      <Alert variant="destructive">
+                        <AlertCircle className="w-4 h-4" />
+                        <AlertDescription>
+                          Takım başvuruları şu anda kapalı
+                        </AlertDescription>
+                      </Alert>
+                    )}
                     <div className="space-y-2">
                       <Label htmlFor="team-name">Takım Adı</Label>
                       <Input
@@ -82,6 +96,7 @@ export default function TeamApplicationPage() {
                         value={teamName}
                         onChange={(e) => setTeamName(e.target.value)}
                         required
+                        disabled={!applicationsOpen}
                         data-testid="input-team-name"
                       />
                     </div>
@@ -93,6 +108,7 @@ export default function TeamApplicationPage() {
                         placeholder="https://example.com/logo.png"
                         value={teamLogo}
                         onChange={(e) => setTeamLogo(e.target.value)}
+                        disabled={!applicationsOpen}
                         data-testid="input-team-logo"
                       />
                     </div>
@@ -105,6 +121,7 @@ export default function TeamApplicationPage() {
                         onChange={(e) => setDescription(e.target.value)}
                         required
                         rows={5}
+                        disabled={!applicationsOpen}
                         data-testid="textarea-description"
                       />
                     </div>
@@ -112,7 +129,7 @@ export default function TeamApplicationPage() {
                   <CardFooter>
                     <Button 
                       type="submit" 
-                      disabled={applyMutation.isPending}
+                      disabled={applyMutation.isPending || !applicationsOpen}
                       data-testid="button-submit"
                     >
                       {applyMutation.isPending ? "Gönderiliyor..." : "Başvur"}
@@ -137,13 +154,8 @@ export default function TeamApplicationPage() {
                 {applications?.map((app) => (
                   <Card key={app.id}>
                     <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <CardTitle className="text-lg">{app.teamName}</CardTitle>
-                          <CardDescription>
-                            {app.user?.username} • {new Date(app.createdAt).toLocaleDateString("tr-TR")}
-                          </CardDescription>
-                        </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <CardTitle className="text-lg">{app.teamName}</CardTitle>
                         <Badge variant={
                           app.status === "pending" ? "secondary" :
                           app.status === "approved" ? "default" : "destructive"
@@ -152,12 +164,24 @@ export default function TeamApplicationPage() {
                            app.status === "approved" ? "Onaylandı" : "Reddedildi"}
                         </Badge>
                       </div>
+                      <CardDescription>
+                        {app.user?.username} • {new Date(app.createdAt).toLocaleDateString("tr-TR")}
+                      </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="space-y-3">
                       {app.teamLogo && (
-                        <img src={app.teamLogo} alt={app.teamName} className="w-16 h-16 object-contain mb-4" />
+                        <div>
+                          <img 
+                            src={app.teamLogo} 
+                            alt={app.teamName} 
+                            className="w-16 h-16 object-contain rounded"
+                          />
+                        </div>
                       )}
-                      <p className="text-sm whitespace-pre-wrap">{app.description}</p>
+                      <div>
+                        <p className="font-semibold text-sm">Açıklama:</p>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{app.description}</p>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}

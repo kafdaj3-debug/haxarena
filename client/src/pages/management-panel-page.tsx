@@ -5,20 +5,28 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Shield, ShieldOff, CheckCircle, User } from "lucide-react";
+import { Shield, ShieldOff, CheckCircle, XCircle, User, Eye } from "lucide-react";
 
 const ROLES = ["DIAMOND VIP", "GOLD VIP", "SILVER VIP", "Lig Oyuncusu", "HaxArena Üye"];
 
 export default function ManagementPanelPage() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
+  const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
 
   const { data: users } = useQuery<any[]>({
     queryKey: ["/api/management/users"],
+    enabled: !!user?.isSuperAdmin,
+  });
+
+  const { data: settings } = useQuery<any>({
+    queryKey: ["/api/settings"],
     enabled: !!user?.isSuperAdmin,
   });
 
@@ -27,12 +35,38 @@ export default function ManagementPanelPage() {
     enabled: !!user?.isSuperAdmin,
   });
 
+  const settingsMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("PATCH", "/api/settings", data);
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Ayarlar güncellendi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/settings"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Ayarlar güncellenemedi", variant: "destructive" });
+    },
+  });
+
   const approveMutation = useMutation({
     mutationFn: async (userId: string) => {
       return await apiRequest("PATCH", `/api/management/users/${userId}/approve`, {});
     },
     onSuccess: () => {
       toast({ title: "Başarılı", description: "Kullanıcı onaylandı" });
+      queryClient.invalidateQueries({ queryKey: ["/api/management/users"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "İşlem başarısız", variant: "destructive" });
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      return await apiRequest("DELETE", `/api/management/users/${userId}`, {});
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Kullanıcı reddedildi" });
       queryClient.invalidateQueries({ queryKey: ["/api/management/users"] });
     },
     onError: () => {
@@ -106,10 +140,55 @@ export default function ManagementPanelPage() {
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="mb-8">
             <h1 className="text-3xl font-heading font-bold mb-2">Yönetim Paneli</h1>
-            <p className="text-muted-foreground">Kullanıcı ve başvuru yönetimi</p>
+            <p className="text-muted-foreground">Platform yönetimi ve ayarları</p>
           </div>
 
           <div className="space-y-8">
+            {/* Başvuru Ayarları */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Başvuru Ayarları</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="admin-apps" className="cursor-pointer">
+                    <div>
+                      <p className="font-medium">Admin Başvuruları</p>
+                      <p className="text-sm text-muted-foreground">
+                        {settings?.adminApplicationsOpen ? "Açık" : "Kapalı"}
+                      </p>
+                    </div>
+                  </Label>
+                  <Switch
+                    id="admin-apps"
+                    checked={settings?.adminApplicationsOpen || false}
+                    onCheckedChange={(checked) => 
+                      settingsMutation.mutate({ adminApplicationsOpen: checked })
+                    }
+                    data-testid="switch-admin-applications"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="team-apps" className="cursor-pointer">
+                    <div>
+                      <p className="font-medium">Takım Başvuruları</p>
+                      <p className="text-sm text-muted-foreground">
+                        {settings?.teamApplicationsOpen ? "Açık" : "Kapalı"}
+                      </p>
+                    </div>
+                  </Label>
+                  <Switch
+                    id="team-apps"
+                    checked={settings?.teamApplicationsOpen || false}
+                    onCheckedChange={(checked) => 
+                      settingsMutation.mutate({ teamApplicationsOpen: checked })
+                    }
+                    data-testid="switch-team-applications"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Bekleyen Admin Başvuruları */}
             <Card>
               <CardHeader>
@@ -118,35 +197,41 @@ export default function ManagementPanelPage() {
               <CardContent>
                 <div className="space-y-4">
                   {pendingApplications.map((app) => (
-                    <div key={app.id} className="flex items-start justify-between p-4 border rounded-lg">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
+                    <div key={app.id} className="p-4 border rounded-lg space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2">
                           <User className="w-4 h-4" />
                           <span className="font-medium">{app.user?.username}</span>
                           <Badge variant="secondary">{app.user?.role}</Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2">{app.reason}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(app.createdAt).toLocaleDateString("tr-TR")}
-                        </p>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => applicationMutation.mutate({ id: app.id, status: "approved" })}
+                            disabled={applicationMutation.isPending}
+                            data-testid={`button-approve-${app.id}`}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Onayla
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => applicationMutation.mutate({ id: app.id, status: "rejected" })}
+                            disabled={applicationMutation.isPending}
+                            data-testid={`button-reject-${app.id}`}
+                          >
+                            Reddet
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => applicationMutation.mutate({ id: app.id, status: "approved" })}
-                          disabled={applicationMutation.isPending}
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Onayla
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => applicationMutation.mutate({ id: app.id, status: "rejected" })}
-                          disabled={applicationMutation.isPending}
-                        >
-                          Reddet
-                        </Button>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div><strong>İsim:</strong> {app.name}</div>
+                        <div><strong>Yaş:</strong> {app.age}</div>
+                        <div><strong>Oyun Nick:</strong> {app.gameNick}</div>
+                        <div><strong>Discord:</strong> {app.discordNick}</div>
+                        <div className="col-span-2"><strong>Süre:</strong> {app.playDuration}</div>
+                        <div className="col-span-2"><strong>Günlük Saat:</strong> {app.dailyHours}</div>
                       </div>
                     </div>
                   ))}
@@ -165,19 +250,32 @@ export default function ManagementPanelPage() {
               <CardContent>
                 <div className="space-y-2">
                   {pendingUsers.map((u) => (
-                    <div key={u.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div key={u.id} className="flex items-center justify-between p-4 border rounded-lg gap-2">
                       <div>
                         <p className="font-medium">{u.username}</p>
                         <p className="text-sm text-muted-foreground">{u.email || "Email yok"}</p>
                       </div>
-                      <Button
-                        size="sm"
-                        onClick={() => approveMutation.mutate(u.id)}
-                        disabled={approveMutation.isPending}
-                      >
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Onayla
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => approveMutation.mutate(u.id)}
+                          disabled={approveMutation.isPending}
+                          data-testid={`button-approve-user-${u.id}`}
+                        >
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          Onayla
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => rejectMutation.mutate(u.id)}
+                          disabled={rejectMutation.isPending}
+                          data-testid={`button-reject-user-${u.id}`}
+                        >
+                          <XCircle className="w-4 h-4 mr-1" />
+                          Reddet
+                        </Button>
+                      </div>
                     </div>
                   ))}
                   {pendingUsers.length === 0 && (
@@ -187,67 +285,73 @@ export default function ManagementPanelPage() {
               </CardContent>
             </Card>
 
-            {/* Tüm Kullanıcılar */}
+            {/* Onaylı Kullanıcılar */}
             <Card>
               <CardHeader>
-                <CardTitle>Tüm Kullanıcılar ({approvedUsers.length})</CardTitle>
+                <CardTitle>Onaylı Kullanıcılar ({approvedUsers.length})</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {approvedUsers.map((u) => (
-                    <div key={u.id} className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div>
-                            <p className="font-medium">{u.username}</p>
-                            <p className="text-sm text-muted-foreground">{u.email || "Email yok"}</p>
-                          </div>
-                          {u.isAdmin && (
-                            <Badge variant="default">Admin</Badge>
-                          )}
-                          {u.isSuperAdmin && (
-                            <Badge variant="destructive">Yönetim</Badge>
+                    <div key={u.id} className="p-4 border rounded-lg space-y-3">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{u.username}</p>
+                          <Badge variant="secondary">{u.role}</Badge>
+                          {u.isAdmin && <Badge variant="default">Admin</Badge>}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowPasswords({ ...showPasswords, [u.id]: !showPasswords[u.id] })}
+                            data-testid={`button-show-password-${u.id}`}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          {showPasswords[u.id] && (
+                            <code className="text-xs bg-muted px-2 py-1 rounded">{u.password}</code>
                           )}
                         </div>
-                        <Badge variant="secondary">{u.role}</Badge>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Select
-                          value={u.role}
-                          onValueChange={(role) => roleUpdateMutation.mutate({ userId: u.id, role })}
-                          disabled={roleUpdateMutation.isPending || u.isSuperAdmin}
-                        >
-                          <SelectTrigger className="w-[200px]">
-                            <SelectValue placeholder="Rol seçin" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {ROLES.map((role) => (
-                              <SelectItem key={role} value={role}>
-                                {role}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {!u.isSuperAdmin && (
-                          <Button
-                            size="sm"
-                            variant={u.isAdmin ? "destructive" : "default"}
-                            onClick={() => adminToggleMutation.mutate({ userId: u.id, isAdmin: !u.isAdmin })}
-                            disabled={adminToggleMutation.isPending}
+                      <div className="flex items-center gap-4 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor={`role-${u.id}`} className="text-sm">Rol:</Label>
+                          <Select
+                            value={u.role}
+                            onValueChange={(role) => roleUpdateMutation.mutate({ userId: u.id, role })}
                           >
-                            {u.isAdmin ? (
-                              <>
-                                <ShieldOff className="w-4 h-4 mr-1" />
-                                Admin Kaldır
-                              </>
-                            ) : (
-                              <>
-                                <Shield className="w-4 h-4 mr-1" />
-                                Admin Yap
-                              </>
-                            )}
-                          </Button>
-                        )}
+                            <SelectTrigger className="w-40" id={`role-${u.id}`} data-testid={`select-role-${u.id}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {ROLES.map((role) => (
+                                <SelectItem key={role} value={role}>
+                                  {role}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant={u.isAdmin ? "destructive" : "default"}
+                          onClick={() => adminToggleMutation.mutate({ userId: u.id, isAdmin: !u.isAdmin })}
+                          disabled={adminToggleMutation.isPending}
+                          data-testid={`button-toggle-admin-${u.id}`}
+                        >
+                          {u.isAdmin ? (
+                            <>
+                              <ShieldOff className="w-4 h-4 mr-1" />
+                              Admin Kaldır
+                            </>
+                          ) : (
+                            <>
+                              <Shield className="w-4 h-4 mr-1" />
+                              Admin Yap
+                            </>
+                          )}
+                        </Button>
                       </div>
                     </div>
                   ))}
