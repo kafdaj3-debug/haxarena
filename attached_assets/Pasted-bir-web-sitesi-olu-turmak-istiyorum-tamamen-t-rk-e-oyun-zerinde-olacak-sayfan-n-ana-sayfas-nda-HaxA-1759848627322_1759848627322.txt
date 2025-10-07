@@ -1,0 +1,123 @@
+bir web sitesi oluşturmak istiyorum tamamen türkçe oyun üzerinde olacak sayfanın ana sayfasında HaxArena V6 Real Soccere hoş geldiniz şeklinde mesaj olacak ana sayfa da aktif odalar kısmı olacak oraya tıklayınca başka bir yere aktarıp odaları güncel olarak gösterecek sayfa siyah tonunda olacak buton renkleri vs 4cadd0 bu renk kodu olacak ve discord adresi olacak https://discord.gg/haxarena
+
+Beşiktaş vs Trabzonspor link https://www.haxball.com/play?c=S94fRiqX_MI
+Kocaelispor vs Gaziantepspor https://www.haxball.com/play?c=SQiZbOZdvCU
+Karşıyaka vs Göztepe https://www.haxball.com/play?c=0nc3iNzdT78
+ https://www.haxball.com/play?c=tIJcy9L3c0k Galatasaray vs Fenerbahçe 
+
+odalar aktif şekilde daha düzenli bir şekilde gösterilecek
+
+VIP yeri olacak orda vip ücretleri vs olacak
+
+SILVER VIP :white_circle: fiyatı 90 tl
+• Pub odalarında VIP TAGI ve VIP emojisi
+• Mesajlar kalın yazı ile görünür
+• 60+ karakter mesajlarda uyarı yemez
+• Gol/asist sonrası büyüme efekti
+• Maç sonu istatistiklerde yazı yazabilir
+• 6 saniyelik yazı engelinden etkilenmez
+• VIP üyelere özel çekilişlere katılabilir.
+• Eğlence turnuvaları ve odalarına katılabilir.
+https://www.shopier.com/40044747 satın al diyince buraya yönlendirecek 
+
+GOLD VIP :yellow_circle: 120 tl
+• Discord’a 5 özel emoji ekletebilir
+• Yavaş mod daha az etkiler
+• Erken '!vote' kullanabilir
+• 3 maç AFK kalma hakkı
+• '!vipstil' ile yazı stilini değiştirebilir
+• Dolu odalara (16/17 kişi) girebilir
+• Makul ek ücret ile yazı renklerini değiştirebilirler.
+https://www.shopier.com/40044867
+
+DIAMOND VIP :gem: 150 tl
+• '!avatar' ile hareketli avatar + hız ayarı
+• Dizilim başlamadan '!değiş' komutu
+• '!afk' ile spec’e geçme hakkı
+• '!adminvip' ile admin olabilir (admin yokken)
+• '!p' komutu ile 10 saniye oyunu durdurabilir
+• :white_check_mark: Tüm VIP özelliklerine erişim hakkı
+https://www.shopier.com/40051776 satın aldıktan sonra discord dan ticket açması için bir uyarı mesajı cıkacak sipariş koduyla bize iletmesi gerektiği yazacak
+
+
+topluluk vs olacak ve kayıt kısmı olacak giriş kısmı olacak
+
+ve aktif lig bölümü olacak ama şuan da ligimiz bulunmamakta ekleme vs yapabilme olsun sadece admine olacak admin içinde bir hesap oluşturmanı istiyorum giriş yapıp ordan her düzenlemeyi vs yapabilelim
+
+admin olarak ve kayıt olanları sadece adminler onaylasın bir bölüm olsun adminler için onaylanması için onaylandıktan sonra isteyen girebilecek kayıt oldukları zaman oyuncular bu tür mesaj cıksın Kaydınız yetkililere iletilmiştir. Onay sürecinin tamamlanmasının ardından giriş yapabilirsiniz.
+
+chat (direkt anasayfa da böyle ortada gözükecek şekil de kayıt olduktan sonra)
+2.takim başvuru kısmı olacak png görsel şeklinde takım logolarını yükleyip ardından oyuncu isimleri girip başvuru yapabilsinler başvurular admin paneline gönderilsin onay red şeklinde olacak ama şuan başvuru yapılmasın buna
+
+öneriler kısmı
+
+böyle insanların bir konu hakkında tartışacağı sözlük gibi maç konuşacağı iddia vs şeyleri
+6.kayıtlı olmayanlar böyle sayfayı gorebilsin ama yazamasin hiç bı türlü
+
+ana sayfa da chat olsun ortada bildiğin forum gibi işte takım başvuru kanalı olsun olduğu zaman seni takım başvuru kanalına atacak orada sadece başvurular gözükecek
+altında öneriler olsun insanlar forumda ne eksik varsa onu önerebilir
+onun altında mesela sözlük gibi insanlar başka şeylerden konuşup orada vakit geçirebilir
+lig tamamıyla orada olmalı başvurular 
+
+adminlik başvurusu başvuru formu olacak
+İsim:
+aşınız?:
+Oyunda Kullandığınız Nick:
+Discord Nickiniz:
+Ne Kadar Süredir Oynamaktasınız?:
+Hangi Sunucularda Aktif Oynadınız?:
+Daha Önce Yetkili Olduğunuz Sunucular/ Varsa Sunucudaki Rütbeniz-Göreviniz?:
+Günde Kaç Saatinizi Ayırabilirsiniz?:
+Hangi zaman dilimlerinde aktif olabilirsiniz? (Sabah/Öğle/Akşam/Gece):
+Sesli toplantılara katılabilir misiniz? (Evet/Hayır):
+
+Son olarak biraz kendinizden bahsedebilir misiniz?:
+
+başvurular adminlere gönderilecek onay red şeklinde olacak mesaj kutucukları olacak başvuru veya red oldugu zaman başvurana gönderilecek
+
+
+admin oturumu tüm butonlari kanallari islemleri kontrol edip duzenleyebilsin yani forumda ne varsa her seyin kontrolunu yapsin admin
+
+alt kisimda cevrimiciler gözüksün
+
+adminler hesap silebilsin
+
+adminler forumda paylasilan konulari silebilme yetkisi kilitleme yetkisi olsun
+
+forumda acilan konular arşive tasinsin yani konularin en altina taşısın kapandigi belli olacak bir sey yap
+
+
+Admin Kadrosu listesi olacak oraya ekleme yapabilelim rol isimleri
+
+Founder
+
+Master Coordinator
+
+Coordinator Admin
+
+Head Overseer Admin
+
+Inspector Admin
+
+Game Admin
+
+Arena Admin bu sekilde hepsi eklenecek ve bu rollere isimler eklenecek duzenleme olsun admin de altina veya yanina ekip isimleri yazilacak
+
+oyun ici nick degistirme bölümü olacak bir forum sekilde ve bunun ücretsiz oldugunu belirt
+
+Oyun içindeki mevcut nick’iniz nedir?
+
+Kullanmak istediğiniz yeni oyun nick’iniz nedir?
+
+Yeni nick talebiniz alınmıştır. Talebiniz 24 saat içerisinde yetkililer tarafından incelenip onaylanacaktır.
+burda yetkililere onay yeri gidecek ve oyuncunun forum bildirisine onaylandigi veya reddedildigi yazacak nick degistirme talebinin (bu forum nickinden bağımsız)
+
+lig icin puan durumu
+fikstur duzenleme vs yetkisi her fikstur duzenlemesin de puan da artsin averaj vs normal futboldaki gibi puan gibi siralama gibi adil olcak ve bu puan durumunda takim sayisina kadar biz ekleme yapip logo koyabilelim 
+Gol kralı sıralaması top 10
+Asist Kralı sıralaması Top 10
+Kurtarış sıralaması Top 10
+CS kralı sıralaması top 10
+DM sıralaması top 10
+bunlara duzenleme yapip oyuncu isimleri yazilabilsin 
+bu 11. kısım gizli kalcak admin yetkisiyle ana sayfaya düşsün sadece 
