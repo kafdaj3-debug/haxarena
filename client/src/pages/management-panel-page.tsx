@@ -7,18 +7,29 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Shield, ShieldOff, CheckCircle, XCircle, User, Eye } from "lucide-react";
+import { Shield, ShieldOff, CheckCircle, XCircle, User, Eye, Trash2, Plus } from "lucide-react";
 
 const ROLES = ["DIAMOND VIP", "GOLD VIP", "SILVER VIP", "Lig Oyuncusu", "HaxArena Üye"];
+const STAFF_ROLES = [
+  "Master Coordinator",
+  "Coordinator Admin",
+  "Head Overseer Admin",
+  "Inspector Admin",
+  "Game Admin",
+  "Arena Admin"
+];
 
 export default function ManagementPanelPage() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
+  const [staffName, setStaffName] = useState("");
+  const [staffRole, setStaffRole] = useState("");
 
   const { data: users } = useQuery<any[]>({
     queryKey: ["/api/management/users"],
@@ -33,6 +44,10 @@ export default function ManagementPanelPage() {
   const { data: adminApplications } = useQuery<any[]>({
     queryKey: ["/api/applications/admin"],
     enabled: !!user?.isSuperAdmin,
+  });
+
+  const { data: staffRoles } = useQuery<any[]>({
+    queryKey: ["/api/staff-roles"],
   });
 
   const settingsMutation = useMutation({
@@ -108,6 +123,47 @@ export default function ManagementPanelPage() {
       toast({ title: "Başarılı", description: "Başvuru güncellendi" });
       queryClient.invalidateQueries({ queryKey: ["/api/applications/admin"] });
       queryClient.invalidateQueries({ queryKey: ["/api/management/users"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "İşlem başarısız", variant: "destructive" });
+    },
+  });
+
+  const deleteApplicationMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest("DELETE", `/api/applications/admin/${id}`, {});
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Başvuru silindi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/applications/admin"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "İşlem başarısız", variant: "destructive" });
+    },
+  });
+
+  const addStaffMutation = useMutation({
+    mutationFn: async (data: { name: string; role: string; managementAccess: boolean }) => {
+      return await apiRequest("POST", "/api/staff-roles", data);
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Staff eklendi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/staff-roles"] });
+      setStaffName("");
+      setStaffRole("");
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "İşlem başarısız", variant: "destructive" });
+    },
+  });
+
+  const deleteStaffMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest("DELETE", `/api/staff-roles/${id}`, {});
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Staff silindi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/staff-roles"] });
     },
     onError: () => {
       toast({ title: "Hata", description: "İşlem başarısız", variant: "destructive" });
@@ -221,7 +277,17 @@ export default function ManagementPanelPage() {
                             disabled={applicationMutation.isPending}
                             data-testid={`button-reject-${app.id}`}
                           >
+                            <XCircle className="w-4 h-4 mr-1" />
                             Reddet
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => deleteApplicationMutation.mutate(app.id)}
+                            disabled={deleteApplicationMutation.isPending}
+                            data-testid={`button-delete-application-${app.id}`}
+                          >
+                            <Trash2 className="w-4 h-4 text-destructive" />
                           </Button>
                         </div>
                       </div>
@@ -253,7 +319,6 @@ export default function ManagementPanelPage() {
                     <div key={u.id} className="flex items-center justify-between p-4 border rounded-lg gap-2">
                       <div>
                         <p className="font-medium">{u.username}</p>
-                        <p className="text-sm text-muted-foreground">{u.email || "Email yok"}</p>
                       </div>
                       <div className="flex gap-2">
                         <Button
@@ -355,6 +420,76 @@ export default function ManagementPanelPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Admin Kadrosu */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Admin Kadrosu</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="İsim"
+                    value={staffName}
+                    onChange={(e) => setStaffName(e.target.value)}
+                    data-testid="input-staff-name"
+                  />
+                  <Select value={staffRole} onValueChange={setStaffRole}>
+                    <SelectTrigger className="w-60" data-testid="select-staff-role">
+                      <SelectValue placeholder="Rol Seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {STAFF_ROLES.map((role) => (
+                        <SelectItem key={role} value={role}>
+                          {role}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    onClick={() => {
+                      if (staffName && staffRole) {
+                        addStaffMutation.mutate({
+                          name: staffName,
+                          role: staffRole,
+                          managementAccess: staffRole === "Master Coordinator" || staffRole === "Coordinator Admin"
+                        });
+                      }
+                    }}
+                    disabled={!staffName || !staffRole || addStaffMutation.isPending}
+                    data-testid="button-add-staff"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Ekle
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {staffRoles?.map((staff) => (
+                    <div key={staff.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <p className="font-medium">{staff.name}</p>
+                        <p className="text-sm text-muted-foreground">{staff.role}</p>
+                        {staff.managementAccess && (
+                          <Badge variant="secondary" className="mt-1">Yönetim Erişimi</Badge>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => deleteStaffMutation.mutate(staff.id)}
+                        disabled={deleteStaffMutation.isPending}
+                        data-testid={`button-delete-staff-${staff.id}`}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </div>
+                  ))}
+                  {!staffRoles?.length && (
+                    <p className="text-center text-muted-foreground py-4">Henüz staff eklenmedi</p>
+                  )}
                 </div>
               </CardContent>
             </Card>

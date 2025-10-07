@@ -88,12 +88,14 @@ export default function ForumPage() {
             </Button>
           </div>
 
-          <Alert className="mb-6">
-            <Lock className="w-4 h-4" />
-            <AlertDescription data-testid="text-login-required">
-              Konu açmak ve yorum yapmak için giriş yapmanız gerekmektedir. Kayıtsız kullanıcılar sadece okuyabilir.
-            </AlertDescription>
-          </Alert>
+          {!user && (
+            <Alert className="mb-6">
+              <Lock className="w-4 h-4" />
+              <AlertDescription data-testid="text-login-required">
+                Konu açmak ve yorum yapmak için giriş yapmanız gerekmektedir. Kayıtsız kullanıcılar sadece okuyabilir.
+              </AlertDescription>
+            </Alert>
+          )}
 
           <Tabs defaultValue="all" className="space-y-6">
             <TabsList>
