@@ -1,8 +1,10 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AdminStaffList from "@/components/AdminStaffList";
+import { useAuth } from "@/lib/auth";
 
 export default function AdminStaffPage() {
+  const { user, logout } = useAuth();
   const roles = [
     "Founder",
     "Master Coordinator",
@@ -38,7 +40,7 @@ export default function AdminStaffPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <Header user={user} onLogout={logout} />
       
       <main className="flex-1 py-12">
         <div className="container mx-auto px-4 max-w-4xl">

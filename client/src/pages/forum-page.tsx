@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Lock } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "@/lib/auth";
 
 export default function ForumPage() {
+  const { user, logout } = useAuth();
   const [posts] = useState([
     {
       id: 1,
@@ -67,7 +69,7 @@ export default function ForumPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <Header user={user} onLogout={logout} />
       
       <main className="flex-1 py-12">
         <div className="container mx-auto px-4">

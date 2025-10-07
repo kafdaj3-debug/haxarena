@@ -6,8 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Trophy, Users, MessageSquare, Shield } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 export default function HomePage() {
+  const { user, logout } = useAuth();
   const allRooms = [
     {
       matchName: "Beşiktaş vs Trabzonspor",
@@ -50,7 +52,7 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <Header user={user} onLogout={logout} />
       
       <main className="flex-1">
         <section className="relative bg-gradient-to-b from-card to-background py-20 border-b">

@@ -2,8 +2,10 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ActiveRoomCard from "@/components/ActiveRoomCard";
 import { useState } from "react";
+import { useAuth } from "@/lib/auth";
 
 export default function ActiveRoomsPage() {
+  const { user, logout } = useAuth();
   const [rooms] = useState([
     {
       id: 1,
@@ -33,7 +35,7 @@ export default function ActiveRoomsPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <Header user={user} onLogout={logout} />
       
       <main className="flex-1 py-12">
         <div className="container mx-auto px-4">

@@ -38,13 +38,12 @@ export default function AuthPage() {
         return;
       }
 
-      const user = await response.json();
+      await response.json();
       toast({
         title: "Giriş Başarılı",
-        description: `Hoş geldin, ${user.username}!`,
+        description: "Hoş geldiniz!",
       });
-      navigate("/");
-      window.location.reload(); // Reload to update header
+      window.location.href = "/";
     } catch (error) {
       toast({
         title: "Hata",
