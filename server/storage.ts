@@ -11,12 +11,18 @@ import {
   type InsertStaffRole,
   type Notification,
   type InsertNotification,
+  type ForumPost,
+  type InsertForumPost,
+  type ForumReply,
+  type InsertForumReply,
   users,
   adminApplications,
   teamApplications,
   settings,
   staffRoles,
-  notifications
+  notifications,
+  forumPosts,
+  forumReplies
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -59,6 +65,18 @@ export interface IStorage {
   getUserNotifications(userId: string): Promise<Notification[]>;
   markNotificationAsRead(id: string): Promise<void>;
   deleteNotification(id: string): Promise<void>;
+  
+  // Forum post operations
+  createForumPost(post: InsertForumPost): Promise<ForumPost>;
+  getForumPosts(category?: string): Promise<(ForumPost & { user: User; replyCount: number })[]>;
+  getForumPost(id: string): Promise<(ForumPost & { user: User }) | undefined>;
+  updateForumPost(id: string, updates: Partial<ForumPost>): Promise<ForumPost | undefined>;
+  deleteForumPost(id: string): Promise<void>;
+  
+  // Forum reply operations
+  createForumReply(reply: InsertForumReply): Promise<ForumReply>;
+  getForumReplies(postId: string): Promise<(ForumReply & { user: User })[]>;
+  deleteForumReply(id: string): Promise<void>;
 }
 
 export class DBStorage implements IStorage {
@@ -221,6 +239,76 @@ export class DBStorage implements IStorage {
 
   async deleteNotification(id: string): Promise<void> {
     await db.delete(notifications).where(eq(notifications.id, id));
+  }
+
+  // Forum post operations
+  async createForumPost(post: InsertForumPost): Promise<ForumPost> {
+    const [forumPost] = await db.insert(forumPosts).values(post).returning();
+    return forumPost;
+  }
+
+  async getForumPosts(category?: string): Promise<(ForumPost & { user: User; replyCount: number })[]> {
+    const posts = category 
+      ? await db.select().from(forumPosts)
+          .where(eq(forumPosts.category, category))
+          .orderBy(desc(forumPosts.createdAt))
+      : await db.select().from(forumPosts)
+          .orderBy(desc(forumPosts.createdAt));
+
+    const postsWithUserAndCount = await Promise.all(
+      posts.map(async (post) => {
+        const [user] = await db.select().from(users).where(eq(users.id, post.userId)).limit(1);
+        const replies = await db.select().from(forumReplies).where(eq(forumReplies.postId, post.id));
+        return { ...post, user, replyCount: replies.length };
+      })
+    );
+
+    return postsWithUserAndCount;
+  }
+
+  async getForumPost(id: string): Promise<(ForumPost & { user: User }) | undefined> {
+    const [post] = await db.select().from(forumPosts).where(eq(forumPosts.id, id)).limit(1);
+    if (!post) return undefined;
+
+    const [user] = await db.select().from(users).where(eq(users.id, post.userId)).limit(1);
+    return { ...post, user };
+  }
+
+  async updateForumPost(id: string, updates: Partial<ForumPost>): Promise<ForumPost | undefined> {
+    const [updated] = await db.update(forumPosts)
+      .set(updates)
+      .where(eq(forumPosts.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteForumPost(id: string): Promise<void> {
+    await db.delete(forumPosts).where(eq(forumPosts.id, id));
+  }
+
+  // Forum reply operations
+  async createForumReply(reply: InsertForumReply): Promise<ForumReply> {
+    const [forumReply] = await db.insert(forumReplies).values(reply).returning();
+    return forumReply;
+  }
+
+  async getForumReplies(postId: string): Promise<(ForumReply & { user: User })[]> {
+    const replies = await db.select().from(forumReplies)
+      .where(eq(forumReplies.postId, postId))
+      .orderBy(desc(forumReplies.createdAt));
+
+    const repliesWithUser = await Promise.all(
+      replies.map(async (reply) => {
+        const [user] = await db.select().from(users).where(eq(users.id, reply.userId)).limit(1);
+        return { ...reply, user };
+      })
+    );
+
+    return repliesWithUser;
+  }
+
+  async deleteForumReply(id: string): Promise<void> {
+    await db.delete(forumReplies).where(eq(forumReplies.id, id));
   }
 }
 
