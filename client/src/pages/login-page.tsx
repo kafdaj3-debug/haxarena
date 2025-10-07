@@ -80,7 +80,12 @@ export default function LoginPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="login-password">Şifre</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="login-password">Şifre</Label>
+                  <Link href="/sifre-sifirlama" className="text-xs text-primary hover:underline">
+                    Şifremi Unuttum
+                  </Link>
+                </div>
                 <Input
                   id="login-password"
                   type="password"

@@ -33,6 +33,7 @@ export default function ManagementPanelPage() {
   const [staffRole, setStaffRole] = useState("");
   const [ipAddress, setIpAddress] = useState("");
   const [ipReason, setIpReason] = useState("");
+  const [resetCodes, setResetCodes] = useState<Record<string, string>>({});
 
   const { data: users } = useQuery<any[]>({
     queryKey: ["/api/management/users"],
@@ -293,6 +294,30 @@ export default function ManagementPanelPage() {
     },
   });
 
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (username: string) => {
+      const response = await fetch("/api/password-reset/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ username }),
+      });
+      if (!response.ok) throw new Error("Şifre sıfırlama başarısız");
+      return await response.json();
+    },
+    onSuccess: (data, username) => {
+      const code = data.message.replace("Şifre sıfırlama kodu: ", "");
+      setResetCodes({ ...resetCodes, [username]: code });
+      toast({ 
+        title: "Kod Üretildi", 
+        description: "Şifre sıfırlama kodu kullanıcıya verilebilir",
+      });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Kod üretilemedi", variant: "destructive" });
+    },
+  });
+
   if (!user?.isSuperAdmin) {
     return (
       <div className="flex flex-col min-h-screen">
@@ -492,7 +517,25 @@ export default function ManagementPanelPage() {
                           <Badge variant="secondary">{u.role}</Badge>
                           {u.isAdmin && <Badge variant="default">Admin</Badge>}
                         </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => resetPasswordMutation.mutate(u.username)}
+                          disabled={resetPasswordMutation.isPending}
+                          data-testid={`button-reset-password-${u.id}`}
+                        >
+                          Şifre Sıfırla
+                        </Button>
                       </div>
+                      {resetCodes[u.username] && (
+                        <div className="p-2 bg-primary/10 rounded border border-primary/30">
+                          <p className="text-sm font-medium text-primary">Şifre Sıfırlama Kodu:</p>
+                          <p className="font-mono text-lg font-bold text-primary">{resetCodes[u.username]}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Bu kodu kullanıcıya verin. 30 dakika geçerlidir.
+                          </p>
+                        </div>
+                      )}
                       <div className="flex items-center gap-4 flex-wrap">
                         <div className="flex items-center gap-2">
                           <Label htmlFor={`role-${u.id}`} className="text-sm">Rol:</Label>
