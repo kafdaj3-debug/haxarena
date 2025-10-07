@@ -11,6 +11,7 @@ interface ForumPostCardProps {
   content: string;
   author: string;
   authorRole?: string;
+  authorPlayerRole?: string;
   category: string;
   replyCount: number;
   createdAt: string;
@@ -38,6 +39,7 @@ export default function ForumPostCard({
   content,
   author,
   authorRole,
+  authorPlayerRole,
   category,
   replyCount,
   createdAt,
@@ -83,13 +85,22 @@ export default function ForumPostCard({
               </div>
               <div className="flex items-center gap-2 flex-wrap text-sm text-muted-foreground">
                 <span data-testid="text-author">{author}</span>
-                {authorRole && authorRole !== "HaxArena Üye" && (
+                {authorRole && (
                   <Badge 
                     variant="outline" 
                     className={`${roleColors[authorRole] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
                     data-testid="badge-author-role"
                   >
                     {authorRole}
+                  </Badge>
+                )}
+                {authorPlayerRole && (
+                  <Badge 
+                    variant="outline" 
+                    className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs"
+                    data-testid="badge-author-player-role"
+                  >
+                    {authorPlayerRole}
                   </Badge>
                 )}
                 <span>•</span>

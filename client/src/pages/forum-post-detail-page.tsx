@@ -236,12 +236,12 @@ export default function ForumPostDetailPage() {
                     {post.staffRole}
                   </Badge>
                 )}
-                {!post.staffRole && post.user.role && post.user.role !== "HaxArena Üye" && (
+                {post.user.playerRole && (
                   <Badge 
                     variant="outline" 
-                    className={`${roleColors[post.user.role] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                    className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs"
                   >
-                    {post.user.role}
+                    {post.user.playerRole}
                   </Badge>
                 )}
               </div>
@@ -320,12 +320,12 @@ export default function ForumPostDetailPage() {
                           {reply.staffRole}
                         </Badge>
                       )}
-                      {!reply.staffRole && reply.user.role && reply.user.role !== "HaxArena Üye" && (
+                      {reply.user.playerRole && (
                         <Badge 
                           variant="outline" 
-                          className={`${roleColors[reply.user.role] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                          className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs"
                         >
-                          {reply.user.role}
+                          {reply.user.playerRole}
                         </Badge>
                       )}
                       <span>•</span>

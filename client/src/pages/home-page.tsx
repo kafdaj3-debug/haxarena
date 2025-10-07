@@ -128,6 +128,7 @@ export default function HomePage() {
                       content={post.content}
                       author={post.user?.username || 'Bilinmeyen'}
                       authorRole={post.staffRole}
+                      authorPlayerRole={post.user?.playerRole}
                       category={post.category}
                       replyCount={post.replyCount}
                       createdAt={formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: tr })}
