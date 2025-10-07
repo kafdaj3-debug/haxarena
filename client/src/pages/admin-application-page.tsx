@@ -274,10 +274,11 @@ export default function AdminApplicationPage() {
               </Alert>
             )}
 
-            <div>
-              <h2 className="text-2xl font-heading font-bold mb-4">Tüm Başvurular</h2>
-              <div className="space-y-4">
-                {applications?.map((app) => (
+            {user?.isAdmin && (
+              <div>
+                <h2 className="text-2xl font-heading font-bold mb-4">Bekleyen Başvurular</h2>
+                <div className="space-y-4">
+                  {applications?.filter(app => app.status === "pending").map((app) => (
                   <Card key={app.id}>
                     <CardHeader>
                       <div className="flex items-center justify-between gap-2">
@@ -337,12 +338,13 @@ export default function AdminApplicationPage() {
                       </div>
                     </CardContent>
                   </Card>
-                ))}
-                {applications?.length === 0 && (
-                  <p className="text-center text-muted-foreground py-8">Henüz başvuru yok</p>
-                )}
+                  ))}
+                  {applications?.filter(app => app.status === "pending").length === 0 && (
+                    <p className="text-center text-muted-foreground py-8">Bekleyen başvuru yok</p>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </main>

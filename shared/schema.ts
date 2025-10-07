@@ -11,6 +11,7 @@ export const users = pgTable("users", {
   isSuperAdmin: boolean("is_super_admin").notNull().default(false),
   isApproved: boolean("is_approved").notNull().default(false),
   role: text("role").notNull().default("HaxArena Üye"),
+  playerRole: text("player_role"),
 });
 
 export const adminApplications = pgTable("admin_applications", {
@@ -36,6 +37,9 @@ export const teamApplications = pgTable("team_applications", {
   teamName: text("team_name").notNull(),
   teamLogo: text("team_logo"),
   description: text("description").notNull(),
+  captain1: text("captain_1"),
+  captain2: text("captain_2"),
+  viceCaptain: text("vice_captain"),
   players: text("players").array(),
   status: text("status").notNull().default("pending"),
   createdAt: timestamp("created_at").notNull().defaultNow(),

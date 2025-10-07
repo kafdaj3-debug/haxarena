@@ -168,7 +168,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (status === "approved") {
+        const user = await storage.getUser(application.userId);
         await storage.updateUser(application.userId, { isAdmin: true });
+        
+        // Add to staff roles if not already exists
+        if (user) {
+          await storage.createStaffRole({
+            name: user.username,
+            role: "Game Admin",
+            managementAccess: false,
+          });
+        }
+        
         await storage.createNotification({
           userId: application.userId,
           message: "Admin başvurunuz onaylandı! Artık admin yetkileriniz var.",
@@ -203,7 +214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: "Takım başvuruları şu anda kapalı" });
       }
 
-      const { teamName, teamLogo, description } = req.body;
+      const { teamName, teamLogo, description, captain1, captain2, viceCaptain, players } = req.body;
       if (!teamName || !description) {
         return res.status(400).json({ error: "Takım adı ve açıklama gerekli" });
       }
@@ -213,6 +224,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         teamName,
         teamLogo: teamLogo || null,
         description,
+        captain1: captain1 || null,
+        captain2: captain2 || null,
+        viceCaptain: viceCaptain || null,
+        players: players || [],
       });
 
       return res.json(application);

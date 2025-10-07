@@ -20,6 +20,10 @@ export default function TeamApplicationPage() {
   const [teamName, setTeamName] = useState("");
   const [teamLogo, setTeamLogo] = useState("");
   const [description, setDescription] = useState("");
+  const [captain1, setCaptain1] = useState("");
+  const [captain2, setCaptain2] = useState("");
+  const [viceCaptain, setViceCaptain] = useState("");
+  const [players, setPlayers] = useState("");
 
   const { data: settings } = useQuery<any>({
     queryKey: ["/api/settings"],
@@ -30,7 +34,7 @@ export default function TeamApplicationPage() {
   });
 
   const applyMutation = useMutation({
-    mutationFn: async (data: { teamName: string; teamLogo: string; description: string }) => {
+    mutationFn: async (data: { teamName: string; teamLogo: string; description: string; captain1: string; captain2: string; viceCaptain: string; players: string[] }) => {
       return await apiRequest("POST", "/api/applications/team", data);
     },
     onSuccess: () => {
@@ -41,6 +45,10 @@ export default function TeamApplicationPage() {
       setTeamName("");
       setTeamLogo("");
       setDescription("");
+      setCaptain1("");
+      setCaptain2("");
+      setViceCaptain("");
+      setPlayers("");
       queryClient.invalidateQueries({ queryKey: ["/api/applications/team"] });
     },
     onError: (error: any) => {
@@ -54,7 +62,16 @@ export default function TeamApplicationPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    applyMutation.mutate({ teamName, teamLogo, description });
+    const playersList = players.split('\n').filter(p => p.trim());
+    applyMutation.mutate({ 
+      teamName, 
+      teamLogo, 
+      description, 
+      captain1, 
+      captain2, 
+      viceCaptain, 
+      players: playersList 
+    });
   };
 
   const applicationsOpen = settings?.teamApplicationsOpen;
@@ -125,6 +142,54 @@ export default function TeamApplicationPage() {
                         data-testid="textarea-description"
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="captain1">1. Kaptan</Label>
+                      <Input
+                        id="captain1"
+                        type="text"
+                        placeholder="İlk kaptan adı"
+                        value={captain1}
+                        onChange={(e) => setCaptain1(e.target.value)}
+                        disabled={!applicationsOpen}
+                        data-testid="input-captain1"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="captain2">2. Kaptan</Label>
+                      <Input
+                        id="captain2"
+                        type="text"
+                        placeholder="İkinci kaptan adı"
+                        value={captain2}
+                        onChange={(e) => setCaptain2(e.target.value)}
+                        disabled={!applicationsOpen}
+                        data-testid="input-captain2"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="viceCaptain">Kaptan Yardımcısı</Label>
+                      <Input
+                        id="viceCaptain"
+                        type="text"
+                        placeholder="Kaptan yardımcısı adı"
+                        value={viceCaptain}
+                        onChange={(e) => setViceCaptain(e.target.value)}
+                        disabled={!applicationsOpen}
+                        data-testid="input-vice-captain"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="players">Oyuncular (Her satıra bir oyuncu)</Label>
+                      <Textarea
+                        id="players"
+                        placeholder="Oyuncu 1&#10;Oyuncu 2&#10;Oyuncu 3"
+                        value={players}
+                        onChange={(e) => setPlayers(e.target.value)}
+                        rows={5}
+                        disabled={!applicationsOpen}
+                        data-testid="textarea-players"
+                      />
+                    </div>
                   </CardContent>
                   <CardFooter>
                     <Button 
@@ -182,6 +247,34 @@ export default function TeamApplicationPage() {
                         <p className="font-semibold text-sm">Açıklama:</p>
                         <p className="text-sm text-muted-foreground whitespace-pre-wrap">{app.description}</p>
                       </div>
+                      {app.captain1 && (
+                        <div>
+                          <p className="font-semibold text-sm">1. Kaptan:</p>
+                          <p className="text-sm text-muted-foreground">{app.captain1}</p>
+                        </div>
+                      )}
+                      {app.captain2 && (
+                        <div>
+                          <p className="font-semibold text-sm">2. Kaptan:</p>
+                          <p className="text-sm text-muted-foreground">{app.captain2}</p>
+                        </div>
+                      )}
+                      {app.viceCaptain && (
+                        <div>
+                          <p className="font-semibold text-sm">Kaptan Yardımcısı:</p>
+                          <p className="text-sm text-muted-foreground">{app.viceCaptain}</p>
+                        </div>
+                      )}
+                      {app.players && app.players.length > 0 && (
+                        <div>
+                          <p className="font-semibold text-sm">Oyuncular:</p>
+                          <ul className="text-sm text-muted-foreground list-disc list-inside">
+                            {app.players.map((player: string, idx: number) => (
+                              <li key={idx}>{player}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 ))}
