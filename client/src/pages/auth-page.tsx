@@ -3,18 +3,16 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AuthPage() {
   const [loginData, setLoginData] = useState({ username: "", password: "" });
-  const [registerData, setRegisterData] = useState({ username: "", email: "", password: "" });
+  const [registerData, setRegisterData] = useState({ username: "", password: "" });
   const [registerSuccess, setRegisterSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [, navigate] = useLocation();
   const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -68,15 +66,22 @@ export default function AuthPage() {
 
       if (!response.ok) {
         const error = await response.json();
+        let errorMessage = "Kayıt işlemi başarısız oldu";
+        
+        if (error.error && error.error.includes("username")) {
+          errorMessage = "Bu kullanıcı adı zaten kullanılıyor";
+        }
+        
         toast({
           title: "Kayıt Başarısız",
-          description: error.error || "Kayıt işlemi başarısız oldu",
+          description: errorMessage,
           variant: "destructive",
         });
         return;
       }
 
       setRegisterSuccess(true);
+      setRegisterData({ username: "", password: "" });
       toast({
         title: "Kayıt Başarılı",
         description: "Hesabınız oluşturuldu, şimdi giriş yapabilirsiniz",
@@ -95,139 +100,118 @@ export default function AuthPage() {
   return (
     <div className="flex min-h-screen">
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-5xl">
           <Link href="/">
-            <a className="flex items-center justify-center mb-8">
+            <a className="flex items-center justify-center mb-12">
               <div className="text-3xl font-heading font-bold text-primary">
                 HaxArena V6
               </div>
             </a>
           </Link>
 
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login" data-testid="tab-login">Giriş Yap</TabsTrigger>
-              <TabsTrigger value="register" data-testid="tab-register">Kayıt Ol</TabsTrigger>
-            </TabsList>
+          <div className="grid md:grid-cols-2 gap-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Giriş Yap</CardTitle>
+                <CardDescription>
+                  Hesabınıza giriş yaparak devam edin
+                </CardDescription>
+              </CardHeader>
+              <form onSubmit={handleLogin}>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="login-username">Kullanıcı Adı</Label>
+                    <Input
+                      id="login-username"
+                      type="text"
+                      placeholder="Kullanıcı adınızı girin"
+                      value={loginData.username}
+                      onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
+                      required
+                      data-testid="input-login-username"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="login-password">Şifre</Label>
+                    <Input
+                      id="login-password"
+                      type="password"
+                      placeholder="Şifrenizi girin"
+                      value={loginData.password}
+                      onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                      required
+                      data-testid="input-login-password"
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    data-testid="button-login"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Giriş yapılıyor..." : "Giriş Yap"}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
 
-            <TabsContent value="login">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Giriş Yap</CardTitle>
-                  <CardDescription>
-                    Hesabınıza giriş yaparak devam edin
-                  </CardDescription>
-                </CardHeader>
-                <form onSubmit={handleLogin}>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="login-username">Kullanıcı Adı</Label>
-                      <Input
-                        id="login-username"
-                        type="text"
-                        placeholder="Kullanıcı adınızı girin"
-                        value={loginData.username}
-                        onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
-                        required
-                        data-testid="input-login-username"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="login-password">Şifre</Label>
-                      <Input
-                        id="login-password"
-                        type="password"
-                        placeholder="Şifrenizi girin"
-                        value={loginData.password}
-                        onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                        required
-                        data-testid="input-login-password"
-                      />
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button 
-                      type="submit" 
-                      className="w-full hover-elevate active-elevate-2" 
-                      data-testid="button-login"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Giriş yapılıyor..." : "Giriş Yap"}
-                    </Button>
-                  </CardFooter>
-                </form>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="register">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Kayıt Ol</CardTitle>
-                  <CardDescription>
-                    Yeni hesap oluşturun
-                  </CardDescription>
-                </CardHeader>
-                <form onSubmit={handleRegister}>
-                  <CardContent className="space-y-4">
-                    {registerSuccess && (
-                      <Alert>
-                        <AlertCircle className="w-4 h-4" />
-                        <AlertDescription data-testid="text-register-success">
-                          Kaydınız yetkililere iletilmiştir. Onay sürecinin tamamlanmasının ardından giriş yapabilirsiniz.
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                    <div className="space-y-2">
-                      <Label htmlFor="register-username">Kullanıcı Adı</Label>
-                      <Input
-                        id="register-username"
-                        type="text"
-                        placeholder="Kullanıcı adı seçin"
-                        value={registerData.username}
-                        onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
-                        required
-                        data-testid="input-register-username"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="register-email">E-posta</Label>
-                      <Input
-                        id="register-email"
-                        type="email"
-                        placeholder="E-posta adresiniz"
-                        value={registerData.email}
-                        onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                        required
-                        data-testid="input-register-email"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="register-password">Şifre</Label>
-                      <Input
-                        id="register-password"
-                        type="password"
-                        placeholder="Güçlü bir şifre oluşturun"
-                        value={registerData.password}
-                        onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                        required
-                        data-testid="input-register-password"
-                      />
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button 
-                      type="submit" 
-                      className="w-full hover-elevate active-elevate-2" 
-                      data-testid="button-register"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Kayıt olunuyor..." : "Kayıt Ol"}
-                    </Button>
-                  </CardFooter>
-                </form>
-              </Card>
-            </TabsContent>
-          </Tabs>
+            <Card>
+              <CardHeader>
+                <CardTitle>Kayıt Ol</CardTitle>
+                <CardDescription>
+                  Yeni hesap oluşturun
+                </CardDescription>
+              </CardHeader>
+              <form onSubmit={handleRegister}>
+                <CardContent className="space-y-4">
+                  {registerSuccess && (
+                    <Alert>
+                      <AlertCircle className="w-4 h-4" />
+                      <AlertDescription data-testid="text-register-success">
+                        Kaydınız yetkililere iletilmiştir. Onay sürecinin tamamlanmasının ardından giriş yapabilirsiniz.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  <div className="space-y-2">
+                    <Label htmlFor="register-username">Kullanıcı Adı</Label>
+                    <Input
+                      id="register-username"
+                      type="text"
+                      placeholder="Kullanıcı adı seçin"
+                      value={registerData.username}
+                      onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
+                      required
+                      data-testid="input-register-username"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-password">Şifre</Label>
+                    <Input
+                      id="register-password"
+                      type="password"
+                      placeholder="Güçlü bir şifre oluşturun"
+                      value={registerData.password}
+                      onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+                      required
+                      data-testid="input-register-password"
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    data-testid="button-register"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Kayıt olunuyor..." : "Kayıt Ol"}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
+          </div>
         </div>
       </div>
 
