@@ -305,8 +305,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/management/users", isSuperAdmin, async (req, res) => {
     try {
       const users = await storage.getAllUsers();
-      // Super adminler şifreleri görebilir
-      return res.json(users);
+      // Güvenlik: Şifreleri frontend'e göndermiyoruz
+      const usersWithoutPasswords = users.map(({ password, ...user }) => user);
+      return res.json(usersWithoutPasswords);
     } catch (error) {
       return res.status(500).json({ error: "Kullanıcılar yüklenemedi" });
     }

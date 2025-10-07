@@ -11,7 +11,6 @@ declare global {
     interface User {
       id: string;
       username: string;
-      email: string | null;
       isAdmin: boolean;
       isSuperAdmin: boolean;
       isApproved: boolean;
@@ -57,7 +56,6 @@ export function setupAuth(app: Express) {
         return done(null, {
           id: user.id,
           username: user.username,
-          email: user.email,
           isAdmin: user.isAdmin,
           isSuperAdmin: user.isSuperAdmin,
           isApproved: user.isApproved,
@@ -82,7 +80,6 @@ export function setupAuth(app: Express) {
       done(null, {
         id: user.id,
         username: user.username,
-        email: user.email,
         isAdmin: user.isAdmin,
         isSuperAdmin: user.isSuperAdmin,
         isApproved: user.isApproved,
@@ -116,7 +113,6 @@ export function setupAuth(app: Express) {
       return res.json({
         id: user.id,
         username: user.username,
-        email: user.email,
         isAdmin: user.isAdmin,
         isSuperAdmin: user.isSuperAdmin,
         isApproved: user.isApproved,
