@@ -15,6 +15,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Shield, ShieldOff, CheckCircle, XCircle, User, Eye, Trash2, Plus, Lock, Unlock, Archive, ArchiveRestore } from "lucide-react";
 
 const ROLES = ["DIAMOND VIP", "GOLD VIP", "SILVER VIP", "Lig Oyuncusu", "HaxArena Üye"];
+const PLAYER_ROLES = ["Kaleci", "Defans", "Orta Saha", "Forvet", "Yedek"];
 const STAFF_ROLES = [
   "Master Coordinator",
   "Coordinator Admin",
@@ -117,6 +118,32 @@ export default function ManagementPanelPage() {
     },
     onError: () => {
       toast({ title: "Hata", description: "İşlem başarısız", variant: "destructive" });
+    },
+  });
+
+  const playerRoleUpdateMutation = useMutation({
+    mutationFn: async ({ userId, playerRole }: { userId: string; playerRole: string }) => {
+      return await apiRequest("PATCH", `/api/management/users/${userId}/player-role`, { playerRole });
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Oyuncu rolü güncellendi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/management/users"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Oyuncu rolü güncellenemedi", variant: "destructive" });
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      return await apiRequest("DELETE", `/api/management/users/${userId}`, {});
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Kullanıcı silindi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/management/users"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Kullanıcı silinemedi", variant: "destructive" });
     },
   });
 
@@ -455,6 +482,25 @@ export default function ManagementPanelPage() {
                             </SelectContent>
                           </Select>
                         </div>
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor={`player-role-${u.id}`} className="text-sm">Oyuncu Rolü:</Label>
+                          <Select
+                            value={u.playerRole || ""}
+                            onValueChange={(playerRole) => playerRoleUpdateMutation.mutate({ userId: u.id, playerRole })}
+                          >
+                            <SelectTrigger className="w-40" id={`player-role-${u.id}`} data-testid={`select-player-role-${u.id}`}>
+                              <SelectValue placeholder="Seçiniz" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="">Yok</SelectItem>
+                              {PLAYER_ROLES.map((role) => (
+                                <SelectItem key={role} value={role}>
+                                  {role}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                         <Button
                           size="sm"
                           variant={u.isAdmin ? "destructive" : "default"}
@@ -473,6 +519,19 @@ export default function ManagementPanelPage() {
                               Admin Yap
                             </>
                           )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            if (confirm(`${u.username} kullanıcısını silmek istediğinizden emin misiniz?`)) {
+                              deleteUserMutation.mutate(u.id);
+                            }
+                          }}
+                          disabled={deleteUserMutation.isPending}
+                          data-testid={`button-delete-user-${u.id}`}
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>
                       </div>
                     </div>

@@ -374,6 +374,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/management/users/:id/player-role", isSuperAdmin, async (req, res) => {
+    try {
+      const { playerRole } = req.body;
+      
+      const user = await storage.updateUser(req.params.id, { playerRole: playerRole || null });
+      if (!user) {
+        return res.status(404).json({ error: "Kullanıcı bulunamadı" });
+      }
+      const { password, ...userWithoutPassword } = user;
+      return res.json(userWithoutPassword);
+    } catch (error) {
+      return res.status(500).json({ error: "Oyuncu rolü güncellenemedi" });
+    }
+  });
+
   // Staff role routes
   app.post("/api/staff-roles", isAdmin, async (req, res) => {
     try {
