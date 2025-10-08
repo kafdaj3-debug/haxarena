@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Lock, MessageSquare, Calendar, Archive, Lock as LockIcon } from "lucide-react";
+import { Plus, Lock, MessageSquare, Calendar, Archive, Lock as LockIcon, Image as ImageIcon, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -45,6 +45,7 @@ const postSchema = z.object({
   title: z.string().min(5, "Başlık en az 5 karakter olmalıdır"),
   content: z.string().min(10, "İçerik en az 10 karakter olmalıdır"),
   category: z.string().min(1, "Kategori seçiniz"),
+  imageUrl: z.string().optional(),
 });
 
 type PostFormData = z.infer<typeof postSchema>;
@@ -57,6 +58,7 @@ export default function ForumPage() {
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const form = useForm<PostFormData>({
     resolver: zodResolver(postSchema),
@@ -64,6 +66,7 @@ export default function ForumPage() {
       title: "",
       content: "",
       category: "",
+      imageUrl: "",
     },
   });
 
@@ -79,6 +82,33 @@ export default function ForumPage() {
     },
   });
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Hata",
+        description: "Görsel boyutu 5MB'dan küçük olmalıdır",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setImagePreview(base64String);
+      form.setValue("imageUrl", base64String);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    form.setValue("imageUrl", "");
+  };
+
   const createPostMutation = useMutation({
     mutationFn: async (data: PostFormData) => {
       return await apiRequest("POST", "/api/forum-posts", data);
@@ -90,6 +120,7 @@ export default function ForumPage() {
         description: "Konu başarıyla oluşturuldu",
       });
       setDialogOpen(false);
+      setImagePreview(null);
       form.reset();
     },
     onError: () => {
@@ -215,6 +246,55 @@ export default function ForumPage() {
                         </FormItem>
                       )}
                     />
+
+                    <div className="space-y-4">
+                      <div>
+                        <FormLabel>Görsel (Opsiyonel)</FormLabel>
+                        <div className="mt-2">
+                          {imagePreview ? (
+                            <div className="relative inline-block">
+                              <img 
+                                src={imagePreview} 
+                                alt="Preview" 
+                                className="max-w-full h-auto max-h-64 rounded-md"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="absolute top-2 right-2"
+                                onClick={removeImage}
+                                data-testid="button-remove-image"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                                className="max-w-xs"
+                                data-testid="input-post-image"
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                onClick={() => document.querySelector<HTMLInputElement>('[data-testid="input-post-image"]')?.click()}
+                                data-testid="button-upload-image"
+                              >
+                                <ImageIcon className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Maksimum 5MB boyutunda görsel yükleyebilirsiniz
+                        </p>
+                      </div>
+                    </div>
 
                     <div className="flex justify-end gap-2">
                       <Button 

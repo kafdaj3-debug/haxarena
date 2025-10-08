@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Calendar, Archive, Lock as LockIcon, MessageSquare, Trash2 } from "lucide-react";
+import { ArrowLeft, Calendar, Archive, Lock as LockIcon, MessageSquare, Trash2, Quote, Image as ImageIcon, X } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
@@ -14,6 +14,7 @@ import type { ForumPost, ForumReply, User } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 
 const roleColors: Record<string, string> = {
   "Founder": "bg-purple-500/20 text-purple-300 border-purple-500/30",
@@ -34,6 +35,8 @@ export default function ForumPostDetailPage() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const [replyContent, setReplyContent] = useState("");
+  const [replyImageUrl, setReplyImageUrl] = useState<string | null>(null);
+  const [quotedReplyId, setQuotedReplyId] = useState<string | null>(null);
 
   const { data: post, isLoading: postLoading } = useQuery<PostWithUser>({
     queryKey: ["/api/forum-posts", id],
@@ -53,9 +56,34 @@ export default function ForumPostDetailPage() {
     },
   });
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Hata",
+        description: "Görsel boyutu 5MB'dan küçük olmalıdır",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setReplyImageUrl(base64String);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setReplyImageUrl(null);
+  };
+
   const createReplyMutation = useMutation({
-    mutationFn: async (content: string) => {
-      return await apiRequest("POST", `/api/forum-posts/${id}/replies`, { content });
+    mutationFn: async (data: { content: string; imageUrl?: string; quotedReplyId?: string }) => {
+      return await apiRequest("POST", `/api/forum-posts/${id}/replies`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/forum-posts", id, "replies"] });
@@ -65,6 +93,8 @@ export default function ForumPostDetailPage() {
         description: "Cevabınız eklendi",
       });
       setReplyContent("");
+      setReplyImageUrl(null);
+      setQuotedReplyId(null);
     },
     onError: () => {
       toast({
@@ -125,7 +155,11 @@ export default function ForumPostDetailPage() {
       });
       return;
     }
-    createReplyMutation.mutate(replyContent);
+    createReplyMutation.mutate({
+      content: replyContent,
+      imageUrl: replyImageUrl || undefined,
+      quotedReplyId: quotedReplyId || undefined,
+    });
   };
 
   if (postLoading) {
@@ -265,6 +299,16 @@ export default function ForumPostDetailPage() {
               <p className="whitespace-pre-wrap text-muted-foreground" data-testid="text-post-content">
                 {post.content}
               </p>
+              {post.imageUrl && (
+                <div className="mt-4">
+                  <img 
+                    src={post.imageUrl} 
+                    alt="Post image" 
+                    className="max-w-full h-auto rounded-md"
+                    data-testid="img-post-image"
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -283,6 +327,28 @@ export default function ForumPostDetailPage() {
                 <h3 className="text-lg font-semibold">Cevap Yaz</h3>
               </CardHeader>
               <CardContent className="space-y-4">
+                {quotedReplyId && (
+                  <div className="bg-muted p-3 rounded-md relative">
+                    <div className="flex items-start gap-2">
+                      <Quote className="w-4 h-4 mt-1 text-muted-foreground" />
+                      <div className="flex-1">
+                        <p className="text-sm text-muted-foreground">
+                          Alıntı yapılıyor...
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => setQuotedReplyId(null)}
+                        data-testid="button-remove-quote"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 <Textarea 
                   placeholder="Cevabınızı yazın..."
                   rows={4}
@@ -290,6 +356,49 @@ export default function ForumPostDetailPage() {
                   onChange={(e) => setReplyContent(e.target.value)}
                   data-testid="textarea-reply-content"
                 />
+                {replyImageUrl ? (
+                  <div className="relative inline-block">
+                    <img 
+                      src={replyImageUrl} 
+                      alt="Preview" 
+                      className="max-w-full h-auto max-h-48 rounded-md"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2"
+                      onClick={removeImage}
+                      data-testid="button-remove-reply-image"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      id="reply-image-upload"
+                      data-testid="input-reply-image"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById('reply-image-upload')?.click()}
+                      data-testid="button-upload-reply-image"
+                    >
+                      <ImageIcon className="w-4 h-4 mr-2" />
+                      Görsel Ekle
+                    </Button>
+                    <p className="text-xs text-muted-foreground">
+                      Maksimum 5MB
+                    </p>
+                  </div>
+                )}
                 <div className="flex justify-end">
                   <Button 
                     onClick={handleReplySubmit}
@@ -366,9 +475,43 @@ export default function ForumPostDetailPage() {
                     </div>
                   </CardHeader>
                   <CardContent>
+                    {reply.quotedReplyId && (
+                      <div className="bg-muted/50 border-l-4 border-primary/30 pl-4 py-2 mb-3 rounded">
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Quote className="w-3 h-3" />
+                          Bir mesaja yanıt veriyor
+                        </p>
+                      </div>
+                    )}
                     <p className="whitespace-pre-wrap text-muted-foreground" data-testid={`text-reply-content-${reply.id}`}>
                       {reply.content}
                     </p>
+                    {reply.imageUrl && (
+                      <div className="mt-4">
+                        <img 
+                          src={reply.imageUrl} 
+                          alt="Reply image" 
+                          className="max-w-full h-auto rounded-md"
+                          data-testid={`img-reply-image-${reply.id}`}
+                        />
+                      </div>
+                    )}
+                    {user && !post.isLocked && (
+                      <div className="mt-3 pt-3 border-t">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setQuotedReplyId(reply.id);
+                            document.querySelector<HTMLTextAreaElement>('[data-testid="textarea-reply-content"]')?.focus();
+                          }}
+                          data-testid={`button-quote-reply-${reply.id}`}
+                        >
+                          <Quote className="w-4 h-4 mr-2" />
+                          Alıntıla
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))
