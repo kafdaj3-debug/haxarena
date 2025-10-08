@@ -3,11 +3,32 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
 
-async function checkIpBan(req: any, res: any, next: any) {
-  const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-  const cleanIp = Array.isArray(ip) ? ip[0] : ip;
+function normalizeClientIp(req: any): string {
+  let ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   
-  const banned = await storage.getBannedIpByAddress(cleanIp);
+  if (Array.isArray(ip)) {
+    ip = ip[0];
+  }
+  
+  if (typeof ip === 'string') {
+    ip = ip.split(',')[0].trim();
+    
+    if (ip.startsWith('::ffff:')) {
+      ip = ip.substring(7);
+    }
+  }
+  
+  return ip || '';
+}
+
+async function checkIpBan(req: any, res: any, next: any) {
+  const clientIp = normalizeClientIp(req);
+  
+  if (!clientIp) {
+    return next();
+  }
+  
+  const banned = await storage.getBannedIpByAddress(clientIp);
   if (banned) {
     return res.status(403).json({ error: "Bu IP adresi engellenmiştir" });
   }
