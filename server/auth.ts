@@ -15,6 +15,8 @@ declare global {
       isSuperAdmin: boolean;
       isApproved: boolean;
       role: string;
+      isBanned: boolean;
+      isChatMuted: boolean;
     }
   }
 }
@@ -60,6 +62,8 @@ export function setupAuth(app: Express) {
           isSuperAdmin: user.isSuperAdmin,
           isApproved: user.isApproved,
           role: user.role,
+          isBanned: user.isBanned,
+          isChatMuted: user.isChatMuted,
         });
       } catch (err) {
         return done(err);
@@ -84,6 +88,8 @@ export function setupAuth(app: Express) {
         isSuperAdmin: user.isSuperAdmin,
         isApproved: user.isApproved,
         role: user.role,
+        isBanned: user.isBanned,
+        isChatMuted: user.isChatMuted,
       });
     } catch (err) {
       done(err);

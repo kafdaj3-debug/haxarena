@@ -80,7 +80,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // IP ban middleware - tüm route'larda kontrol edilir
   app.use(checkIpBan);
   // Profile routes
-  app.get("/api/profile", isAuthenticated, async (req, res) => {
+  app.get("/api/profile", isAuthenticated, isNotBanned, async (req, res) => {
     try {
       const user = await storage.getUser(req.user!.id);
       if (!user) {
@@ -93,7 +93,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/profile/username", isAuthenticated, async (req, res) => {
+  app.patch("/api/profile/username", isAuthenticated, isNotBanned, async (req, res) => {
     try {
       const { username } = req.body;
       if (!username) {
@@ -117,7 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/profile/password", isAuthenticated, async (req, res) => {
+  app.patch("/api/profile/password", isAuthenticated, isNotBanned, async (req, res) => {
     try {
       const { currentPassword, newPassword } = req.body;
       if (!currentPassword || !newPassword) {
@@ -144,7 +144,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin application routes
-  app.post("/api/applications/admin", isAuthenticated, async (req, res) => {
+  app.post("/api/applications/admin", isAuthenticated, isNotBanned, async (req, res) => {
     try {
       const settings = await storage.getSettings();
       if (!settings.adminApplicationsOpen) {
@@ -200,7 +200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/applications/admin/my", isAuthenticated, async (req, res) => {
+  app.get("/api/applications/admin/my", isAuthenticated, isNotBanned, async (req, res) => {
     try {
       const applications = await storage.getUserAdminApplications(req.user!.id);
       return res.json(applications);
@@ -261,7 +261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Team application routes
-  app.post("/api/applications/team", isAuthenticated, async (req, res) => {
+  app.post("/api/applications/team", isAuthenticated, isNotBanned, async (req, res) => {
     try {
       const settings = await storage.getSettings();
       if (!settings.teamApplicationsOpen) {
@@ -307,7 +307,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/applications/team/my", isAuthenticated, async (req, res) => {
+  app.get("/api/applications/team/my", isAuthenticated, isNotBanned, async (req, res) => {
     try {
       const applications = await storage.getUserTeamApplications(req.user!.id);
       return res.json(applications);
