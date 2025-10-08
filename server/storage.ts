@@ -77,7 +77,7 @@ export interface IStorage {
   
   // Forum post operations
   createForumPost(post: InsertForumPost): Promise<ForumPost>;
-  getForumPosts(category?: string): Promise<(ForumPost & { user: User; replyCount: number })[]>;
+  getForumPosts(category?: string, includeArchived?: boolean): Promise<(ForumPost & { user: User; replyCount: number })[]>;
   getForumPost(id: string): Promise<(ForumPost & { user: User }) | undefined>;
   updateForumPost(id: string, updates: Partial<ForumPost>): Promise<ForumPost | undefined>;
   deleteForumPost(id: string): Promise<void>;
@@ -282,13 +282,28 @@ export class DBStorage implements IStorage {
     return forumPost;
   }
 
-  async getForumPosts(category?: string): Promise<(ForumPost & { user: User; replyCount: number })[]> {
-    const posts = category 
-      ? await db.select().from(forumPosts)
-          .where(eq(forumPosts.category, category))
-          .orderBy(desc(forumPosts.createdAt))
-      : await db.select().from(forumPosts)
-          .orderBy(desc(forumPosts.createdAt));
+  async getForumPosts(category?: string, includeArchived: boolean = false): Promise<(ForumPost & { user: User; replyCount: number })[]> {
+    let posts;
+    
+    if (category) {
+      posts = includeArchived
+        ? await db.select().from(forumPosts)
+            .where(eq(forumPosts.category, category))
+            .orderBy(desc(forumPosts.createdAt))
+        : await db.select().from(forumPosts)
+            .where(eq(forumPosts.category, category))
+            .orderBy(desc(forumPosts.createdAt));
+    } else {
+      posts = includeArchived
+        ? await db.select().from(forumPosts)
+            .orderBy(desc(forumPosts.createdAt))
+        : await db.select().from(forumPosts)
+            .orderBy(desc(forumPosts.createdAt));
+    }
+    
+    if (!includeArchived) {
+      posts = posts.filter(p => !p.isArchived);
+    }
 
     const postsWithUserAndCount = await Promise.all(
       posts.map(async (post) => {

@@ -56,6 +56,26 @@ function isSuperAdmin(req: any, res: any, next: any) {
   return res.status(403).json({ error: "Yetkiniz yok" });
 }
 
+function isNotBanned(req: any, res: any, next: any) {
+  if (!req.isAuthenticated()) {
+    return next();
+  }
+  if (req.user.isBanned) {
+    return res.status(403).json({ error: "Hesabınız yasaklandı. Sebep: " + (req.user.banReason || "Belirtilmemiş") });
+  }
+  return next();
+}
+
+function isNotChatMuted(req: any, res: any, next: any) {
+  if (!req.isAuthenticated()) {
+    return next();
+  }
+  if (req.user.isChatMuted) {
+    return res.status(403).json({ error: "Sohbet yazma izniniz kaldırıldı" });
+  }
+  return next();
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // IP ban middleware - tüm route'larda kontrol edilir
   app.use(checkIpBan);
@@ -535,7 +555,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Forum routes
-  app.post("/api/forum-posts", isAuthenticated, async (req, res) => {
+  app.post("/api/forum-posts", isAuthenticated, isNotBanned, async (req, res) => {
     try {
       const { title, content, category } = req.body;
       const post = await storage.createForumPost({
@@ -553,7 +573,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/forum-posts", async (req, res) => {
     try {
       const category = req.query.category as string | undefined;
-      const posts = await storage.getForumPosts(category);
+      const includeArchived = req.isAuthenticated() && (req.user!.isAdmin || req.user!.isSuperAdmin);
+      const posts = await storage.getForumPosts(category, includeArchived);
       const staffRoles = await storage.getStaffRoles();
       const staffMap = new Map(staffRoles.map(s => [s.name, s.role]));
       
@@ -608,8 +629,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updates.isLocked = isLocked;
       }
       
-      if (typeof isArchived === "boolean" && (isOwner || isAdminUser)) {
-        updates.isArchived = isArchived;
+      if (typeof isArchived === "boolean") {
+        // Arşivden çıkarma sadece yönetim yapabilir
+        if (isArchived === false && post.isArchived) {
+          if (!isAdminUser) {
+            return res.status(403).json({ error: "Arşivden çıkarma yetkiniz yok" });
+          }
+        }
+        // Arşivleme: sahibi veya admin yapabilir
+        if (isArchived === true && (isOwner || isAdminUser)) {
+          updates.isArchived = isArchived;
+        }
+        // Arşivden çıkarma: sadece admin
+        if (isArchived === false && isAdminUser) {
+          updates.isArchived = isArchived;
+        }
       }
 
       const updatedPost = await storage.updateForumPost(req.params.id, updates);
@@ -642,7 +676,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/forum-posts/:id/replies", isAuthenticated, async (req, res) => {
+  app.post("/api/forum-posts/:id/replies", isAuthenticated, isNotBanned, async (req, res) => {
     try {
       const { content } = req.body;
       const reply = await storage.createForumReply({
@@ -702,7 +736,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/chat/messages", isAuthenticated, async (req, res) => {
+  app.post("/api/chat/messages", isAuthenticated, isNotBanned, isNotChatMuted, async (req, res) => {
     try {
       const { message } = req.body;
       if (!message || !message.trim()) {

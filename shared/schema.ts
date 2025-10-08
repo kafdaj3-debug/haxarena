@@ -12,6 +12,10 @@ export const users = pgTable("users", {
   isApproved: boolean("is_approved").notNull().default(false),
   role: text("role").notNull().default("HaxArena Üye"),
   playerRole: text("player_role"),
+  isBanned: boolean("is_banned").notNull().default(false),
+  banReason: text("ban_reason"),
+  isChatMuted: boolean("is_chat_muted").notNull().default(false),
+  lastIpAddress: text("last_ip_address"),
 });
 
 export const adminApplications = pgTable("admin_applications", {

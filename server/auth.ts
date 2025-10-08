@@ -132,10 +132,26 @@ export function setupAuth(app: Express) {
       if (!user) {
         return res.status(401).json({ error: info?.message || "Giriş başarısız" });
       }
-      req.login(user, (err) => {
+      req.login(user, async (err) => {
         if (err) {
           return res.status(500).json({ error: "Giriş yapılamadı" });
         }
+        
+        let ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        if (Array.isArray(ip)) {
+          ip = ip[0];
+        }
+        if (typeof ip === 'string') {
+          ip = ip.split(',')[0].trim();
+          if (ip.startsWith('::ffff:')) {
+            ip = ip.substring(7);
+          }
+        }
+        
+        if (ip && typeof ip === 'string') {
+          await storage.updateUser(user.id, { lastIpAddress: ip });
+        }
+        
         return res.json(user);
       });
     })(req, res, next);
