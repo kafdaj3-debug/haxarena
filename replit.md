@@ -93,7 +93,9 @@ Preferred communication style: Simple, everyday language.
 
 **Community Forum:**
 - Post creation with categories (Genel Sohbet, Takım Başvuruları, Öneriler, Sözlük)
-- Reply system with counts
+- Image upload support for posts and replies (base64, max 5MB)
+- Reply system with counts and quote/reference functionality
+- Quote feature allows users to reference specific replies
 - Post locking and archiving functionality
 - Admin moderation capabilities
 - Role badge display with priority ordering (Admin/Management roles first, then player roles)

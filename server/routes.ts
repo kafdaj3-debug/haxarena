@@ -582,12 +582,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Forum routes
   app.post("/api/forum-posts", isAuthenticated, isNotBanned, async (req, res) => {
     try {
-      const { title, content, category } = req.body;
+      const { title, content, category, imageUrl } = req.body;
       const post = await storage.createForumPost({
         userId: req.user!.id,
         title,
         content,
         category,
+        imageUrl,
       });
       return res.json(post);
     } catch (error) {
@@ -703,11 +704,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/forum-posts/:id/replies", isAuthenticated, isNotBanned, async (req, res) => {
     try {
-      const { content } = req.body;
+      const { content, imageUrl, quotedReplyId } = req.body;
       const reply = await storage.createForumReply({
         postId: req.params.id,
         userId: req.user!.id,
         content,
+        imageUrl,
+        quotedReplyId,
       });
       return res.json(reply);
     } catch (error) {
