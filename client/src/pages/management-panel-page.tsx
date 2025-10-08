@@ -318,6 +318,32 @@ export default function ManagementPanelPage() {
     },
   });
 
+  const banToggleMutation = useMutation({
+    mutationFn: async ({ userId, isBanned, banReason }: { userId: string; isBanned: boolean; banReason: string }) => {
+      return await apiRequest("PATCH", `/api/management/users/${userId}`, { isBanned, banReason });
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Kullanıcı ban durumu güncellendi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/management/users"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Ban durumu güncellenemedi", variant: "destructive" });
+    },
+  });
+
+  const muteToggleMutation = useMutation({
+    mutationFn: async ({ userId, isMuted }: { userId: string; isMuted: boolean }) => {
+      return await apiRequest("PATCH", `/api/management/users/${userId}`, { isChatMuted: isMuted });
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Kullanıcı mute durumu güncellendi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/management/users"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Mute durumu güncellenemedi", variant: "destructive" });
+    },
+  });
+
   if (!user?.isSuperAdmin) {
     return (
       <div className="flex flex-col min-h-screen">
@@ -536,6 +562,22 @@ export default function ManagementPanelPage() {
                           </p>
                         </div>
                       )}
+                      <div className="space-y-2">
+                        <div className="text-sm text-muted-foreground">
+                          <span className="font-medium">Son IP:</span> {u.lastIpAddress || "Bilinmiyor"}
+                        </div>
+                        {u.isBanned && (
+                          <div className="p-2 bg-destructive/10 rounded border border-destructive/30">
+                            <p className="text-sm font-medium text-destructive">Yasaklı</p>
+                            <p className="text-xs text-muted-foreground">Sebep: {u.banReason || "Belirtilmemiş"}</p>
+                          </div>
+                        )}
+                        {u.isChatMuted && (
+                          <div className="p-2 bg-orange-500/10 rounded border border-orange-500/30">
+                            <p className="text-sm font-medium text-orange-600 dark:text-orange-400">Sohbet Susturuldu</p>
+                          </div>
+                        )}
+                      </div>
                       <div className="flex items-center gap-4 flex-wrap">
                         <div className="flex items-center gap-2">
                           <Label htmlFor={`role-${u.id}`} className="text-sm">Rol:</Label>
@@ -595,6 +637,33 @@ export default function ManagementPanelPage() {
                               Admin Yap
                             </>
                           )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={u.isBanned ? "default" : "destructive"}
+                          onClick={() => {
+                            if (u.isBanned) {
+                              banToggleMutation.mutate({ userId: u.id, isBanned: false, banReason: "" });
+                            } else {
+                              const reason = prompt("Ban sebebi:");
+                              if (reason !== null) {
+                                banToggleMutation.mutate({ userId: u.id, isBanned: true, banReason: reason });
+                              }
+                            }
+                          }}
+                          disabled={banToggleMutation.isPending}
+                          data-testid={`button-toggle-ban-${u.id}`}
+                        >
+                          {u.isBanned ? "Ban Kaldır" : "Ban"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={u.isChatMuted ? "default" : "outline"}
+                          onClick={() => muteToggleMutation.mutate({ userId: u.id, isMuted: !u.isChatMuted })}
+                          disabled={muteToggleMutation.isPending}
+                          data-testid={`button-toggle-mute-${u.id}`}
+                        >
+                          {u.isChatMuted ? "Mute Kaldır" : "Mute"}
                         </Button>
                         <Button
                           size="sm"

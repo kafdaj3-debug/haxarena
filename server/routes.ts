@@ -437,6 +437,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/management/users/:id", isSuperAdmin, async (req, res) => {
+    try {
+      const updates: Partial<any> = {};
+      
+      if (typeof req.body.isBanned === "boolean") {
+        updates.isBanned = req.body.isBanned;
+        updates.banReason = req.body.banReason || null;
+      }
+      
+      if (typeof req.body.isChatMuted === "boolean") {
+        updates.isChatMuted = req.body.isChatMuted;
+      }
+      
+      const user = await storage.updateUser(req.params.id, updates);
+      if (!user) {
+        return res.status(404).json({ error: "Kullanıcı bulunamadı" });
+      }
+      
+      const { password, ...userWithoutPassword } = user;
+      return res.json(userWithoutPassword);
+    } catch (error) {
+      return res.status(500).json({ error: "Kullanıcı güncellenemedi" });
+    }
+  });
+
   app.patch("/api/management/users/:id/player-role", isSuperAdmin, async (req, res) => {
     try {
       const { playerRole } = req.body;
