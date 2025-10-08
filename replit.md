@@ -64,7 +64,7 @@ Preferred communication style: Simple, everyday language.
 - WebSocket connection support via `@neondatabase/serverless`
 
 **Schema Design:**
-- Users table: id (UUID), username, email, password (hashed), isAdmin flag
+- Users table: id (UUID), username, email, password (hashed), isAdmin flag, isBanned, banReason, isChatMuted, lastIpAddress
 - All fields enforce uniqueness and NOT NULL constraints where appropriate
 - Zod schemas for runtime validation via `drizzle-zod`
 
@@ -112,6 +112,11 @@ Preferred communication style: Simple, everyday language.
 - Staff hierarchy management with 7 role levels (Founder → Arena Admin)
 - User registration approval workflow
 - Content moderation tools
+- User ban/mute system with reason tracking
+  - Ban functionality blocks access to all protected routes (profile, applications, forum, chat)
+  - Chat mute functionality prevents sending messages while allowing other interactions
+  - IP address tracking and display for security monitoring
+  - Ban reason storage and display in management interface
 - User deletion with complete cascade handling (removes all forum posts, replies, applications, notifications, and chat messages)
 - Password viewing feature (restricted to super admin/management only)
 - Admin application "about yourself" field display in management interface
