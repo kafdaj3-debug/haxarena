@@ -73,9 +73,10 @@ Preferred communication style: Simple, everyday language.
 - Production: Automated file-based migrations on startup
   - Migration files stored in `/migrations` directory (must be present in deployment)
   - Server runs migrations automatically on production startup using drizzle-orm migrate()
-  - Path: `dist/index.js` accesses migrations via `../migrations` from project root
+  - Path resolution: Tries multiple paths (../migrations, ./migrations, cwd/migrations) to ensure compatibility
   - Idempotent error handling: Gracefully skips already-applied migrations
   - Aborts on genuine migration failures to prevent incomplete schema
+  - Enhanced logging for debugging migration path resolution
 
 **Session Management:**
 - Development: MemoryStore for simplicity
@@ -131,6 +132,7 @@ Preferred communication style: Simple, everyday language.
   - Chat mute functionality prevents sending messages while allowing other interactions
   - IP address tracking and display for security monitoring
   - Ban reason storage and display in management interface
+  - IP ban check middleware with graceful degradation (tolerates missing table during initial deployment)
 - User deletion with complete cascade handling (removes all forum posts, replies, applications, notifications, and chat messages)
 - Password viewing feature (restricted to super admin/management only)
 - Admin application "about yourself" field display in management interface
