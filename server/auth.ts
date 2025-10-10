@@ -3,12 +3,14 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
+import MemoryStore from "memorystore";
 import bcrypt from "bcrypt";
 import { storage } from "./storage";
 import type { User } from "@shared/schema";
-import { db } from "./db";
+import { db, pool } from "./db";
 
 const PgSession = connectPgSimple(session);
+const MemoryStoreSession = MemoryStore(session);
 
 declare global {
   namespace Express {
@@ -27,12 +29,31 @@ declare global {
 
 export function setupAuth(app: Express) {
   // Configure session store based on environment
-  const sessionStore = process.env.NODE_ENV === "production" 
-    ? new PgSession({
-        conString: process.env.DATABASE_URL,
-        createTableIfMissing: true,
-      })
-    : undefined; // Use MemoryStore in development for simplicity
+  let sessionStore;
+  
+  if (process.env.NODE_ENV === "production") {
+    // Production: Use PostgreSQL session store with existing pool
+    // This reuses the same connection pool as Drizzle (already has SSL configured)
+    sessionStore = new PgSession({
+      pool: pool as any, // Type assertion: Neon Pool is compatible with pg Pool
+      createTableIfMissing: true,
+      tableName: 'session'
+    });
+    
+    // Handle async connection errors
+    sessionStore.on?.('error', (err: Error) => {
+      console.error("⚠️  Session store error:", err);
+      // Session store errors are logged but don't crash the app
+      // Users will need to re-authenticate if sessions are lost
+    });
+    
+    console.log("✓ Production session store: PostgreSQL (connect-pg-simple with Neon pool)");
+  } else {
+    // Development: Use MemoryStore for simplicity
+    sessionStore = new MemoryStoreSession({
+      checkPeriod: 86400000 // Prune expired entries every 24h
+    });
+  }
 
   app.use(
     session({
