@@ -841,7 +841,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Mesaj boş olamaz" });
       }
 
-      // Rate limiting: 5 saniye (Admin, Yönetim ve VIP'ler hariç)
+      // Rate limiting: 3 saniye (Admin, Yönetim ve VIP'ler hariç)
       const currentUser = await storage.getUser(req.user!.id);
       const isExemptFromRateLimit = currentUser?.isAdmin || 
                                      currentUser?.role?.includes('VIP');
@@ -851,8 +851,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const now = Date.now();
         const lastMessageTime = userLastMessageTime.get(userId) || 0;
         
-        if (now - lastMessageTime < 5000) {
-          const remainingSeconds = Math.ceil((5000 - (now - lastMessageTime)) / 1000);
+        if (now - lastMessageTime < 3000) {
+          const remainingSeconds = Math.ceil((3000 - (now - lastMessageTime)) / 1000);
           return res.status(429).json({ 
             error: `Lütfen ${remainingSeconds} saniye bekleyin` 
           });
