@@ -137,12 +137,16 @@ export function setupAuth(app: Express) {
     try {
       const { username, password } = req.body;
 
+      console.log("📝 REGISTER attempt:", { username, hasPassword: !!password });
+
       if (!username || !password) {
+        console.log("⚠️  REGISTER validation failed: missing credentials");
         return res.status(400).json({ error: "Kullanıcı adı ve şifre gereklidir" });
       }
 
       const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
+        console.log("⚠️  REGISTER failed: username already exists:", username);
         return res.status(400).json({ error: "Bu kullanıcı adı zaten kullanılıyor" });
       }
 
@@ -153,6 +157,8 @@ export function setupAuth(app: Express) {
         password: hashedPassword,
       });
 
+      console.log("✅ REGISTER success:", user.username);
+      
       return res.json({
         id: user.id,
         username: user.username,
@@ -162,7 +168,9 @@ export function setupAuth(app: Express) {
         role: user.role,
       });
     } catch (error) {
-      console.error("Register error:", error);
+      console.error("❌ REGISTER ERROR:", error);
+      console.error("Error details:", error instanceof Error ? error.message : String(error));
+      console.error("Error stack:", error instanceof Error ? error.stack : "No stack");
       return res.status(500).json({ error: "Kayıt başarısız" });
     }
   });
@@ -170,13 +178,17 @@ export function setupAuth(app: Express) {
   app.post("/api/auth/login", (req, res, next) => {
     passport.authenticate("local", (err: any, user: Express.User | false, info: any) => {
       if (err) {
+        console.error("❌ LOGIN ERROR:", err);
+        console.error("Error stack:", err.stack);
         return res.status(500).json({ error: "Sunucu hatası" });
       }
       if (!user) {
+        console.log("⚠️  LOGIN FAILED:", info?.message);
         return res.status(401).json({ error: info?.message || "Giriş başarısız" });
       }
       req.login(user, async (err) => {
         if (err) {
+          console.error("❌ SESSION LOGIN ERROR:", err);
           return res.status(500).json({ error: "Giriş yapılamadı" });
         }
         
