@@ -1,0 +1,220 @@
+2025-10-10 17:04:02.67
+fafd9119
+User
+length: 111,
+2025-10-10 17:04:02.67
+fafd9119
+User
+severity: 'ERROR',
+2025-10-10 17:04:02.67
+fafd9119
+User
+code: '42703',
+2025-10-10 17:04:02.67
+fafd9119
+User
+detail: undefined,
+2025-10-10 17:04:02.67
+fafd9119
+User
+hint: undefined,
+2025-10-10 17:04:02.67
+fafd9119
+User
+position: '68',
+2025-10-10 17:04:02.67
+fafd9119
+User
+internalPosition: undefined,
+2025-10-10 17:04:02.67
+fafd9119
+User
+internalQuery: undefined,
+2025-10-10 17:04:02.67
+fafd9119
+User
+where: undefined,
+2025-10-10 17:04:02.67
+fafd9119
+User
+schema: undefined,
+2025-10-10 17:04:02.67
+fafd9119
+User
+table: undefined,
+2025-10-10 17:04:02.67
+fafd9119
+User
+column: undefined,
+2025-10-10 17:04:02.67
+fafd9119
+User
+dataType: undefined,
+2025-10-10 17:04:02.67
+fafd9119
+User
+constraint: undefined,
+2025-10-10 17:04:02.67
+fafd9119
+User
+file: 'parse_relation.c',
+2025-10-10 17:04:02.67
+fafd9119
+User
+line: '3722',
+2025-10-10 17:04:02.67
+fafd9119
+User
+routine: 'errorMissingColumn'
+2025-10-10 17:04:02.67
+fafd9119
+User
+}
+2025-10-10 17:04:02.67
+fafd9119
+User
+Error details: column "is_approved" does not exist
+2025-10-10 17:04:02.67
+fafd9119
+User
+Error stack: error: column "is_approved" does not exist
+2025-10-10 17:04:02.67
+fafd9119
+User
+at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-10-10 17:04:02.67
+fafd9119
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-10-10 17:04:02.67
+fafd9119
+User
+at async NeonPreparedQuery.execute (file:///home/runner/workspace/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-10-10 17:04:02.67
+fafd9119
+User
+at async DBStorage.getUserByUsername (file:///home/runner/workspace/dist/index.js:218:20)
+2025-10-10 17:04:02.67
+fafd9119
+User
+at async file:///home/runner/workspace/dist/index.js:1434:28
+2025-10-10 17:04:29.27
+fafd9119
+User
+❌ LOGIN ERROR: error: column "is_approved" does not exist
+2025-10-10 17:04:29.27
+fafd9119
+User
+at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-10-10 17:04:29.27
+fafd9119
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-10-10 17:04:29.27
+fafd9119
+User
+at async NeonPreparedQuery.execute (file:///home/runner/workspace/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-10-10 17:04:29.27
+fafd9119
+User
+at async DBStorage.getUserByUsername (file:///home/runner/workspace/dist/index.js:218:20)
+2025-10-10 17:04:29.27
+fafd9119
+User
+at async Strategy._verify (file:///home/runner/workspace/dist/index.js:1377:22) {
+2025-10-10 17:04:29.27
+fafd9119
+User
+length: 111,
+2025-10-10 17:04:29.27
+fafd9119
+User
+severity: 'ERROR',
+2025-10-10 17:04:29.27
+fafd9119
+User
+code: '42703',
+2025-10-10 17:04:29.27
+fafd9119
+User
+detail: undefined,
+2025-10-10 17:04:29.27
+fafd9119
+User
+hint: undefined,
+2025-10-10 17:04:29.27
+fafd9119
+User
+position: '68',
+2025-10-10 17:04:29.27
+fafd9119
+User
+internalPosition: undefined,
+2025-10-10 17:04:29.27
+fafd9119
+User
+internalQuery: undefined,
+2025-10-10 17:04:29.27
+fafd9119
+User
+where: undefined,
+2025-10-10 17:04:29.27
+fafd9119
+User
+schema: undefined,
+2025-10-10 17:04:29.27
+fafd9119
+User
+table: undefined,
+2025-10-10 17:04:29.27
+fafd9119
+User
+column: undefined,
+2025-10-10 17:04:29.27
+fafd9119
+User
+dataType: undefined,
+2025-10-10 17:04:29.27
+fafd9119
+User
+constraint: undefined,
+2025-10-10 17:04:29.27
+fafd9119
+User
+file: 'parse_relation.c',
+2025-10-10 17:04:29.27
+fafd9119
+User
+line: '3722',
+2025-10-10 17:04:29.27
+fafd9119
+User
+routine: 'errorMissingColumn'
+2025-10-10 17:04:29.27
+fafd9119
+User
+}
+2025-10-10 17:04:29.27
+fafd9119
+User
+Error stack: error: column "is_approved" does not exist
+2025-10-10 17:04:29.27
+fafd9119
+User
+at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-10-10 17:04:29.27
+fafd9119
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-10-10 17:04:29.27
+fafd9119
+User
+at async NeonPreparedQuery.execute (file:///home/runner/workspace/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-10-10 17:04:29.27
+fafd9119
+User
+at async DBStorage.getUserByUsername (file:///home/runner/workspace/dist/index.js:218:20)
+2025-10-10 17:04:29.27
+fafd9119
+User
+at async Strategy._verify (file:///home/runner/workspace/dist/index.js:1377:22)

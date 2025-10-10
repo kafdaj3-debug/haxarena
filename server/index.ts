@@ -106,15 +106,33 @@ app.use((req, res, next) => {
       }
     }
 
-    // Fix: Ensure is_super_admin column exists (production hotfix)
+    // Fix: Ensure all required columns exist (production hotfix)
     try {
-      log("Checking database schema integrity...");
-      await db.execute(sql`
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS is_super_admin boolean DEFAULT false NOT NULL;
-      `);
-      log("✓ Database schema verified and patched if needed");
+      log("Patching production database schema...");
+      
+      // Add each column separately (PostgreSQL requires separate statements)
+      const patches = [
+        sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_super_admin boolean DEFAULT false NOT NULL`,
+        sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_approved boolean DEFAULT false NOT NULL`,
+        sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS role text DEFAULT 'HaxArena Üye' NOT NULL`,
+        sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS player_role text`,
+        sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned boolean DEFAULT false NOT NULL`,
+        sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS ban_reason text`,
+        sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_chat_muted boolean DEFAULT false NOT NULL`,
+        sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_ip_address text`,
+      ];
+      
+      for (const patch of patches) {
+        try {
+          await db.execute(patch);
+        } catch (e) {
+          // Ignore "column already exists" errors
+        }
+      }
+      
+      log("✓ Production database schema fully patched");
     } catch (error) {
-      console.error("⚠️  Schema patch failed (non-critical):", error);
+      console.error("⚠️  Schema patch failed:", error);
     }
   }
 
