@@ -55,6 +55,13 @@ function isAuthenticated(req: any, res: any, next: any) {
 }
 
 function isAdmin(req: any, res: any, next: any) {
+  console.log("🔐 isAdmin check:", {
+    isAuthenticated: req.isAuthenticated(),
+    user: req.user,
+    isAdmin: req.user?.isAdmin,
+    isSuperAdmin: req.user?.isSuperAdmin
+  });
+  
   if (req.isAuthenticated() && (req.user.isAdmin || req.user.isSuperAdmin)) {
     return next();
   }

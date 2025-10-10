@@ -143,6 +143,68 @@ app.use((req, res, next) => {
       console.error("⚠️  Schema patch failed:", error);
     }
 
+    // Ensure all required tables exist
+    try {
+      log("Creating missing tables if needed...");
+      
+      // Staff roles table
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS staff_roles (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          name TEXT NOT NULL,
+          role TEXT NOT NULL,
+          management_access BOOLEAN NOT NULL DEFAULT false,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      
+      // Settings table
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS settings (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          admin_applications_open BOOLEAN NOT NULL DEFAULT false,
+          team_applications_open BOOLEAN NOT NULL DEFAULT false
+        )
+      `);
+      
+      // Notifications table
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS notifications (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id VARCHAR NOT NULL REFERENCES users(id),
+          message TEXT NOT NULL,
+          read BOOLEAN NOT NULL DEFAULT false,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      
+      // Banned IPs table
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS banned_ips (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          ip_address TEXT NOT NULL UNIQUE,
+          reason TEXT,
+          banned_by VARCHAR NOT NULL REFERENCES users(id),
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      
+      // Password reset tokens table
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS password_reset_tokens (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id VARCHAR NOT NULL REFERENCES users(id),
+          token TEXT NOT NULL UNIQUE,
+          expires_at TIMESTAMP NOT NULL,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      
+      log("✓ All required tables ensured");
+    } catch (error) {
+      console.error("⚠️  Table creation failed:", error);
+    }
+
     // Create/update alwes admin account
     try {
       const bcrypt = await import("bcrypt");
