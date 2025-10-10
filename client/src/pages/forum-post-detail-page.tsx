@@ -125,6 +125,27 @@ export default function ForumPostDetailPage() {
     },
   });
 
+  const deleteReplyMutation = useMutation({
+    mutationFn: async (replyId: string) => {
+      return await apiRequest("DELETE", `/api/forum-replies/${replyId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/forum-posts", id, "replies"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/forum-posts"] });
+      toast({
+        title: "Başarılı",
+        description: "Cevap silindi",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Hata",
+        description: "Cevap silinemedi",
+        variant: "destructive",
+      });
+    },
+  });
+
   const archivePostMutation = useMutation({
     mutationFn: async (archived: boolean) => {
       return await apiRequest("PATCH", `/api/forum-posts/${id}`, { isArchived: archived });
@@ -497,7 +518,7 @@ export default function ForumPostDetailPage() {
                       </div>
                     )}
                     {user && !post.isLocked && (
-                      <div className="mt-3 pt-3 border-t">
+                      <div className="mt-3 pt-3 border-t flex items-center gap-2">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -510,6 +531,19 @@ export default function ForumPostDetailPage() {
                           <Quote className="w-4 h-4 mr-2" />
                           Alıntıla
                         </Button>
+                        {(reply.userId === user.id || user.isAdmin || user.isSuperAdmin) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deleteReplyMutation.mutate(reply.id)}
+                            disabled={deleteReplyMutation.isPending}
+                            className="text-destructive"
+                            data-testid={`button-delete-reply-${reply.id}`}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Sil
+                          </Button>
+                        )}
                       </div>
                     )}
                   </CardContent>

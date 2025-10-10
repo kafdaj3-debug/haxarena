@@ -50,6 +50,18 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Ensure required columns exist (development & production)
+  try {
+    // Add last_username_change column if missing
+    await db.execute(sql`
+      ALTER TABLE users 
+      ADD COLUMN IF NOT EXISTS last_username_change timestamp
+    `);
+    log("Database schema check completed");
+  } catch (error: any) {
+    log("Database schema check warning: " + error.message);
+  }
+
   // Run database migrations on startup (production deployment)
   if (process.env.NODE_ENV === "production") {
     try {

@@ -85,6 +85,7 @@ export interface IStorage {
   // Forum reply operations
   createForumReply(reply: InsertForumReply): Promise<ForumReply>;
   getForumReplies(postId: string): Promise<(ForumReply & { user: User })[]>;
+  getForumReply(id: string): Promise<(ForumReply & { user: User }) | undefined>;
   deleteForumReply(id: string): Promise<void>;
   
   // Chat message operations
@@ -355,6 +356,14 @@ export class DBStorage implements IStorage {
     );
 
     return repliesWithUser;
+  }
+
+  async getForumReply(id: string): Promise<(ForumReply & { user: User }) | undefined> {
+    const [reply] = await db.select().from(forumReplies).where(eq(forumReplies.id, id)).limit(1);
+    if (!reply) return undefined;
+
+    const [user] = await db.select().from(users).where(eq(users.id, reply.userId)).limit(1);
+    return { ...reply, user };
   }
 
   async deleteForumReply(id: string): Promise<void> {

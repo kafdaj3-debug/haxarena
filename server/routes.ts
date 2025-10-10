@@ -791,8 +791,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/forum-replies/:id", isAdmin, async (req, res) => {
+  app.delete("/api/forum-replies/:id", isAuthenticated, async (req, res) => {
     try {
+      const reply = await storage.getForumReply(req.params.id);
+      
+      if (!reply) {
+        return res.status(404).json({ error: "Cevap bulunamadı" });
+      }
+      
+      // Reply sahibi veya admin silebilir
+      const isOwner = reply.userId === req.user!.id;
+      const isAdminUser = req.user!.isAdmin || req.user!.isSuperAdmin;
+      
+      if (!isOwner && !isAdminUser) {
+        return res.status(403).json({ error: "Bu cevabı silme yetkiniz yok" });
+      }
+      
       await storage.deleteForumReply(req.params.id);
       return res.json({ message: "Cevap silindi" });
     } catch (error) {
