@@ -134,6 +134,9 @@ Preferred communication style: Simple, everyday language.
 **Admin Panel:**
 - Staff hierarchy management with 7 role levels (Founder → Arena Admin)
 - User registration approval workflow
+  - PATCH /api/management/users/:id/approve - Approve pending users
+  - PATCH /api/management/users/:id/reject - Reject and delete pending users
+  - Self-protection: Admin cannot approve/reject their own account
 - Content moderation tools
 - User ban/mute system with reason tracking
   - Ban functionality blocks access to all protected routes (profile, applications, forum, chat)
