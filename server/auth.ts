@@ -63,7 +63,9 @@ export function setupAuth(app: Express) {
       saveUninitialized: false,
       cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-        secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+        httpOnly: true, // Prevent XSS attacks
+        secure: process.env.NODE_ENV === "production", // HTTPS only in production (Replit auto-provides HTTPS)
+        sameSite: "lax", // CSRF protection - same-site requests allowed
       },
     })
   );
