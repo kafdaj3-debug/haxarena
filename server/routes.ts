@@ -402,6 +402,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/management/users/:id/reject", isSuperAdmin, async (req, res) => {
+    try {
+      // Reddetme işlemi: Kullanıcıyı sil
+      if (req.params.id === req.user!.id) {
+        return res.status(400).json({ error: "Kendi hesabınızı reddedemezsiniz" });
+      }
+      await storage.deleteUser(req.params.id);
+      return res.json({ message: "Kullanıcı reddedildi ve silindi" });
+    } catch (error) {
+      return res.status(500).json({ error: "Kullanıcı reddedilemedi" });
+    }
+  });
+
   app.delete("/api/management/users/:id", isSuperAdmin, async (req, res) => {
     try {
       // Kullanıcı kendi hesabını silemez

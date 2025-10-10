@@ -92,7 +92,7 @@ export default function ManagementPanelPage() {
 
   const rejectMutation = useMutation({
     mutationFn: async (userId: string) => {
-      return await apiRequest("DELETE", `/api/management/users/${userId}`, {});
+      return await apiRequest("PATCH", `/api/management/users/${userId}/reject`, {});
     },
     onSuccess: () => {
       toast({ title: "Başarılı", description: "Kullanıcı reddedildi" });
