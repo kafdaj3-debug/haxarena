@@ -57,6 +57,11 @@ app.use((req, res, next) => {
       ALTER TABLE users 
       ADD COLUMN IF NOT EXISTS last_username_change timestamp
     `);
+    // Add created_at column if missing
+    await db.execute(sql`
+      ALTER TABLE users 
+      ADD COLUMN IF NOT EXISTS created_at timestamp DEFAULT NOW()
+    `);
     log("Database schema check completed");
   } catch (error: any) {
     log("Database schema check warning: " + error.message);

@@ -1001,6 +1001,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Recent users route (public)
+  app.get("/api/users/recent", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const users = await storage.getRecentUsers(limit);
+      // Şifreleri gizle
+      const safeUsers = users.map(u => ({
+        id: u.id,
+        username: u.username,
+        role: u.role,
+        playerRole: u.playerRole,
+        createdAt: u.createdAt,
+      }));
+      return res.json(safeUsers);
+    } catch (error) {
+      return res.status(500).json({ error: "Kullanıcılar yüklenemedi" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

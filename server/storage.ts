@@ -44,6 +44,7 @@ export interface IStorage {
   updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
   deleteUser(id: string): Promise<void>;
   getAllUsers(): Promise<User[]>;
+  getRecentUsers(limit?: number): Promise<User[]>;
   
   // Admin application operations
   createAdminApplication(app: InsertAdminApplication): Promise<AdminApplication>;
@@ -143,6 +144,13 @@ export class DBStorage implements IStorage {
 
   async getAllUsers(): Promise<User[]> {
     return await db.select().from(users);
+  }
+
+  async getRecentUsers(limit: number = 10): Promise<User[]> {
+    return await db.select()
+      .from(users)
+      .orderBy(desc(users.createdAt))
+      .limit(limit);
   }
 
   // Admin application operations

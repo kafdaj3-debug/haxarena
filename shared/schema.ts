@@ -17,6 +17,7 @@ export const users = pgTable("users", {
   isChatMuted: boolean("is_chat_muted").notNull().default(false),
   lastIpAddress: text("last_ip_address"),
   lastUsernameChange: timestamp("last_username_change"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const adminApplications = pgTable("admin_applications", {
@@ -123,6 +124,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
   isSuperAdmin: true,
   isApproved: true,
   role: true,
+  createdAt: true,
 });
 
 export const insertAdminApplicationSchema = createInsertSchema(adminApplications).omit({
