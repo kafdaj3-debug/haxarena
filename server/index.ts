@@ -2,19 +2,6 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { setupAuth } from "./auth";
-import { execSync } from "child_process";
-
-// Run database migrations on startup (production deployment)
-if (process.env.NODE_ENV === "production") {
-  try {
-    log("Running database migrations...");
-    execSync("drizzle-kit push --force", { stdio: "inherit" });
-    log("Database migrations completed successfully");
-  } catch (error) {
-    log("Warning: Database migration failed, continuing startup...");
-    console.error(error);
-  }
-}
 
 const app = express();
 app.set('trust proxy', true);
