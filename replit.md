@@ -85,9 +85,14 @@ Preferred communication style: Simple, everyday language.
   - Type assertion bridges Neon Pool with connect-pg-simple
   - Auto-creates session table on startup
   - Async error event listener for runtime connection monitoring
-  - Secure cookies enabled in production
+  - Secure cookies with security flags:
+    - httpOnly: true (XSS protection)
+    - secure: true in production (HTTPS only)
+    - sameSite: "lax" (CSRF protection)
+    - maxAge: 30 days
+  - Trust proxy: 1 (Replit HTTPS termination)
   - Prevents memory leaks in Autoscale deployments
-  - Fixed: Production deployment SSL configuration resolved (October 2025)
+  - Fixed: Production deployment SSL and cookie configuration resolved (October 2025)
 
 ### Application Features
 
