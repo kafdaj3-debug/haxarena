@@ -147,13 +147,39 @@ app.use((req, res, next) => {
     try {
       log("Creating missing tables if needed...");
       
-      // Staff roles table
+      // Admin applications table
       await db.execute(sql`
-        CREATE TABLE IF NOT EXISTS staff_roles (
+        CREATE TABLE IF NOT EXISTS admin_applications (
           id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id VARCHAR NOT NULL REFERENCES users(id),
           name TEXT NOT NULL,
-          role TEXT NOT NULL,
-          management_access BOOLEAN NOT NULL DEFAULT false,
+          age TEXT NOT NULL,
+          game_nick TEXT NOT NULL,
+          discord_nick TEXT NOT NULL,
+          play_duration TEXT NOT NULL,
+          active_servers TEXT NOT NULL,
+          previous_experience TEXT NOT NULL,
+          daily_hours TEXT NOT NULL,
+          active_time_zones TEXT NOT NULL,
+          about_yourself TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'pending',
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      
+      // Team applications table
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS team_applications (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id VARCHAR NOT NULL REFERENCES users(id),
+          team_name TEXT NOT NULL,
+          team_logo TEXT,
+          description TEXT NOT NULL,
+          captain_1 TEXT,
+          captain_2 TEXT,
+          vice_captain TEXT,
+          players TEXT[],
+          status TEXT NOT NULL DEFAULT 'pending',
           created_at TIMESTAMP NOT NULL DEFAULT NOW()
         )
       `);
@@ -167,6 +193,17 @@ app.use((req, res, next) => {
         )
       `);
       
+      // Staff roles table
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS staff_roles (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          name TEXT NOT NULL,
+          role TEXT NOT NULL,
+          management_access BOOLEAN NOT NULL DEFAULT false,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      
       // Notifications table
       await db.execute(sql`
         CREATE TABLE IF NOT EXISTS notifications (
@@ -174,6 +211,44 @@ app.use((req, res, next) => {
           user_id VARCHAR NOT NULL REFERENCES users(id),
           message TEXT NOT NULL,
           read BOOLEAN NOT NULL DEFAULT false,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      
+      // Forum posts table
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS forum_posts (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id VARCHAR NOT NULL REFERENCES users(id),
+          title TEXT NOT NULL,
+          content TEXT NOT NULL,
+          category TEXT NOT NULL,
+          image_url TEXT,
+          is_locked BOOLEAN NOT NULL DEFAULT false,
+          is_archived BOOLEAN NOT NULL DEFAULT false,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      
+      // Forum replies table
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS forum_replies (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          post_id VARCHAR NOT NULL REFERENCES forum_posts(id) ON DELETE CASCADE,
+          user_id VARCHAR NOT NULL REFERENCES users(id),
+          content TEXT NOT NULL,
+          image_url TEXT,
+          quoted_reply_id VARCHAR,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      
+      // Chat messages table
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS chat_messages (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id VARCHAR NOT NULL REFERENCES users(id),
+          message TEXT NOT NULL,
           created_at TIMESTAMP NOT NULL DEFAULT NOW()
         )
       `);
