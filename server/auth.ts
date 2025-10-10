@@ -12,6 +12,9 @@ import { db, pool } from "./db";
 const PgSession = connectPgSimple(session);
 const MemoryStoreSession = MemoryStore(session);
 
+// IP-based registration rate limiting (30 minutes)
+const registrationAttempts = new Map<string, number>();
+
 declare global {
   namespace Express {
     interface User {
@@ -159,6 +162,19 @@ export function setupAuth(app: Express) {
 
       console.log("✅ REGISTER success:", user.username);
       
+      // IP-based rate limiting: Sadece başarılı kayıttan sonra IP'yi kaydet
+      let ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      if (Array.isArray(ip)) {
+        ip = ip[0];
+      }
+      if (typeof ip === 'string') {
+        ip = ip.split(',')[0].trim();
+        if (ip.startsWith('::ffff:')) {
+          ip = ip.substring(7);
+        }
+        registrationAttempts.set(ip, Date.now());
+      }
+      
       return res.json({
         id: user.id,
         username: user.username,
@@ -186,6 +202,16 @@ export function setupAuth(app: Express) {
         console.log("⚠️  LOGIN FAILED:", info?.message);
         return res.status(401).json({ error: info?.message || "Giriş başarısız" });
       }
+      
+      // Ban kontrolü
+      const userWithBan = user as any;
+      if (userWithBan.isBanned) {
+        const banMessage = userWithBan.banReason 
+          ? `Hesabınız yasaklandı. Sebep: ${userWithBan.banReason}` 
+          : "Hesabınız yasaklandı. Destek ekibi ile iletişime geçin.";
+        return res.status(403).json({ error: banMessage });
+      }
+      
       req.login(user, async (err) => {
         if (err) {
           console.error("❌ SESSION LOGIN ERROR:", err);

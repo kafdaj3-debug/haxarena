@@ -59,7 +59,7 @@ export default function AdminStaffPage() {
         </div>
       </main>
 
-      <Footer onlineCount={42} />
+      <Footer />
     </div>
   );
 }

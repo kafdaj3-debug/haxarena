@@ -76,7 +76,7 @@ export default function VIPPage() {
         </div>
       </main>
 
-      <Footer onlineCount={42} />
+      <Footer />
     </div>
   );
 }

@@ -69,7 +69,7 @@ export default function ActiveRoomsPage() {
         </div>
       </main>
 
-      <Footer onlineCount={42} />
+      <Footer />
     </div>
   );
 }

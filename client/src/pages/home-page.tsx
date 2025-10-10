@@ -69,45 +69,53 @@ export default function HomePage() {
         <section className="py-16 bg-background">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-              <Card className="hover-elevate overflow-visible">
-                <CardHeader>
-                  <Trophy className="w-10 h-10 text-primary mb-2" />
-                  <CardTitle>Aktif Lig</CardTitle>
-                  <CardDescription>
-                    Profesyonel lig sistemi ve istatistikler
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+              <Link href="/lig" data-testid="link-feature-league">
+                <Card className="hover-elevate active-elevate-2 overflow-visible cursor-pointer">
+                  <CardHeader>
+                    <Trophy className="w-10 h-10 text-primary mb-2" />
+                    <CardTitle>Aktif Lig</CardTitle>
+                    <CardDescription>
+                      Profesyonel lig sistemi ve istatistikler
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
 
-              <Card className="hover-elevate overflow-visible">
-                <CardHeader>
-                  <Users className="w-10 h-10 text-primary mb-2" />
-                  <CardTitle>Topluluk</CardTitle>
-                  <CardDescription>
-                    Aktif ve dostane oyuncu topluluğu
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+              <Link href="/admin-kadrosu" data-testid="link-feature-community">
+                <Card className="hover-elevate active-elevate-2 overflow-visible cursor-pointer">
+                  <CardHeader>
+                    <Users className="w-10 h-10 text-primary mb-2" />
+                    <CardTitle>Topluluk</CardTitle>
+                    <CardDescription>
+                      Aktif ve dostane oyuncu topluluğu
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
 
-              <Card className="hover-elevate overflow-visible">
-                <CardHeader>
-                  <Shield className="w-10 h-10 text-primary mb-2" />
-                  <CardTitle>VIP Sistem</CardTitle>
-                  <CardDescription>
-                    Özel özellikler ve ayrıcalıklar
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+              <Link href="/vip" data-testid="link-feature-vip">
+                <Card className="hover-elevate active-elevate-2 overflow-visible cursor-pointer">
+                  <CardHeader>
+                    <Shield className="w-10 h-10 text-primary mb-2" />
+                    <CardTitle>VIP Sistem</CardTitle>
+                    <CardDescription>
+                      Özel özellikler ve ayrıcalıklar
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
 
-              <Card className="hover-elevate overflow-visible">
-                <CardHeader>
-                  <MessageSquare className="w-10 h-10 text-primary mb-2" />
-                  <CardTitle>Forum</CardTitle>
-                  <CardDescription>
-                    Aktif tartışma ve paylaşım platformu
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+              <Link href="/forum" data-testid="link-feature-forum">
+                <Card className="hover-elevate active-elevate-2 overflow-visible cursor-pointer">
+                  <CardHeader>
+                    <MessageSquare className="w-10 h-10 text-primary mb-2" />
+                    <CardTitle>Forum</CardTitle>
+                    <CardDescription>
+                      Aktif tartışma ve paylaşım platformu
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
             </div>
 
             <div className="mb-12 grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -163,7 +171,7 @@ export default function HomePage() {
         </section>
       </main>
 
-      <Footer onlineCount={42} />
+      <Footer />
     </div>
   );
 }

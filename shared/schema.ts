@@ -16,6 +16,7 @@ export const users = pgTable("users", {
   banReason: text("ban_reason"),
   isChatMuted: boolean("is_chat_muted").notNull().default(false),
   lastIpAddress: text("last_ip_address"),
+  lastUsernameChange: timestamp("last_username_change"),
 });
 
 export const adminApplications = pgTable("admin_applications", {

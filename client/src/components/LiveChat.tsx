@@ -49,15 +49,13 @@ export default function LiveChat() {
       const match = errorMessage.match(/Lütfen (\d+) saniye bekleyin/);
       if (match) {
         toast({
-          title: "Çok hızlı!",
+          title: "Yavaş ol!",
           description: errorMessage.split(': ')[1],
-          variant: "destructive",
         });
       } else {
         toast({
-          title: "Hata",
+          title: "Uyarı",
           description: "Mesaj gönderilemedi",
-          variant: "destructive",
         });
       }
     },

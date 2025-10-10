@@ -171,7 +171,7 @@ export default function ForumPostDetailPage() {
             <p className="text-center text-muted-foreground">Yükleniyor...</p>
           </div>
         </main>
-        <Footer onlineCount={42} />
+        <Footer />
       </div>
     );
   }
@@ -185,7 +185,7 @@ export default function ForumPostDetailPage() {
             <p className="text-center text-muted-foreground">Konu bulunamadı</p>
           </div>
         </main>
-        <Footer onlineCount={42} />
+        <Footer />
       </div>
     );
   }
@@ -528,7 +528,7 @@ export default function ForumPostDetailPage() {
         </div>
       </main>
 
-      <Footer onlineCount={42} />
+      <Footer />
     </div>
   );
 }

@@ -2,10 +2,12 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SiDiscord } from "react-icons/si";
-import { UserCircle, LogOut, Shield, Bell, Trash2 } from "lucide-react";
+import { UserCircle, LogOut, Shield, Bell, Trash2, Menu } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useState } from "react";
 
 interface HeaderProps {
   user?: { 
@@ -18,6 +20,8 @@ interface HeaderProps {
 }
 
 export default function Header({ user, onLogout }: HeaderProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
   const { data: notifications } = useQuery<any[]>({
     queryKey: ["/api/notifications"],
     enabled: !!user,
@@ -90,6 +94,59 @@ export default function Header({ user, onLogout }: HeaderProps) {
         </nav>
 
         <div className="flex items-center gap-2">
+          {/* Mobil Menü Butonu */}
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild className="lg:hidden">
+              <Button variant="ghost" size="icon" className="hover-elevate active-elevate-2" data-testid="button-mobile-menu">
+                <Menu className="w-5 h-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72">
+              <div className="flex flex-col gap-4 mt-8">
+                <Link href="/" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-home">
+                  <Button variant="ghost" className="w-full justify-start hover-elevate active-elevate-2">
+                    Ana Sayfa
+                  </Button>
+                </Link>
+                <Link href="/aktif-odalar" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-rooms">
+                  <Button variant="ghost" className="w-full justify-start hover-elevate active-elevate-2">
+                    Aktif Odalar
+                  </Button>
+                </Link>
+                <Link href="/vip" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-vip">
+                  <Button variant="ghost" className="w-full justify-start hover-elevate active-elevate-2">
+                    VIP
+                  </Button>
+                </Link>
+                <Link href="/lig" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-league">
+                  <Button variant="ghost" className="w-full justify-start hover-elevate active-elevate-2">
+                    Lig
+                  </Button>
+                </Link>
+                <Link href="/forum" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-forum">
+                  <Button variant="ghost" className="w-full justify-start hover-elevate active-elevate-2">
+                    Forum
+                  </Button>
+                </Link>
+                <Link href="/admin-kadrosu" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-staff">
+                  <Button variant="ghost" className="w-full justify-start hover-elevate active-elevate-2">
+                    Admin Kadrosu
+                  </Button>
+                </Link>
+                <Link href="/admin-basvuru" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-admin-application">
+                  <Button variant="ghost" className="w-full justify-start hover-elevate active-elevate-2">
+                    Admin Başvurusu
+                  </Button>
+                </Link>
+                <Link href="/takim-basvuru" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-team-application">
+                  <Button variant="ghost" className="w-full justify-start hover-elevate active-elevate-2">
+                    Takım Başvurusu
+                  </Button>
+                </Link>
+              </div>
+            </SheetContent>
+          </Sheet>
+
           <a
             href="https://discord.gg/haxarena"
             target="_blank"

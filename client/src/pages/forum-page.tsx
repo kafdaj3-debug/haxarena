@@ -740,7 +740,7 @@ export default function ForumPage() {
         </div>
       </main>
 
-      <Footer onlineCount={42} />
+      <Footer />
     </div>
   );
 }

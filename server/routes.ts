@@ -119,12 +119,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Kullanıcı adı gerekli" });
       }
 
+      const currentUser = await storage.getUser(req.user!.id);
+      if (!currentUser) {
+        return res.status(404).json({ error: "Kullanıcı bulunamadı" });
+      }
+
+      // 1 aylık nick değiştirme limiti (Admin ve yönetim hariç)
+      const isExempt = currentUser.isAdmin || currentUser.isSuperAdmin;
+      if (!isExempt && currentUser.lastUsernameChange) {
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        
+        if (new Date(currentUser.lastUsernameChange) > oneMonthAgo) {
+          const nextChangeDate = new Date(currentUser.lastUsernameChange);
+          nextChangeDate.setMonth(nextChangeDate.getMonth() + 1);
+          const daysRemaining = Math.ceil((nextChangeDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+          return res.status(429).json({ 
+            error: `Kullanıcı adını değiştirmek için ${daysRemaining} gün beklemeniz gerekiyor.` 
+          });
+        }
+      }
+
       const existing = await storage.getUserByUsername(username);
       if (existing && existing.id !== req.user!.id) {
         return res.status(400).json({ error: "Bu kullanıcı adı zaten kullanılıyor" });
       }
 
-      const updated = await storage.updateUser(req.user!.id, { username });
+      const updated = await storage.updateUser(req.user!.id, { 
+        username,
+        lastUsernameChange: new Date()
+      });
       if (!updated) {
         return res.status(404).json({ error: "Kullanıcı bulunamadı" });
       }
@@ -242,13 +266,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (status === "approved") {
         const user = await storage.getUser(application.userId);
-        await storage.updateUser(application.userId, { isAdmin: true, role: "Game Admin" });
+        await storage.updateUser(application.userId, { isAdmin: true, role: "Arena Admin" });
         
         // Add to staff roles if not already exists
         if (user) {
           await storage.createStaffRole({
             name: user.username,
-            role: "Game Admin",
+            role: "Arena Admin",
             managementAccess: false,
           });
         }
@@ -803,19 +827,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Mesaj boş olamaz" });
       }
 
-      // Rate limiting: 5 saniye
-      const userId = req.user!.id;
-      const now = Date.now();
-      const lastMessageTime = userLastMessageTime.get(userId) || 0;
+      // Rate limiting: 5 saniye (Admin, Yönetim ve VIP'ler hariç)
+      const currentUser = await storage.getUser(req.user!.id);
+      const isExemptFromRateLimit = currentUser?.isAdmin || 
+                                     currentUser?.role?.includes('VIP');
       
-      if (now - lastMessageTime < 5000) {
-        const remainingSeconds = Math.ceil((5000 - (now - lastMessageTime)) / 1000);
-        return res.status(429).json({ 
-          error: `Lütfen ${remainingSeconds} saniye bekleyin` 
-        });
-      }
+      if (!isExemptFromRateLimit) {
+        const userId = req.user!.id;
+        const now = Date.now();
+        const lastMessageTime = userLastMessageTime.get(userId) || 0;
+        
+        if (now - lastMessageTime < 5000) {
+          const remainingSeconds = Math.ceil((5000 - (now - lastMessageTime)) / 1000);
+          return res.status(429).json({ 
+            error: `Lütfen ${remainingSeconds} saniye bekleyin` 
+          });
+        }
 
-      userLastMessageTime.set(userId, now);
+        userLastMessageTime.set(userId, now);
+      }
 
       const chatMessage = await storage.createChatMessage({
         userId: req.user!.id,

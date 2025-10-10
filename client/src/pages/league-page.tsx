@@ -27,7 +27,7 @@ export default function LeaguePage() {
         </div>
       </main>
 
-      <Footer onlineCount={42} />
+      <Footer />
     </div>
   );
 }
