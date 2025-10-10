@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { setupAuth } from "./auth";
 import { db } from "./db";
+import { sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/neon-serverless/migrator";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -103,6 +104,17 @@ app.use((req, res, next) => {
         log("Aborting startup to prevent running with incomplete schema");
         process.exit(1);
       }
+    }
+
+    // Fix: Ensure is_super_admin column exists (production hotfix)
+    try {
+      log("Checking database schema integrity...");
+      await db.execute(sql`
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS is_super_admin boolean DEFAULT false NOT NULL;
+      `);
+      log("✓ Database schema verified and patched if needed");
+    } catch (error) {
+      console.error("⚠️  Schema patch failed (non-critical):", error);
     }
   }
 

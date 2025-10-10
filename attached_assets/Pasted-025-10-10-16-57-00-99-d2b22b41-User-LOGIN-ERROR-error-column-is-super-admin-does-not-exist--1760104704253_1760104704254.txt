@@ -1,0 +1,180 @@
+025-10-10 16:57:00.99
+d2b22b41
+User
+❌ LOGIN ERROR: error: column "is_super_admin" does not exist
+2025-10-10 16:57:00.99
+d2b22b41
+User
+at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-10-10 16:57:00.99
+d2b22b41
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-10-10 16:57:00.99
+d2b22b41
+User
+at async NeonPreparedQuery.execute (file:///home/runner/workspace/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-10-10 16:57:00.99
+d2b22b41
+User
+at async DBStorage.getUserByUsername (file:///home/runner/workspace/dist/index.js:218:20)
+2025-10-10 16:57:00.99
+d2b22b41
+User
+at async Strategy._verify (file:///home/runner/workspace/dist/index.js:1377:22) {
+2025-10-10 16:57:00.99
+d2b22b41
+User
+length: 114,
+2025-10-10 16:57:00.99
+d2b22b41
+User
+severity: 'ERROR',
+2025-10-10 16:57:00.99
+d2b22b41
+User
+code: '42703',
+2025-10-10 16:57:00.99
+d2b22b41
+User
+detail: undefined,
+2025-10-10 16:57:00.99
+d2b22b41
+User
+hint: undefined,
+2025-10-10 16:57:00.99
+d2b22b41
+User
+position: '50',
+2025-10-10 16:57:00.99
+d2b22b41
+User
+internalPosition: undefined,
+2025-10-10 16:57:00.99
+d2b22b41
+User
+internalQuery: undefined,
+2025-10-10 16:57:00.99
+d2b22b41
+User
+where: undefined,
+2025-10-10 16:57:00.99
+d2b22b41
+User
+schema: undefined,
+2025-10-10 16:57:00.99
+d2b22b41
+User
+table: undefined,
+2025-10-10 16:57:00.99
+d2b22b41
+User
+column: undefined,
+2025-10-10 16:57:00.99
+d2b22b41
+User
+dataType: undefined,
+2025-10-10 16:57:00.99
+d2b22b41
+User
+constraint: undefined,
+2025-10-10 16:57:00.99
+d2b22b41
+User
+file: 'parse_relation.c',
+2025-10-10 16:57:00.99
+d2b22b41
+User
+line: '3722',
+2025-10-10 16:57:00.99
+d2b22b41
+User
+routine: 'errorMissingColumn'
+2025-10-10 16:57:00.99
+d2b22b41
+User
+}
+2025-10-10 16:57:00.99
+d2b22b41
+User
+Error stack: error: column "is_super_admin" does not exist
+2025-10-10 16:57:00.99
+d2b22b41
+User
+at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-10-10 16:57:00.99
+d2b22b41
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-10-10 16:57:00.99
+d2b22b41
+User
+at async NeonPreparedQuery.execute (file:///home/runner/workspace/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-10-10 16:57:00.99
+d2b22b41
+User
+at async DBStorage.getUserByUsername (file:///home/runner/workspace/dist/index.js:218:20)
+2025-10-10 16:57:00.99
+d2b22b41
+User
+at async Strategy._verify (file:///home/runner/workspace/dist/index.js:1377:22)
+2025-10-10 16:57:22.06
+d2b22b41
+User
+❌ LOGIN ERROR: error: column "is_super_admin" does not exist
+2025-10-10 16:57:22.06
+d2b22b41
+User
+at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-10-10 16:57:22.06
+d2b22b41
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-10-10 16:57:22.06
+d2b22b41
+User
+at async NeonPreparedQuery.execute (file:///home/runner/workspace/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-10-10 16:57:22.06
+d2b22b41
+User
+at async DBStorage.getUserByUsername (file:///home/runner/workspace/dist/index.js:218:20)
+2025-10-10 16:57:22.06
+d2b22b41
+User
+at async Strategy._verify (file:///home/runner/workspace/dist/index.js:1377:22) {
+2025-10-10 16:57:22.06
+d2b22b41
+User
+length: 114,
+2025-10-10 16:57:22.06
+d2b22b41
+User
+severity: 'ERROR',
+2025-10-10 16:57:22.06
+d2b22b41
+User
+code: '42703',
+2025-10-10 16:57:22.06
+d2b22b41
+User
+detail: undefined,
+2025-10-10 16:57:22.06
+d2b22b41
+User
+hint: undefined,
+2025-10-10 16:57:22.06
+d2b22b41
+User
+position: '50',
+2025-10-10 16:57:22.06
+d2b22b41
+User
+internalPosition: undefined,
+2025-10-10 16:57:22.06
+d2b22b41
+User
+internalQuery: undefined,
+2025-10-10 16:57:22.06
+d2b22b41
+User
+where: undefined,
