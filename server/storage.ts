@@ -40,6 +40,13 @@ export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserProfile(userId: string): Promise<{
+    user: User;
+    forumPostCount: number;
+    chatMessageCount: number;
+    teamApplications: TeamApplication[];
+    adminApplications: AdminApplication[];
+  } | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
   deleteUser(id: string): Promise<void>;
@@ -151,6 +158,36 @@ export class DBStorage implements IStorage {
       .from(users)
       .orderBy(desc(users.createdAt))
       .limit(limit);
+  }
+
+  async getUserProfile(userId: string) {
+    const user = await this.getUser(userId);
+    if (!user) return undefined;
+
+    const [forumPostCount, chatMessageCount, userTeamApps, userAdminApps] = await Promise.all([
+      db.select().from(forumPosts).where(eq(forumPosts.userId, userId)).then(posts => posts.length),
+      db.select().from(chatMessages).where(eq(chatMessages.userId, userId)).then(messages => messages.length),
+      this.getUserTeamApplications(userId),
+      this.getUserAdminApplications(userId)
+    ]);
+
+    return {
+      user,
+      forumPostCount,
+      chatMessageCount,
+      teamApplications: userTeamApps.map(app => ({
+        id: app.id,
+        teamName: app.teamName,
+        status: app.status,
+        createdAt: app.createdAt
+      })),
+      adminApplications: userAdminApps.map(app => ({
+        id: app.id,
+        name: app.name,
+        status: app.status,
+        createdAt: app.createdAt
+      }))
+    };
   }
 
   // Admin application operations

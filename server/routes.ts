@@ -1001,6 +1001,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User profile route (public)
+  app.get("/api/users/:userId/profile", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const profile = await storage.getUserProfile(userId);
+      
+      if (!profile) {
+        return res.status(404).json({ error: "Kullanıcı bulunamadı" });
+      }
+
+      // Şifreyi gizle
+      const { password, ...safeUser } = profile.user;
+      
+      return res.json({
+        user: safeUser,
+        forumPostCount: profile.forumPostCount,
+        chatMessageCount: profile.chatMessageCount,
+        teamApplications: profile.teamApplications,
+        adminApplications: profile.adminApplications
+      });
+    } catch (error) {
+      return res.status(500).json({ error: "Profil bilgileri alınamadı" });
+    }
+  });
+
   // Recent users route (public)
   app.get("/api/users/recent", async (req, res) => {
     try {

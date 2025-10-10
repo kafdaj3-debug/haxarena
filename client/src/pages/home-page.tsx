@@ -169,17 +169,19 @@ export default function HomePage() {
                     <div className="space-y-3">
                       {recentUsers.length > 0 ? (
                         recentUsers.slice(0, 5).map((user: any) => (
-                          <div key={user.id} className="flex items-center justify-between p-2 rounded-lg hover-elevate" data-testid={`recent-user-${user.id}`}>
-                            <div>
-                              <p className="font-medium text-sm">{user.username}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {formatDistanceToNow(new Date(user.createdAt), { addSuffix: true, locale: tr })}
-                              </p>
+                          <Link key={user.id} href={`/profil/${user.id}`}>
+                            <div className="flex items-center justify-between p-2 rounded-lg hover-elevate cursor-pointer" data-testid={`recent-user-${user.id}`}>
+                              <div>
+                                <p className="font-medium text-sm">{user.username}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {formatDistanceToNow(new Date(user.createdAt), { addSuffix: true, locale: tr })}
+                                </p>
+                              </div>
+                              <Badge variant="outline" className="text-xs">
+                                {user.role}
+                              </Badge>
                             </div>
-                            <Badge variant="outline" className="text-xs">
-                              {user.role}
-                            </Badge>
-                          </div>
+                          </Link>
                         ))
                       ) : (
                         <p className="text-sm text-muted-foreground text-center py-4">

@@ -14,6 +14,7 @@ import AdminStaffPage from "@/pages/admin-staff-page";
 import LoginPage from "@/pages/login-page";
 import RegisterPage from "@/pages/register-page";
 import ProfileSettingsPage from "@/pages/profile-settings-page";
+import ProfilePage from "@/pages/profile-page";
 import AdminApplicationPage from "@/pages/admin-application-page";
 import TeamApplicationPage from "@/pages/team-application-page";
 import ManagementPanelPage from "@/pages/management-panel-page";
@@ -34,6 +35,7 @@ function Router() {
       <Route path="/kayit" component={RegisterPage} />
       <Route path="/sifre-sifirlama" component={PasswordResetPage} />
       <Route path="/profil" component={ProfileSettingsPage} />
+      <Route path="/profil/:userId" component={ProfilePage} />
       <Route path="/admin-basvuru" component={AdminApplicationPage} />
       <Route path="/takim-basvuru" component={TeamApplicationPage} />
       <Route path="/yonetim" component={ManagementPanelPage} />
