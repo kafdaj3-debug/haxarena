@@ -8,10 +8,11 @@ import { execSync } from "child_process";
 if (process.env.NODE_ENV === "production") {
   try {
     log("Running database migrations...");
-    execSync("npm run db:push", { stdio: "inherit" });
+    execSync("drizzle-kit push --force", { stdio: "inherit" });
     log("Database migrations completed successfully");
   } catch (error) {
-    log("Warning: Database migration failed, but continuing startup...");
+    log("Warning: Database migration failed, continuing startup...");
+    console.error(error);
   }
 }
 
