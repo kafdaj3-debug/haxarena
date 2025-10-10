@@ -69,9 +69,12 @@ Preferred communication style: Simple, everyday language.
 - Zod schemas for runtime validation via `drizzle-zod`
 
 **Migration Strategy:**
-- Drizzle Kit for schema migrations
-- Migration files stored in `/migrations` directory
-- Push-based deployment with `db:push` command
+- Development: Use `npm run db:push --force` to sync schema changes
+- Production: Automated file-based migrations on startup
+  - Migration files stored in `/migrations` directory (must be present in deployment)
+  - Server runs migrations automatically on production startup using drizzle-orm migrate()
+  - Path: `dist/index.js` accesses migrations via `../migrations` from project root
+  - Startup aborts if migrations fail (prevents running with incomplete schema)
 
 ### Application Features
 
