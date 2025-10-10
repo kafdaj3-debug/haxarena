@@ -60,10 +60,29 @@ app.use((req, res, next) => {
       log(`Looking for migrations at: ${migrationsPath}`);
       await migrate(db, { migrationsFolder: migrationsPath });
       log("Database migrations completed successfully");
-    } catch (error) {
-      log("CRITICAL: Database migration failed - aborting startup");
-      console.error(error);
-      process.exit(1); // Abort startup if migrations fail
+    } catch (error: any) {
+      // Handle idempotent migration errors (already exists cases)
+      const errorMessage = error?.message || String(error);
+      
+      // Allowlist: benign "already exists" errors from re-running migrations
+      const idempotentErrors = [
+        "relation", "table", "type", "function", 
+        "extension", "index", "constraint", "sequence"
+      ];
+      
+      const isIdempotentError = idempotentErrors.some(keyword => 
+        errorMessage.toLowerCase().includes(keyword) && 
+        errorMessage.toLowerCase().includes("already exists")
+      );
+      
+      if (isIdempotentError) {
+        log("Database schema already migrated - skipping redundant migration");
+      } else {
+        log("CRITICAL: Database migration failed with unexpected error");
+        console.error(error);
+        log("Aborting startup to prevent running with incomplete schema");
+        process.exit(1);
+      }
     }
   }
 

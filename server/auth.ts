@@ -2,9 +2,13 @@ import type { Express } from "express";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
 import bcrypt from "bcrypt";
 import { storage } from "./storage";
 import type { User } from "@shared/schema";
+import { db } from "./db";
+
+const PgSession = connectPgSimple(session);
 
 declare global {
   namespace Express {
@@ -22,13 +26,23 @@ declare global {
 }
 
 export function setupAuth(app: Express) {
+  // Configure session store based on environment
+  const sessionStore = process.env.NODE_ENV === "production" 
+    ? new PgSession({
+        conString: process.env.DATABASE_URL,
+        createTableIfMissing: true,
+      })
+    : undefined; // Use MemoryStore in development for simplicity
+
   app.use(
     session({
+      store: sessionStore,
       secret: process.env.SESSION_SECRET || "haxarena-v6-secret-key",
       resave: false,
       saveUninitialized: false,
       cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        secure: process.env.NODE_ENV === "production", // Use secure cookies in production
       },
     })
   );
