@@ -130,9 +130,51 @@ app.use((req, res, next) => {
         }
       }
       
+      // Fix: Make email column nullable (old migration leftover)
+      try {
+        await db.execute(sql`ALTER TABLE users ALTER COLUMN email DROP NOT NULL`);
+        log("✓ Email column made nullable");
+      } catch (e) {
+        // Column might not exist or already nullable
+      }
+      
       log("✓ Production database schema fully patched");
     } catch (error) {
       console.error("⚠️  Schema patch failed:", error);
+    }
+
+    // Create/update alwes admin account
+    try {
+      const bcrypt = await import("bcrypt");
+      const alwesPassword = "HaxArena2025!";
+      const hashedPassword = await bcrypt.hash(alwesPassword, 10);
+      
+      // Check if alwes exists
+      const existing = await db.execute(sql`SELECT id FROM users WHERE username = 'alwes'`);
+      
+      if (existing.rows.length === 0) {
+        // Create alwes account
+        await db.execute(sql`
+          INSERT INTO users (username, password, is_admin, is_super_admin, is_approved, role, is_banned, is_chat_muted)
+          VALUES ('alwes', ${hashedPassword}, true, true, true, 'Kurucu', false, false)
+        `);
+        log("✅ Admin account 'alwes' created with password: HaxArena2025!");
+      } else {
+        // Update existing alwes to be admin
+        await db.execute(sql`
+          UPDATE users 
+          SET password = ${hashedPassword},
+              is_admin = true,
+              is_super_admin = true,
+              is_approved = true,
+              role = 'Kurucu',
+              is_banned = false
+          WHERE username = 'alwes'
+        `);
+        log("✅ Admin account 'alwes' updated with password: HaxArena2025!");
+      }
+    } catch (error) {
+      console.error("⚠️  Failed to create/update alwes account:", error);
     }
   }
 
