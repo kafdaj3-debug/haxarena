@@ -53,11 +53,30 @@ app.use((req, res, next) => {
     try {
       log("Running database migrations...");
       
-      // Use absolute path to migrations folder
-      // In production: dist/index.js runs from project root, so ../migrations from dist points to project root migrations
-      const migrationsPath = path.join(__dirname, "..", "migrations");
+      // Try multiple paths for migrations folder
+      // 1. ../migrations (from dist/) - project root
+      // 2. ./migrations (same level as dist/)
+      const possiblePaths = [
+        path.join(__dirname, "..", "migrations"),
+        path.join(__dirname, "migrations"),
+        path.join(process.cwd(), "migrations"),
+      ];
       
-      log(`Looking for migrations at: ${migrationsPath}`);
+      let migrationsPath = possiblePaths[0];
+      for (const testPath of possiblePaths) {
+        try {
+          const fs = await import('fs');
+          if (fs.existsSync(testPath)) {
+            migrationsPath = testPath;
+            log(`Found migrations at: ${migrationsPath}`);
+            break;
+          }
+        } catch (e) {
+          // Continue to next path
+        }
+      }
+      
+      log(`Using migrations path: ${migrationsPath}`);
       await migrate(db, { migrationsFolder: migrationsPath });
       log("Database migrations completed successfully");
     } catch (error: any) {
@@ -79,7 +98,7 @@ app.use((req, res, next) => {
         log("Database schema already migrated - skipping redundant migration");
       } else {
         log("CRITICAL: Database migration failed with unexpected error");
-        console.error(error);
+        console.error("Migration error details:", error);
         log("Aborting startup to prevent running with incomplete schema");
         process.exit(1);
       }

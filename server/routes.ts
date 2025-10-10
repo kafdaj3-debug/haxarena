@@ -22,17 +22,29 @@ function normalizeClientIp(req: any): string {
 }
 
 async function checkIpBan(req: any, res: any, next: any) {
-  const clientIp = normalizeClientIp(req);
-  
-  if (!clientIp) {
-    return next();
+  try {
+    const clientIp = normalizeClientIp(req);
+    
+    if (!clientIp) {
+      return next();
+    }
+    
+    const banned = await storage.getBannedIpByAddress(clientIp);
+    if (banned) {
+      return res.status(403).json({ error: "Bu IP adresi engellenmiştir" });
+    }
+    next();
+  } catch (error: any) {
+    // If table doesn't exist yet (during initial migration), allow the request
+    const errorMessage = error?.message || String(error);
+    if (errorMessage.includes('relation') && errorMessage.includes('does not exist')) {
+      console.warn('IP ban check skipped - table not yet created');
+      return next();
+    }
+    // For other errors, log and continue to prevent blocking
+    console.error('Error checking IP ban:', error);
+    next();
   }
-  
-  const banned = await storage.getBannedIpByAddress(clientIp);
-  if (banned) {
-    return res.status(403).json({ error: "Bu IP adresi engellenmiştir" });
-  }
-  next();
 }
 
 function isAuthenticated(req: any, res: any, next: any) {
