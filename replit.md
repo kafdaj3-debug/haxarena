@@ -74,7 +74,16 @@ Preferred communication style: Simple, everyday language.
   - Migration files stored in `/migrations` directory (must be present in deployment)
   - Server runs migrations automatically on production startup using drizzle-orm migrate()
   - Path: `dist/index.js` accesses migrations via `../migrations` from project root
-  - Startup aborts if migrations fail (prevents running with incomplete schema)
+  - Idempotent error handling: Gracefully skips already-applied migrations
+  - Aborts on genuine migration failures to prevent incomplete schema
+
+**Session Management:**
+- Development: MemoryStore for simplicity
+- Production: PostgreSQL session store via connect-pg-simple
+  - Uses DATABASE_URL connection string
+  - Auto-creates session table on startup
+  - Secure cookies enabled in production
+  - Prevents memory leaks in Autoscale deployments
 
 ### Application Features
 
