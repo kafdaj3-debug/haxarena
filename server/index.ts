@@ -4,6 +4,11 @@ import { setupVite, serveStatic, log } from "./vite";
 import { setupAuth } from "./auth";
 import { db } from "./db";
 import { migrate } from "drizzle-orm/neon-serverless/migrator";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.set('trust proxy', true);
@@ -47,12 +52,18 @@ app.use((req, res, next) => {
   if (process.env.NODE_ENV === "production") {
     try {
       log("Running database migrations...");
-      await migrate(db, { migrationsFolder: "./migrations" });
+      
+      // Use absolute path to migrations folder
+      // In production: dist/index.js runs from project root, so ../migrations from dist points to project root migrations
+      const migrationsPath = path.join(__dirname, "..", "migrations");
+      
+      log(`Looking for migrations at: ${migrationsPath}`);
+      await migrate(db, { migrationsFolder: migrationsPath });
       log("Database migrations completed successfully");
     } catch (error) {
-      log("Database migration failed:");
+      log("CRITICAL: Database migration failed - aborting startup");
       console.error(error);
-      log("Attempting to continue startup...");
+      process.exit(1); // Abort startup if migrations fail
     }
   }
 
