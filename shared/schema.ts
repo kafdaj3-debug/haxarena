@@ -118,6 +118,15 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const privateMessages = pgTable("private_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  senderId: varchar("sender_id").notNull().references(() => users.id),
+  receiverId: varchar("receiver_id").notNull().references(() => users.id),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   isAdmin: true,
@@ -181,6 +190,12 @@ export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTo
   createdAt: true,
 });
 
+export const insertPrivateMessageSchema = createInsertSchema(privateMessages).omit({
+  id: true,
+  isRead: true,
+  createdAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type AdminApplication = typeof adminApplications.$inferSelect;
@@ -203,3 +218,5 @@ export type BannedIp = typeof bannedIps.$inferSelect;
 export type InsertBannedIp = z.infer<typeof insertBannedIpSchema>;
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;
+export type PrivateMessage = typeof privateMessages.$inferSelect;
+export type InsertPrivateMessage = z.infer<typeof insertPrivateMessageSchema>;

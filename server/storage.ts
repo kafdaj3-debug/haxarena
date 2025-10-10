@@ -21,6 +21,8 @@ import {
   type InsertBannedIp,
   type PasswordResetToken,
   type InsertPasswordResetToken,
+  type PrivateMessage,
+  type InsertPrivateMessage,
   users,
   adminApplications,
   teamApplications,
@@ -31,7 +33,8 @@ import {
   forumReplies,
   chatMessages,
   bannedIps,
-  passwordResetTokens
+  passwordResetTokens,
+  privateMessages
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -112,6 +115,14 @@ export interface IStorage {
   getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
   deletePasswordResetToken(id: string): Promise<void>;
   deleteUserPasswordResetTokens(userId: string): Promise<void>;
+  
+  // Private message operations
+  sendPrivateMessage(message: InsertPrivateMessage): Promise<PrivateMessage>;
+  getConversation(userId1: string, userId2: string): Promise<PrivateMessage[]>;
+  getUserConversations(userId: string): Promise<{userId: string; username: string; lastMessage: string; unreadCount: number; createdAt: Date}[]>;
+  markMessageAsRead(messageId: string): Promise<void>;
+  markConversationAsRead(userId: string, otherUserId: string): Promise<void>;
+  getAllPrivateMessages(): Promise<(PrivateMessage & { sender: User; receiver: User })[]>;
 }
 
 export class DBStorage implements IStorage {
@@ -485,6 +496,119 @@ export class DBStorage implements IStorage {
 
   async deleteUserPasswordResetTokens(userId: string): Promise<void> {
     await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, userId));
+  }
+
+  // Private message operations
+  async sendPrivateMessage(message: InsertPrivateMessage): Promise<PrivateMessage> {
+    const [pm] = await db.insert(privateMessages).values(message).returning();
+    return pm;
+  }
+
+  async getConversation(userId1: string, userId2: string): Promise<PrivateMessage[]> {
+    const { or, and } = await import("drizzle-orm");
+    return await db.select()
+      .from(privateMessages)
+      .where(
+        or(
+          and(
+            eq(privateMessages.senderId, userId1),
+            eq(privateMessages.receiverId, userId2)
+          ),
+          and(
+            eq(privateMessages.senderId, userId2),
+            eq(privateMessages.receiverId, userId1)
+          )
+        )
+      )
+      .orderBy(desc(privateMessages.createdAt));
+  }
+
+  async getUserConversations(userId: string): Promise<{userId: string; username: string; lastMessage: string; unreadCount: number; createdAt: Date}[]> {
+    const { or, and, sql, count } = await import("drizzle-orm");
+    
+    const sentMessages = await db.select()
+      .from(privateMessages)
+      .where(eq(privateMessages.senderId, userId))
+      .orderBy(desc(privateMessages.createdAt));
+    
+    const receivedMessages = await db.select()
+      .from(privateMessages)
+      .where(eq(privateMessages.receiverId, userId))
+      .orderBy(desc(privateMessages.createdAt));
+    
+    const allMessages = [...sentMessages, ...receivedMessages]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    
+    const conversationMap = new Map<string, typeof allMessages[0]>();
+    
+    for (const msg of allMessages) {
+      const otherUserId = msg.senderId === userId ? msg.receiverId : msg.senderId;
+      if (!conversationMap.has(otherUserId)) {
+        conversationMap.set(otherUserId, msg);
+      }
+    }
+    
+    const conversations = [];
+    for (const [otherUserId, lastMsg] of conversationMap.entries()) {
+      const otherUser = await this.getUser(otherUserId);
+      if (!otherUser) continue;
+      
+      const unreadMessages = await db.select()
+        .from(privateMessages)
+        .where(
+          and(
+            eq(privateMessages.senderId, otherUserId),
+            eq(privateMessages.receiverId, userId),
+            eq(privateMessages.isRead, false)
+          )
+        );
+      
+      conversations.push({
+        userId: otherUserId,
+        username: otherUser.username,
+        lastMessage: lastMsg.message,
+        unreadCount: unreadMessages.length,
+        createdAt: lastMsg.createdAt
+      });
+    }
+    
+    return conversations.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async markMessageAsRead(messageId: string): Promise<void> {
+    await db.update(privateMessages)
+      .set({ isRead: true })
+      .where(eq(privateMessages.id, messageId));
+  }
+
+  async markConversationAsRead(userId: string, otherUserId: string): Promise<void> {
+    const { and } = await import("drizzle-orm");
+    await db.update(privateMessages)
+      .set({ isRead: true })
+      .where(
+        and(
+          eq(privateMessages.senderId, otherUserId),
+          eq(privateMessages.receiverId, userId)
+        )
+      );
+  }
+
+  async getAllPrivateMessages(): Promise<(PrivateMessage & { sender: User; receiver: User })[]> {
+    const messages = await db.select().from(privateMessages).orderBy(desc(privateMessages.createdAt));
+    
+    const messagesWithUsers = await Promise.all(
+      messages.map(async (msg) => {
+        const sender = await this.getUser(msg.senderId);
+        const receiver = await this.getUser(msg.receiverId);
+        return {
+          ...msg,
+          sender: sender!,
+          receiver: receiver!
+        };
+      })
+    );
+    
+    return messagesWithUsers;
   }
 }
 
