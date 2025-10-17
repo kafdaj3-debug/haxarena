@@ -23,9 +23,9 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/statistics" className="text-muted-foreground hover:text-foreground flex items-center gap-2 text-sm hover-elevate py-1 px-2 rounded-md -ml-2">
+                <Link href="/istatistikler" className="text-muted-foreground hover:text-foreground flex items-center gap-2 text-sm hover-elevate py-1 px-2 rounded-md -ml-2">
                   <Trophy className="w-4 h-4" />
-                  Leaderboards
+                  İstatistikler
                 </Link>
               </li>
               <li>
@@ -92,12 +92,6 @@ export default function Footer() {
                   <Users className="w-4 h-4" />
                   Discord Sunucusu
                 </a>
-              </li>
-              <li>
-                <Link href="/profile" className="text-muted-foreground hover:text-foreground flex items-center gap-2 text-sm hover-elevate py-1 px-2 rounded-md -ml-2">
-                  <Users className="w-4 h-4" />
-                  Profilim
-                </Link>
               </li>
               <li>
                 <Link href="/messages" className="text-muted-foreground hover:text-foreground flex items-center gap-2 text-sm hover-elevate py-1 px-2 rounded-md -ml-2">
