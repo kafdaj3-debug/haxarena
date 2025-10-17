@@ -288,7 +288,7 @@ export default function PlayerDetailPage() {
                               backgroundColor: 'rgba(0, 0, 0, 0.9)', 
                               border: '1px solid rgba(255, 255, 255, 0.2)',
                               borderRadius: '8px',
-                              color: '#fff',
+                              color: '#e5e5e5',
                               padding: '8px 12px'
                             }}
                             formatter={(value: number, name: string, props: any) => [
@@ -299,7 +299,7 @@ export default function PlayerDetailPage() {
                           <Legend 
                             verticalAlign="bottom" 
                             height={36}
-                            formatter={(value: string) => <span className="text-sm text-foreground">{value}</span>}
+                            formatter={(value: string) => <span className="text-sm" style={{ color: '#e5e5e5' }}>{value}</span>}
                           />
                         </PieChart>
                       </ResponsiveContainer>
