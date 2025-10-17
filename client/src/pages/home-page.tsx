@@ -6,7 +6,7 @@ import LiveChat from "@/components/LiveChat";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Trophy, Users, MessageSquare, Shield } from "lucide-react";
+import { Trophy, BarChart3, MessageSquare, Shield } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
@@ -81,13 +81,13 @@ export default function HomePage() {
                 </Card>
               </Link>
 
-              <Link href="/admin-kadrosu" data-testid="link-feature-community">
+              <Link href="/istatistikler" data-testid="link-feature-statistics">
                 <Card className="hover-elevate active-elevate-2 overflow-visible cursor-pointer">
                   <CardHeader>
-                    <Users className="w-10 h-10 text-primary mb-2" />
-                    <CardTitle>Topluluk</CardTitle>
+                    <BarChart3 className="w-10 h-10 text-primary mb-2" />
+                    <CardTitle>İstatistikler</CardTitle>
                     <CardDescription>
-                      Aktif ve dostane oyuncu topluluğu
+                      Oyuncu sıralamalarını ve performans istatistiklerini inceleyin
                     </CardDescription>
                   </CardHeader>
                 </Card>
