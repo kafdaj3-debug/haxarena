@@ -174,6 +174,50 @@ export default function ForumPostDetailPage() {
     },
   });
 
+  const editPostMutation = useMutation({
+    mutationFn: async (data: { title: string; content: string }) => {
+      return await apiRequest("PATCH", `/api/forum-posts/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/forum-posts", id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/forum-posts"] });
+      toast({
+        title: "Başarılı",
+        description: "Konu güncellendi",
+      });
+      setEditingPost(false);
+    },
+    onError: () => {
+      toast({
+        title: "Hata",
+        description: "Konu güncellenemedi",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const editReplyMutation = useMutation({
+    mutationFn: async ({ replyId, content }: { replyId: string; content: string }) => {
+      return await apiRequest("PATCH", `/api/forum-replies/${replyId}`, { content });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/forum-posts", id, "replies"] });
+      toast({
+        title: "Başarılı",
+        description: "Cevap güncellendi",
+      });
+      setEditingReplyId(null);
+      setEditReplyContent("");
+    },
+    onError: () => {
+      toast({
+        title: "Hata",
+        description: "Cevap güncellenemedi",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleReplySubmit = () => {
     if (!replyContent.trim()) {
       toast({
@@ -259,6 +303,19 @@ export default function ForumPostDetailPage() {
                     <Button
                       variant="ghost"
                       size="sm"
+                      onClick={() => {
+                        setEditingPost(true);
+                        setEditTitle(post.title);
+                        setEditContent(post.content);
+                      }}
+                      data-testid="button-edit-post"
+                    >
+                      <Edit className="w-4 h-4 mr-1" />
+                      Düzenle
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => archivePostMutation.mutate(!post.isArchived)}
                       disabled={archivePostMutation.isPending}
                       data-testid="button-archive-post"
@@ -280,9 +337,21 @@ export default function ForumPostDetailPage() {
                   </div>
                 )}
               </div>
-              <h1 className="text-3xl font-heading font-bold mb-3" data-testid="text-post-title">
-                {post.title}
-              </h1>
+              {editingPost ? (
+                <div className="space-y-3 mb-3">
+                  <Input
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    placeholder="Başlık"
+                    className="text-2xl font-heading font-bold"
+                    data-testid="input-edit-title"
+                  />
+                </div>
+              ) : (
+                <h1 className="text-3xl font-heading font-bold mb-3" data-testid="text-post-title">
+                  {post.title}
+                </h1>
+              )}
               <div className="flex items-center gap-2 flex-wrap text-sm text-muted-foreground">
                 <span data-testid="text-post-author">{post.user.username}</span>
                 
@@ -324,18 +393,58 @@ export default function ForumPostDetailPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="whitespace-pre-wrap text-muted-foreground" data-testid="text-post-content">
-                {post.content}
-              </p>
-              {post.imageUrl && (
-                <div className="mt-4">
-                  <img 
-                    src={post.imageUrl} 
-                    alt="Post image" 
-                    className="max-w-full h-auto rounded-md"
-                    data-testid="img-post-image"
+              {editingPost ? (
+                <div className="space-y-3">
+                  <Textarea
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    placeholder="İçerik"
+                    rows={8}
+                    data-testid="textarea-edit-content"
                   />
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => {
+                        if (!editTitle.trim() || !editContent.trim()) {
+                          toast({
+                            title: "Hata",
+                            description: "Başlık ve içerik boş olamaz",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                        editPostMutation.mutate({ title: editTitle, content: editContent });
+                      }}
+                      disabled={editPostMutation.isPending}
+                      data-testid="button-save-post"
+                    >
+                      Kaydet
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setEditingPost(false)}
+                      data-testid="button-cancel-edit-post"
+                    >
+                      İptal
+                    </Button>
+                  </div>
                 </div>
+              ) : (
+                <>
+                  <p className="whitespace-pre-wrap text-muted-foreground" data-testid="text-post-content">
+                    {post.content}
+                  </p>
+                  {post.imageUrl && (
+                    <div className="mt-4">
+                      <img 
+                        src={post.imageUrl} 
+                        alt="Post image" 
+                        className="max-w-full h-auto rounded-md"
+                        data-testid="img-post-image"
+                      />
+                    </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
@@ -511,9 +620,52 @@ export default function ForumPostDetailPage() {
                         </p>
                       </div>
                     )}
-                    <p className="whitespace-pre-wrap text-muted-foreground" data-testid={`text-reply-content-${reply.id}`}>
-                      {reply.content}
-                    </p>
+                    {editingReplyId === reply.id ? (
+                      <div className="space-y-3">
+                        <Textarea
+                          value={editReplyContent}
+                          onChange={(e) => setEditReplyContent(e.target.value)}
+                          placeholder="Cevap"
+                          rows={4}
+                          data-testid={`textarea-edit-reply-${reply.id}`}
+                        />
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              if (!editReplyContent.trim()) {
+                                toast({
+                                  title: "Hata",
+                                  description: "Cevap boş olamaz",
+                                  variant: "destructive",
+                                });
+                                return;
+                              }
+                              editReplyMutation.mutate({ replyId: reply.id, content: editReplyContent });
+                            }}
+                            disabled={editReplyMutation.isPending}
+                            data-testid={`button-save-reply-${reply.id}`}
+                          >
+                            Kaydet
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setEditingReplyId(null);
+                              setEditReplyContent("");
+                            }}
+                            data-testid={`button-cancel-edit-reply-${reply.id}`}
+                          >
+                            İptal
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-wrap text-muted-foreground" data-testid={`text-reply-content-${reply.id}`}>
+                        {reply.content}
+                      </p>
+                    )}
                     {reply.imageUrl && (
                       <div className="mt-4">
                         <img 
@@ -524,7 +676,7 @@ export default function ForumPostDetailPage() {
                         />
                       </div>
                     )}
-                    {user && !post.isLocked && (
+                    {user && !post.isLocked && editingReplyId !== reply.id && (
                       <div className="mt-3 pt-3 border-t flex items-center gap-2">
                         <Button
                           variant="ghost"
@@ -538,6 +690,20 @@ export default function ForumPostDetailPage() {
                           <Quote className="w-4 h-4 mr-2" />
                           Alıntıla
                         </Button>
+                        {reply.userId === user.id && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setEditingReplyId(reply.id);
+                              setEditReplyContent(reply.content);
+                            }}
+                            data-testid={`button-edit-reply-${reply.id}`}
+                          >
+                            <Edit className="w-4 h-4 mr-2" />
+                            Düzenle
+                          </Button>
+                        )}
                         {(reply.userId === user.id || user.isAdmin || user.isSuperAdmin) && (
                           <Button
                             variant="ghost"

@@ -31,7 +31,9 @@ function Router() {
       <Route path="/forum/:id" component={ForumPostDetailPage} />
       <Route path="/admin-kadrosu" component={AdminStaffPage} />
       <Route path="/giris" component={LoginPage} />
+      <Route path="/login" component={LoginPage} />
       <Route path="/kayit" component={RegisterPage} />
+      <Route path="/register" component={RegisterPage} />
       <Route path="/sifre-sifirlama" component={PasswordResetPage} />
       <Route path="/profil" component={ProfileSettingsPage} />
       <Route path="/admin-basvuru" component={AdminApplicationPage} />
