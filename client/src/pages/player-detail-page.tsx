@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Target, Shield, Clock, Crosshair, Award, TrendingUp, User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
 interface PlayerDetailData {
   id: string;
@@ -52,6 +53,28 @@ export default function PlayerDetailPage() {
   const winPercentage = totalMatches > 0 ? ((player?.wins || 0) / totalMatches * 100).toFixed(1) : '0.0';
   const lossPercentage = totalMatches > 0 ? ((player?.losses || 0) / totalMatches * 100).toFixed(1) : '0.0';
   const drawPercentage = totalMatches > 0 ? ((player?.draws || 0) / totalMatches * 100).toFixed(1) : '0.0';
+
+  // Prepare pie chart data
+  const pieChartData = [
+    { 
+      name: 'Galibiyet', 
+      value: player?.wins || 0, 
+      percentage: winPercentage,
+      color: '#22c55e' // green-500
+    },
+    { 
+      name: 'Yenilgi', 
+      value: player?.losses || 0, 
+      percentage: lossPercentage,
+      color: '#ef4444' // red-500
+    },
+    { 
+      name: 'Beraberlik', 
+      value: player?.draws || 0, 
+      percentage: drawPercentage,
+      color: '#eab308' // yellow-500
+    },
+  ];
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -103,52 +126,118 @@ export default function PlayerDetailPage() {
               {/* Match Statistics */}
               <div>
                 <h2 className="text-2xl font-bold mb-4">Maç İstatistikleri</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Toplam Maç</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-3xl font-bold" data-testid="text-matches-played">{player.matchesPlayed}</p>
-                    </CardContent>
-                  </Card>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Stats Cards */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Toplam Maç</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-3xl font-bold" data-testid="text-matches-played">{player.matchesPlayed}</p>
+                      </CardContent>
+                    </Card>
 
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <Trophy className="w-4 h-4 text-green-500" />
-                        Galibiyet
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-3xl font-bold text-green-500" data-testid="text-wins">{player.wins}</p>
-                      <p className="text-sm text-muted-foreground">%{winPercentage}</p>
-                    </CardContent>
-                  </Card>
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <Trophy className="w-4 h-4 text-green-500" />
+                          Galibiyet
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-3xl font-bold text-green-500" data-testid="text-wins">{player.wins}</p>
+                        <p className="text-sm text-muted-foreground">%{winPercentage}</p>
+                      </CardContent>
+                    </Card>
 
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <Target className="w-4 h-4 text-red-500" />
-                        Yenilgi
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-3xl font-bold text-red-500" data-testid="text-losses">{player.losses}</p>
-                      <p className="text-sm text-muted-foreground">%{lossPercentage}</p>
-                    </CardContent>
-                  </Card>
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <Target className="w-4 h-4 text-red-500" />
+                          Yenilgi
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-3xl font-bold text-red-500" data-testid="text-losses">{player.losses}</p>
+                        <p className="text-sm text-muted-foreground">%{lossPercentage}</p>
+                      </CardContent>
+                    </Card>
 
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                          <Award className="w-4 h-4 text-yellow-500" />
+                          Beraberlik
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-3xl font-bold text-yellow-500" data-testid="text-draws">{player.draws}</p>
+                        <p className="text-sm text-muted-foreground">%{drawPercentage}</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* 3D Pie Chart */}
                   <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <Award className="w-4 h-4 text-yellow-500" />
-                        Beraberlik
-                      </CardTitle>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Maç Oranları</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-3xl font-bold text-yellow-500" data-testid="text-draws">{player.draws}</p>
-                      <p className="text-sm text-muted-foreground">%{drawPercentage}</p>
+                    <CardContent className="flex items-center justify-center">
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                          <defs>
+                            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                              <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+                              <feOffset dx="0" dy="4" result="offsetblur"/>
+                              <feComponentTransfer>
+                                <feFuncA type="linear" slope="0.5"/>
+                              </feComponentTransfer>
+                              <feMerge>
+                                <feMergeNode/>
+                                <feMergeNode in="SourceGraphic"/>
+                              </feMerge>
+                            </filter>
+                          </defs>
+                          <Pie
+                            data={pieChartData}
+                            cx="50%"
+                            cy="45%"
+                            startAngle={0}
+                            endAngle={360}
+                            innerRadius={0}
+                            outerRadius={100}
+                            paddingAngle={2}
+                            dataKey="value"
+                            animationBegin={0}
+                            animationDuration={1000}
+                            label={({ percentage }) => `%${percentage}`}
+                            labelLine={false}
+                            style={{ filter: 'url(#shadow)' }}
+                          >
+                            {pieChartData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={2} stroke="#1a1a1a" />
+                            ))}
+                          </Pie>
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: 'rgba(0, 0, 0, 0.8)', 
+                              border: '1px solid #333',
+                              borderRadius: '6px',
+                              color: '#fff'
+                            }}
+                            formatter={(value: number, name: string, props: any) => [
+                              `${value} maç (%${props.payload.percentage})`,
+                              name
+                            ]}
+                          />
+                          <Legend 
+                            verticalAlign="bottom" 
+                            height={36}
+                            formatter={(value: string) => <span className="text-sm">{value}</span>}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
                     </CardContent>
                   </Card>
                 </div>
