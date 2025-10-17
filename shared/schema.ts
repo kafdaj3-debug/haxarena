@@ -22,7 +22,6 @@ export const users = pgTable("users", {
   assists: integer("assists").notNull().default(0),
   saves: integer("saves").notNull().default(0),
   matchTime: integer("match_time").notNull().default(0), // seconds
-  offlineTime: integer("offline_time").notNull().default(0), // seconds
   rank: text("rank").notNull().default("Bronz"),
 });
 
