@@ -23,6 +23,11 @@ export const users = pgTable("users", {
   saves: integer("saves").notNull().default(0),
   matchTime: integer("match_time").notNull().default(0), // seconds
   rank: text("rank").notNull().default("Bronz"),
+  wins: integer("wins").notNull().default(0),
+  losses: integer("losses").notNull().default(0),
+  draws: integer("draws").notNull().default(0),
+  matchesPlayed: integer("matches_played").notNull().default(0),
+  points: integer("points").notNull().default(0),
 });
 
 export const adminApplications = pgTable("admin_applications", {
