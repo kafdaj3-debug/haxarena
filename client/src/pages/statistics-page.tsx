@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trophy, Target, Shield, Clock, Medal, Crosshair, Award } from "lucide-react";
 
 interface PlayerStats {
@@ -45,9 +47,12 @@ const staticPlayers: PlayerStats[] = [
   { username: "Okan", rank: "HaxArena Üye", goals: 20, assists: 9, dm: 6, cs: 3, saves: 46, matchTime: 1800 }
 ];
 
+type SortCategory = 'goals' | 'assists' | 'dm' | 'cs' | 'saves' | 'matchTime';
+
 export default function StatisticsPage() {
   const { user, logout } = useAuth();
   const [, navigate] = useLocation();
+  const [activeCategory, setActiveCategory] = useState<SortCategory>('goals');
 
   // Format seconds to Turkish time format
   const formatTime = (seconds: number) => {
@@ -56,26 +61,30 @@ export default function StatisticsPage() {
     return `${hours} saat ${minutes} dakika`;
   };
 
-  // Get top players by goals (Best 6)
-  const top6Players = [...staticPlayers]
-    .sort((a, b) => b.goals - a.goals)
-    .slice(0, 6);
-
-  // Get top 10 for each category
-  const getTop10 = (key: keyof Omit<PlayerStats, 'username' | 'rank'>) => {
+  // Sort function based on category
+  const getSortedPlayers = (category: SortCategory) => {
     return [...staticPlayers]
-      .sort((a, b) => b[key] - a[key])
-      .slice(0, 10);
+      .sort((a, b) => b[category] - a[category])
+      .slice(0, 50);
   };
 
-  const categories = [
-    { key: 'goals' as const, label: 'Gol Top 10', icon: Trophy },
-    { key: 'assists' as const, label: 'Asist Top 10', icon: Target },
-    { key: 'dm' as const, label: 'DM Top 10', icon: Crosshair },
-    { key: 'cs' as const, label: 'CS Top 10', icon: Award },
-    { key: 'saves' as const, label: 'Kurtarış Top 10', icon: Shield },
-    { key: 'matchTime' as const, label: 'Süre Top 10', icon: Clock },
-  ];
+  // Get category details
+  const getCategoryDetails = (category: SortCategory) => {
+    const details = {
+      goals: { label: 'Gol', icon: Trophy, key: 'goals' as const },
+      assists: { label: 'Asist', icon: Target, key: 'assists' as const },
+      dm: { label: 'DM', icon: Crosshair, key: 'dm' as const },
+      cs: { label: 'CS', icon: Award, key: 'cs' as const },
+      saves: { label: 'Kurtarış', icon: Shield, key: 'saves' as const },
+      matchTime: { label: 'Süre', icon: Clock, key: 'matchTime' as const }
+    };
+    return details[category];
+  };
+
+  const sortedStats = getSortedPlayers(activeCategory);
+  const top6Players = sortedStats.slice(0, 6);
+  const categoryDetails = getCategoryDetails(activeCategory);
+  const CategoryIcon = categoryDetails.icon;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -86,103 +95,142 @@ export default function StatisticsPage() {
           {/* Page title */}
           <div>
             <h1 className="text-3xl font-bold text-foreground">Leaderboards</h1>
-            <p className="text-muted-foreground mt-2">Oyuncu sıralamaları</p>
+            <p className="text-muted-foreground mt-2">Kategorilere göre sıralamalar</p>
           </div>
 
-          {/* Best 6 Section */}
-          <div>
-            <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
-              <Medal className="w-6 h-6 text-primary" />
-              Best 6
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {top6Players.length === 0 ? (
-                <div className="col-span-full text-center py-8 text-muted-foreground">
-                  Henüz oyuncu verisi eklenmedi
-                </div>
-              ) : (
-                top6Players.map((player, index) => (
-                  <Card 
-                    key={index} 
-                    className="p-4 hover-elevate"
-                    data-testid={`card-top-player-${index}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="text-3xl font-bold text-primary">#{index + 1}</div>
-                      <div className="flex-1">
-                        <div className="font-semibold text-foreground" data-testid={`text-username-${index}`}>
-                          {player.username}
-                        </div>
-                        <div className="text-sm text-muted-foreground">{player.rank}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xl font-bold text-primary" data-testid={`text-goals-${index}`}>
-                          {player.goals}
-                        </div>
-                        <div className="text-xs text-muted-foreground">Gol</div>
-                      </div>
+          {/* Category Tabs */}
+          <Tabs value={activeCategory} onValueChange={(v) => setActiveCategory(v as SortCategory)}>
+            <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full md:w-auto">
+              <TabsTrigger value="goals" className="gap-1" data-testid="tab-goals">
+                <Trophy className="w-4 h-4" />
+                <span className="hidden sm:inline">Gol</span>
+              </TabsTrigger>
+              <TabsTrigger value="assists" className="gap-1" data-testid="tab-assists">
+                <Target className="w-4 h-4" />
+                <span className="hidden sm:inline">Asist</span>
+              </TabsTrigger>
+              <TabsTrigger value="dm" className="gap-1" data-testid="tab-dm">
+                <Crosshair className="w-4 h-4" />
+                <span className="hidden sm:inline">DM</span>
+              </TabsTrigger>
+              <TabsTrigger value="cs" className="gap-1" data-testid="tab-cs">
+                <Award className="w-4 h-4" />
+                <span className="hidden sm:inline">CS</span>
+              </TabsTrigger>
+              <TabsTrigger value="saves" className="gap-1" data-testid="tab-saves">
+                <Shield className="w-4 h-4" />
+                <span className="hidden sm:inline">Kurtarış</span>
+              </TabsTrigger>
+              <TabsTrigger value="matchTime" className="gap-1" data-testid="tab-matchtime">
+                <Clock className="w-4 h-4" />
+                <span className="hidden sm:inline">Süre</span>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value={activeCategory} className="mt-6 space-y-8">
+              {/* Best 6 Section */}
+              <div>
+                <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Medal className="w-6 h-6 text-primary" />
+                  Best 6
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {top6Players.length === 0 ? (
+                    <div className="col-span-full text-center py-8 text-muted-foreground">
+                      Henüz oyuncu verisi eklenmedi
                     </div>
-                  </Card>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* Top 10 Categories Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {categories.map((category) => {
-              const top10 = getTop10(category.key);
-              const CategoryIcon = category.icon;
-              
-              return (
-                <Card key={category.key} className="overflow-hidden">
-                  <div className="p-4 bg-muted/50 border-b">
-                    <h3 className="font-bold text-foreground flex items-center gap-2">
-                      <CategoryIcon className="w-5 h-5 text-primary" />
-                      {category.label}
-                    </h3>
-                  </div>
-                  <div className="p-4">
-                    <div className="space-y-2">
-                      {top10.length === 0 ? (
-                        <div className="text-center py-4 text-muted-foreground text-sm">
-                          Henüz veri yok
-                        </div>
-                      ) : (
-                        top10.map((player, index) => (
-                          <div 
-                            key={index}
-                            className="flex items-center justify-between py-2 px-3 rounded-md hover-elevate"
-                            data-testid={`${category.key}-player-${index}`}
-                          >
-                            <div className="flex items-center gap-3 flex-1">
-                              <div className="text-sm font-bold text-muted-foreground w-6">
-                                #{index + 1}
-                              </div>
-                              <div className="flex-1">
-                                <div className="font-medium text-foreground text-sm">
-                                  {player.username}
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                  {player.rank}
-                                </div>
-                              </div>
+                  ) : (
+                    top6Players.map((player, index) => (
+                      <Card 
+                        key={index} 
+                        className="p-4 hover-elevate"
+                        data-testid={`card-top-player-${index}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="text-3xl font-bold text-primary">#{index + 1}</div>
+                          <div className="flex-1">
+                            <div className="font-semibold text-foreground" data-testid={`text-username-${index}`}>
+                              {player.username}
                             </div>
-                            <div className="text-sm font-bold text-primary">
-                              {category.key === 'matchTime' 
-                                ? formatTime(player[category.key])
-                                : player[category.key]
+                            <div className="text-sm text-muted-foreground">{player.rank}</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xl font-bold text-primary" data-testid={`text-stat-value-${index}`}>
+                              {categoryDetails.key === 'matchTime' 
+                                ? formatTime(player[categoryDetails.key])
+                                : player[categoryDetails.key]
                               }
                             </div>
+                            <div className="text-xs text-muted-foreground">{categoryDetails.label}</div>
                           </div>
-                        ))
-                      )}
-                    </div>
+                        </div>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Top 50 Table */}
+              <div>
+                <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
+                  <CategoryIcon className="w-5 h-5" />
+                  {categoryDetails.label} Top 50
+                </h2>
+                <Card className="overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-muted/50 border-b">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">#</th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Kullanıcı Adı</th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Rütbe</th>
+                          <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
+                            <div className="flex items-center justify-center gap-1">
+                              <CategoryIcon className="w-4 h-4" />
+                              {categoryDetails.label}
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sortedStats.length === 0 ? (
+                          <tr>
+                            <td colSpan={4} className="text-center py-8 text-muted-foreground">
+                              Henüz istatistik bulunmuyor
+                            </td>
+                          </tr>
+                        ) : (
+                          sortedStats.map((player, index) => (
+                            <tr 
+                              key={index} 
+                              className="border-b hover-elevate"
+                              data-testid={`row-player-${index}`}
+                            >
+                              <td className="px-4 py-3 text-sm font-medium text-muted-foreground">
+                                {index + 1}
+                              </td>
+                              <td className="px-4 py-3 text-sm font-medium text-foreground" data-testid={`text-player-name-${index}`}>
+                                {player.username}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-muted-foreground">
+                                {player.rank}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-center font-semibold text-primary" data-testid={`text-player-stat-${index}`}>
+                                {categoryDetails.key === 'matchTime' 
+                                  ? formatTime(player[categoryDetails.key])
+                                  : player[categoryDetails.key]
+                                }
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                 </Card>
-              );
-            })}
-          </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
       <Footer />
