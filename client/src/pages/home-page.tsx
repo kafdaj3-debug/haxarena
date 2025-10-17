@@ -81,18 +81,6 @@ export default function HomePage() {
                 </Card>
               </Link>
 
-              <Link href="/istatistikler" data-testid="link-feature-statistics">
-                <Card className="hover-elevate active-elevate-2 overflow-visible cursor-pointer">
-                  <CardHeader>
-                    <BarChart3 className="w-10 h-10 text-primary mb-2" />
-                    <CardTitle>İstatistikler</CardTitle>
-                    <CardDescription>
-                      Oyuncu sıralamalarını ve performans istatistiklerini inceleyin
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-
               <Link href="/vip" data-testid="link-feature-vip">
                 <Card className="hover-elevate active-elevate-2 overflow-visible cursor-pointer">
                   <CardHeader>
@@ -112,6 +100,18 @@ export default function HomePage() {
                     <CardTitle>Forum</CardTitle>
                     <CardDescription>
                       Aktif tartışma ve paylaşım platformu
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+
+              <Link href="/istatistikler" data-testid="link-feature-statistics">
+                <Card className="hover-elevate active-elevate-2 overflow-visible cursor-pointer">
+                  <CardHeader>
+                    <BarChart3 className="w-10 h-10 text-primary mb-2" />
+                    <CardTitle>İstatistikler</CardTitle>
+                    <CardDescription>
+                      Oyuncu sıralamalarını ve performans istatistiklerini inceleyin
                     </CardDescription>
                   </CardHeader>
                 </Card>
