@@ -27,12 +27,7 @@ interface PlayerDetailData {
 }
 
 const renderActiveShape = (props: any) => {
-  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload } = props;
-  const RADIAN = Math.PI / 180;
-  const sin = Math.sin(-RADIAN * ((startAngle + endAngle) / 2));
-  const cos = Math.cos(-RADIAN * ((startAngle + endAngle) / 2));
-  const mx = cx + (outerRadius + 15) * cos;
-  const my = cy + (outerRadius + 15) * sin;
+  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
 
   return (
     <g>
@@ -46,17 +41,6 @@ const renderActiveShape = (props: any) => {
         fill={fill}
         stroke="none"
       />
-      <text 
-        x={mx} 
-        y={my} 
-        fill="#e5e5e5" 
-        textAnchor={cos >= 0 ? 'start' : 'end'} 
-        dominantBaseline="central"
-        fontSize="16"
-        fontWeight="700"
-      >
-        {`${payload.name}: %${payload.percentage}`}
-      </text>
     </g>
   );
 };
@@ -268,18 +252,18 @@ export default function PlayerDetailPage() {
                             animationBegin={0}
                             animationDuration={800}
                             label={(props: any) => {
-                              const { x, y, payload } = props;
+                              const { x, y } = props;
                               return (
                                 <text 
                                   x={x} 
                                   y={y} 
-                                  fill={payload.color} 
+                                  fill="#e5e5e5" 
                                   textAnchor="middle" 
                                   dominantBaseline="central"
                                   fontSize="14"
                                   fontWeight="700"
                                 >
-                                  %{payload.percentage}
+                                  %{props.payload.percentage}
                                 </text>
                               );
                             }}
