@@ -17,8 +17,31 @@ interface PlayerStats {
 
 // Statik veri - Oyun verilerini buraya gireceksiniz
 const staticPlayers: PlayerStats[] = [
-  // Örnek veri - buraya gerçek oyun verilerini gireceksiniz
-  // { username: "OyuncuAdı", rank: "Rütbe", goals: 0, assists: 0, dm: 0, cs: 0, saves: 0, matchTime: 0 }
+  { username: "Metehan", rank: "DIAMOND VIP", goals: 145, assists: 89, dm: 12, cs: 8, saves: 234, matchTime: 86400 },
+  { username: "Emre", rank: "GOLD VIP", goals: 132, assists: 76, dm: 15, cs: 10, saves: 198, matchTime: 79200 },
+  { username: "Berkay", rank: "DIAMOND VIP", goals: 128, assists: 95, dm: 10, cs: 7, saves: 215, matchTime: 82800 },
+  { username: "Ahmet", rank: "GOLD VIP", goals: 121, assists: 68, dm: 18, cs: 12, saves: 187, matchTime: 75600 },
+  { username: "Burak", rank: "SILVER VIP", goals: 115, assists: 82, dm: 8, cs: 5, saves: 201, matchTime: 72000 },
+  { username: "Cem", rank: "Lig Oyuncusu", goals: 109, assists: 71, dm: 20, cs: 15, saves: 176, matchTime: 68400 },
+  { username: "Deniz", rank: "DIAMOND VIP", goals: 98, assists: 64, dm: 9, cs: 6, saves: 189, matchTime: 64800 },
+  { username: "Eren", rank: "GOLD VIP", goals: 94, assists: 58, dm: 11, cs: 7, saves: 165, matchTime: 61200 },
+  { username: "Furkan", rank: "Lig Oyuncusu", goals: 87, assists: 52, dm: 14, cs: 9, saves: 158, matchTime: 57600 },
+  { username: "Gökhan", rank: "SILVER VIP", goals: 81, assists: 49, dm: 13, cs: 8, saves: 142, matchTime: 54000 },
+  { username: "Hakan", rank: "HaxArena Üye", goals: 76, assists: 45, dm: 16, cs: 11, saves: 134, matchTime: 50400 },
+  { username: "İbrahim", rank: "Lig Oyuncusu", goals: 72, assists: 41, dm: 7, cs: 4, saves: 128, matchTime: 46800 },
+  { username: "Kaan", rank: "GOLD VIP", goals: 68, assists: 38, dm: 10, cs: 6, saves: 121, matchTime: 43200 },
+  { username: "Mert", rank: "HaxArena Üye", goals: 64, assists: 35, dm: 12, cs: 8, saves: 115, matchTime: 39600 },
+  { username: "Onur", rank: "SILVER VIP", goals: 59, assists: 32, dm: 9, cs: 5, saves: 108, matchTime: 36000 },
+  { username: "Serkan", rank: "Lig Oyuncusu", goals: 55, assists: 29, dm: 11, cs: 7, saves: 102, matchTime: 32400 },
+  { username: "Tolga", rank: "HaxArena Üye", goals: 51, assists: 26, dm: 8, cs: 4, saves: 96, matchTime: 28800 },
+  { username: "Uğur", rank: "GOLD VIP", goals: 47, assists: 24, dm: 13, cs: 9, saves: 89, matchTime: 25200 },
+  { username: "Volkan", rank: "HaxArena Üye", goals: 43, assists: 21, dm: 6, cs: 3, saves: 83, matchTime: 21600 },
+  { username: "Yusuf", rank: "SILVER VIP", goals: 39, assists: 19, dm: 10, cs: 6, saves: 76, matchTime: 18000 },
+  { username: "Zafer", rank: "Lig Oyuncusu", goals: 35, assists: 17, dm: 7, cs: 4, saves: 70, matchTime: 14400 },
+  { username: "Alper", rank: "HaxArena Üye", goals: 31, assists: 15, dm: 9, cs: 5, saves: 64, matchTime: 10800 },
+  { username: "Barış", rank: "DIAMOND VIP", goals: 28, assists: 13, dm: 5, cs: 2, saves: 58, matchTime: 7200 },
+  { username: "Efe", rank: "GOLD VIP", goals: 24, assists: 11, dm: 8, cs: 4, saves: 52, matchTime: 3600 },
+  { username: "Okan", rank: "HaxArena Üye", goals: 20, assists: 9, dm: 6, cs: 3, saves: 46, matchTime: 1800 }
 ];
 
 export default function StatisticsPage() {
