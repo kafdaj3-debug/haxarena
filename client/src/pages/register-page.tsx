@@ -27,11 +27,7 @@ export default function RegisterPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        let errorMessage = "Kayıt işlemi başarısız oldu";
-        
-        if (error.error && error.error.includes("username")) {
-          errorMessage = "Bu kullanıcı adı zaten kullanılıyor";
-        }
+        const errorMessage = error.error || "Kayıt işlemi başarısız oldu";
         
         toast({
           title: "Kayıt Başarısız",

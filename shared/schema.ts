@@ -136,6 +136,7 @@ export const privateMessages = pgTable("private_messages", {
   senderId: varchar("sender_id").notNull().references(() => users.id),
   receiverId: varchar("receiver_id").notNull().references(() => users.id),
   message: text("message").notNull(),
+  imageUrl: text("image_url"), // base64 image, max 5MB
   isRead: boolean("is_read").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

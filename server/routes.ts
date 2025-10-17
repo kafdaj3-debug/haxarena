@@ -869,6 +869,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/forum-posts/:id/replies", isAuthenticated, isNotBanned, async (req, res) => {
     try {
       const { content, imageUrl, quotedReplyId } = req.body;
+      
+      // Check if post is locked or archived
+      const post = await storage.getForumPost(req.params.id);
+      if (!post) {
+        return res.status(404).json({ error: "Konu bulunamadı" });
+      }
+      
+      if (post.isLocked) {
+        return res.status(403).json({ error: "Bu konu kilitlenmiştir. Yeni cevap eklenemez." });
+      }
+      
+      if (post.isArchived) {
+        return res.status(403).json({ error: "Bu konu arşivlenmiştir. Yeni cevap eklenemez." });
+      }
+      
       const reply = await storage.createForumReply({
         postId: req.params.id,
         userId: req.user!.id,
@@ -1142,10 +1157,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Private message routes
   app.post("/api/private-messages", isAuthenticated, isNotBanned, async (req, res) => {
     try {
-      const { receiverId, message } = req.body;
+      const { receiverId, message, imageUrl } = req.body;
       
-      if (!receiverId || !message) {
-        return res.status(400).json({ error: "Alıcı ve mesaj gerekli" });
+      if (!receiverId || (!message && !imageUrl)) {
+        return res.status(400).json({ error: "Alıcı ve mesaj veya görsel gerekli" });
       }
 
       const receiver = await storage.getUser(receiverId);
@@ -1153,10 +1168,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Kullanıcı bulunamadı" });
       }
 
+      // Validate image size if provided
+      if (imageUrl) {
+        if (!imageUrl.startsWith('data:image/')) {
+          return res.status(400).json({ error: "Geçersiz görsel formatı" });
+        }
+
+        const base64Data = imageUrl.split(',')[1];
+        if (!base64Data) {
+          return res.status(400).json({ error: "Geçersiz görsel verisi" });
+        }
+
+        const sizeInBytes = (base64Data.length * 3) / 4;
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        
+        if (sizeInBytes > maxSize) {
+          return res.status(400).json({ error: "Görsel boyutu 5MB'den küçük olmalıdır" });
+        }
+      }
+
       const pm = await storage.sendPrivateMessage({
         senderId: req.user!.id,
         receiverId,
         message,
+        imageUrl: imageUrl || null,
       });
 
       return res.json(pm);

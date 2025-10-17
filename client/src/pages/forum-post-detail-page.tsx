@@ -468,12 +468,12 @@ export default function ForumPostDetailPage() {
             </CardContent>
           </Card>
 
-          {post.isLocked ? (
+          {post.isLocked || post.isArchived ? (
             <Card className="mb-6">
               <CardContent className="pt-6">
                 <div className="text-center text-muted-foreground">
                   <LockIcon className="w-8 h-8 mx-auto mb-2" />
-                  <p>Bu konu kilitlenmiştir. Yeni cevap eklenemez.</p>
+                  <p>{post.isArchived ? "Bu konu arşivlenmiştir. Yeni cevap eklenemez." : "Bu konu kilitlenmiştir. Yeni cevap eklenemez."}</p>
                 </div>
               </CardContent>
             </Card>

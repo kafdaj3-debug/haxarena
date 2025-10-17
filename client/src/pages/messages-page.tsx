@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Send, MessageSquare, UserPlus, Search } from "lucide-react";
+import { Send, MessageSquare, UserPlus, Search, Image as ImageIcon, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
@@ -28,6 +28,7 @@ type PrivateMessage = {
   senderId: string;
   receiverId: string;
   message: string;
+  imageUrl?: string | null;
   isRead: boolean;
   createdAt: string;
   sender: User;
@@ -46,6 +47,7 @@ export default function MessagesPage() {
   const { toast } = useToast();
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [messageText, setMessageText] = useState("");
+  const [messageImageUrl, setMessageImageUrl] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -67,13 +69,14 @@ export default function MessagesPage() {
   });
 
   const sendMessageMutation = useMutation({
-    mutationFn: async (data: { receiverId: string; message: string }) => {
+    mutationFn: async (data: { receiverId: string; message: string; imageUrl?: string | null }) => {
       return await apiRequest("POST", "/api/private-messages", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/private-messages/${selectedUserId}`] });
       queryClient.invalidateQueries({ queryKey: ["/api/private-messages/conversations"] });
       setMessageText("");
+      setMessageImageUrl(null);
     },
     onError: () => {
       toast({
@@ -95,8 +98,37 @@ export default function MessagesPage() {
   });
 
   const handleSendMessage = () => {
-    if (!messageText.trim() || !selectedUserId) return;
-    sendMessageMutation.mutate({ receiverId: selectedUserId, message: messageText });
+    if ((!messageText.trim() && !messageImageUrl) || !selectedUserId) return;
+    sendMessageMutation.mutate({ 
+      receiverId: selectedUserId, 
+      message: messageText,
+      imageUrl: messageImageUrl 
+    });
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Dosya Boyutu Hatası",
+        description: "Görsel boyutu 5MB'den küçük olmalıdır",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setMessageImageUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setMessageImageUrl(null);
   };
 
   const handleSelectConversation = (userId: string) => {
@@ -299,7 +331,17 @@ export default function MessagesPage() {
                                 : "bg-muted"
                             }`}
                           >
-                            <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                            {msg.message && (
+                              <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                            )}
+                            {msg.imageUrl && (
+                              <img 
+                                src={msg.imageUrl} 
+                                alt="Message attachment" 
+                                className="max-w-full h-auto rounded-md mt-2"
+                                data-testid={`img-message-${msg.id}`}
+                              />
+                            )}
                             <p className="text-xs mt-1 opacity-70">
                               {formatDistanceToNow(new Date(msg.createdAt), {
                                 addSuffix: true,
@@ -311,28 +353,72 @@ export default function MessagesPage() {
                       ))}
                     </div>
 
-                    <div className="flex gap-2">
-                      <Textarea
-                        value={messageText}
-                        onChange={(e) => setMessageText(e.target.value)}
-                        placeholder="Mesajınızı yazın..."
-                        rows={3}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSendMessage();
-                          }
-                        }}
-                        data-testid="textarea-message"
-                      />
-                      <Button
-                        onClick={handleSendMessage}
-                        disabled={sendMessageMutation.isPending || !messageText.trim()}
-                        size="icon"
-                        data-testid="button-send-message"
-                      >
-                        <Send className="w-4 h-4" />
-                      </Button>
+                    <div className="space-y-3">
+                      {messageImageUrl && (
+                        <div className="relative inline-block">
+                          <img 
+                            src={messageImageUrl} 
+                            alt="Preview" 
+                            className="max-w-full h-auto max-h-48 rounded-md"
+                            data-testid="img-message-preview"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-2 right-2"
+                            onClick={removeImage}
+                            data-testid="button-remove-message-image"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <div className="flex-1 space-y-2">
+                          <Textarea
+                            value={messageText}
+                            onChange={(e) => setMessageText(e.target.value)}
+                            placeholder="Mesajınızı yazın..."
+                            rows={3}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSendMessage();
+                              }
+                            }}
+                            data-testid="textarea-message"
+                          />
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              className="hidden"
+                              id="message-image-upload"
+                              data-testid="input-message-image"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => document.getElementById('message-image-upload')?.click()}
+                              data-testid="button-upload-message-image"
+                            >
+                              <ImageIcon className="w-4 h-4 mr-2" />
+                              Görsel Ekle
+                            </Button>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={handleSendMessage}
+                          disabled={sendMessageMutation.isPending || (!messageText.trim() && !messageImageUrl)}
+                          size="icon"
+                          data-testid="button-send-message"
+                        >
+                          <Send className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
                   </>
                 )}
