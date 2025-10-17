@@ -15,6 +15,7 @@ import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const roleColors: Record<string, string> = {
   "Founder": "bg-purple-500/20 text-purple-300 border-purple-500/30",
@@ -337,67 +338,77 @@ export default function ForumPostDetailPage() {
                   </div>
                 )}
               </div>
-              {editingPost ? (
-                <div className="space-y-3 mb-3">
-                  <Input
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    placeholder="Başlık"
-                    className="text-2xl font-heading font-bold"
-                    data-testid="input-edit-title"
-                  />
-                </div>
-              ) : (
-                <h1 className="text-3xl font-heading font-bold mb-3" data-testid="text-post-title">
-                  {post.title}
-                </h1>
-              )}
-              <div className="flex items-center gap-2 flex-wrap text-sm text-muted-foreground">
-                <span data-testid="text-post-author">{post.user.username}</span>
-                
-                {/* Yönetim etiketi (en öncelikli) */}
-                {post.user.isSuperAdmin && (
-                  <Badge 
-                    variant="outline" 
-                    className="bg-red-500/20 text-red-300 border-red-500/30 text-xs font-bold"
-                  >
-                    YÖNETİM
-                  </Badge>
-                )}
-                
-                {/* Admin/Staff rolü */}
-                {post.staffRole && (
-                  <Badge 
-                    variant="outline" 
-                    className={`${roleColors[post.staffRole] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
-                  >
-                    {post.staffRole}
-                  </Badge>
-                )}
-                
-                {/* Oyuncu rolü */}
-                {post.user.playerRole && (
-                  <Badge 
-                    variant="outline" 
-                    className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs"
-                  >
-                    {post.user.playerRole}
-                  </Badge>
-                )}
-                
-                <span>•</span>
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  {format(new Date(post.createdAt), "d MMMM yyyy, HH:mm", { locale: tr })}
-                </span>
-                {post.editedAt && (
-                  <>
-                    <span>•</span>
-                    <span className="text-xs italic" data-testid="text-post-edited">
-                      (düzenlendi)
+              <div className="flex items-start gap-4 mb-4">
+                <Avatar className="w-16 h-16 flex-shrink-0 border-2 border-primary/20">
+                  <AvatarImage src={post.user.profilePicture || undefined} alt={post.user.username} />
+                  <AvatarFallback className="text-xl">{post.user.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 flex-wrap mb-2">
+                    <span className="text-xl font-bold text-foreground" data-testid="text-post-author">{post.user.username}</span>
+                    
+                    {/* Yönetim etiketi (en öncelikli) */}
+                    {post.user.isSuperAdmin && (
+                      <Badge 
+                        variant="outline" 
+                        className="bg-red-500/20 text-red-300 border-red-500/30 text-xs font-bold"
+                      >
+                        YÖNETİM
+                      </Badge>
+                    )}
+                    
+                    {/* Admin/Staff rolü */}
+                    {post.staffRole && (
+                      <Badge 
+                        variant="outline" 
+                        className={`${roleColors[post.staffRole] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                      >
+                        {post.staffRole}
+                      </Badge>
+                    )}
+                    
+                    {/* Oyuncu rolü */}
+                    {post.user.playerRole && (
+                      <Badge 
+                        variant="outline" 
+                        className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs"
+                      >
+                        {post.user.playerRole}
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  {editingPost ? (
+                    <div className="space-y-3">
+                      <Input
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        placeholder="Başlık"
+                        className="text-2xl font-heading font-bold"
+                        data-testid="input-edit-title"
+                      />
+                    </div>
+                  ) : (
+                    <h1 className="text-2xl font-heading font-bold mb-2" data-testid="text-post-title">
+                      {post.title}
+                    </h1>
+                  )}
+                  
+                  <div className="flex items-center gap-2 flex-wrap text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      {format(new Date(post.createdAt), "d MMMM yyyy, HH:mm", { locale: tr })}
                     </span>
-                  </>
-                )}
+                    {post.editedAt && (
+                      <>
+                        <span>•</span>
+                        <span className="text-xs italic" data-testid="text-post-edited">
+                          (düzenlendi)
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -577,54 +588,62 @@ export default function ForumPostDetailPage() {
               replies.map((reply) => (
                 <Card key={reply.id} data-testid={`card-reply-${reply.id}`}>
                   <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2 flex-wrap text-sm">
-                      <span className="font-medium" data-testid={`text-reply-author-${reply.id}`}>
-                        {reply.user.username}
-                      </span>
-                      
-                      {/* Yönetim etiketi (en öncelikli) */}
-                      {reply.user.isSuperAdmin && (
-                        <Badge 
-                          variant="outline" 
-                          className="bg-red-500/20 text-red-300 border-red-500/30 text-xs font-bold"
-                        >
-                          YÖNETİM
-                        </Badge>
-                      )}
-                      
-                      {/* Admin/Staff rolü */}
-                      {reply.staffRole && (
-                        <Badge 
-                          variant="outline" 
-                          className={`${roleColors[reply.staffRole] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
-                        >
-                          {reply.staffRole}
-                        </Badge>
-                      )}
-                      
-                      {/* Oyuncu rolü */}
-                      {reply.user.playerRole && (
-                        <Badge 
-                          variant="outline" 
-                          className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs"
-                        >
-                          {reply.user.playerRole}
-                        </Badge>
-                      )}
-                      
-                      <span>•</span>
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {format(new Date(reply.createdAt), "d MMMM yyyy, HH:mm", { locale: tr })}
-                      </span>
-                      {reply.editedAt && (
-                        <>
-                          <span>•</span>
-                          <span className="text-xs italic" data-testid={`text-reply-edited-${reply.id}`}>
-                            (düzenlendi)
+                    <div className="flex items-start gap-3">
+                      <Avatar className="w-10 h-10 flex-shrink-0 border-2 border-primary/20">
+                        <AvatarImage src={reply.user.profilePicture || undefined} alt={reply.user.username} />
+                        <AvatarFallback className="text-sm">{reply.user.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 flex-wrap text-sm mb-1">
+                          <span className="font-bold text-foreground" data-testid={`text-reply-author-${reply.id}`}>
+                            {reply.user.username}
                           </span>
-                        </>
-                      )}
+                          
+                          {/* Yönetim etiketi (en öncelikli) */}
+                          {reply.user.isSuperAdmin && (
+                            <Badge 
+                              variant="outline" 
+                              className="bg-red-500/20 text-red-300 border-red-500/30 text-xs font-bold"
+                            >
+                              YÖNETİM
+                            </Badge>
+                          )}
+                          
+                          {/* Admin/Staff rolü */}
+                          {reply.staffRole && (
+                            <Badge 
+                              variant="outline" 
+                              className={`${roleColors[reply.staffRole] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'} text-xs`}
+                            >
+                              {reply.staffRole}
+                            </Badge>
+                          )}
+                          
+                          {/* Oyuncu rolü */}
+                          {reply.user.playerRole && (
+                            <Badge 
+                              variant="outline" 
+                              className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs"
+                            >
+                              {reply.user.playerRole}
+                            </Badge>
+                          )}
+                          
+                          <span>•</span>
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {format(new Date(reply.createdAt), "d MMMM yyyy, HH:mm", { locale: tr })}
+                          </span>
+                          {reply.editedAt && (
+                            <>
+                              <span>•</span>
+                              <span className="text-xs italic" data-testid={`text-reply-edited-${reply.id}`}>
+                                (düzenlendi)
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>

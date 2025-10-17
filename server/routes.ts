@@ -206,14 +206,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { profilePicture } = req.body;
       
-      // Validate base64 image
+      // Validate base64 image format
       if (profilePicture && !profilePicture.startsWith('data:image/')) {
         return res.status(400).json({ error: "Geçersiz resim formatı" });
       }
       
-      // 5MB limit (base64 is ~33% larger than raw)
-      if (profilePicture && profilePicture.length > 5 * 1024 * 1024 * 1.33) {
-        return res.status(400).json({ error: "Resim çok büyük (maksimum 5MB)" });
+      // 5MB size limit: decode base64 to get actual file size
+      if (profilePicture) {
+        const base64Data = profilePicture.split(',')[1];
+        if (!base64Data) {
+          return res.status(400).json({ error: "Geçersiz base64 verisi" });
+        }
+        
+        // Calculate decoded size (base64 is ~33% larger than raw data)
+        const sizeInBytes = (base64Data.length * 3) / 4;
+        const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+        
+        if (sizeInBytes > MAX_SIZE) {
+          return res.status(400).json({ error: "Resim çok büyük (maksimum 5MB)" });
+        }
       }
 
       const updated = await storage.updateUser(req.user!.id, { profilePicture });
