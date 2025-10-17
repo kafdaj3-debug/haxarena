@@ -46,6 +46,7 @@ const renderActiveShape = (props: any) => {
         endAngle={endAngle}
         fill={fill}
         stroke="none"
+        strokeWidth={0}
       />
       <text 
         x={textX} 
@@ -268,6 +269,7 @@ export default function PlayerDetailPage() {
                                 key={`cell-${index}`} 
                                 fill={entry.color} 
                                 stroke="none"
+                                strokeWidth={0}
                               />
                             ))}
                           </Pie>
