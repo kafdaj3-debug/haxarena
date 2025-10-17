@@ -20,6 +20,7 @@ import ManagementPanelPage from "@/pages/management-panel-page";
 import PasswordResetPage from "@/pages/password-reset-page";
 import MessagesPage from "@/pages/messages-page";
 import StatisticsPage from "@/pages/statistics-page";
+import ManagementLoginPage from "@/pages/management-login-page";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -40,6 +41,7 @@ function Router() {
       <Route path="/profil" component={ProfileSettingsPage} />
       <Route path="/admin-basvuru" component={AdminApplicationPage} />
       <Route path="/takim-basvuru" component={TeamApplicationPage} />
+      <Route path="/yonetim-giris" component={ManagementLoginPage} />
       <Route path="/yonetim" component={ManagementPanelPage} />
       <Route path="/mesajlar" component={MessagesPage} />
       <Route path="/messages" component={MessagesPage} />

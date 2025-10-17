@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +28,8 @@ const STAFF_ROLES = [
 ];
 
 export default function ManagementPanelPage() {
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
+  const [, navigate] = useLocation();
   const { toast } = useToast();
   const [staffName, setStaffName] = useState("");
   const [staffRole, setStaffRole] = useState("");
@@ -35,9 +37,32 @@ export default function ManagementPanelPage() {
   const [ipReason, setIpReason] = useState("");
   const [resetCodes, setResetCodes] = useState<Record<string, string>>({});
 
+  // Redirect to management login if not admin (using useEffect)
+  useEffect(() => {
+    if (!isLoading && (!user || (!user.isAdmin && !user.isSuperAdmin))) {
+      navigate("/yonetim-giris");
+    }
+  }, [user, isLoading, navigate]);
+
+  // Show loading state while checking auth
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="text-lg text-muted-foreground">Yetki kontrol ediliyor...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Block render if not admin
+  if (!user || (!user.isAdmin && !user.isSuperAdmin)) {
+    return null;
+  }
+
   const { data: users } = useQuery<any[]>({
     queryKey: ["/api/management/users"],
-    enabled: !!user?.isSuperAdmin,
+    enabled: !!(user?.isSuperAdmin),
   });
 
   const { data: settings } = useQuery<any>({
@@ -52,6 +77,7 @@ export default function ManagementPanelPage() {
 
   const { data: staffRoles } = useQuery<any[]>({
     queryKey: ["/api/staff-roles"],
+    enabled: !!user?.isSuperAdmin,
   });
 
   const { data: forumPosts } = useQuery<any[]>({
