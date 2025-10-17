@@ -264,7 +264,7 @@ export default function PlayerDetailPage() {
                             endAngle={360}
                             innerRadius={0}
                             outerRadius={95}
-                            paddingAngle={1}
+                            paddingAngle={0}
                             dataKey="value"
                             animationBegin={0}
                             animationDuration={800}
