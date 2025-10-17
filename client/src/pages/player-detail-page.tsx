@@ -45,8 +45,7 @@ const renderActiveShape = (props: any) => {
         startAngle={startAngle}
         endAngle={endAngle}
         fill={fill}
-        stroke="none"
-        strokeWidth={0}
+        stroke={fill}
       />
       <text 
         x={textX} 
@@ -258,6 +257,7 @@ export default function PlayerDetailPage() {
                             animationDuration={800}
                             label={false}
                             labelLine={false}
+                            blendStroke
                             style={{ cursor: 'pointer' }}
                             activeIndex={activeIndex}
                             activeShape={renderActiveShape}
@@ -268,8 +268,7 @@ export default function PlayerDetailPage() {
                               <Cell 
                                 key={`cell-${index}`} 
                                 fill={entry.color} 
-                                stroke="none"
-                                strokeWidth={0}
+                                stroke={entry.color}
                               />
                             ))}
                           </Pie>
