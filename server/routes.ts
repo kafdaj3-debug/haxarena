@@ -202,6 +202,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/profile/picture", isAuthenticated, isNotBanned, async (req, res) => {
+    try {
+      const { profilePicture } = req.body;
+      
+      // Validate base64 image
+      if (profilePicture && !profilePicture.startsWith('data:image/')) {
+        return res.status(400).json({ error: "Geçersiz resim formatı" });
+      }
+      
+      // 5MB limit (base64 is ~33% larger than raw)
+      if (profilePicture && profilePicture.length > 5 * 1024 * 1024 * 1.33) {
+        return res.status(400).json({ error: "Resim çok büyük (maksimum 5MB)" });
+      }
+
+      const updated = await storage.updateUser(req.user!.id, { profilePicture });
+      if (!updated) {
+        return res.status(404).json({ error: "Kullanıcı bulunamadı" });
+      }
+
+      const { password, ...userWithoutPassword } = updated;
+      return res.json(userWithoutPassword);
+    } catch (error) {
+      return res.status(500).json({ error: "Profil fotoğrafı güncellenemedi" });
+    }
+  });
+
   // Admin application routes
   app.post("/api/applications/admin", isAuthenticated, isNotBanned, async (req, res) => {
     try {
