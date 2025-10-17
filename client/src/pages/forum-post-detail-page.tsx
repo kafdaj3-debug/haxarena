@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { ForumPost, ForumReply, User } from "@shared/schema";
-import { formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -388,7 +388,7 @@ export default function ForumPostDetailPage() {
                 <span>•</span>
                 <span className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: tr })}
+                  {format(new Date(post.createdAt), "d MMMM yyyy, HH:mm", { locale: tr })}
                 </span>
                 {post.editedAt && (
                   <>
@@ -615,7 +615,7 @@ export default function ForumPostDetailPage() {
                       <span>•</span>
                       <span className="text-muted-foreground flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
-                        {formatDistanceToNow(new Date(reply.createdAt), { addSuffix: true, locale: tr })}
+                        {format(new Date(reply.createdAt), "d MMMM yyyy, HH:mm", { locale: tr })}
                       </span>
                       {reply.editedAt && (
                         <>
