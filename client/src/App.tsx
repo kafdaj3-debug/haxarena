@@ -20,6 +20,7 @@ import ManagementPanelPage from "@/pages/management-panel-page";
 import PasswordResetPage from "@/pages/password-reset-page";
 import MessagesPage from "@/pages/messages-page";
 import StatisticsPage from "@/pages/statistics-page";
+import PlayerDetailPage from "@/pages/player-detail-page";
 import ManagementLoginPage from "@/pages/management-login-page";
 import NotFound from "@/pages/not-found";
 
@@ -47,6 +48,7 @@ function Router() {
       <Route path="/messages" component={MessagesPage} />
       <Route path="/istatistikler" component={StatisticsPage} />
       <Route path="/stats" component={StatisticsPage} />
+      <Route path="/oyuncu/:username" component={PlayerDetailPage} />
       <Route component={NotFound} />
     </Switch>
   );
