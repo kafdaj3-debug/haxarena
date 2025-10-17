@@ -112,6 +112,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User search route
+  app.get("/api/users/search", isAuthenticated, isNotBanned, async (req, res) => {
+    try {
+      const { query } = req.query;
+      if (!query || typeof query !== "string") {
+        return res.status(400).json({ error: "Arama sorgusu gerekli" });
+      }
+      
+      const users = await storage.searchUsersByUsername(query);
+      const usersWithoutPassword = users.map(({ password, ...user }) => user);
+      return res.json(usersWithoutPassword);
+    } catch (error) {
+      return res.status(500).json({ error: "Kullanıcı araması başarısız" });
+    }
+  });
+
   app.patch("/api/profile/username", isAuthenticated, isNotBanned, async (req, res) => {
     try {
       const { username } = req.body;
@@ -461,16 +477,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Create admin user (isAdmin: true, isApproved: true)
-      const newAdmin = await storage.createUser({
+      // Create admin user
+      const newUser = await storage.createUser({
         username,
         password: hashedPassword,
-        role: "HaxArena Üye",
-        isAdmin: true,
-        isApproved: true,
       });
 
-      const { password: _, ...adminWithoutPassword } = newAdmin;
+      // Set admin flags and role
+      const newAdmin = await storage.updateUser(newUser.id, {
+        isAdmin: true,
+        isApproved: true,
+        role: "HaxArena Üye",
+      });
+
+      const { password: _, ...adminWithoutPassword } = newAdmin!;
       return res.status(201).json(adminWithoutPassword);
     } catch (error) {
       console.error("[CREATE ADMIN ERROR]", error);
@@ -744,14 +764,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isOwner = post.userId === req.user!.id;
       const isAdminUser = req.user!.isAdmin || req.user!.isSuperAdmin;
       
-      const updates: Partial<{ isLocked: boolean; isArchived: boolean; title: string; content: string }> = {};
+      const updates: Partial<{ isLocked: boolean; isArchived: boolean; title: string; content: string; editedAt: Date }> = {};
       
       // Sadece post sahibi title ve content düzenleyebilir
       if (isOwner && title) {
         updates.title = title;
+        updates.editedAt = new Date();
       }
       if (isOwner && content) {
         updates.content = content;
+        updates.editedAt = new Date();
       }
       
       if (typeof isLocked === "boolean" && isAdminUser) {
@@ -858,7 +880,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "İçerik gerekli" });
       }
       
-      const updatedReply = await storage.updateForumReply(req.params.id, { content });
+      const updatedReply = await storage.updateForumReply(req.params.id, { 
+        content,
+        editedAt: new Date()
+      });
       return res.json(updatedReply);
     } catch (error) {
       return res.status(500).json({ error: "Cevap güncellenemedi" });

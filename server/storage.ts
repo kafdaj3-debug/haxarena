@@ -43,7 +43,7 @@ export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
-  getUserByEmail(email: string): Promise<User | undefined>;
+  searchUsersByUsername(query: string): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
   deleteUser(id: string): Promise<void>;
@@ -119,7 +119,7 @@ export interface IStorage {
   
   // Player statistics operations
   getPlayerStats(): Promise<User[]>;
-  updatePlayerStats(userId: string, stats: { goals?: number; assists?: number; saves?: number; matchTime?: number; offlineTime?: number; rank?: string }): Promise<User | undefined>;
+  updatePlayerStats(userId: string, stats: { goals?: number; assists?: number; saves?: number; matchTime?: number; rank?: string }): Promise<User | undefined>;
 }
 
 export class DBStorage implements IStorage {
@@ -134,9 +134,11 @@ export class DBStorage implements IStorage {
     return user;
   }
 
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
-    return user;
+  async searchUsersByUsername(query: string): Promise<User[]> {
+    const { ilike } = await import("drizzle-orm");
+    return await db.select().from(users)
+      .where(ilike(users.username, `%${query}%`))
+      .limit(10);
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
@@ -598,7 +600,7 @@ export class DBStorage implements IStorage {
 
   async updatePlayerStats(
     userId: string, 
-    stats: { goals?: number; assists?: number; saves?: number; matchTime?: number; offlineTime?: number; rank?: string }
+    stats: { goals?: number; assists?: number; saves?: number; matchTime?: number; rank?: string }
   ): Promise<User | undefined> {
     await db.update(users).set(stats).where(eq(users.id, userId));
     const [updatedUser] = await db.select().from(users).where(eq(users.id, userId)).limit(1);

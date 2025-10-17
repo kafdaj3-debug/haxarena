@@ -390,6 +390,14 @@ export default function ForumPostDetailPage() {
                   <Calendar className="w-4 h-4" />
                   {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: tr })}
                 </span>
+                {post.editedAt && (
+                  <>
+                    <span>•</span>
+                    <span className="text-xs italic" data-testid="text-post-edited">
+                      (düzenlendi)
+                    </span>
+                  </>
+                )}
               </div>
             </CardHeader>
             <CardContent>
@@ -609,6 +617,14 @@ export default function ForumPostDetailPage() {
                         <Calendar className="w-3 h-3" />
                         {formatDistanceToNow(new Date(reply.createdAt), { addSuffix: true, locale: tr })}
                       </span>
+                      {reply.editedAt && (
+                        <>
+                          <span>•</span>
+                          <span className="text-xs italic" data-testid={`text-reply-edited-${reply.id}`}>
+                            (düzenlendi)
+                          </span>
+                        </>
+                      )}
                     </div>
                   </CardHeader>
                   <CardContent>

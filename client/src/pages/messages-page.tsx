@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Send, MessageSquare } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Send, MessageSquare, UserPlus, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
@@ -44,6 +46,8 @@ export default function MessagesPage() {
   const { toast } = useToast();
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [messageText, setMessageText] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const { data: conversations = [], isLoading: conversationsLoading } = useQuery<Conversation[]>({
     queryKey: ["/api/private-messages/conversations"],
@@ -55,6 +59,11 @@ export default function MessagesPage() {
     enabled: !!selectedUserId && !!user,
     refetchOnMount: true,
     staleTime: 0,
+  });
+
+  const { data: searchResults = [], isLoading: searchLoading } = useQuery<User[]>({
+    queryKey: [`/api/users/search?query=${searchQuery}`],
+    enabled: !!searchQuery && searchQuery.length >= 2,
   });
 
   const sendMessageMutation = useMutation({
@@ -92,6 +101,12 @@ export default function MessagesPage() {
 
   const handleSelectConversation = (userId: string) => {
     setSelectedUserId(userId);
+  };
+
+  const handleSelectUser = (userId: string) => {
+    setSelectedUserId(userId);
+    setIsDialogOpen(false);
+    setSearchQuery("");
   };
 
   // Mark unread messages as read when switching conversations  
@@ -141,7 +156,68 @@ export default function MessagesPage() {
             {/* Conversations List */}
             <Card className="md:col-span-1">
               <CardHeader>
-                <h2 className="text-xl font-semibold">Konuşmalar</h2>
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="text-xl font-semibold">Konuşmalar</h2>
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" variant="outline" data-testid="button-new-message">
+                        <UserPlus className="w-4 h-4 mr-1" />
+                        Yeni Mesaj
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Yeni Mesaj Gönder</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Kullanıcı adı ara..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10"
+                            data-testid="input-search-user"
+                          />
+                        </div>
+                        <div className="max-h-64 overflow-y-auto space-y-2">
+                          {searchLoading ? (
+                            <p className="text-center text-muted-foreground">Aranıyor...</p>
+                          ) : searchQuery.length < 2 ? (
+                            <p className="text-center text-muted-foreground">En az 2 karakter girin</p>
+                          ) : searchResults.length === 0 ? (
+                            <p className="text-center text-muted-foreground">Kullanıcı bulunamadı</p>
+                          ) : (
+                            searchResults
+                              .filter((u) => u.id !== user?.id)
+                              .map((searchUser) => (
+                                <div
+                                  key={searchUser.id}
+                                  className="p-3 rounded-md cursor-pointer hover-elevate active-elevate-2"
+                                  onClick={() => handleSelectUser(searchUser.id)}
+                                  data-testid={`user-result-${searchUser.id}`}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <Avatar className="w-8 h-8">
+                                      <AvatarFallback>{searchUser.username[0].toUpperCase()}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                      <p className="font-medium text-sm">{searchUser.username}</p>
+                                      {searchUser.playerRole && (
+                                        <Badge variant="outline" className="text-xs">
+                                          {searchUser.playerRole}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))
+                          )}
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </CardHeader>
               <CardContent>
                 {conversationsLoading ? (

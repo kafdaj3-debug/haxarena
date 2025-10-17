@@ -88,6 +88,7 @@ export const forumPosts = pgTable("forum_posts", {
   isLocked: boolean("is_locked").notNull().default(false),
   isArchived: boolean("is_archived").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  editedAt: timestamp("edited_at"),
 });
 
 export const forumReplies = pgTable("forum_replies", {
@@ -98,6 +99,7 @@ export const forumReplies = pgTable("forum_replies", {
   imageUrl: text("image_url"),
   quotedReplyId: varchar("quoted_reply_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  editedAt: timestamp("edited_at"),
 });
 
 export const chatMessages = pgTable("chat_messages", {
