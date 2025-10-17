@@ -48,7 +48,7 @@ const staticPlayers: PlayerStats[] = [
   { username: "Okan", rank: "HaxArena Üye", goals: 20, assists: 9, dm: 6, cs: 3, saves: 46, matchTime: 1800, matchesPlayed: 55 }
 ];
 
-type ViewCategory = 'best6' | 'goals' | 'assists' | 'dm' | 'cs' | 'saves' | 'matchTime' | 'top50';
+type ViewCategory = 'best6' | 'goals' | 'assists' | 'dm' | 'cs' | 'saves' | 'matchTime' | 'top25';
 
 export default function StatisticsPage() {
   const { user, logout } = useAuth();
@@ -65,13 +65,13 @@ export default function StatisticsPage() {
   // Get players based on active view
   const getPlayers = () => {
     if (activeView === 'best6') {
-      // Best 6: TOP 50 genel sıralamasından ilk 6 kişi (gol bazlı)
+      // Best 6: TOP 25 genel sıralamasından ilk 6 kişi (gol bazlı)
       return [...staticPlayers]
         .sort((a, b) => b.goals - a.goals)
         .slice(0, 6);
-    } else if (activeView === 'top50') {
-      // TOP 50: Tüm oyuncular
-      return staticPlayers.slice(0, 50);
+    } else if (activeView === 'top25') {
+      // TOP 25: Tüm oyuncular
+      return staticPlayers.slice(0, 25);
     } else {
       // Kategorilere göre top 10
       return [...staticPlayers]
@@ -90,7 +90,7 @@ export default function StatisticsPage() {
       cs: 'CS - Top 10',
       saves: 'Kurtarış - Top 10',
       matchTime: 'Süre - Top 10',
-      top50: 'TOP 50'
+      top25: 'TOP 25'
     };
     return titles[activeView];
   };
@@ -105,7 +105,7 @@ export default function StatisticsPage() {
       cs: Award,
       saves: Shield,
       matchTime: Clock,
-      top50: ListOrdered
+      top25: ListOrdered
     };
     return icons[activeView];
   };
@@ -157,9 +157,9 @@ export default function StatisticsPage() {
                 <Clock className="w-4 h-4" />
                 <span className="hidden sm:inline">Süre</span>
               </TabsTrigger>
-              <TabsTrigger value="top50" className="gap-1" data-testid="tab-top50">
+              <TabsTrigger value="top25" className="gap-1" data-testid="tab-top25">
                 <ListOrdered className="w-4 h-4" />
-                <span className="hidden sm:inline">TOP 50</span>
+                <span className="hidden sm:inline">TOP 25</span>
               </TabsTrigger>
             </TabsList>
           </Tabs>
