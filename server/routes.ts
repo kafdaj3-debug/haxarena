@@ -1036,6 +1036,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Private message routes
+  app.post("/api/private-messages", isAuthenticated, isNotBanned, async (req, res) => {
+    try {
+      const { receiverId, message } = req.body;
+      
+      if (!receiverId || !message) {
+        return res.status(400).json({ error: "Alıcı ve mesaj gerekli" });
+      }
+
+      const receiver = await storage.getUser(receiverId);
+      if (!receiver) {
+        return res.status(404).json({ error: "Kullanıcı bulunamadı" });
+      }
+
+      const pm = await storage.sendPrivateMessage({
+        senderId: req.user!.id,
+        receiverId,
+        message,
+      });
+
+      return res.json(pm);
+    } catch (error) {
+      return res.status(500).json({ error: "Mesaj gönderilemedi" });
+    }
+  });
+
+  app.get("/api/private-messages/conversations", isAuthenticated, async (req, res) => {
+    try {
+      const conversations = await storage.getConversations(req.user!.id);
+      return res.json(conversations);
+    } catch (error) {
+      return res.status(500).json({ error: "Konuşmalar yüklenemedi" });
+    }
+  });
+
+  app.get("/api/private-messages/unread-count", isAuthenticated, async (req, res) => {
+    try {
+      const count = await storage.getUnreadMessageCount(req.user!.id);
+      return res.json({ count });
+    } catch (error) {
+      return res.status(500).json({ error: "Sayı alınamadı" });
+    }
+  });
+
+  app.get("/api/private-messages/:otherUserId", isAuthenticated, async (req, res) => {
+    try {
+      const messages = await storage.getConversationMessages(req.user!.id, req.params.otherUserId);
+      return res.json(messages);
+    } catch (error) {
+      return res.status(500).json({ error: "Mesajlar yüklenemedi" });
+    }
+  });
+
+  app.patch("/api/private-messages/:messageId/read", isAuthenticated, async (req, res) => {
+    try {
+      await storage.markMessageAsRead(req.params.messageId);
+      return res.json({ message: "Mesaj okundu olarak işaretlendi" });
+    } catch (error) {
+      return res.status(500).json({ error: "İşlem başarısız" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

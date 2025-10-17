@@ -76,6 +76,13 @@ export default function Header({ user, onLogout }: HeaderProps) {
               Forum
             </Button>
           </Link>
+          {user && (
+            <Link href="/mesajlar" data-testid="link-nav-messages">
+              <Button variant="ghost" className="hover-elevate active-elevate-2">
+                Mesajlar
+              </Button>
+            </Link>
+          )}
           <Link href="/admin-kadrosu" data-testid="link-nav-staff">
             <Button variant="ghost" className="hover-elevate active-elevate-2">
               Admin Kadrosu
@@ -128,6 +135,13 @@ export default function Header({ user, onLogout }: HeaderProps) {
                     Forum
                   </Button>
                 </Link>
+                {user && (
+                  <Link href="/mesajlar" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-messages">
+                    <Button variant="ghost" className="w-full justify-start hover-elevate active-elevate-2">
+                      Mesajlar
+                    </Button>
+                  </Link>
+                )}
                 <Link href="/admin-kadrosu" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-staff">
                   <Button variant="ghost" className="w-full justify-start hover-elevate active-elevate-2">
                     Admin Kadrosu

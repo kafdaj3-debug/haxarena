@@ -18,6 +18,7 @@ import AdminApplicationPage from "@/pages/admin-application-page";
 import TeamApplicationPage from "@/pages/team-application-page";
 import ManagementPanelPage from "@/pages/management-panel-page";
 import PasswordResetPage from "@/pages/password-reset-page";
+import MessagesPage from "@/pages/messages-page";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -39,6 +40,8 @@ function Router() {
       <Route path="/admin-basvuru" component={AdminApplicationPage} />
       <Route path="/takim-basvuru" component={TeamApplicationPage} />
       <Route path="/yonetim" component={ManagementPanelPage} />
+      <Route path="/mesajlar" component={MessagesPage} />
+      <Route path="/messages" component={MessagesPage} />
       <Route component={NotFound} />
     </Switch>
   );

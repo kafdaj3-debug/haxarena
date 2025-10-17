@@ -21,6 +21,8 @@ import {
   type InsertBannedIp,
   type PasswordResetToken,
   type InsertPasswordResetToken,
+  type PrivateMessage,
+  type InsertPrivateMessage,
   users,
   adminApplications,
   teamApplications,
@@ -106,6 +108,13 @@ export interface IStorage {
   getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
   deletePasswordResetToken(id: string): Promise<void>;
   deleteUserPasswordResetTokens(userId: string): Promise<void>;
+  
+  // Private message operations
+  sendPrivateMessage(message: InsertPrivateMessage): Promise<PrivateMessage>;
+  getConversations(userId: string): Promise<Array<{ otherUser: User; lastMessage: PrivateMessage; unreadCount: number }>>;
+  getConversationMessages(userId: string, otherUserId: string): Promise<(PrivateMessage & { sender: User; receiver: User })[]>;
+  markMessageAsRead(messageId: string): Promise<void>;
+  getUnreadMessageCount(userId: string): Promise<number>;
 }
 
 export class DBStorage implements IStorage {
@@ -458,6 +467,112 @@ export class DBStorage implements IStorage {
 
   async deleteUserPasswordResetTokens(userId: string): Promise<void> {
     await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, userId));
+  }
+
+  // Private message operations
+  async sendPrivateMessage(message: InsertPrivateMessage): Promise<PrivateMessage> {
+    const [pm] = await db.insert(privateMessages).values(message).returning();
+    return pm;
+  }
+
+  async getConversations(userId: string): Promise<Array<{ otherUser: User; lastMessage: PrivateMessage; unreadCount: number }>>  {
+    const { or, and, sql } = await import("drizzle-orm");
+    
+    // Get all messages where user is sender or receiver
+    const messages = await db
+      .select()
+      .from(privateMessages)
+      .where(
+        or(
+          eq(privateMessages.senderId, userId),
+          eq(privateMessages.receiverId, userId)
+        )
+      )
+      .orderBy(desc(privateMessages.createdAt));
+
+    // Group by other user
+    const conversationMap = new Map<string, { lastMessage: PrivateMessage; messages: PrivateMessage[] }>();
+    
+    for (const msg of messages) {
+      const otherUserId = msg.senderId === userId ? msg.receiverId : msg.senderId;
+      
+      if (!conversationMap.has(otherUserId)) {
+        conversationMap.set(otherUserId, { lastMessage: msg, messages: [msg] });
+      } else {
+        conversationMap.get(otherUserId)!.messages.push(msg);
+      }
+    }
+
+    // Build conversation list with other user info and unread count
+    const conversations = await Promise.all(
+      Array.from(conversationMap.entries()).map(async ([otherUserId, data]) => {
+        const [otherUser] = await db.select().from(users).where(eq(users.id, otherUserId)).limit(1);
+        
+        // Count unread messages from other user to current user
+        const unreadCount = data.messages.filter(
+          m => m.senderId === otherUserId && m.receiverId === userId && !m.isRead
+        ).length;
+
+        return {
+          otherUser,
+          lastMessage: data.lastMessage,
+          unreadCount,
+        };
+      })
+    );
+
+    return conversations;
+  }
+
+  async getConversationMessages(userId: string, otherUserId: string): Promise<(PrivateMessage & { sender: User; receiver: User })[]> {
+    const { or, and } = await import("drizzle-orm");
+    
+    const messages = await db
+      .select()
+      .from(privateMessages)
+      .where(
+        or(
+          and(
+            eq(privateMessages.senderId, userId),
+            eq(privateMessages.receiverId, otherUserId)
+          ),
+          and(
+            eq(privateMessages.senderId, otherUserId),
+            eq(privateMessages.receiverId, userId)
+          )
+        )
+      )
+      .orderBy(privateMessages.createdAt);
+
+    const messagesWithUsers = await Promise.all(
+      messages.map(async (msg) => {
+        const [sender] = await db.select().from(users).where(eq(users.id, msg.senderId)).limit(1);
+        const [receiver] = await db.select().from(users).where(eq(users.id, msg.receiverId)).limit(1);
+        return { ...msg, sender, receiver };
+      })
+    );
+
+    return messagesWithUsers;
+  }
+
+  async markMessageAsRead(messageId: string): Promise<void> {
+    await db.update(privateMessages).set({ isRead: true }).where(eq(privateMessages.id, messageId));
+  }
+
+  async getUnreadMessageCount(userId: string): Promise<number> {
+    const { and } = await import("drizzle-orm");
+    
+    const unreadMessages = await db
+      .select()
+      .from(privateMessages)
+      .where(
+        and(
+          eq(privateMessages.receiverId, userId),
+          eq(privateMessages.isRead, false)
+        )
+      );
+
+    return unreadMessages.length;
   }
 }
 
