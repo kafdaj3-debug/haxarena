@@ -243,19 +243,6 @@ export default function PlayerDetailPage() {
                     <CardContent className="flex items-center justify-center">
                       <ResponsiveContainer width="100%" height={300}>
                         <PieChart>
-                          <defs>
-                            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-                              <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
-                              <feOffset dx="0" dy="4" result="offsetblur"/>
-                              <feComponentTransfer>
-                                <feFuncA type="linear" slope="0.5"/>
-                              </feComponentTransfer>
-                              <feMerge>
-                                <feMergeNode/>
-                                <feMergeNode in="SourceGraphic"/>
-                              </feMerge>
-                            </filter>
-                          </defs>
                           <Pie
                             data={pieChartData}
                             cx="50%"
@@ -270,7 +257,7 @@ export default function PlayerDetailPage() {
                             animationDuration={800}
                             label={false}
                             labelLine={false}
-                            style={{ filter: 'url(#shadow)', cursor: 'pointer' }}
+                            style={{ cursor: 'pointer' }}
                             activeIndex={activeIndex}
                             activeShape={renderActiveShape}
                             onMouseEnter={(_, index) => setActiveIndex(index)}
