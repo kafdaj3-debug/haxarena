@@ -119,6 +119,8 @@ export interface IStorage {
   
   // Player statistics operations
   getPlayerStats(): Promise<User[]>;
+  getPlayerByUsername(username: string): Promise<User | undefined>;
+  getPlayersRanking(): Promise<User[]>;
   updatePlayerStats(userId: string, stats: { goals?: number; assists?: number; saves?: number; matchTime?: number; rank?: string }): Promise<User | undefined>;
 }
 
@@ -596,6 +598,26 @@ export class DBStorage implements IStorage {
       .orderBy(desc(users.goals));
     
     return allUsers;
+  }
+
+  async getPlayerByUsername(username: string): Promise<User | undefined> {
+    const [player] = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, username))
+      .limit(1);
+    
+    return player;
+  }
+
+  async getPlayersRanking(): Promise<User[]> {
+    const allPlayers = await db
+      .select()
+      .from(users)
+      .where(eq(users.isApproved, true))
+      .orderBy(desc(users.points));
+    
+    return allPlayers;
   }
 
   async updatePlayerStats(

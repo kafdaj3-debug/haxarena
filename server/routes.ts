@@ -1203,6 +1203,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Player detail by username
+  app.get("/api/players/:username", async (req, res) => {
+    try {
+      const player = await storage.getPlayerByUsername(req.params.username);
+      
+      if (!player) {
+        return res.status(404).json({ error: "Oyuncu bulunamadı" });
+      }
+
+      // Get all players ranking to calculate position
+      const allPlayers = await storage.getPlayersRanking();
+      const playerIndex = allPlayers.findIndex(p => p.id === player.id);
+      const ranking = playerIndex !== -1 ? playerIndex + 1 : 0;
+
+      // Remove sensitive data
+      const { password, lastIpAddress, ...playerData } = player;
+      
+      return res.json({
+        ...playerData,
+        ranking,
+        totalPlayers: allPlayers.length
+      });
+    } catch (error) {
+      return res.status(500).json({ error: "Oyuncu detayı yüklenemedi" });
+    }
+  });
+
+  // Players ranking
+  app.get("/api/players/ranking", async (req, res) => {
+    try {
+      const ranking = await storage.getPlayersRanking();
+      // Remove sensitive data
+      const sanitized = ranking.map(user => {
+        const { password, lastIpAddress, ...safe } = user;
+        return safe;
+      });
+      return res.json(sanitized);
+    } catch (error) {
+      return res.status(500).json({ error: "Sıralama yüklenemedi" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
