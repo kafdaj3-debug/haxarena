@@ -21,8 +21,6 @@ import {
   type InsertBannedIp,
   type PasswordResetToken,
   type InsertPasswordResetToken,
-  type PrivateMessage,
-  type InsertPrivateMessage,
   users,
   adminApplications,
   teamApplications,
@@ -43,18 +41,10 @@ export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
-  getUserProfile(userId: string): Promise<{
-    user: User;
-    forumPostCount: number;
-    chatMessageCount: number;
-    teamApplications: TeamApplication[];
-    adminApplications: AdminApplication[];
-  } | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
   deleteUser(id: string): Promise<void>;
   getAllUsers(): Promise<User[]>;
-  getRecentUsers(limit?: number): Promise<User[]>;
   
   // Admin application operations
   createAdminApplication(app: InsertAdminApplication): Promise<AdminApplication>;
@@ -97,6 +87,7 @@ export interface IStorage {
   createForumReply(reply: InsertForumReply): Promise<ForumReply>;
   getForumReplies(postId: string): Promise<(ForumReply & { user: User })[]>;
   getForumReply(id: string): Promise<(ForumReply & { user: User }) | undefined>;
+  updateForumReply(id: string, updates: Partial<ForumReply>): Promise<ForumReply | undefined>;
   deleteForumReply(id: string): Promise<void>;
   
   // Chat message operations
@@ -115,14 +106,6 @@ export interface IStorage {
   getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
   deletePasswordResetToken(id: string): Promise<void>;
   deleteUserPasswordResetTokens(userId: string): Promise<void>;
-  
-  // Private message operations
-  sendPrivateMessage(message: InsertPrivateMessage): Promise<PrivateMessage>;
-  getConversation(userId1: string, userId2: string): Promise<PrivateMessage[]>;
-  getUserConversations(userId: string): Promise<{userId: string; username: string; lastMessage: string; unreadCount: number; createdAt: Date}[]>;
-  markMessageAsRead(messageId: string): Promise<void>;
-  markConversationAsRead(userId: string, otherUserId: string): Promise<void>;
-  getAllPrivateMessages(): Promise<(PrivateMessage & { sender: User; receiver: User })[]>;
 }
 
 export class DBStorage implements IStorage {
@@ -148,6 +131,8 @@ export class DBStorage implements IStorage {
   }
 
   async deleteUser(id: string): Promise<void> {
+    const { or } = await import("drizzle-orm");
+    
     // İlk önce kullanıcıya ait tüm bağlı kayıtları sil
     await db.delete(forumReplies).where(eq(forumReplies.userId, id));
     await db.delete(forumPosts).where(eq(forumPosts.userId, id));
@@ -155,6 +140,15 @@ export class DBStorage implements IStorage {
     await db.delete(teamApplications).where(eq(teamApplications.userId, id));
     await db.delete(notifications).where(eq(notifications.userId, id));
     await db.delete(chatMessages).where(eq(chatMessages.userId, id));
+    await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, id));
+    
+    // Private message'ları sil (gönderen veya alıcı olarak)
+    await db.delete(privateMessages).where(
+      or(
+        eq(privateMessages.senderId, id),
+        eq(privateMessages.receiverId, id)
+      )
+    );
     
     // Son olarak kullanıcıyı sil
     await db.delete(users).where(eq(users.id, id));
@@ -162,43 +156,6 @@ export class DBStorage implements IStorage {
 
   async getAllUsers(): Promise<User[]> {
     return await db.select().from(users);
-  }
-
-  async getRecentUsers(limit: number = 10): Promise<User[]> {
-    return await db.select()
-      .from(users)
-      .orderBy(desc(users.createdAt))
-      .limit(limit);
-  }
-
-  async getUserProfile(userId: string) {
-    const user = await this.getUser(userId);
-    if (!user) return undefined;
-
-    const [forumPostCount, chatMessageCount, userTeamApps, userAdminApps] = await Promise.all([
-      db.select().from(forumPosts).where(eq(forumPosts.userId, userId)).then(posts => posts.length),
-      db.select().from(chatMessages).where(eq(chatMessages.userId, userId)).then(messages => messages.length),
-      this.getUserTeamApplications(userId),
-      this.getUserAdminApplications(userId)
-    ]);
-
-    return {
-      user,
-      forumPostCount,
-      chatMessageCount,
-      teamApplications: userTeamApps.map(app => ({
-        id: app.id,
-        teamName: app.teamName,
-        status: app.status,
-        createdAt: app.createdAt
-      })),
-      adminApplications: userAdminApps.map(app => ({
-        id: app.id,
-        name: app.name,
-        status: app.status,
-        createdAt: app.createdAt
-      }))
-    };
   }
 
   // Admin application operations
@@ -422,6 +379,11 @@ export class DBStorage implements IStorage {
     return { ...reply, user };
   }
 
+  async updateForumReply(id: string, updates: Partial<ForumReply>): Promise<ForumReply | undefined> {
+    const [reply] = await db.update(forumReplies).set(updates).where(eq(forumReplies.id, id)).returning();
+    return reply;
+  }
+
   async deleteForumReply(id: string): Promise<void> {
     await db.delete(forumReplies).where(eq(forumReplies.id, id));
   }
@@ -496,119 +458,6 @@ export class DBStorage implements IStorage {
 
   async deleteUserPasswordResetTokens(userId: string): Promise<void> {
     await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, userId));
-  }
-
-  // Private message operations
-  async sendPrivateMessage(message: InsertPrivateMessage): Promise<PrivateMessage> {
-    const [pm] = await db.insert(privateMessages).values(message).returning();
-    return pm;
-  }
-
-  async getConversation(userId1: string, userId2: string): Promise<PrivateMessage[]> {
-    const { or, and } = await import("drizzle-orm");
-    return await db.select()
-      .from(privateMessages)
-      .where(
-        or(
-          and(
-            eq(privateMessages.senderId, userId1),
-            eq(privateMessages.receiverId, userId2)
-          ),
-          and(
-            eq(privateMessages.senderId, userId2),
-            eq(privateMessages.receiverId, userId1)
-          )
-        )
-      )
-      .orderBy(desc(privateMessages.createdAt));
-  }
-
-  async getUserConversations(userId: string): Promise<{userId: string; username: string; lastMessage: string; unreadCount: number; createdAt: Date}[]> {
-    const { or, and, sql, count } = await import("drizzle-orm");
-    
-    const sentMessages = await db.select()
-      .from(privateMessages)
-      .where(eq(privateMessages.senderId, userId))
-      .orderBy(desc(privateMessages.createdAt));
-    
-    const receivedMessages = await db.select()
-      .from(privateMessages)
-      .where(eq(privateMessages.receiverId, userId))
-      .orderBy(desc(privateMessages.createdAt));
-    
-    const allMessages = [...sentMessages, ...receivedMessages]
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    
-    const conversationMap = new Map<string, typeof allMessages[0]>();
-    
-    for (const msg of allMessages) {
-      const otherUserId = msg.senderId === userId ? msg.receiverId : msg.senderId;
-      if (!conversationMap.has(otherUserId)) {
-        conversationMap.set(otherUserId, msg);
-      }
-    }
-    
-    const conversations = [];
-    for (const [otherUserId, lastMsg] of conversationMap.entries()) {
-      const otherUser = await this.getUser(otherUserId);
-      if (!otherUser) continue;
-      
-      const unreadMessages = await db.select()
-        .from(privateMessages)
-        .where(
-          and(
-            eq(privateMessages.senderId, otherUserId),
-            eq(privateMessages.receiverId, userId),
-            eq(privateMessages.isRead, false)
-          )
-        );
-      
-      conversations.push({
-        userId: otherUserId,
-        username: otherUser.username,
-        lastMessage: lastMsg.message,
-        unreadCount: unreadMessages.length,
-        createdAt: lastMsg.createdAt
-      });
-    }
-    
-    return conversations.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  }
-
-  async markMessageAsRead(messageId: string): Promise<void> {
-    await db.update(privateMessages)
-      .set({ isRead: true })
-      .where(eq(privateMessages.id, messageId));
-  }
-
-  async markConversationAsRead(userId: string, otherUserId: string): Promise<void> {
-    const { and } = await import("drizzle-orm");
-    await db.update(privateMessages)
-      .set({ isRead: true })
-      .where(
-        and(
-          eq(privateMessages.senderId, otherUserId),
-          eq(privateMessages.receiverId, userId)
-        )
-      );
-  }
-
-  async getAllPrivateMessages(): Promise<(PrivateMessage & { sender: User; receiver: User })[]> {
-    const messages = await db.select().from(privateMessages).orderBy(desc(privateMessages.createdAt));
-    
-    const messagesWithUsers = await Promise.all(
-      messages.map(async (msg) => {
-        const sender = await this.getUser(msg.senderId);
-        const receiver = await this.getUser(msg.receiverId);
-        return {
-          ...msg,
-          sender: sender!,
-          receiver: receiver!
-        };
-      })
-    );
-    
-    return messagesWithUsers;
   }
 }
 

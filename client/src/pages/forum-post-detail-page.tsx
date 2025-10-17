@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Calendar, Archive, Lock as LockIcon, MessageSquare, Trash2, Quote, Image as ImageIcon, X } from "lucide-react";
+import { ArrowLeft, Calendar, Archive, Lock as LockIcon, MessageSquare, Trash2, Quote, Image as ImageIcon, X, Edit } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
@@ -37,6 +37,13 @@ export default function ForumPostDetailPage() {
   const [replyContent, setReplyContent] = useState("");
   const [replyImageUrl, setReplyImageUrl] = useState<string | null>(null);
   const [quotedReplyId, setQuotedReplyId] = useState<string | null>(null);
+  
+  const [editingPost, setEditingPost] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  
+  const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
+  const [editReplyContent, setEditReplyContent] = useState("");
 
   const { data: post, isLoading: postLoading } = useQuery<PostWithUser>({
     queryKey: ["/api/forum-posts", id],

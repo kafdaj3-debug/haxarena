@@ -11,8 +11,6 @@ import { useAuth } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
-import { Badge } from "@/components/ui/badge";
-import { UserPlus } from "lucide-react";
 
 export default function HomePage() {
   const { user, logout } = useAuth();
@@ -37,10 +35,6 @@ export default function HomePage() {
 
   const { data: forumPosts = [] } = useQuery<any[]>({
     queryKey: ["/api/forum-posts"],
-  });
-
-  const { data: recentUsers = [] } = useQuery<any[]>({
-    queryKey: ["/api/users/recent"],
   });
 
   return (
@@ -155,42 +149,8 @@ export default function HomePage() {
                   </div>
                 </div>
               )}
-              <div className="lg:col-span-1 space-y-6">
+              <div className="lg:col-span-1">
                 <LiveChat />
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <UserPlus className="w-5 h-5" />
-                      Son Kayıt Olanlar
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {recentUsers.length > 0 ? (
-                        recentUsers.slice(0, 5).map((user: any) => (
-                          <Link key={user.id} href={`/profil/${user.id}`}>
-                            <div className="flex items-center justify-between p-2 rounded-lg hover-elevate cursor-pointer" data-testid={`recent-user-${user.id}`}>
-                              <div>
-                                <p className="font-medium text-sm">{user.username}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {formatDistanceToNow(new Date(user.createdAt), { addSuffix: true, locale: tr })}
-                                </p>
-                              </div>
-                              <Badge variant="outline" className="text-xs">
-                                {user.role}
-                              </Badge>
-                            </div>
-                          </Link>
-                        ))
-                      ) : (
-                        <p className="text-sm text-muted-foreground text-center py-4">
-                          Henüz kayıt yok
-                        </p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
               </div>
             </div>
 

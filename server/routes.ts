@@ -694,7 +694,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/forum-posts/:id", isAuthenticated, async (req, res) => {
     try {
-      const { isLocked, isArchived } = req.body;
+      const { isLocked, isArchived, title, content } = req.body;
       const post = await storage.getForumPost(req.params.id);
       
       if (!post) {
@@ -705,7 +705,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isOwner = post.userId === req.user!.id;
       const isAdminUser = req.user!.isAdmin || req.user!.isSuperAdmin;
       
-      const updates: Partial<{ isLocked: boolean; isArchived: boolean }> = {};
+      const updates: Partial<{ isLocked: boolean; isArchived: boolean; title: string; content: string }> = {};
+      
+      // Sadece post sahibi title ve content düzenleyebilir
+      if (isOwner && title) {
+        updates.title = title;
+      }
+      if (isOwner && content) {
+        updates.content = content;
+      }
       
       if (typeof isLocked === "boolean" && isAdminUser) {
         updates.isLocked = isLocked;
@@ -791,6 +799,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/forum-replies/:id", isAuthenticated, async (req, res) => {
+    try {
+      const { content } = req.body;
+      const reply = await storage.getForumReply(req.params.id);
+      
+      if (!reply) {
+        return res.status(404).json({ error: "Cevap bulunamadı" });
+      }
+      
+      // Sadece reply sahibi düzenleyebilir
+      const isOwner = reply.userId === req.user!.id;
+      
+      if (!isOwner) {
+        return res.status(403).json({ error: "Bu cevabı düzenleme yetkiniz yok" });
+      }
+      
+      if (!content) {
+        return res.status(400).json({ error: "İçerik gerekli" });
+      }
+      
+      const updatedReply = await storage.updateForumReply(req.params.id, { content });
+      return res.json(updatedReply);
+    } catch (error) {
+      return res.status(500).json({ error: "Cevap güncellenemedi" });
+    }
+  });
+
   app.delete("/api/forum-replies/:id", isAuthenticated, async (req, res) => {
     try {
       const reply = await storage.getForumReply(req.params.id);
@@ -841,7 +876,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Mesaj boş olamaz" });
       }
 
-      // Rate limiting: 3 saniye (Admin, Yönetim ve VIP'ler hariç)
+      // Rate limiting: 5 saniye (Admin, Yönetim ve VIP'ler hariç)
       const currentUser = await storage.getUser(req.user!.id);
       const isExemptFromRateLimit = currentUser?.isAdmin || 
                                      currentUser?.role?.includes('VIP');
@@ -851,8 +886,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const now = Date.now();
         const lastMessageTime = userLastMessageTime.get(userId) || 0;
         
-        if (now - lastMessageTime < 3000) {
-          const remainingSeconds = Math.ceil((3000 - (now - lastMessageTime)) / 1000);
+        if (now - lastMessageTime < 5000) {
+          const remainingSeconds = Math.ceil((5000 - (now - lastMessageTime)) / 1000);
           return res.status(429).json({ 
             error: `Lütfen ${remainingSeconds} saniye bekleyin` 
           });
@@ -998,50 +1033,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json({ message: "Şifre başarıyla değiştirildi" });
     } catch (error) {
       return res.status(500).json({ error: "Şifre değiştirilemedi" });
-    }
-  });
-
-  // User profile route (public)
-  app.get("/api/users/:userId/profile", async (req, res) => {
-    try {
-      const { userId } = req.params;
-      const profile = await storage.getUserProfile(userId);
-      
-      if (!profile) {
-        return res.status(404).json({ error: "Kullanıcı bulunamadı" });
-      }
-
-      // Şifreyi gizle
-      const { password, ...safeUser } = profile.user;
-      
-      return res.json({
-        user: safeUser,
-        forumPostCount: profile.forumPostCount,
-        chatMessageCount: profile.chatMessageCount,
-        teamApplications: profile.teamApplications,
-        adminApplications: profile.adminApplications
-      });
-    } catch (error) {
-      return res.status(500).json({ error: "Profil bilgileri alınamadı" });
-    }
-  });
-
-  // Recent users route (public)
-  app.get("/api/users/recent", async (req, res) => {
-    try {
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
-      const users = await storage.getRecentUsers(limit);
-      // Şifreleri gizle
-      const safeUsers = users.map(u => ({
-        id: u.id,
-        username: u.username,
-        role: u.role,
-        playerRole: u.playerRole,
-        createdAt: u.createdAt,
-      }));
-      return res.json(safeUsers);
-    } catch (error) {
-      return res.status(500).json({ error: "Kullanıcılar yüklenemedi" });
     }
   });
 

@@ -48,12 +48,13 @@ export default function LiveChat() {
       const errorMessage = error.message || "Mesaj gönderilemedi";
       const match = errorMessage.match(/Lütfen (\d+) saniye bekleyin/);
       if (match) {
-        const seconds = match[1];
         toast({
-          description: `Biraz yavaş ol, ${seconds} saniye sonra tekrar dene`,
+          title: "Yavaş ol!",
+          description: errorMessage.split(': ')[1],
         });
       } else {
         toast({
+          title: "Uyarı",
           description: "Mesaj gönderilemedi",
         });
       }
