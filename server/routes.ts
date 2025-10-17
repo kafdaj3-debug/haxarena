@@ -1226,6 +1226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalPlayers: allPlayers.length
       });
     } catch (error) {
+      console.error("Error in /api/players/:username:", error);
       return res.status(500).json({ error: "Oyuncu detayı yüklenemedi" });
     }
   });
