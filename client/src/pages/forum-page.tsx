@@ -36,7 +36,6 @@ const roleColors: Record<string, string> = {
 
 const categories = [
   { value: "Genel Sohbet", label: "Genel Sohbet" },
-  { value: "Takım Başvuruları", label: "Takım Başvuruları" },
   { value: "Öneriler", label: "Öneriler" },
   { value: "Sözlük", label: "Sözlük" },
 ];
@@ -139,8 +138,6 @@ export default function ForumPage() {
   const filterPostsByTab = (tab: string) => {
     if (tab === "all") {
       setSelectedCategory(undefined);
-    } else if (tab === "team-applications") {
-      setSelectedCategory("Takım Başvuruları");
     } else if (tab === "suggestions") {
       setSelectedCategory("Öneriler");
     } else if (tab === "general") {
@@ -331,7 +328,6 @@ export default function ForumPage() {
           <Tabs defaultValue="all" className="space-y-6" onValueChange={filterPostsByTab}>
             <TabsList>
               <TabsTrigger value="all" data-testid="tab-all">Tümü</TabsTrigger>
-              <TabsTrigger value="team-applications" data-testid="tab-team-applications">Takım Başvuruları</TabsTrigger>
               <TabsTrigger value="suggestions" data-testid="tab-suggestions">Öneriler</TabsTrigger>
               <TabsTrigger value="general" data-testid="tab-general">Genel Sohbet</TabsTrigger>
               <TabsTrigger value="dictionary" data-testid="tab-dictionary">Sözlük</TabsTrigger>
