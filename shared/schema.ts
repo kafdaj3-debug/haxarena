@@ -7,6 +7,7 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  profilePicture: text("profile_picture"), // base64 image or gif
   isAdmin: boolean("is_admin").notNull().default(false),
   isSuperAdmin: boolean("is_super_admin").notNull().default(false),
   isApproved: boolean("is_approved").notNull().default(false),
