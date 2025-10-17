@@ -283,19 +283,6 @@ export default function PlayerDetailPage() {
                               />
                             ))}
                           </Pie>
-                          <Tooltip 
-                            contentStyle={{ 
-                              backgroundColor: 'rgba(0, 0, 0, 0.9)', 
-                              border: '1px solid rgba(255, 255, 255, 0.2)',
-                              borderRadius: '8px',
-                              color: '#e5e5e5',
-                              padding: '8px 12px'
-                            }}
-                            formatter={(value: number, name: string, props: any) => [
-                              `${value} maç (%${props.payload.percentage})`,
-                              name
-                            ]}
-                          />
                           <Legend 
                             verticalAlign="bottom" 
                             height={36}
