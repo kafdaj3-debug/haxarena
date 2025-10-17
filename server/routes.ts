@@ -1166,10 +1166,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/stats", async (req, res) => {
     try {
       const stats = await storage.getPlayerStats();
-      // Remove sensitive data
+      // Remove sensitive data and add DM/CS (not in database, set to 0)
       const sanitized = stats.map(user => {
         const { password, lastIpAddress, ...safe } = user;
-        return safe;
+        return {
+          ...safe,
+          dm: 0,
+          cs: 0
+        };
       });
       return res.json(sanitized);
     } catch (error) {

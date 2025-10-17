@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
@@ -6,7 +7,7 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Target, Shield, Clock, Crosshair, Award, TrendingUp, User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, Sector } from "recharts";
 
 interface PlayerDetailData {
   id: string;
@@ -25,9 +26,30 @@ interface PlayerDetailData {
   totalPlayers: number;
 }
 
+const renderActiveShape = (props: any) => {
+  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
+
+  return (
+    <g>
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius + 10}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+        stroke="rgba(255, 255, 255, 0.3)"
+        strokeWidth={2}
+      />
+    </g>
+  );
+};
+
 export default function PlayerDetailPage() {
   const { username } = useParams();
   const { user, logout } = useAuth();
+  const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
 
   const { data: player, isLoading } = useQuery<PlayerDetailData>({
     queryKey: ['/api/players', username],
@@ -60,19 +82,19 @@ export default function PlayerDetailPage() {
       name: 'Galibiyet', 
       value: player?.wins || 0, 
       percentage: winPercentage,
-      color: '#22c55e' // green-500
+      color: '#86efac' // green-300 (light)
     },
     { 
       name: 'Yenilgi', 
       value: player?.losses || 0, 
       percentage: lossPercentage,
-      color: '#ef4444' // red-500
+      color: '#fca5a5' // red-300 (light)
     },
     { 
       name: 'Beraberlik', 
       value: player?.draws || 0, 
       percentage: drawPercentage,
-      color: '#eab308' // yellow-500
+      color: '#fde047' // yellow-300 (light)
     },
   ];
 
@@ -211,20 +233,36 @@ export default function PlayerDetailPage() {
                             dataKey="value"
                             animationBegin={0}
                             animationDuration={1000}
-                            label={({ percentage }) => `%${percentage}`}
+                            label={{
+                              position: 'inside',
+                              fill: '#ffffff',
+                              fontSize: 14,
+                              fontWeight: 600,
+                              formatter: (value: any, entry: any) => `%${entry.percentage}`
+                            }}
                             labelLine={false}
-                            style={{ filter: 'url(#shadow)' }}
+                            style={{ filter: 'url(#shadow)', cursor: 'pointer' }}
+                            activeIndex={activeIndex}
+                            activeShape={renderActiveShape}
+                            onMouseEnter={(_, index) => setActiveIndex(index)}
+                            onMouseLeave={() => setActiveIndex(undefined)}
                           >
                             {pieChartData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={2} stroke="#1a1a1a" />
+                              <Cell 
+                                key={`cell-${index}`} 
+                                fill={entry.color} 
+                                strokeWidth={2} 
+                                stroke="rgba(255, 255, 255, 0.3)"
+                              />
                             ))}
                           </Pie>
                           <Tooltip 
                             contentStyle={{ 
-                              backgroundColor: 'rgba(0, 0, 0, 0.8)', 
-                              border: '1px solid #333',
-                              borderRadius: '6px',
-                              color: '#fff'
+                              backgroundColor: 'rgba(0, 0, 0, 0.9)', 
+                              border: '1px solid rgba(255, 255, 255, 0.2)',
+                              borderRadius: '8px',
+                              color: '#fff',
+                              padding: '8px 12px'
                             }}
                             formatter={(value: number, name: string, props: any) => [
                               `${value} maç (%${props.payload.percentage})`,
@@ -234,7 +272,7 @@ export default function PlayerDetailPage() {
                           <Legend 
                             verticalAlign="bottom" 
                             height={36}
-                            formatter={(value: string) => <span className="text-sm">{value}</span>}
+                            formatter={(value: string) => <span className="text-sm text-foreground">{value}</span>}
                           />
                         </PieChart>
                       </ResponsiveContainer>

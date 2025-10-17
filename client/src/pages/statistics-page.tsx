@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Target, Shield, Clock, Crown, ListOrdered } from "lucide-react";
+import { Trophy, Target, Shield, Clock, Crown, ListOrdered, Crosshair, Award } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface PlayerStats {
@@ -17,9 +17,11 @@ interface PlayerStats {
   saves: number;
   matchTime: number;
   matchesPlayed: number;
+  dm: number;
+  cs: number;
 }
 
-type ViewCategory = 'best6' | 'goals' | 'assists' | 'saves' | 'matchTime' | 'top25';
+type ViewCategory = 'best6' | 'goals' | 'assists' | 'dm' | 'cs' | 'saves' | 'matchTime' | 'top25';
 
 export default function StatisticsPage() {
   const { user, logout } = useAuth();
@@ -62,6 +64,8 @@ export default function StatisticsPage() {
       best6: 'Best 6',
       goals: 'Gol - Top 10',
       assists: 'Asist - Top 10',
+      dm: 'DM - Top 10',
+      cs: 'CS - Top 10',
       saves: 'Kurtarış - Top 10',
       matchTime: 'Süre - Top 10',
       top25: 'TOP 25'
@@ -75,6 +79,8 @@ export default function StatisticsPage() {
       best6: Crown,
       goals: Trophy,
       assists: Target,
+      dm: Crosshair,
+      cs: Award,
       saves: Shield,
       matchTime: Clock,
       top25: ListOrdered
@@ -100,7 +106,7 @@ export default function StatisticsPage() {
 
           {/* Category Tabs */}
           <Tabs value={activeView} onValueChange={(v) => setActiveView(v as ViewCategory)}>
-            <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full mb-6">
+            <TabsList className="grid grid-cols-4 md:grid-cols-8 w-full mb-6">
               <TabsTrigger value="best6" className="gap-1" data-testid="tab-best6">
                 <Crown className="w-4 h-4" />
                 <span className="hidden sm:inline">Best 6</span>
@@ -112,6 +118,14 @@ export default function StatisticsPage() {
               <TabsTrigger value="assists" className="gap-1" data-testid="tab-assists">
                 <Target className="w-4 h-4" />
                 <span className="hidden sm:inline">Asist</span>
+              </TabsTrigger>
+              <TabsTrigger value="dm" className="gap-1" data-testid="tab-dm">
+                <Crosshair className="w-4 h-4" />
+                <span className="hidden sm:inline">DM</span>
+              </TabsTrigger>
+              <TabsTrigger value="cs" className="gap-1" data-testid="tab-cs">
+                <Award className="w-4 h-4" />
+                <span className="hidden sm:inline">CS</span>
               </TabsTrigger>
               <TabsTrigger value="saves" className="gap-1" data-testid="tab-saves">
                 <Shield className="w-4 h-4" />
@@ -165,6 +179,8 @@ export default function StatisticsPage() {
                           Asist
                         </div>
                       </th>
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">DM</th>
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">CS</th>
                       <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
                         <div className="flex items-center justify-center gap-1">
                           <Shield className="w-4 h-4" />
@@ -182,7 +198,7 @@ export default function StatisticsPage() {
                   <tbody>
                     {players.length === 0 ? (
                       <tr>
-                        <td colSpan={8} className="text-center py-8 text-muted-foreground">
+                        <td colSpan={10} className="text-center py-8 text-muted-foreground">
                           Henüz istatistik bulunmuyor
                         </td>
                       </tr>
@@ -216,6 +232,12 @@ export default function StatisticsPage() {
                         </td>
                         <td className="px-4 py-3 text-sm text-center text-foreground" data-testid={`text-player-assists-${index}`}>
                           {player.assists}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-center text-foreground" data-testid={`text-player-dm-${index}`}>
+                          {player.dm || 0}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-center text-foreground" data-testid={`text-player-cs-${index}`}>
+                          {player.cs || 0}
                         </td>
                         <td className="px-4 py-3 text-sm text-center text-foreground" data-testid={`text-player-saves-${index}`}>
                           {player.saves}
