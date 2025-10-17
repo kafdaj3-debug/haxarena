@@ -48,11 +48,11 @@ export default function ManagementLoginPage() {
 
       const userData = await response.json();
       
-      // Check if user is admin or super admin
-      if (!userData.isAdmin && !userData.isSuperAdmin) {
+      // Check if user is super admin
+      if (!userData.isSuperAdmin) {
         toast({
           title: "Yetkisiz Erişim",
-          description: "Bu sayfaya erişim yetkiniz yok",
+          description: "Sadece süper adminler yönetim paneline erişebilir",
           variant: "destructive",
         });
         setIsLoading(false);

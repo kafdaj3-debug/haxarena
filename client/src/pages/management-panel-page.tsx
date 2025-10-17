@@ -37,13 +37,12 @@ export default function ManagementPanelPage() {
   const [ipReason, setIpReason] = useState("");
   const [resetCodes, setResetCodes] = useState<Record<string, string>>({});
   const [adminUsername, setAdminUsername] = useState("");
-  const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [adminConfirmPassword, setAdminConfirmPassword] = useState("");
 
-  // Redirect to management login if not admin (using useEffect)
+  // Redirect to management login if not super admin (using useEffect)
   useEffect(() => {
-    if (!isLoading && (!user || (!user.isAdmin && !user.isSuperAdmin))) {
+    if (!isLoading && (!user || !user.isSuperAdmin)) {
       navigate("/yonetim-giris");
     }
   }, [user, isLoading, navigate]);
@@ -59,14 +58,14 @@ export default function ManagementPanelPage() {
     );
   }
 
-  // Block render if not admin
-  if (!user || (!user.isAdmin && !user.isSuperAdmin)) {
+  // Block render if not super admin
+  if (!user || !user.isSuperAdmin) {
     return null;
   }
 
   const { data: users } = useQuery<any[]>({
     queryKey: ["/api/management/users"],
-    enabled: !!(user?.isSuperAdmin),
+    enabled: !!user?.isSuperAdmin,
   });
 
   const { data: settings } = useQuery<any>({
@@ -86,7 +85,7 @@ export default function ManagementPanelPage() {
 
   const { data: forumPosts } = useQuery<any[]>({
     queryKey: ["/api/forum-posts"],
-    enabled: !!user?.isAdmin,
+    enabled: !!user?.isSuperAdmin,
   });
 
   const { data: bannedIps } = useQuery<any[]>({
@@ -325,14 +324,13 @@ export default function ManagementPanelPage() {
   });
 
   const createAdminMutation = useMutation({
-    mutationFn: async (data: { username: string; email: string; password: string }) => {
+    mutationFn: async (data: { username: string; password: string }) => {
       return await apiRequest("POST", "/api/management/create-admin", data);
     },
     onSuccess: () => {
       toast({ title: "Başarılı", description: "Yeni admin oluşturuldu" });
       queryClient.invalidateQueries({ queryKey: ["/api/management/users"] });
       setAdminUsername("");
-      setAdminEmail("");
       setAdminPassword("");
       setAdminConfirmPassword("");
     },
@@ -394,20 +392,6 @@ export default function ManagementPanelPage() {
       toast({ title: "Hata", description: "Mute durumu güncellenemedi", variant: "destructive" });
     },
   });
-
-  if (!user?.isSuperAdmin) {
-    return (
-      <div className="flex flex-col min-h-screen">
-        <Header user={user} onLogout={logout} />
-        <main className="flex-1 py-12">
-          <div className="container mx-auto px-4 text-center">
-            <p className="text-muted-foreground">Bu sayfaya erişim yetkiniz yok</p>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
 
   const pendingUsers = users?.filter(u => !u.isApproved) || [];
   const approvedUsers = users?.filter(u => u.isApproved) || [];
@@ -489,17 +473,6 @@ export default function ManagementPanelPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="admin-email">E-posta</Label>
-                      <Input
-                        id="admin-email"
-                        type="email"
-                        value={adminEmail}
-                        onChange={(e) => setAdminEmail(e.target.value)}
-                        placeholder="E-posta adresi"
-                        data-testid="input-admin-email"
-                      />
-                    </div>
-                    <div className="space-y-2">
                       <Label htmlFor="admin-password">Şifre</Label>
                       <Input
                         id="admin-password"
@@ -524,7 +497,7 @@ export default function ManagementPanelPage() {
                   </div>
                   <Button
                     onClick={() => {
-                      if (!adminUsername || !adminEmail || !adminPassword || !adminConfirmPassword) {
+                      if (!adminUsername || !adminPassword || !adminConfirmPassword) {
                         toast({ 
                           title: "Hata", 
                           description: "Tüm alanları doldurun", 
@@ -542,7 +515,6 @@ export default function ManagementPanelPage() {
                       }
                       createAdminMutation.mutate({
                         username: adminUsername,
-                        email: adminEmail,
                         password: adminPassword,
                       });
                     }}

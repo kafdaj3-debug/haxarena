@@ -64,9 +64,10 @@ Preferred communication style: Simple, everyday language.
 - WebSocket connection support via `@neondatabase/serverless`
 
 **Schema Design:**
-- Users table: id (UUID), username, email, password (hashed), isAdmin flag, isBanned, banReason, isChatMuted, lastIpAddress
+- Users table: id (UUID), username, password (hashed), isAdmin, isSuperAdmin, isApproved, isBanned, banReason, isChatMuted, lastIpAddress, player stats (goals, assists, saves, matchTime, offlineTime, rank)
 - All fields enforce uniqueness and NOT NULL constraints where appropriate
 - Zod schemas for runtime validation via `drizzle-zod`
+- NOTE: No email column in users table (removed to match existing schema)
 
 **Migration Strategy:**
 - Development: Use `npm run db:push --force` to sync schema changes
