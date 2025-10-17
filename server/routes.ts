@@ -1098,6 +1098,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Player statistics routes
+  app.get("/api/stats", async (req, res) => {
+    try {
+      const stats = await storage.getPlayerStats();
+      // Remove sensitive data
+      const sanitized = stats.map(user => {
+        const { password, lastIpAddress, ...safe } = user;
+        return safe;
+      });
+      return res.json(sanitized);
+    } catch (error) {
+      return res.status(500).json({ error: "İstatistikler yüklenemedi" });
+    }
+  });
+
+  app.patch("/api/stats/:userId", isAdmin, async (req, res) => {
+    try {
+      const { goals, assists, saves, matchTime, offlineTime, rank } = req.body;
+      
+      // Filter out undefined values to prevent NULL constraint violations
+      const updates: any = {};
+      if (goals !== undefined) updates.goals = goals;
+      if (assists !== undefined) updates.assists = assists;
+      if (saves !== undefined) updates.saves = saves;
+      if (matchTime !== undefined) updates.matchTime = matchTime;
+      if (offlineTime !== undefined) updates.offlineTime = offlineTime;
+      if (rank !== undefined) updates.rank = rank;
+      
+      const updated = await storage.updatePlayerStats(req.params.userId, updates);
+      
+      if (!updated) {
+        return res.status(404).json({ error: "Kullanıcı bulunamadı" });
+      }
+      
+      const { password, ...userWithoutPassword } = updated;
+      return res.json(userWithoutPassword);
+    } catch (error) {
+      return res.status(500).json({ error: "İstatistikler güncellenemedi" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

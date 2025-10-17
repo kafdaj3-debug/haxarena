@@ -115,6 +115,10 @@ export interface IStorage {
   getConversationMessages(userId: string, otherUserId: string): Promise<(PrivateMessage & { sender: User; receiver: User })[]>;
   markMessageAsRead(messageId: string): Promise<void>;
   getUnreadMessageCount(userId: string): Promise<number>;
+  
+  // Player statistics operations
+  getPlayerStats(): Promise<User[]>;
+  updatePlayerStats(userId: string, stats: { goals?: number; assists?: number; saves?: number; matchTime?: number; offlineTime?: number; rank?: string }): Promise<User | undefined>;
 }
 
 export class DBStorage implements IStorage {
@@ -573,6 +577,26 @@ export class DBStorage implements IStorage {
       );
 
     return unreadMessages.length;
+  }
+
+  // Player statistics operations
+  async getPlayerStats(): Promise<User[]> {
+    const allUsers = await db
+      .select()
+      .from(users)
+      .where(eq(users.isApproved, true))
+      .orderBy(desc(users.goals));
+    
+    return allUsers;
+  }
+
+  async updatePlayerStats(
+    userId: string, 
+    stats: { goals?: number; assists?: number; saves?: number; matchTime?: number; offlineTime?: number; rank?: string }
+  ): Promise<User | undefined> {
+    await db.update(users).set(stats).where(eq(users.id, userId));
+    const [updatedUser] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    return updatedUser;
   }
 }
 

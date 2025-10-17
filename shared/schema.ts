@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, boolean, timestamp, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -17,6 +17,13 @@ export const users = pgTable("users", {
   isChatMuted: boolean("is_chat_muted").notNull().default(false),
   lastIpAddress: text("last_ip_address"),
   lastUsernameChange: timestamp("last_username_change"),
+  // Player statistics
+  goals: integer("goals").notNull().default(0),
+  assists: integer("assists").notNull().default(0),
+  saves: integer("saves").notNull().default(0),
+  matchTime: integer("match_time").notNull().default(0), // seconds
+  offlineTime: integer("offline_time").notNull().default(0), // seconds
+  rank: text("rank").notNull().default("Bronz"),
 });
 
 export const adminApplications = pgTable("admin_applications", {

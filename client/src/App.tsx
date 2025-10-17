@@ -19,6 +19,7 @@ import TeamApplicationPage from "@/pages/team-application-page";
 import ManagementPanelPage from "@/pages/management-panel-page";
 import PasswordResetPage from "@/pages/password-reset-page";
 import MessagesPage from "@/pages/messages-page";
+import StatisticsPage from "@/pages/statistics-page";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -42,6 +43,8 @@ function Router() {
       <Route path="/yonetim" component={ManagementPanelPage} />
       <Route path="/mesajlar" component={MessagesPage} />
       <Route path="/messages" component={MessagesPage} />
+      <Route path="/istatistikler" component={StatisticsPage} />
+      <Route path="/stats" component={StatisticsPage} />
       <Route component={NotFound} />
     </Switch>
   );

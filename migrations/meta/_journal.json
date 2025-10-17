@@ -8,6 +8,13 @@
       "when": 1760097866834,
       "tag": "0000_silent_zuras",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1760713107770,
+      "tag": "0001_fantastic_ghost_rider",
+      "breakpoints": true
     }
   ]
 }

@@ -98,6 +98,11 @@ export default function Header({ user, onLogout }: HeaderProps) {
               Takım Başvurusu
             </Button>
           </Link>
+          <Link href="/istatistikler" data-testid="link-nav-stats">
+            <Button variant="ghost" className="hover-elevate active-elevate-2">
+              İstatistikler
+            </Button>
+          </Link>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -155,6 +160,11 @@ export default function Header({ user, onLogout }: HeaderProps) {
                 <Link href="/takim-basvuru" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-team-application">
                   <Button variant="ghost" className="w-full justify-start hover-elevate active-elevate-2">
                     Takım Başvurusu
+                  </Button>
+                </Link>
+                <Link href="/istatistikler" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-stats">
+                  <Button variant="ghost" className="w-full justify-start hover-elevate active-elevate-2">
+                    İstatistikler
                   </Button>
                 </Link>
               </div>
