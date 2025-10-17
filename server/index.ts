@@ -132,6 +132,7 @@ app.use((req, res, next) => {
         sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS ban_reason text`,
         sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_chat_muted boolean DEFAULT false NOT NULL`,
         sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_ip_address text`,
+        sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_picture text`,
       ];
       
       for (const patch of patches) {
