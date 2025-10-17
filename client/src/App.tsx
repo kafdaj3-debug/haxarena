@@ -40,6 +40,7 @@ function Router() {
       <Route path="/register" component={RegisterPage} />
       <Route path="/sifre-sifirlama" component={PasswordResetPage} />
       <Route path="/profil" component={ProfileSettingsPage} />
+      <Route path="/profile-settings" component={ProfileSettingsPage} />
       <Route path="/admin-basvuru" component={AdminApplicationPage} />
       <Route path="/takim-basvuru" component={TeamApplicationPage} />
       <Route path="/yonetim-giris" component={ManagementLoginPage} />

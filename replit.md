@@ -64,7 +64,7 @@ Preferred communication style: Simple, everyday language.
 - WebSocket connection support via `@neondatabase/serverless`
 
 **Schema Design:**
-- Users table: id (UUID), username, password (hashed), isAdmin, isSuperAdmin, isApproved, isBanned, banReason, isChatMuted, lastIpAddress, player stats (goals, assists, saves, matchTime, offlineTime, rank)
+- Users table: id (UUID), username, password (hashed), profilePicture (base64 image/GIF, nullable), isAdmin, isSuperAdmin, isApproved, isBanned, banReason, isChatMuted, lastIpAddress, player stats (goals, assists, saves, matchTime, offlineTime, rank)
 - All fields enforce uniqueness and NOT NULL constraints where appropriate
 - Zod schemas for runtime validation via `drizzle-zod`
 - NOTE: No email column in users table (removed to match existing schema)
@@ -122,6 +122,9 @@ Preferred communication style: Simple, everyday language.
 - Admin moderation capabilities
 - Role badge display with priority ordering (Admin/Management roles first, then player roles)
 - "YÖNETİM" badge for super admin users in posts and replies
+- Profile picture display: Prominent author avatars (w-16 h-16 for posts, w-10 h-10 for replies)
+- Bold author names for easy identification
+- Fallback to user initials when no profile picture set
 
 **Live Chat System:**
 - Real-time community chat on homepage (displayed next to forum posts)
@@ -131,6 +134,23 @@ Preferred communication style: Simple, everyday language.
 - Message deletion permissions for admin and management users only
 - Auto-scroll to latest messages
 - Authenticated users only
+
+**User Profile System:**
+- Profile picture upload and management (base64 storage, supports GIF and normal images)
+- Client-side and server-side 5MB size validation
+- Backend validation: format check (data:image/ prefix), base64 decode, size calculation
+- Passport session integration: profilePicture field included in deserializeUser
+- Express User type extended with profilePicture?: string | null
+- Profile settings page (/profile-settings or /profil) with upload, preview, and remove functionality
+- PATCH /api/profile/picture endpoint with null handling for removal
+- Avatar display throughout application:
+  - Profile settings: 32x32 preview
+  - Forum post authors: 16x16 with border-2 border-primary/20
+  - Forum reply authors: 10x10 with border-2 border-primary/20
+  - Bold author names for prominence
+  - Fallback to user initials (first 2 letters uppercase) when no picture set
+- shadcn Avatar component with AvatarImage and AvatarFallback
+- Cache invalidation and page reload after upload/removal
 
 **Admin Panel:**
 - Staff hierarchy management with 7 role levels (Founder → Arena Admin)

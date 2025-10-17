@@ -206,13 +206,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { profilePicture } = req.body;
       
-      // Validate base64 image format
-      if (profilePicture && !profilePicture.startsWith('data:image/')) {
-        return res.status(400).json({ error: "Geçersiz resim formatı" });
-      }
-      
-      // 5MB size limit: decode base64 to get actual file size
-      if (profilePicture) {
+      // Allow null to remove picture, otherwise validate
+      if (profilePicture !== null && profilePicture !== undefined) {
+        // Validate base64 image format
+        if (!profilePicture.startsWith('data:image/')) {
+          return res.status(400).json({ error: "Geçersiz resim formatı" });
+        }
+        
+        // 5MB size limit: decode base64 to get actual file size
         const base64Data = profilePicture.split(',')[1];
         if (!base64Data) {
           return res.status(400).json({ error: "Geçersiz base64 verisi" });
@@ -235,6 +236,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { password, ...userWithoutPassword } = updated;
       return res.json(userWithoutPassword);
     } catch (error) {
+      console.error('Profile picture update error:', error);
       return res.status(500).json({ error: "Profil fotoğrafı güncellenemedi" });
     }
   });
