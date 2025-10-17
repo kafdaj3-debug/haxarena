@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Target, Shield, Clock, Crosshair, Award } from "lucide-react";
+import { Trophy, Target, Shield, Clock, Crosshair, Award, Crown, ListOrdered } from "lucide-react";
 
 interface PlayerStats {
   username: string;
@@ -48,12 +48,12 @@ const staticPlayers: PlayerStats[] = [
   { username: "Okan", rank: "HaxArena Üye", goals: 20, assists: 9, dm: 6, cs: 3, saves: 46, matchTime: 1800, matchesPlayed: 55 }
 ];
 
-type SortCategory = 'goals' | 'assists' | 'dm' | 'cs' | 'saves' | 'matchTime';
+type ViewCategory = 'best6' | 'goals' | 'assists' | 'dm' | 'cs' | 'saves' | 'matchTime' | 'top50';
 
 export default function StatisticsPage() {
   const { user, logout } = useAuth();
   const [, navigate] = useLocation();
-  const [activeCategory, setActiveCategory] = useState<SortCategory>('goals');
+  const [activeView, setActiveView] = useState<ViewCategory>('best6');
 
   // Format seconds to Turkish time format
   const formatTime = (seconds: number) => {
@@ -62,29 +62,57 @@ export default function StatisticsPage() {
     return `${hours} saat ${minutes} dakika`;
   };
 
-  // Get category details
-  const getCategoryDetails = (category: SortCategory) => {
-    const details = {
-      goals: { label: 'Gol', icon: Trophy },
-      assists: { label: 'Asist', icon: Target },
-      dm: { label: 'DM', icon: Crosshair },
-      cs: { label: 'CS', icon: Award },
-      saves: { label: 'Kurtarış', icon: Shield },
-      matchTime: { label: 'Süre', icon: Clock }
+  // Get players based on active view
+  const getPlayers = () => {
+    if (activeView === 'best6') {
+      // Best 6: TOP 50 genel sıralamasından ilk 6 kişi (gol bazlı)
+      return [...staticPlayers]
+        .sort((a, b) => b.goals - a.goals)
+        .slice(0, 6);
+    } else if (activeView === 'top50') {
+      // TOP 50: Tüm oyuncular
+      return staticPlayers.slice(0, 50);
+    } else {
+      // Kategorilere göre top 10
+      return [...staticPlayers]
+        .sort((a, b) => b[activeView] - a[activeView])
+        .slice(0, 10);
+    }
+  };
+
+  // Get table title based on active view
+  const getTableTitle = () => {
+    const titles = {
+      best6: 'Best 6',
+      goals: 'Gol - Top 10',
+      assists: 'Asist - Top 10',
+      dm: 'DM - Top 10',
+      cs: 'CS - Top 10',
+      saves: 'Kurtarış - Top 10',
+      matchTime: 'Süre - Top 10',
+      top50: 'TOP 50'
     };
-    return details[category];
+    return titles[activeView];
   };
 
-  // Get top 10 for Best 6 section
-  const getTop10ForCategory = (category: SortCategory) => {
-    return [...staticPlayers]
-      .sort((a, b) => b[category] - a[category])
-      .slice(0, 10);
+  // Get table icon based on active view
+  const getTableIcon = () => {
+    const icons = {
+      best6: Crown,
+      goals: Trophy,
+      assists: Target,
+      dm: Crosshair,
+      cs: Award,
+      saves: Shield,
+      matchTime: Clock,
+      top50: ListOrdered
+    };
+    return icons[activeView];
   };
 
-  const top10Players = getTop10ForCategory(activeCategory);
-  const categoryDetails = getCategoryDetails(activeCategory);
-  const CategoryIcon = categoryDetails.icon;
+  const players = getPlayers();
+  const tableTitle = getTableTitle();
+  const TableIcon = getTableIcon();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -98,189 +126,139 @@ export default function StatisticsPage() {
             <p className="text-muted-foreground mt-2">Kategorilere göre sıralamalar</p>
           </div>
 
-          {/* Best 6 Section - Top 10 with category tabs */}
-          <div>
-            <h2 className="text-2xl font-bold text-foreground mb-4">Best 6</h2>
-            
-            <Tabs value={activeCategory} onValueChange={(v) => setActiveCategory(v as SortCategory)}>
-              <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full md:w-auto mb-4">
-                <TabsTrigger value="goals" className="gap-1" data-testid="tab-goals">
-                  <Trophy className="w-4 h-4" />
-                  <span className="hidden sm:inline">Gol</span>
-                </TabsTrigger>
-                <TabsTrigger value="assists" className="gap-1" data-testid="tab-assists">
-                  <Target className="w-4 h-4" />
-                  <span className="hidden sm:inline">Asist</span>
-                </TabsTrigger>
-                <TabsTrigger value="dm" className="gap-1" data-testid="tab-dm">
-                  <Crosshair className="w-4 h-4" />
-                  <span className="hidden sm:inline">DM</span>
-                </TabsTrigger>
-                <TabsTrigger value="cs" className="gap-1" data-testid="tab-cs">
-                  <Award className="w-4 h-4" />
-                  <span className="hidden sm:inline">CS</span>
-                </TabsTrigger>
-                <TabsTrigger value="saves" className="gap-1" data-testid="tab-saves">
-                  <Shield className="w-4 h-4" />
-                  <span className="hidden sm:inline">Kurtarış</span>
-                </TabsTrigger>
-                <TabsTrigger value="matchTime" className="gap-1" data-testid="tab-matchtime">
-                  <Clock className="w-4 h-4" />
-                  <span className="hidden sm:inline">Süre</span>
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+          {/* Category Tabs */}
+          <Tabs value={activeView} onValueChange={(v) => setActiveView(v as ViewCategory)}>
+            <TabsList className="grid grid-cols-4 md:grid-cols-8 w-full mb-6">
+              <TabsTrigger value="best6" className="gap-1" data-testid="tab-best6">
+                <Crown className="w-4 h-4" />
+                <span className="hidden sm:inline">Best 6</span>
+              </TabsTrigger>
+              <TabsTrigger value="goals" className="gap-1" data-testid="tab-goals">
+                <Trophy className="w-4 h-4" />
+                <span className="hidden sm:inline">Gol</span>
+              </TabsTrigger>
+              <TabsTrigger value="assists" className="gap-1" data-testid="tab-assists">
+                <Target className="w-4 h-4" />
+                <span className="hidden sm:inline">Asist</span>
+              </TabsTrigger>
+              <TabsTrigger value="dm" className="gap-1" data-testid="tab-dm">
+                <Crosshair className="w-4 h-4" />
+                <span className="hidden sm:inline">DM</span>
+              </TabsTrigger>
+              <TabsTrigger value="cs" className="gap-1" data-testid="tab-cs">
+                <Award className="w-4 h-4" />
+                <span className="hidden sm:inline">CS</span>
+              </TabsTrigger>
+              <TabsTrigger value="saves" className="gap-1" data-testid="tab-saves">
+                <Shield className="w-4 h-4" />
+                <span className="hidden sm:inline">Kurtarış</span>
+              </TabsTrigger>
+              <TabsTrigger value="matchTime" className="gap-1" data-testid="tab-matchtime">
+                <Clock className="w-4 h-4" />
+                <span className="hidden sm:inline">Süre</span>
+              </TabsTrigger>
+              <TabsTrigger value="top50" className="gap-1" data-testid="tab-top50">
+                <ListOrdered className="w-4 h-4" />
+                <span className="hidden sm:inline">TOP 50</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-            {/* Top 10 table for selected category */}
-            <Card className="overflow-hidden">
-              <div className="p-4 bg-muted/50 border-b">
-                <h3 className="font-bold text-foreground flex items-center gap-2">
-                  <CategoryIcon className="w-5 h-5 text-primary" />
-                  {categoryDetails.label} - Top 10
-                </h3>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-muted/50 border-b">
+          {/* Statistics Table */}
+          <Card className="overflow-hidden">
+            <div className="p-4 bg-muted/50 border-b">
+              <h3 className="font-bold text-foreground flex items-center gap-2">
+                <TableIcon className="w-5 h-5 text-primary" />
+                {tableTitle}
+              </h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-muted/50 border-b">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">#</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Kullanıcı Adı</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Rütbe</th>
+                    <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">Oynanan Maç</th>
+                    <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
+                      <div className="flex items-center justify-center gap-1">
+                        <Trophy className="w-4 h-4" />
+                        Gol
+                      </div>
+                    </th>
+                    <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
+                      <div className="flex items-center justify-center gap-1">
+                        <Target className="w-4 h-4" />
+                        Asist
+                      </div>
+                    </th>
+                    <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">DM</th>
+                    <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">CS</th>
+                    <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
+                      <div className="flex items-center justify-center gap-1">
+                        <Shield className="w-4 h-4" />
+                        Kurtarış
+                      </div>
+                    </th>
+                    <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
+                      <div className="flex items-center justify-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        Süre
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {players.length === 0 ? (
                     <tr>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">#</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Kullanıcı Adı</th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
-                        {categoryDetails.label}
-                      </th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
-                        Oynanan Maç
-                      </th>
+                      <td colSpan={10} className="text-center py-8 text-muted-foreground">
+                        Henüz istatistik bulunmuyor
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {top10Players.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="text-center py-8 text-muted-foreground">
-                          Henüz istatistik bulunmuyor
+                  ) : (
+                    players.map((player, index) => (
+                      <tr 
+                        key={index} 
+                        className="border-b hover-elevate"
+                        data-testid={`row-player-${index}`}
+                      >
+                        <td className="px-4 py-3 text-sm font-medium text-muted-foreground">
+                          {index + 1}
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-foreground" data-testid={`text-player-name-${index}`}>
+                          {player.username}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-muted-foreground">
+                          {player.rank}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-center text-foreground" data-testid={`text-player-matches-${index}`}>
+                          {player.matchesPlayed}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-center font-semibold text-foreground" data-testid={`text-player-goals-${index}`}>
+                          {player.goals}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-center text-foreground" data-testid={`text-player-assists-${index}`}>
+                          {player.assists}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-center text-foreground" data-testid={`text-player-dm-${index}`}>
+                          {player.dm}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-center text-foreground" data-testid={`text-player-cs-${index}`}>
+                          {player.cs}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-center text-foreground" data-testid={`text-player-saves-${index}`}>
+                          {player.saves}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-center text-foreground" data-testid={`text-player-playtime-${index}`}>
+                          {formatTime(player.matchTime)}
                         </td>
                       </tr>
-                    ) : (
-                      top10Players.map((player, index) => (
-                        <tr 
-                          key={index} 
-                          className="border-b hover-elevate"
-                          data-testid={`row-best6-player-${index}`}
-                        >
-                          <td className="px-4 py-3 text-sm font-medium text-muted-foreground">
-                            {index + 1}
-                          </td>
-                          <td className="px-4 py-3 text-sm font-medium text-foreground" data-testid={`text-best6-player-name-${index}`}>
-                            {player.username}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center font-semibold text-foreground" data-testid={`text-best6-player-value-${index}`}>
-                            {activeCategory === 'matchTime' ? formatTime(player[activeCategory]) : player[activeCategory]}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-foreground" data-testid={`text-best6-player-matches-${index}`}>
-                            {player.matchesPlayed}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </Card>
-          </div>
-
-          {/* TOP 50 Section - Full detailed stats */}
-          <div>
-            <h2 className="text-2xl font-bold text-foreground mb-4">TOP 50</h2>
-            
-            <Card className="overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-muted/50 border-b">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">#</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Kullanıcı Adı</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Rütbe</th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
-                        <div className="flex items-center justify-center gap-1">
-                          <Trophy className="w-4 h-4" />
-                          Gol
-                        </div>
-                      </th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
-                        <div className="flex items-center justify-center gap-1">
-                          <Target className="w-4 h-4" />
-                          Asist
-                        </div>
-                      </th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">DM</th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">CS</th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
-                        <div className="flex items-center justify-center gap-1">
-                          <Shield className="w-4 h-4" />
-                          Kurtarış
-                        </div>
-                      </th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
-                        <div className="flex items-center justify-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          Süre
-                        </div>
-                      </th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">Oynanan Maç</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {staticPlayers.length === 0 ? (
-                      <tr>
-                        <td colSpan={10} className="text-center py-8 text-muted-foreground">
-                          Henüz istatistik bulunmuyor
-                        </td>
-                      </tr>
-                    ) : (
-                      staticPlayers.slice(0, 50).map((player, index) => (
-                        <tr 
-                          key={index} 
-                          className="border-b hover-elevate"
-                          data-testid={`row-top50-player-${index}`}
-                        >
-                          <td className="px-4 py-3 text-sm font-medium text-muted-foreground">
-                            {index + 1}
-                          </td>
-                          <td className="px-4 py-3 text-sm font-medium text-foreground" data-testid={`text-top50-player-name-${index}`}>
-                            {player.username}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-muted-foreground">
-                            {player.rank}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center font-semibold text-foreground" data-testid={`text-top50-player-goals-${index}`}>
-                            {player.goals}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-foreground" data-testid={`text-top50-player-assists-${index}`}>
-                            {player.assists}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-foreground" data-testid={`text-top50-player-dm-${index}`}>
-                            {player.dm}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-foreground" data-testid={`text-top50-player-cs-${index}`}>
-                            {player.cs}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-foreground" data-testid={`text-top50-player-saves-${index}`}>
-                            {player.saves}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-foreground" data-testid={`text-top50-player-playtime-${index}`}>
-                            {formatTime(player.matchTime)}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-center text-foreground" data-testid={`text-top50-player-matches-${index}`}>
-                            {player.matchesPlayed}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </Card>
-          </div>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
         </div>
       </main>
 
