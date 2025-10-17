@@ -33,20 +33,28 @@ export default function StatisticsPage() {
     queryKey: ['/api/stats'],
   });
 
-  // Format seconds to detailed Turkish time format
+  // Format seconds to detailed Turkish time format (ALWAYS shows ALL components)
   const formatTime = (seconds: number) => {
-    const weeks = Math.floor(seconds / (7 * 24 * 3600));
-    const days = Math.floor((seconds % (7 * 24 * 3600)) / (24 * 3600));
-    const hours = Math.floor((seconds % (24 * 3600)) / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
+    let remainder = seconds;
+    
+    const weeks = Math.floor(remainder / (7 * 24 * 3600));
+    remainder = remainder % (7 * 24 * 3600);
+    
+    const days = Math.floor(remainder / (24 * 3600));
+    remainder = remainder % (24 * 3600);
+    
+    const hours = Math.floor(remainder / 3600);
+    remainder = remainder % 3600;
+    
+    const minutes = Math.floor(remainder / 60);
+    const secs = remainder % 60;
 
     const parts = [];
-    if (weeks > 0) parts.push(`${weeks} hafta`);
-    if (days > 0) parts.push(`${days} gün`);
-    if (hours > 0) parts.push(`${hours} saat`);
-    if (minutes > 0) parts.push(`${minutes} dakika`);
-    if (secs > 0 || parts.length === 0) parts.push(`${secs} saniye`);
+    parts.push(`${weeks} hafta`);
+    parts.push(`${days} gün`);
+    parts.push(`${hours} saat`);
+    parts.push(`${minutes} dakika`);
+    parts.push(`${secs} saniye`);
 
     return parts.join(' ');
   };
