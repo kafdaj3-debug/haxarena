@@ -169,8 +169,7 @@ export default function StatisticsPage() {
                       <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">Oynanan Maç</th>
                       <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
                         <div className="flex items-center justify-center gap-1">
-                          <Trophy className="w-4 h-4" />
-                          Gol
+                          ⚽ Gol
                         </div>
                       </th>
                       <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
@@ -179,12 +178,11 @@ export default function StatisticsPage() {
                           Asist
                         </div>
                       </th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">DM</th>
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">🛡️ DM</th>
                       <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">CS</th>
                       <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
                         <div className="flex items-center justify-center gap-1">
-                          <Shield className="w-4 h-4" />
-                          Kurtarış
+                          🧤 Kurtarış
                         </div>
                       </th>
                       <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">

@@ -27,7 +27,12 @@ interface PlayerDetailData {
 }
 
 const renderActiveShape = (props: any) => {
-  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
+  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent } = props;
+  const RADIAN = Math.PI / 180;
+  const sin = Math.sin(-RADIAN * ((startAngle + endAngle) / 2));
+  const cos = Math.cos(-RADIAN * ((startAngle + endAngle) / 2));
+  const mx = cx + (outerRadius + 15) * cos;
+  const my = cy + (outerRadius + 15) * sin;
 
   return (
     <g>
@@ -35,13 +40,24 @@ const renderActiveShape = (props: any) => {
         cx={cx}
         cy={cy}
         innerRadius={innerRadius}
-        outerRadius={outerRadius + 10}
+        outerRadius={outerRadius + 8}
         startAngle={startAngle}
         endAngle={endAngle}
         fill={fill}
-        stroke="rgba(255, 255, 255, 0.3)"
+        stroke={fill}
         strokeWidth={2}
       />
+      <text 
+        x={mx} 
+        y={my} 
+        fill={fill} 
+        textAnchor={cos >= 0 ? 'start' : 'end'} 
+        dominantBaseline="central"
+        fontSize="16"
+        fontWeight="700"
+      >
+        {`${payload.name}: %${payload.percentage}`}
+      </text>
     </g>
   );
 };
@@ -82,19 +98,19 @@ export default function PlayerDetailPage() {
       name: 'Galibiyet', 
       value: player?.wins || 0, 
       percentage: winPercentage,
-      color: '#86efac' // green-300 (light)
+      color: '#22c55e' // green-500
     },
     { 
       name: 'Yenilgi', 
       value: player?.losses || 0, 
       percentage: lossPercentage,
-      color: '#fca5a5' // red-300 (light)
+      color: '#ef4444' // red-500
     },
     { 
       name: 'Beraberlik', 
       value: player?.draws || 0, 
       percentage: drawPercentage,
-      color: '#fde047' // yellow-300 (light)
+      color: '#eab308' // yellow-500
     },
   ];
 
@@ -224,21 +240,30 @@ export default function PlayerDetailPage() {
                           <Pie
                             data={pieChartData}
                             cx="50%"
-                            cy="45%"
+                            cy="50%"
                             startAngle={0}
                             endAngle={360}
                             innerRadius={0}
-                            outerRadius={100}
-                            paddingAngle={2}
+                            outerRadius={95}
+                            paddingAngle={1}
                             dataKey="value"
                             animationBegin={0}
-                            animationDuration={1000}
-                            label={{
-                              position: 'inside',
-                              fill: '#ffffff',
-                              fontSize: 14,
-                              fontWeight: 600,
-                              formatter: (value: any, entry: any) => `%${entry.percentage}`
+                            animationDuration={800}
+                            label={(props: any) => {
+                              const { x, y, payload } = props;
+                              return (
+                                <text 
+                                  x={x} 
+                                  y={y} 
+                                  fill={payload.color} 
+                                  textAnchor="middle" 
+                                  dominantBaseline="central"
+                                  fontSize="14"
+                                  fontWeight="700"
+                                >
+                                  %{payload.percentage}
+                                </text>
+                              );
                             }}
                             labelLine={false}
                             style={{ filter: 'url(#shadow)', cursor: 'pointer' }}
@@ -288,8 +313,7 @@ export default function PlayerDetailPage() {
                   <Card>
                     <CardHeader className="pb-3">
                       <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <Trophy className="w-4 h-4 text-primary" />
-                        Goller
+                        ⚽ Goller
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -312,8 +336,7 @@ export default function PlayerDetailPage() {
                   <Card>
                     <CardHeader className="pb-3">
                       <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <Shield className="w-4 h-4 text-primary" />
-                        Kurtarışlar
+                        🧤 Kurtarışlar
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -336,8 +359,7 @@ export default function PlayerDetailPage() {
                   <Card>
                     <CardHeader className="pb-3">
                       <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <Crosshair className="w-4 h-4 text-primary" />
-                        DM
+                        🛡️ DM
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
