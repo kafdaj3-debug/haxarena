@@ -137,6 +137,7 @@ export default function HomePage() {
                         title={post.title}
                         content={post.content}
                         author={post.user?.username || 'Bilinmeyen'}
+                        authorProfilePicture={post.user?.profilePicture}
                         authorRole={post.staffRole}
                         authorPlayerRole={post.user?.playerRole}
                         authorIsAdmin={post.user?.isAdmin}

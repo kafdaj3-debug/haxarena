@@ -1,5 +1,5 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Lock, Trash2 } from "lucide-react";
@@ -10,6 +10,7 @@ interface ForumPostCardProps {
   title: string;
   content: string;
   author: string;
+  authorProfilePicture?: string | null;
   authorRole?: string;
   authorPlayerRole?: string;
   authorIsAdmin?: boolean;
@@ -40,6 +41,7 @@ export default function ForumPostCard({
   title,
   content,
   author,
+  authorProfilePicture,
   authorRole,
   authorPlayerRole,
   authorIsAdmin,
@@ -71,28 +73,13 @@ export default function ForumPostCard({
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3 flex-1 min-w-0">
-            <Avatar className="w-10 h-10 flex-shrink-0">
+            <Avatar className="w-12 h-12 flex-shrink-0 border-2 border-primary/20">
+              <AvatarImage src={authorProfilePicture || undefined} alt={author} />
               <AvatarFallback data-testid={`avatar-${author}`}>{getInitials(author)}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap mb-1">
-                <Link href={`/forum/${id}`} className="font-semibold hover:text-primary transition-colors" data-testid={`link-post-${id}`}>
-                  {title}
-                </Link>
-                {isLocked && (
-                  <Badge variant="secondary" className="gap-1" data-testid="badge-locked">
-                    <Lock className="w-3 h-3" />
-                    Kilitli
-                  </Badge>
-                )}
-                {isArchived && (
-                  <Badge variant="secondary" data-testid="badge-archived">
-                    Arşivlendi
-                  </Badge>
-                )}
-              </div>
-              <div className="flex items-center gap-2 flex-wrap text-sm text-muted-foreground">
-                <span data-testid="text-author">{author}</span>
+              <div className="flex items-center gap-2 flex-wrap mb-2">
+                <span className="text-base font-bold text-foreground" data-testid="text-author">{author}</span>
                 
                 {/* Yönetim etiketi (en öncelikli) */}
                 {authorIsSuperAdmin && (
@@ -137,11 +124,28 @@ export default function ForumPostCard({
                     {authorRole}
                   </Badge>
                 )}
-                
+              </div>
+              
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <Link href={`/forum/${id}`} className="font-semibold text-lg hover:text-primary transition-colors" data-testid={`link-post-${id}`}>
+                  {title}
+                </Link>
+                {isLocked && (
+                  <Badge variant="secondary" className="gap-1" data-testid="badge-locked">
+                    <Lock className="w-3 h-3" />
+                    Kilitli
+                  </Badge>
+                )}
+                {isArchived && (
+                  <Badge variant="secondary" data-testid="badge-archived">
+                    Arşivlendi
+                  </Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-2 flex-wrap text-sm text-muted-foreground">
+                <span>{createdAt}</span>
                 <span>•</span>
                 <span data-testid="text-category">{category}</span>
-                <span>•</span>
-                <span>{createdAt}</span>
               </div>
             </div>
           </div>
