@@ -29,6 +29,7 @@ export default function RegisterPage() {
         const error = await response.json();
         const errorMessage = error.error || "Kayıt işlemi başarısız oldu";
         
+        setRegisterSuccess(false);
         toast({
           title: "Kayıt Başarısız",
           description: errorMessage,
@@ -44,6 +45,7 @@ export default function RegisterPage() {
         description: "Hesabınız oluşturuldu. Yöneticiler tarafından onaylandıktan sonra giriş yapabilirsiniz.",
       });
     } catch (error) {
+      setRegisterSuccess(false);
       toast({
         title: "Hata",
         description: "Bir hata oluştu, lütfen tekrar deneyin",
