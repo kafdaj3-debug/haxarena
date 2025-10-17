@@ -33,11 +33,22 @@ export default function StatisticsPage() {
     queryKey: ['/api/stats'],
   });
 
-  // Format seconds to Turkish time format
+  // Format seconds to detailed Turkish time format
   const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
+    const weeks = Math.floor(seconds / (7 * 24 * 3600));
+    const days = Math.floor((seconds % (7 * 24 * 3600)) / (24 * 3600));
+    const hours = Math.floor((seconds % (24 * 3600)) / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    return `${hours} saat ${minutes} dakika`;
+    const secs = seconds % 60;
+
+    const parts = [];
+    if (weeks > 0) parts.push(`${weeks} hafta`);
+    if (days > 0) parts.push(`${days} gün`);
+    if (hours > 0) parts.push(`${hours} saat`);
+    if (minutes > 0) parts.push(`${minutes} dakika`);
+    if (secs > 0 || parts.length === 0) parts.push(`${secs} saniye`);
+
+    return parts.join(' ');
   };
 
   // Get players based on active view
@@ -108,36 +119,28 @@ export default function StatisticsPage() {
           <Tabs value={activeView} onValueChange={(v) => setActiveView(v as ViewCategory)}>
             <TabsList className="grid grid-cols-4 md:grid-cols-8 w-full mb-6">
               <TabsTrigger value="best6" className="gap-1" data-testid="tab-best6">
-                <Crown className="w-4 h-4" />
-                <span className="hidden sm:inline">Best 6</span>
+                👑 <span className="hidden sm:inline">Best 6</span>
               </TabsTrigger>
               <TabsTrigger value="goals" className="gap-1" data-testid="tab-goals">
-                <Trophy className="w-4 h-4" />
-                <span className="hidden sm:inline">Gol</span>
+                ⚽ <span className="hidden sm:inline">Gol</span>
               </TabsTrigger>
               <TabsTrigger value="assists" className="gap-1" data-testid="tab-assists">
-                <Target className="w-4 h-4" />
-                <span className="hidden sm:inline">Asist</span>
+                🎯 <span className="hidden sm:inline">Asist</span>
               </TabsTrigger>
               <TabsTrigger value="dm" className="gap-1" data-testid="tab-dm">
-                <Crosshair className="w-4 h-4" />
-                <span className="hidden sm:inline">DM</span>
+                🛡️ <span className="hidden sm:inline">DM</span>
               </TabsTrigger>
               <TabsTrigger value="cs" className="gap-1" data-testid="tab-cs">
-                <Award className="w-4 h-4" />
-                <span className="hidden sm:inline">CS</span>
+                🥅 <span className="hidden sm:inline">CS</span>
               </TabsTrigger>
               <TabsTrigger value="saves" className="gap-1" data-testid="tab-saves">
-                <Shield className="w-4 h-4" />
-                <span className="hidden sm:inline">Kurtarış</span>
+                🧤 <span className="hidden sm:inline">Kurtarış</span>
               </TabsTrigger>
               <TabsTrigger value="matchTime" className="gap-1" data-testid="tab-matchtime">
-                <Clock className="w-4 h-4" />
-                <span className="hidden sm:inline">Süre</span>
+                ⏱️ <span className="hidden sm:inline">Süre</span>
               </TabsTrigger>
               <TabsTrigger value="top25" className="gap-1" data-testid="tab-top25">
-                <ListOrdered className="w-4 h-4" />
-                <span className="hidden sm:inline">TOP 25</span>
+                🏆 <span className="hidden sm:inline">TOP 25</span>
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -167,30 +170,12 @@ export default function StatisticsPage() {
                       <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Kullanıcı Adı</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Rütbe</th>
                       <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">Oynanan Maç</th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
-                        <div className="flex items-center justify-center gap-1">
-                          ⚽ Gol
-                        </div>
-                      </th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
-                        <div className="flex items-center justify-center gap-1">
-                          <Target className="w-4 h-4" />
-                          Asist
-                        </div>
-                      </th>
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">⚽ Gol</th>
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">🎯 Asist</th>
                       <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">🛡️ DM</th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">CS</th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
-                        <div className="flex items-center justify-center gap-1">
-                          🧤 Kurtarış
-                        </div>
-                      </th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">
-                        <div className="flex items-center justify-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          Süre
-                        </div>
-                      </th>
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">🥅 CS</th>
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">🧤 Kurtarış</th>
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-foreground">⏱️ Süre</th>
                     </tr>
                   </thead>
                   <tbody>

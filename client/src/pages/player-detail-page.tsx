@@ -27,7 +27,7 @@ interface PlayerDetailData {
 }
 
 const renderActiveShape = (props: any) => {
-  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent } = props;
+  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload } = props;
   const RADIAN = Math.PI / 180;
   const sin = Math.sin(-RADIAN * ((startAngle + endAngle) / 2));
   const cos = Math.cos(-RADIAN * ((startAngle + endAngle) / 2));
@@ -44,13 +44,12 @@ const renderActiveShape = (props: any) => {
         startAngle={startAngle}
         endAngle={endAngle}
         fill={fill}
-        stroke={fill}
-        strokeWidth={2}
+        stroke="none"
       />
       <text 
         x={mx} 
         y={my} 
-        fill={fill} 
+        fill="#e5e5e5" 
         textAnchor={cos >= 0 ? 'start' : 'end'} 
         dominantBaseline="central"
         fontSize="16"
@@ -79,11 +78,22 @@ export default function PlayerDetailPage() {
     enabled: !!username,
   });
 
-  // Format seconds to Turkish time format
+  // Format seconds to detailed Turkish time format
   const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
+    const weeks = Math.floor(seconds / (7 * 24 * 3600));
+    const days = Math.floor((seconds % (7 * 24 * 3600)) / (24 * 3600));
+    const hours = Math.floor((seconds % (24 * 3600)) / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    return `${hours} saat ${minutes} dakika`;
+    const secs = seconds % 60;
+
+    const parts = [];
+    if (weeks > 0) parts.push(`${weeks} hafta`);
+    if (days > 0) parts.push(`${days} gün`);
+    if (hours > 0) parts.push(`${hours} saat`);
+    if (minutes > 0) parts.push(`${minutes} dakika`);
+    if (secs > 0 || parts.length === 0) parts.push(`${secs} saniye`);
+
+    return parts.join(' ');
   };
 
   // Calculate percentages
@@ -324,8 +334,7 @@ export default function PlayerDetailPage() {
                   <Card>
                     <CardHeader className="pb-3">
                       <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <Target className="w-4 h-4 text-primary" />
-                        Asistler
+                        🎯 Asistler
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -347,8 +356,7 @@ export default function PlayerDetailPage() {
                   <Card>
                     <CardHeader className="pb-3">
                       <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-primary" />
-                        Oyun Süresi
+                        ⏱️ Oyun Süresi
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -370,8 +378,7 @@ export default function PlayerDetailPage() {
                   <Card>
                     <CardHeader className="pb-3">
                       <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <Award className="w-4 h-4 text-primary" />
-                        CS
+                        🥅 CS
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
