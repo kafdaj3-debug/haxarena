@@ -439,6 +439,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/management/create-admin", isSuperAdmin, async (req, res) => {
+    try {
+      const { username, email, password } = req.body;
+
+      // Validation
+      if (!username || !email || !password) {
+        return res.status(400).json({ error: "Tüm alanları doldurun" });
+      }
+
+      if (password.length < 6) {
+        return res.status(400).json({ error: "Şifre en az 6 karakter olmalı" });
+      }
+
+      // Check if username or email already exists
+      const existingUsername = await storage.getUserByUsername(username);
+      if (existingUsername) {
+        return res.status(400).json({ error: "Bu kullanıcı adı zaten kullanılıyor" });
+      }
+
+      const existingEmail = await storage.getUserByEmail(email);
+      if (existingEmail) {
+        return res.status(400).json({ error: "Bu e-posta adresi zaten kullanılıyor" });
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create admin user (isAdmin: true, isApproved: true)
+      const newAdmin = await storage.createUser({
+        username,
+        email,
+        password: hashedPassword,
+        role: "HaxArena Üye",
+        isAdmin: true,
+        isApproved: true,
+      });
+
+      const { password: _, ...adminWithoutPassword } = newAdmin;
+      return res.status(201).json(adminWithoutPassword);
+    } catch (error) {
+      console.error("[CREATE ADMIN ERROR]", error);
+      return res.status(500).json({ error: "Admin oluşturulamadı" });
+    }
+  });
+
   app.delete("/api/management/users/:id", isSuperAdmin, async (req, res) => {
     try {
       // Kullanıcı kendi hesabını silemez

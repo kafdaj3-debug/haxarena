@@ -36,6 +36,10 @@ export default function ManagementPanelPage() {
   const [ipAddress, setIpAddress] = useState("");
   const [ipReason, setIpReason] = useState("");
   const [resetCodes, setResetCodes] = useState<Record<string, string>>({});
+  const [adminUsername, setAdminUsername] = useState("");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminConfirmPassword, setAdminConfirmPassword] = useState("");
 
   // Redirect to management login if not admin (using useEffect)
   useEffect(() => {
@@ -320,6 +324,27 @@ export default function ManagementPanelPage() {
     },
   });
 
+  const createAdminMutation = useMutation({
+    mutationFn: async (data: { username: string; email: string; password: string }) => {
+      return await apiRequest("POST", "/api/management/create-admin", data);
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Yeni admin oluşturuldu" });
+      queryClient.invalidateQueries({ queryKey: ["/api/management/users"] });
+      setAdminUsername("");
+      setAdminEmail("");
+      setAdminPassword("");
+      setAdminConfirmPassword("");
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Hata", 
+        description: error.message || "Admin oluşturulamadı", 
+        variant: "destructive" 
+      });
+    },
+  });
+
   const resetPasswordMutation = useMutation({
     mutationFn: async (username: string) => {
       const response = await fetch("/api/password-reset/request", {
@@ -441,6 +466,92 @@ export default function ManagementPanelPage() {
                     }
                     data-testid="switch-team-applications"
                   />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Yeni Admin Ekle */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Yeni Admin Ekle</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="admin-username">Kullanıcı Adı</Label>
+                      <Input
+                        id="admin-username"
+                        value={adminUsername}
+                        onChange={(e) => setAdminUsername(e.target.value)}
+                        placeholder="Kullanıcı adı"
+                        data-testid="input-admin-username"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="admin-email">E-posta</Label>
+                      <Input
+                        id="admin-email"
+                        type="email"
+                        value={adminEmail}
+                        onChange={(e) => setAdminEmail(e.target.value)}
+                        placeholder="E-posta adresi"
+                        data-testid="input-admin-email"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="admin-password">Şifre</Label>
+                      <Input
+                        id="admin-password"
+                        type="password"
+                        value={adminPassword}
+                        onChange={(e) => setAdminPassword(e.target.value)}
+                        placeholder="En az 6 karakter"
+                        data-testid="input-admin-password"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="admin-confirm-password">Şifre Tekrar</Label>
+                      <Input
+                        id="admin-confirm-password"
+                        type="password"
+                        value={adminConfirmPassword}
+                        onChange={(e) => setAdminConfirmPassword(e.target.value)}
+                        placeholder="Şifreyi tekrar girin"
+                        data-testid="input-admin-confirm-password"
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      if (!adminUsername || !adminEmail || !adminPassword || !adminConfirmPassword) {
+                        toast({ 
+                          title: "Hata", 
+                          description: "Tüm alanları doldurun", 
+                          variant: "destructive" 
+                        });
+                        return;
+                      }
+                      if (adminPassword !== adminConfirmPassword) {
+                        toast({ 
+                          title: "Hata", 
+                          description: "Şifreler eşleşmiyor", 
+                          variant: "destructive" 
+                        });
+                        return;
+                      }
+                      createAdminMutation.mutate({
+                        username: adminUsername,
+                        email: adminEmail,
+                        password: adminPassword,
+                      });
+                    }}
+                    disabled={createAdminMutation.isPending}
+                    data-testid="button-create-admin"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Admin Oluştur
+                  </Button>
                 </div>
               </CardContent>
             </Card>
