@@ -27,7 +27,13 @@ interface PlayerDetailData {
 }
 
 const renderActiveShape = (props: any) => {
-  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
+  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload } = props;
+  const RADIAN = Math.PI / 180;
+  const midAngle = (startAngle + endAngle) / 2;
+  const sin = Math.sin(-RADIAN * midAngle);
+  const cos = Math.cos(-RADIAN * midAngle);
+  const textX = cx + (outerRadius + 20) * cos;
+  const textY = cy + (outerRadius + 20) * sin;
 
   return (
     <g>
@@ -35,12 +41,23 @@ const renderActiveShape = (props: any) => {
         cx={cx}
         cy={cy}
         innerRadius={innerRadius}
-        outerRadius={outerRadius + 8}
+        outerRadius={outerRadius + 10}
         startAngle={startAngle}
         endAngle={endAngle}
         fill={fill}
         stroke="none"
       />
+      <text 
+        x={textX} 
+        y={textY} 
+        fill="#e5e5e5" 
+        textAnchor={cos >= 0 ? 'start' : 'end'} 
+        dominantBaseline="central"
+        fontSize="16"
+        fontWeight="700"
+      >
+        %{payload.percentage}
+      </text>
     </g>
   );
 };
@@ -251,22 +268,7 @@ export default function PlayerDetailPage() {
                             dataKey="value"
                             animationBegin={0}
                             animationDuration={800}
-                            label={(props: any) => {
-                              const { x, y } = props;
-                              return (
-                                <text 
-                                  x={x} 
-                                  y={y} 
-                                  fill="#e5e5e5" 
-                                  textAnchor="middle" 
-                                  dominantBaseline="central"
-                                  fontSize="14"
-                                  fontWeight="700"
-                                >
-                                  %{props.payload.percentage}
-                                </text>
-                              );
-                            }}
+                            label={false}
                             labelLine={false}
                             style={{ filter: 'url(#shadow)', cursor: 'pointer' }}
                             activeIndex={activeIndex}
@@ -278,8 +280,7 @@ export default function PlayerDetailPage() {
                               <Cell 
                                 key={`cell-${index}`} 
                                 fill={entry.color} 
-                                strokeWidth={2} 
-                                stroke="rgba(255, 255, 255, 0.3)"
+                                stroke="none"
                               />
                             ))}
                           </Pie>
