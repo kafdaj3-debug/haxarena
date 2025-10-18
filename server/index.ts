@@ -299,6 +299,19 @@ app.use((req, res, next) => {
         )
       `);
       
+      // Private messages table
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS private_messages (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          sender_id VARCHAR NOT NULL REFERENCES users(id),
+          receiver_id VARCHAR NOT NULL REFERENCES users(id),
+          message TEXT NOT NULL,
+          image_url TEXT,
+          is_read BOOLEAN NOT NULL DEFAULT false,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      
       log("✓ All required tables ensured");
     } catch (error) {
       console.error("⚠️  Table creation failed:", error);
