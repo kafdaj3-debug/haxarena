@@ -42,23 +42,23 @@ export default function HomePage() {
       <Header user={user} onLogout={logout} />
       
       <main className="flex-1">
-        <section className="relative bg-gradient-to-b from-card to-background py-20 border-b">
+        <section className="relative bg-gradient-to-b from-card to-background py-12 md:py-20 border-b">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-6xl font-heading font-bold mb-6" data-testid="text-hero-title">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-heading font-bold mb-4 md:mb-6" data-testid="text-hero-title">
               HaxArena V6 Real Soccer'e
               <span className="block text-primary mt-2">Hoş Geldiniz</span>
             </h1>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-6 md:mb-8 max-w-2xl mx-auto px-4">
               Türkiye'nin en büyük HaxBall Real Soccer topluluğu
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <Link href="/aktif-odalar">
-                <Button size="lg" className="hover-elevate active-elevate-2" data-testid="button-hero-rooms">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 px-4">
+              <Link href="/aktif-odalar" className="w-full sm:w-auto">
+                <Button size="lg" className="hover-elevate active-elevate-2 w-full sm:w-auto" data-testid="button-hero-rooms">
                   Aktif Odalara Katıl
                 </Button>
               </Link>
-              <a href="https://discord.gg/haxarena" target="_blank" rel="noopener noreferrer">
-                <Button size="lg" variant="outline" className="hover-elevate active-elevate-2" data-testid="button-hero-discord">
+              <a href="https://discord.gg/haxarena" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="hover-elevate active-elevate-2 w-full sm:w-auto" data-testid="button-hero-discord">
                   Discord'a Katıl
                 </Button>
               </a>
@@ -66,7 +66,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="py-16 bg-background">
+        <section className="py-8 md:py-16 bg-background">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
               <Link href="/lig" data-testid="link-feature-league">
@@ -118,18 +118,18 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="mb-12 grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="mb-8 md:mb-12 grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
               {forumPosts.length > 0 && (
                 <div className="lg:col-span-2">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-3xl font-heading font-bold">Son Forum Konuları</h2>
+                  <div className="flex items-center justify-between mb-4 md:mb-6">
+                    <h2 className="text-2xl md:text-3xl font-heading font-bold">Son Forum Konuları</h2>
                     <Link href="/forum">
-                      <Button variant="ghost" className="hover-elevate active-elevate-2" data-testid="button-view-forum">
+                      <Button variant="ghost" className="hover-elevate active-elevate-2 text-sm md:text-base" data-testid="button-view-forum">
                         Foruma Git
                       </Button>
                     </Link>
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-3 md:space-y-4">
                     {forumPosts.slice(0, 2).map((post: any) => (
                       <ForumPostCard 
                         key={post.id} 
@@ -156,8 +156,8 @@ export default function HomePage() {
             </div>
 
             <div>
-              <h2 className="text-3xl font-heading font-bold mb-6">Aktif Odalar</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <h2 className="text-2xl md:text-3xl font-heading font-bold mb-4 md:mb-6">Aktif Odalar</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 {allRooms.map((room, index) => (
                   <ActiveRoomCard
                     key={index}

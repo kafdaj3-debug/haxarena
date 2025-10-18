@@ -30,6 +30,7 @@ export default function LiveChat() {
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const { data: messages, refetch } = useQuery<any[]>({
     queryKey: ["/api/chat/messages"],
@@ -87,8 +88,11 @@ export default function LiveChat() {
     setShowEmojiPicker(false);
   };
 
+  // Scroll sadece chat container içinde olsun, tüm sayfayı kaydırmasın
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatContainerRef.current && messagesEndRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -109,7 +113,10 @@ export default function LiveChat() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="h-80 overflow-y-auto space-y-3 p-4 bg-muted/30 rounded-lg">
+          <div 
+            ref={chatContainerRef}
+            className="h-64 md:h-80 overflow-y-auto space-y-3 p-3 md:p-4 bg-muted/30 rounded-lg"
+          >
             {messages?.map((msg: any) => (
               <div key={msg.id} className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
