@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { useParams } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Target, Shield, Clock, Crosshair, Award, TrendingUp, User } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, Sector } from "recharts";
 
 interface PlayerDetailData {
@@ -25,6 +23,76 @@ interface PlayerDetailData {
   ranking: number;
   totalPlayers: number;
 }
+
+// Test verileri (gerçek database yerine)
+const testPlayerData: Record<string, PlayerDetailData> = {
+  "Oyuncu1": {
+    id: "1",
+    username: "Oyuncu1",
+    rank: "Elmas",
+    goals: 245,
+    assists: 180,
+    saves: 95,
+    matchTime: 864000,
+    wins: 280,
+    losses: 100,
+    draws: 40,
+    matchesPlayed: 420,
+    points: 1120,
+    ranking: 1,
+    totalPlayers: 10
+  },
+  "Oyuncu2": {
+    id: "2",
+    username: "Oyuncu2",
+    rank: "Platin",
+    goals: 198,
+    assists: 165,
+    saves: 88,
+    matchTime: 720000,
+    wins: 220,
+    losses: 120,
+    draws: 40,
+    matchesPlayed: 380,
+    points: 920,
+    ranking: 2,
+    totalPlayers: 10
+  },
+  "Oyuncu3": {
+    id: "3",
+    username: "Oyuncu3",
+    rank: "Altın",
+    goals: 175,
+    assists: 145,
+    saves: 82,
+    matchTime: 648000,
+    wins: 200,
+    losses: 110,
+    draws: 40,
+    matchesPlayed: 350,
+    points: 840,
+    ranking: 3,
+    totalPlayers: 10
+  }
+};
+
+// Varsayılan test verisi (oyuncu bulunamazsa)
+const defaultPlayerData: PlayerDetailData = {
+  id: "default",
+  username: "Test Oyuncu",
+  rank: "Bronz",
+  goals: 50,
+  assists: 35,
+  saves: 20,
+  matchTime: 144000,
+  wins: 40,
+  losses: 30,
+  draws: 10,
+  matchesPlayed: 80,
+  points: 170,
+  ranking: 5,
+  totalPlayers: 10
+};
 
 const renderActiveShape = (props: any) => {
   const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload } = props;
@@ -67,17 +135,11 @@ export default function PlayerDetailPage() {
   const { user, logout } = useAuth();
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
 
-  const { data: player, isLoading } = useQuery<PlayerDetailData>({
-    queryKey: ['/api/players', username],
-    queryFn: async () => {
-      const response = await fetch(`/api/players/${username}`);
-      if (!response.ok) {
-        throw new Error('Oyuncu bulunamadı');
-      }
-      return response.json();
-    },
-    enabled: !!username,
-  });
+  // Test verileri kullan (gerçek database yerine)
+  const player = username && testPlayerData[username] 
+    ? testPlayerData[username] 
+    : defaultPlayerData;
+  const isLoading = false;
 
   // Format seconds to detailed Turkish time format (ALWAYS shows ALL components)
   const formatTime = (seconds: number) => {
@@ -139,19 +201,8 @@ export default function PlayerDetailPage() {
       
       <main className="flex-1 bg-background">
         <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-          {isLoading ? (
-            <div className="space-y-6">
-              <Skeleton className="h-32 w-full" />
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Skeleton className="h-40" />
-                <Skeleton className="h-40" />
-                <Skeleton className="h-40" />
-              </div>
-            </div>
-          ) : player ? (
-            <>
-              {/* Player Header */}
-              <Card>
+          {/* Player Header */}
+          <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
@@ -355,14 +406,6 @@ export default function PlayerDetailPage() {
                   </Card>
                 </div>
               </div>
-            </>
-          ) : (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">Oyuncu bulunamadı</p>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </main>
 
