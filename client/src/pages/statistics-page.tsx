@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
 import Header from "@/components/Header";
@@ -7,7 +6,7 @@ import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trophy, Target, Shield, Clock, Crown, ListOrdered, Crosshair, Award } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Link } from "wouter";
 
 interface PlayerStats {
   username: string;
@@ -23,15 +22,28 @@ interface PlayerStats {
 
 type ViewCategory = 'best6' | 'goals' | 'assists' | 'dm' | 'cs' | 'saves' | 'matchTime' | 'top25';
 
+// Test verileri (gerçek database yerine)
+const testPlayers: PlayerStats[] = [
+  { username: "Oyuncu1", rank: "Elmas", goals: 245, assists: 180, saves: 95, matchTime: 864000, matchesPlayed: 420, dm: 35, cs: 28 },
+  { username: "Oyuncu2", rank: "Platin", goals: 198, assists: 165, saves: 88, matchTime: 720000, matchesPlayed: 380, dm: 30, cs: 25 },
+  { username: "Oyuncu3", rank: "Altın", goals: 175, assists: 145, saves: 82, matchTime: 648000, matchesPlayed: 350, dm: 28, cs: 22 },
+  { username: "Oyuncu4", rank: "Gümüş", goals: 152, assists: 130, saves: 75, matchTime: 576000, matchesPlayed: 320, dm: 25, cs: 20 },
+  { username: "Oyuncu5", rank: "Bronz", goals: 138, assists: 118, saves: 68, matchTime: 504000, matchesPlayed: 290, dm: 22, cs: 18 },
+  { username: "Oyuncu6", rank: "Bronz", goals: 125, assists: 105, saves: 62, matchTime: 432000, matchesPlayed: 260, dm: 20, cs: 16 },
+  { username: "Oyuncu7", rank: "Elmas", goals: 118, assists: 98, saves: 58, matchTime: 396000, matchesPlayed: 245, dm: 18, cs: 15 },
+  { username: "Oyuncu8", rank: "Platin", goals: 105, assists: 88, saves: 52, matchTime: 360000, matchesPlayed: 230, dm: 16, cs: 14 },
+  { username: "Oyuncu9", rank: "Altın", goals: 95, assists: 78, saves: 48, matchTime: 324000, matchesPlayed: 215, dm: 15, cs: 12 },
+  { username: "Oyuncu10", rank: "Gümüş", goals: 88, assists: 72, saves: 45, matchTime: 288000, matchesPlayed: 200, dm: 14, cs: 11 },
+];
+
 export default function StatisticsPage() {
   const { user, logout } = useAuth();
   const [, navigate] = useLocation();
   const [activeView, setActiveView] = useState<ViewCategory>('best6');
 
-  // Fetch players from database
-  const { data: allPlayers = [], isLoading } = useQuery<PlayerStats[]>({
-    queryKey: ['/api/stats'],
-  });
+  // Test verileri kullan
+  const allPlayers = testPlayers;
+  const isLoading = false;
 
   // Format seconds to detailed Turkish time format (ALWAYS shows ALL components)
   const formatTime = (seconds: number) => {
@@ -154,16 +166,7 @@ export default function StatisticsPage() {
           </Tabs>
 
           {/* Statistics Table */}
-          {isLoading ? (
-            <Card>
-              <div className="p-6 space-y-4">
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-8 w-full" />
-              </div>
-            </Card>
-          ) : (
-            <Card className="overflow-hidden">
+          <Card className="overflow-hidden">
               <div className="p-4 bg-muted/50 border-b">
                 <h3 className="font-bold text-foreground flex items-center gap-2">
                   <TableIcon className="w-5 h-5 text-primary" />
@@ -236,8 +239,7 @@ export default function StatisticsPage() {
                 </tbody>
               </table>
             </div>
-            </Card>
-          )}
+          </Card>
         </div>
       </main>
 
