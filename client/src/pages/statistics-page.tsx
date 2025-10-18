@@ -206,8 +206,14 @@ export default function StatisticsPage() {
                         <td className="px-4 py-3 text-sm font-medium text-muted-foreground">
                           {index + 1}
                         </td>
-                        <td className="px-4 py-3 text-sm font-medium text-foreground">
-                          {player.username}
+                        <td className="px-4 py-3 text-sm font-medium">
+                          <Link 
+                            href={`/oyuncu/${player.username}`} 
+                            className="text-primary hover:underline cursor-pointer"
+                            data-testid={`link-player-${index}`}
+                          >
+                            {player.username}
+                          </Link>
                         </td>
                         <td className="px-4 py-3 text-sm text-muted-foreground">
                           {player.rank}
