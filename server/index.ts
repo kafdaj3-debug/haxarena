@@ -42,6 +42,10 @@ app.use((req, res, next) => {
     // Normalize origin (remove trailing slash)
     const normalizedOrigin = origin ? origin.replace(/\/$/, '') : null;
     
+    // Check if origin is backend's own domain (same-origin request)
+    const backendUrl = process.env.RENDER_EXTERNAL_URL || req.get('host');
+    const isBackendOrigin = normalizedOrigin && backendUrl && normalizedOrigin.includes(backendUrl);
+    
     // Allow all Netlify domains (most permissive approach)
     if (normalizedOrigin && (
       normalizedOrigins.includes(normalizedOrigin) ||
@@ -59,6 +63,12 @@ app.use((req, res, next) => {
       if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
       }
+    } else if (normalizedOrigin && isBackendOrigin) {
+      // Backend's own domain - same-origin request, no CORS needed but allow it
+      // Don't log as blocked
+      if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+      }
     } else if (normalizedOrigin) {
       // For other origins, check if it's localhost or in allowed list
       if (normalizedOrigin.startsWith('http://localhost') || normalizedOrigins.includes(normalizedOrigin)) {
@@ -71,8 +81,8 @@ app.use((req, res, next) => {
           return res.sendStatus(200);
         }
       } else {
-        // Log blocked origin for debugging
-        if (process.env.NODE_ENV === 'production') {
+        // Log blocked origin for debugging (but not for backend's own domain)
+        if (process.env.NODE_ENV === 'production' && !isBackendOrigin) {
           log(`⚠️ CORS blocked origin: ${normalizedOrigin} (not in allowed list)`);
         }
       }
@@ -83,8 +93,8 @@ app.use((req, res, next) => {
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     }
     
-    // Debug logging in production
-    if (process.env.NODE_ENV === 'production' && normalizedOrigin) {
+    // Debug logging in production (but not for backend's own domain)
+    if (process.env.NODE_ENV === 'production' && normalizedOrigin && !isBackendOrigin) {
       log(`CORS: ${req.method} ${req.path} from origin: ${normalizedOrigin}`);
     }
   }

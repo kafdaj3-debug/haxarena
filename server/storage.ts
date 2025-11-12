@@ -412,13 +412,23 @@ export class DBStorage implements IStorage {
 
     const postsWithUserAndCount = await Promise.all(
       posts.map(async (post) => {
-        const [user] = await db.select().from(users).where(eq(users.id, post.userId)).limit(1);
-        const replies = await db.select().from(forumReplies).where(eq(forumReplies.postId, post.id));
-        return { ...post, user, replyCount: replies.length };
+        try {
+          const [user] = await db.select().from(users).where(eq(users.id, post.userId)).limit(1);
+          if (!user) {
+            console.error(`User not found for post ${post.id}, userId: ${post.userId}`);
+            return null; // Skip posts with missing users
+          }
+          const replies = await db.select().from(forumReplies).where(eq(forumReplies.postId, post.id));
+          return { ...post, user, replyCount: replies.length };
+        } catch (error: any) {
+          console.error(`Error processing post ${post.id}:`, error);
+          return null; // Skip posts with errors
+        }
       })
     );
 
-    return postsWithUserAndCount;
+    // Filter out null posts (posts with missing users or errors)
+    return postsWithUserAndCount.filter((post): post is ForumPost & { user: User; replyCount: number } => post !== null);
   }
 
   async getForumPost(id: string): Promise<(ForumPost & { user: User }) | undefined> {
