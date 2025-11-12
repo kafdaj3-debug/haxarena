@@ -391,6 +391,93 @@ app.use((req, res, next) => {
         )
       `);
       
+      // Custom roles table
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS custom_roles (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          name TEXT NOT NULL UNIQUE,
+          color TEXT NOT NULL DEFAULT '#808080',
+          priority INTEGER NOT NULL DEFAULT 0,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      
+      // User custom roles junction table
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS user_custom_roles (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          role_id VARCHAR NOT NULL REFERENCES custom_roles(id) ON DELETE CASCADE,
+          assigned_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      
+      // League tables
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS league_teams (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          name TEXT NOT NULL,
+          logo TEXT,
+          played INTEGER NOT NULL DEFAULT 0,
+          won INTEGER NOT NULL DEFAULT 0,
+          drawn INTEGER NOT NULL DEFAULT 0,
+          lost INTEGER NOT NULL DEFAULT 0,
+          goals_for INTEGER NOT NULL DEFAULT 0,
+          goals_against INTEGER NOT NULL DEFAULT 0,
+          goal_difference INTEGER NOT NULL DEFAULT 0,
+          head_to_head INTEGER NOT NULL DEFAULT 0,
+          points INTEGER NOT NULL DEFAULT 0,
+          position INTEGER NOT NULL DEFAULT 0,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS league_fixtures (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          home_team_id VARCHAR NOT NULL REFERENCES league_teams(id) ON DELETE CASCADE,
+          away_team_id VARCHAR NOT NULL REFERENCES league_teams(id) ON DELETE CASCADE,
+          home_score INTEGER,
+          away_score INTEGER,
+          match_date TIMESTAMP NOT NULL,
+          is_played BOOLEAN NOT NULL DEFAULT false,
+          week INTEGER NOT NULL,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS player_stats (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          fixture_id VARCHAR NOT NULL REFERENCES league_fixtures(id) ON DELETE CASCADE,
+          user_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          team_id VARCHAR NOT NULL REFERENCES league_teams(id) ON DELETE CASCADE,
+          goals INTEGER NOT NULL DEFAULT 0,
+          assists INTEGER NOT NULL DEFAULT 0,
+          dm INTEGER NOT NULL DEFAULT 0,
+          clean_sheets INTEGER NOT NULL DEFAULT 0,
+          saves INTEGER NOT NULL DEFAULT 0,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS team_of_week (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          week INTEGER NOT NULL UNIQUE,
+          image TEXT NOT NULL,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      
+      // Add statistics_visible column to settings if missing
+      try {
+        await db.execute(sql`ALTER TABLE settings ADD COLUMN IF NOT EXISTS statistics_visible BOOLEAN NOT NULL DEFAULT true`);
+      } catch (e) {
+        // Column might already exist
+      }
+      
       log("✓ All required tables ensured");
     } catch (error) {
       console.error("⚠️  Table creation failed:", error);
