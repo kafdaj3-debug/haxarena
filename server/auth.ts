@@ -68,8 +68,8 @@ export function setupAuth(app: Express) {
       cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         httpOnly: true, // Prevent XSS attacks
-        secure: process.env.NODE_ENV === "production", // HTTPS only in production (Replit auto-provides HTTPS)
-        sameSite: "lax", // CSRF protection - same-site requests allowed
+        secure: process.env.NODE_ENV === "production", // HTTPS only in production
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Cross-domain cookies in production (Netlify -> Render)
       },
     })
   );

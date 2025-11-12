@@ -329,7 +329,8 @@ app.use((req, res, next) => {
           image_url TEXT,
           is_locked BOOLEAN NOT NULL DEFAULT false,
           is_archived BOOLEAN NOT NULL DEFAULT false,
-          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+          created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+          edited_at TIMESTAMP
         )
       `);
       
@@ -342,7 +343,8 @@ app.use((req, res, next) => {
           content TEXT NOT NULL,
           image_url TEXT,
           quoted_reply_id VARCHAR,
-          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+          created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+          edited_at TIMESTAMP
         )
       `);
       
