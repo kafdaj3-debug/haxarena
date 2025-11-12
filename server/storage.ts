@@ -106,7 +106,7 @@ export interface IStorage {
   
   // Forum reply operations
   createForumReply(reply: InsertForumReply): Promise<ForumReply>;
-  getForumReplies(postId: string): Promise<(ForumReply & { user: User })[]>;
+  getForumReplies(postId: string): Promise<(ForumReply & { user: User; quotedReply?: ForumReply & { user: User } })[]>;
   getForumReply(id: string): Promise<(ForumReply & { user: User }) | undefined>;
   updateForumReply(id: string, updates: Partial<ForumReply>): Promise<ForumReply | undefined>;
   deleteForumReply(id: string): Promise<void>;
@@ -555,7 +555,7 @@ export class DBStorage implements IStorage {
         imageUrl: row.image_url || null,
         isLocked: row.is_locked,
         isArchived: row.is_archived,
-        createdAt: row.created_at,
+        createdAt: row.created_at instanceof Date ? row.created_at : new Date(row.created_at),
         editedAt: null,
       };
       
@@ -682,14 +682,15 @@ export class DBStorage implements IStorage {
     }
   }
 
-  async getForumReplies(postId: string): Promise<(ForumReply & { user: User })[]> {
+  async getForumReplies(postId: string): Promise<(ForumReply & { user: User; quotedReply?: ForumReply & { user: User } })[]> {
     try {
       // Use raw SQL to avoid edited_at column issues
+      // Order by created_at ASC (oldest first, newest at bottom)
       const result = await db.execute(sql`
         SELECT id, post_id, user_id, content, image_url, quoted_reply_id, created_at
         FROM forum_replies
         WHERE post_id = ${postId}
-        ORDER BY created_at DESC
+        ORDER BY created_at ASC
       `);
       
       const replies = result.rows.map((row: any) => ({
@@ -699,14 +700,48 @@ export class DBStorage implements IStorage {
         content: row.content,
         imageUrl: row.image_url || null,
         quotedReplyId: row.quoted_reply_id || null,
-        createdAt: row.created_at,
+        createdAt: row.created_at instanceof Date ? row.created_at : new Date(row.created_at),
         editedAt: null,
       }));
 
       const repliesWithUser = await Promise.all(
         replies.map(async (reply) => {
           const [user] = await db.select().from(users).where(eq(users.id, reply.userId)).limit(1);
-          return { ...reply, user };
+          
+          // Get quoted reply if exists
+          let quotedReply: (ForumReply & { user: User }) | undefined = undefined;
+          if (reply.quotedReplyId) {
+            try {
+              const quotedResult = await db.execute(sql`
+                SELECT id, post_id, user_id, content, image_url, quoted_reply_id, created_at
+                FROM forum_replies
+                WHERE id = ${reply.quotedReplyId}
+                LIMIT 1
+              `);
+              
+              if (quotedResult.rows && quotedResult.rows.length > 0) {
+                const quotedRow = quotedResult.rows[0] as any;
+                const [quotedUser] = await db.select().from(users).where(eq(users.id, quotedRow.user_id)).limit(1);
+                if (quotedUser) {
+                  quotedReply = {
+                    id: quotedRow.id,
+                    postId: quotedRow.post_id,
+                    userId: quotedRow.user_id,
+                    content: quotedRow.content,
+                    imageUrl: quotedRow.image_url || null,
+                    quotedReplyId: quotedRow.quoted_reply_id || null,
+                    createdAt: quotedRow.created_at instanceof Date ? quotedRow.created_at : new Date(quotedRow.created_at),
+                    editedAt: null,
+                    user: quotedUser,
+                  };
+                }
+              }
+            } catch (e) {
+              console.error("Error fetching quoted reply:", e);
+            }
+          }
+          
+          return { ...reply, user, quotedReply };
         })
       );
 

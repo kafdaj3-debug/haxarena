@@ -28,7 +28,7 @@ const roleColors: Record<string, string> = {
 };
 
 type PostWithUser = ForumPost & { user: User; staffRole?: string | null; customRoles?: any[] };
-type ReplyWithUser = ForumReply & { user: User; staffRole?: string | null; customRoles?: any[] };
+type ReplyWithUser = ForumReply & { user: User; staffRole?: string | null; customRoles?: any[]; quotedReply?: ReplyWithUser };
 
 export default function ForumPostDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -103,6 +103,10 @@ export default function ForumPostDetailPage() {
       setReplyContent("");
       setReplyImageUrl(null);
       setQuotedReplyId(null);
+      // Scroll to bottom after reply is added
+      setTimeout(() => {
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+      }, 100);
     },
     onError: () => {
       toast({
@@ -501,28 +505,40 @@ export default function ForumPostDetailPage() {
                 <h3 className="text-lg font-semibold">Cevap Yaz</h3>
               </CardHeader>
               <CardContent className="space-y-4">
-                {quotedReplyId && (
-                  <div className="bg-muted p-3 rounded-md relative">
-                    <div className="flex items-start gap-2">
-                      <Quote className="w-4 h-4 mt-1 text-muted-foreground" />
-                      <div className="flex-1">
-                        <p className="text-sm text-muted-foreground">
-                          Alıntı yapılıyor...
-                        </p>
+                {quotedReplyId && (() => {
+                  const quotedReply = replies?.find(r => r.id === quotedReplyId);
+                  return (
+                    <div className="bg-muted p-3 rounded-md relative border-l-4 border-primary/30">
+                      <div className="flex items-start gap-2">
+                        <Quote className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          {quotedReply ? (
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-1">
+                                {quotedReply.user?.username || 'Bilinmeyen'} tarafından alıntılandı:
+                              </p>
+                              <p className="text-sm line-clamp-3">{quotedReply.content}</p>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground">
+                              Alıntı yapılıyor...
+                            </p>
+                          )}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 flex-shrink-0"
+                          onClick={() => setQuotedReplyId(null)}
+                          data-testid="button-remove-quote"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
                       </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => setQuotedReplyId(null)}
-                        data-testid="button-remove-quote"
-                      >
-                        <X className="w-3 h-3" />
-                      </Button>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
                 <Textarea 
                   placeholder="Cevabınızı yazın..."
                   rows={4}
@@ -683,12 +699,17 @@ export default function ForumPostDetailPage() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    {reply.quotedReplyId && (
+                    {reply.quotedReply && (
                       <div className="bg-muted/50 border-l-4 border-primary/30 pl-4 py-2 mb-3 rounded">
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Quote className="w-3 h-3" />
-                          Bir mesaja yanıt veriyor
-                        </p>
+                        <div className="flex items-start gap-2">
+                          <Quote className="w-3 h-3 mt-0.5 text-muted-foreground flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-muted-foreground mb-1">
+                              {reply.quotedReply.user?.username || 'Bilinmeyen'} tarafından:
+                            </p>
+                            <p className="text-sm line-clamp-3">{reply.quotedReply.content}</p>
+                          </div>
+                        </div>
                       </div>
                     )}
                     {editingReplyId === reply.id ? (
