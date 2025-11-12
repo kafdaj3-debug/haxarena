@@ -887,12 +887,41 @@ export class DBStorage implements IStorage {
 
   // Private message operations
   async sendPrivateMessage(message: InsertPrivateMessage): Promise<PrivateMessage> {
-    const [pm] = await db.insert(privateMessages).values(message).returning();
-    return pm;
+    try {
+      // Use raw SQL to ensure compatibility
+      const result = await db.execute(sql`
+        INSERT INTO private_messages (sender_id, receiver_id, message, image_url, is_read, created_at)
+        VALUES (${message.senderId}, ${message.receiverId}, ${message.message}, ${message.imageUrl || null}, false, NOW())
+        RETURNING id, sender_id, receiver_id, message, image_url, is_read, created_at
+      `);
+      
+      if (!result.rows || result.rows.length === 0) {
+        throw new Error("Failed to create private message - no message returned");
+      }
+      
+      const row = result.rows[0] as any;
+      return {
+        id: row.id,
+        senderId: row.sender_id,
+        receiverId: row.receiver_id,
+        message: row.message,
+        imageUrl: row.image_url || null,
+        isRead: row.is_read,
+        createdAt: row.created_at instanceof Date ? row.created_at : new Date(row.created_at),
+      };
+    } catch (error: any) {
+      console.error("Error in sendPrivateMessage:", error);
+      console.error("Message data:", message);
+      console.error("Error stack:", error?.stack);
+      console.error("Error code:", error?.code);
+      console.error("Error constraint:", error?.constraint);
+      console.error("Error detail:", error?.detail);
+      throw error;
+    }
   }
 
   async getConversations(userId: string): Promise<Array<{ otherUser: User; lastMessage: PrivateMessage; unreadCount: number }>>  {
-    const { or, and, sql } = await import("drizzle-orm");
+    const { or, and } = await import("drizzle-orm");
     
     // Get all messages where user is sender or receiver
     const messages = await db

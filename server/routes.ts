@@ -1308,13 +1308,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const pm = await storage.sendPrivateMessage({
         senderId: req.user!.id,
         receiverId,
-        message,
+        message: message || "",
         imageUrl: imageUrl || null,
       });
 
       return res.json(pm);
-    } catch (error) {
-      return res.status(500).json({ error: "Mesaj gönderilemedi" });
+    } catch (error: any) {
+      console.error("Error sending private message:", error);
+      console.error("Error message:", error?.message);
+      console.error("Error code:", error?.code);
+      console.error("Error detail:", error?.detail);
+      console.error("Error constraint:", error?.constraint);
+      console.error("Error stack:", error?.stack);
+      return res.status(500).json({ 
+        error: "Mesaj gönderilemedi", 
+        details: error?.message || error?.detail || "Bilinmeyen hata" 
+      });
     }
   });
 
