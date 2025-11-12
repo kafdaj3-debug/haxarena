@@ -62,6 +62,25 @@ export default function LeaguePage() {
 
   const weeks = Object.keys(fixturesByWeek).sort((a, b) => parseInt(a) - parseInt(b));
 
+  // Get current week's matches (this week)
+  const getCurrentWeekMatches = () => {
+    if (!fixtures) return [];
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
+    startOfWeek.setHours(0, 0, 0, 0);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    return fixtures.filter((fixture: any) => {
+      const matchDate = new Date(fixture.matchDate);
+      return matchDate >= startOfWeek && matchDate <= endOfWeek;
+    }).sort((a: any, b: any) => new Date(a.matchDate).getTime() - new Date(b.matchDate).getTime());
+  };
+
+  const currentWeekMatches = getCurrentWeekMatches();
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header user={user} onLogout={logout} />
@@ -194,7 +213,128 @@ export default function LeaguePage() {
                   Henüz maç bulunmamaktadır
                 </div>
               ) : (
-                weeks.map((week) => (
+                <>
+                  {/* Bu Haftaki Maçlar - Özel Bölüm */}
+                  {currentWeekMatches.length > 0 && (
+                    <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+                      <CardHeader className="pb-4">
+                        <CardTitle className="text-2xl flex items-center gap-2">
+                          <Calendar className="w-6 h-6 text-primary" />
+                          Bu Haftaki Maçlar
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Bu hafta oynanacak tüm maçlar ve detayları
+                        </p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {currentWeekMatches.map((fixture: any) => {
+                          const matchDate = new Date(fixture.matchDate);
+                          const isToday = matchDate.toDateString() === new Date().toDateString();
+                          const isPast = matchDate < new Date();
+                          
+                          return (
+                            <div 
+                              key={fixture.id} 
+                              className={`p-5 border-2 rounded-xl transition-all hover:shadow-lg ${
+                                isToday 
+                                  ? "border-primary bg-primary/10 shadow-md" 
+                                  : isPast
+                                  ? "border-muted bg-muted/30"
+                                  : "border-border bg-card hover:border-primary/50"
+                              }`}
+                              data-testid={`fixture-current-week-${fixture.id}`}
+                            >
+                              <div className="flex items-center justify-between gap-4 mb-3">
+                                <div className="flex items-center gap-4 flex-1">
+                                  {fixture.homeTeam.logo && (
+                                    <img 
+                                      src={fixture.homeTeam.logo} 
+                                      alt={fixture.homeTeam.name} 
+                                      className="w-14 h-14 object-contain"
+                                    />
+                                  )}
+                                  <div className="flex-1 text-right">
+                                    <span className={`font-bold text-lg ${fixture.isPlayed && fixture.homeScore > fixture.awayScore ? "text-green-600" : ""}`}>
+                                      {fixture.homeTeam.name}
+                                    </span>
+                                  </div>
+                                </div>
+                                
+                                <div className="flex flex-col items-center justify-center min-w-[120px]">
+                                  {fixture.isPlayed ? (
+                                    <div className="text-3xl font-bold flex items-center gap-2">
+                                      <span className={fixture.homeScore > fixture.awayScore ? "text-green-600" : fixture.homeScore < fixture.awayScore ? "text-muted-foreground" : "text-blue-600"}>
+                                        {fixture.homeScore}
+                                      </span>
+                                      <span className="text-muted-foreground">-</span>
+                                      <span className={fixture.awayScore > fixture.homeScore ? "text-green-600" : fixture.awayScore < fixture.homeScore ? "text-muted-foreground" : "text-blue-600"}>
+                                        {fixture.awayScore}
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    <span className="text-xl font-bold text-muted-foreground">VS</span>
+                                  )}
+                                  {isToday && !fixture.isPlayed && (
+                                    <span className="text-xs font-semibold text-primary mt-1 bg-primary/20 px-2 py-1 rounded-full">
+                                      BUGÜN
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                <div className="flex items-center gap-4 flex-1">
+                                  <div className="flex-1">
+                                    <span className={`font-bold text-lg ${fixture.isPlayed && fixture.awayScore > fixture.homeScore ? "text-green-600" : ""}`}>
+                                      {fixture.awayTeam.name}
+                                    </span>
+                                  </div>
+                                  {fixture.awayTeam.logo && (
+                                    <img 
+                                      src={fixture.awayTeam.logo} 
+                                      alt={fixture.awayTeam.name} 
+                                      className="w-14 h-14 object-contain"
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center justify-between pt-3 border-t">
+                                <div className="flex items-center gap-2 text-sm">
+                                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                                  <span className="font-medium">
+                                    {matchDate.toLocaleDateString('tr-TR', {
+                                      weekday: 'long',
+                                      day: 'numeric',
+                                      month: 'long',
+                                      year: 'numeric',
+                                      timeZone: 'Europe/Istanbul'
+                                    })}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm">
+                                  <span className="text-muted-foreground">Saat:</span>
+                                  <span className="font-semibold">
+                                    {matchDate.toLocaleTimeString('tr-TR', {
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                      timeZone: 'Europe/Istanbul'
+                                    })}
+                                  </span>
+                                </div>
+                                {fixture.isPlayed && (
+                                  <span className="text-xs font-semibold text-green-600 bg-green-600/20 px-2 py-1 rounded-full">
+                                    OYNANDI
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Tüm Haftalar */}
+                  {weeks.map((week) => (
                   <Card key={week}>
                     <CardHeader>
                       <CardTitle>{week}. Hafta</CardTitle>
@@ -262,6 +402,8 @@ export default function LeaguePage() {
                     </CardContent>
                   </Card>
                 ))
+                  )}
+                </>
               )}
             </TabsContent>
 

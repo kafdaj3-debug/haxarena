@@ -9,20 +9,20 @@ export default function ActiveRoomsPage() {
   const [rooms] = useState([
     {
       id: 1,
-      matchName: "Kocaelispor vs Gaziantepspor",
-      link: "https://www.haxball.com/play?c=SQiZbOZdvCU",
+      matchName: "Galatasaray vs Fenerbahçe",
+      link: "https://www.haxball.com/play?c=IYzJzBiJHEs",
       isActive: true
     },
     {
       id: 2,
       matchName: "Karşıyaka vs Göztepe",
-      link: "https://www.haxball.com/play?c=0nc3iNzdT78",
+      link: "https://www.haxball.com/play?c=ypq2XywtUqI",
       isActive: true
     },
     {
       id: 3,
-      matchName: "Galatasaray vs Fenerbahçe",
-      link: "https://www.haxball.com/play?c=tIJcy9L3c0k",
+      matchName: "Kocaelispor vs Gaziantepspor",
+      link: "https://www.haxball.com/play?c=XtjDImqNvwI",
       isActive: true
     }
   ]);
@@ -42,7 +42,7 @@ export default function ActiveRoomsPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
             {rooms.map((room) => (
               <ActiveRoomCard
                 key={room.id}
