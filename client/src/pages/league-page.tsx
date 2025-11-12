@@ -155,23 +155,53 @@ export default function LeaguePage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {teams?.map((team, index) => (
+                          {teams?.map((team, index) => {
+                            const isTopThree = index < 3;
+                            const rankClass = index === 0 
+                              ? "bg-gradient-to-r from-yellow-500/20 to-yellow-600/10 border-yellow-500/30" 
+                              : index === 1 
+                              ? "bg-gradient-to-r from-gray-400/20 to-gray-500/10 border-gray-400/30" 
+                              : index === 2 
+                              ? "bg-gradient-to-r from-orange-600/20 to-orange-700/10 border-orange-600/30" 
+                              : "";
+                            
+                            return (
                             <tr 
                               key={team.id} 
-                              className="border-b hover:bg-muted/50 transition-colors"
+                              className={`border-b transition-colors ${isTopThree ? `${rankClass} hover:opacity-90` : "hover:bg-muted/50"}`}
                               data-testid={`row-team-${team.id}`}
                             >
-                              <td className="p-3 font-bold text-center">{index + 1}</td>
+                              <td className="p-3 font-bold text-center">
+                                {isTopThree ? (
+                                  <div className="flex items-center justify-center gap-1">
+                                    {index === 0 && <span className="text-2xl">🥇</span>}
+                                    {index === 1 && <span className="text-2xl">🥈</span>}
+                                    {index === 2 && <span className="text-2xl">🥉</span>}
+                                    <span className={index === 0 ? "text-yellow-600" : index === 1 ? "text-gray-500" : "text-orange-600"}>{index + 1}</span>
+                                  </div>
+                                ) : (
+                                  index + 1
+                                )}
+                              </td>
                               <td className="p-3">
                                 <div className="flex items-center gap-3">
                                   {team.logo && (
                                     <img 
                                       src={team.logo} 
                                       alt={team.name} 
-                                      className="w-8 h-8 object-contain"
+                                      className={`object-contain ${isTopThree ? "w-10 h-10" : "w-8 h-8"}`}
                                     />
                                   )}
-                                  <span className="font-medium">{team.name}</span>
+                                  <span className={`font-medium ${isTopThree ? "text-lg" : ""}`}>{team.name}</span>
+                                  {isTopThree && (
+                                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                                      index === 0 ? "bg-yellow-500/20 text-yellow-700" 
+                                      : index === 1 ? "bg-gray-400/20 text-gray-700" 
+                                      : "bg-orange-600/20 text-orange-700"
+                                    }`}>
+                                      {index === 0 ? "ŞAMPİYON" : index === 1 ? "İKİNCİ" : "ÜÇÜNCÜ"}
+                                    </span>
+                                  )}
                                 </div>
                               </td>
                               <td className="p-3 text-center">{team.played}</td>
@@ -190,9 +220,12 @@ export default function LeaguePage() {
                                   {team.headToHead > 0 ? "+" : ""}{team.headToHead || 0}
                                 </span>
                               </td>
-                              <td className="p-3 text-center font-bold text-primary">{team.points}</td>
+                              <td className={`p-3 text-center font-bold ${isTopThree ? index === 0 ? "text-yellow-600 text-lg" : index === 1 ? "text-gray-500 text-lg" : "text-orange-600 text-lg" : "text-primary"}`}>
+                                {team.points}
+                              </td>
                             </tr>
-                          ))}
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>

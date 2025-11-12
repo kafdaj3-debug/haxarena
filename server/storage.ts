@@ -1204,11 +1204,14 @@ export class DBStorage implements IStorage {
       await this.revertMatchResult(fixture.homeTeamId, fixture.awayTeamId, fixture.homeScore, fixture.awayScore);
     }
 
-    // Update fixture
+    // Update fixture - preserve matchDate and week
     await db.update(leagueFixtures).set({
       homeScore,
       awayScore,
       isPlayed: true,
+      // matchDate and week are preserved automatically, but explicitly set to ensure they're not lost
+      matchDate: fixture.matchDate,
+      week: fixture.week,
     }).where(eq(leagueFixtures.id, id));
 
     // Update team standings

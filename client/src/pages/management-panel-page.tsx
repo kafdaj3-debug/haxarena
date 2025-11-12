@@ -83,6 +83,8 @@ export default function ManagementPanelPage() {
   
   // Manual team edit state
   const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
+  const [editingTeamName, setEditingTeamName] = useState("");
+  const [editingTeamLogo, setEditingTeamLogo] = useState("");
   const [manualPoints, setManualPoints] = useState("");
   const [manualPlayed, setManualPlayed] = useState("");
   const [manualWon, setManualWon] = useState("");
@@ -1538,6 +1540,8 @@ export default function ManagementPanelPage() {
                               size="sm"
                               onClick={() => {
                                 setEditingTeamId(team.id);
+                                setEditingTeamName(team.name);
+                                setEditingTeamLogo(team.logo || "");
                                 setManualPoints(team.points.toString());
                                 setManualPlayed(team.played.toString());
                                 setManualWon(team.won.toString());
@@ -1568,7 +1572,33 @@ export default function ManagementPanelPage() {
                         {/* Manuel Düzenleme Formu */}
                         {editingTeamId === team.id && (
                           <div className="p-4 border rounded-lg bg-muted/20 space-y-3">
-                            <h4 className="font-medium text-sm">Manuel İstatistik Düzenleme</h4>
+                            <h4 className="font-medium text-sm">Takım Bilgilerini Düzenle</h4>
+                            
+                            {/* Takım İsmi ve Logosu */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pb-3 border-b">
+                              <div className="space-y-1">
+                                <Label className="text-xs">Takım İsmi</Label>
+                                <Input
+                                  type="text"
+                                  value={editingTeamName}
+                                  onChange={(e) => setEditingTeamName(e.target.value)}
+                                  className="h-8 text-sm"
+                                  placeholder="Takım ismi"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">Takım Logosu URL</Label>
+                                <Input
+                                  type="url"
+                                  value={editingTeamLogo}
+                                  onChange={(e) => setEditingTeamLogo(e.target.value)}
+                                  className="h-8 text-sm"
+                                  placeholder="https://example.com/logo.png"
+                                />
+                              </div>
+                            </div>
+                            
+                            <h4 className="font-medium text-sm pt-2">Manuel İstatistik Düzenleme</h4>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                               <div className="space-y-1">
                                 <Label className="text-xs">Puan</Label>
@@ -1655,6 +1685,12 @@ export default function ManagementPanelPage() {
                                 size="sm"
                                 onClick={() => {
                                   const data: any = {};
+                                  // Takım ismi ve logosu
+                                  if (editingTeamName.trim()) data.name = editingTeamName.trim();
+                                  if (editingTeamLogo.trim()) data.logo = editingTeamLogo.trim();
+                                  else if (editingTeamLogo === "") data.logo = null;
+                                  
+                                  // İstatistikler
                                   if (manualPoints) data.points = parseInt(manualPoints);
                                   if (manualPlayed) data.played = parseInt(manualPlayed);
                                   if (manualWon) data.won = parseInt(manualWon);
@@ -1666,14 +1702,18 @@ export default function ManagementPanelPage() {
                                   
                                   manualTeamUpdateMutation.mutate({ id: team.id, data });
                                 }}
-                                disabled={manualTeamUpdateMutation.isPending}
+                                disabled={manualTeamUpdateMutation.isPending || !editingTeamName.trim()}
                               >
                                 Kaydet
                               </Button>
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => setEditingTeamId(null)}
+                                onClick={() => {
+                                  setEditingTeamId(null);
+                                  setEditingTeamName("");
+                                  setEditingTeamLogo("");
+                                }}
                               >
                                 İptal
                               </Button>
