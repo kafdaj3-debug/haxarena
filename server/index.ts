@@ -294,6 +294,32 @@ app.use((req, res, next) => {
         log(`⚠️  Warning checking forum_replies table: ${e.message}`);
       }
       
+      // Private messages table columns
+      try {
+        // Check if private_messages table exists
+        const privateMessagesCheck = await db.execute(sql`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'private_messages'
+          )
+        `);
+        
+        if (privateMessagesCheck.rows && privateMessagesCheck.rows[0] && (privateMessagesCheck.rows[0] as any).exists) {
+          // Add image_url column if it doesn't exist
+          try {
+            await db.execute(sql`ALTER TABLE private_messages ADD COLUMN IF NOT EXISTS image_url TEXT`);
+            log("✓ Added image_url column to private_messages");
+          } catch (e: any) {
+            if (!e.message?.includes("already exists") && !e.message?.includes("duplicate")) {
+              log(`⚠️  Warning adding image_url to private_messages: ${e.message}`);
+            }
+          }
+        }
+      } catch (e: any) {
+        log(`⚠️  Warning checking private_messages table: ${e.message}`);
+      }
+      
       // Fix: Make email column nullable (old migration leftover)
       try {
         await db.execute(sql`ALTER TABLE users ALTER COLUMN email DROP NOT NULL`);

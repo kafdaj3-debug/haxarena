@@ -888,12 +888,39 @@ export class DBStorage implements IStorage {
   // Private message operations
   async sendPrivateMessage(message: InsertPrivateMessage): Promise<PrivateMessage> {
     try {
+      // Check if image_url column exists, if not, don't include it in insert
+      let hasImageUrl = false;
+      try {
+        const columnCheck = await db.execute(sql`
+          SELECT EXISTS (
+            SELECT FROM information_schema.columns 
+            WHERE table_schema = 'public' 
+            AND table_name = 'private_messages'
+            AND column_name = 'image_url'
+          )
+        `);
+        hasImageUrl = columnCheck.rows[0] ? (columnCheck.rows[0] as any).exists : false;
+      } catch (e) {
+        // If check fails, assume column doesn't exist
+        hasImageUrl = false;
+      }
+      
       // Use raw SQL to ensure compatibility
-      const result = await db.execute(sql`
-        INSERT INTO private_messages (sender_id, receiver_id, message, image_url, is_read, created_at)
-        VALUES (${message.senderId}, ${message.receiverId}, ${message.message}, ${message.imageUrl || null}, false, NOW())
-        RETURNING id, sender_id, receiver_id, message, image_url, is_read, created_at
-      `);
+      let result;
+      if (hasImageUrl) {
+        result = await db.execute(sql`
+          INSERT INTO private_messages (sender_id, receiver_id, message, image_url, is_read, created_at)
+          VALUES (${message.senderId}, ${message.receiverId}, ${message.message}, ${message.imageUrl || null}, false, NOW())
+          RETURNING id, sender_id, receiver_id, message, image_url, is_read, created_at
+        `);
+      } else {
+        // If image_url column doesn't exist, insert without it
+        result = await db.execute(sql`
+          INSERT INTO private_messages (sender_id, receiver_id, message, is_read, created_at)
+          VALUES (${message.senderId}, ${message.receiverId}, ${message.message}, false, NOW())
+          RETURNING id, sender_id, receiver_id, message, is_read, created_at
+        `);
+      }
       
       if (!result.rows || result.rows.length === 0) {
         throw new Error("Failed to create private message - no message returned");
@@ -905,7 +932,7 @@ export class DBStorage implements IStorage {
         senderId: row.sender_id,
         receiverId: row.receiver_id,
         message: row.message,
-        imageUrl: row.image_url || null,
+        imageUrl: hasImageUrl ? (row.image_url || null) : null,
         isRead: row.is_read,
         createdAt: row.created_at instanceof Date ? row.created_at : new Date(row.created_at),
       };
