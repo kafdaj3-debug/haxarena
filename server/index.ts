@@ -16,12 +16,13 @@ const app = express();
 // Trust first proxy (Replit HTTPS termination)
 app.set('trust proxy', 1);
 
-// CORS configuration - Allow requests from Netlify, Vercel and localhost
+// CORS configuration - Allow requests from Netlify, Vercel, Anksoft and localhost
 const allowedOrigins = [
-  process.env.FRONTEND_URL, // Frontend URL (Netlify, Vercel, etc.)
+  process.env.FRONTEND_URL, // Frontend URL (Netlify, Vercel, Anksoft, etc.)
   'https://haxarena.netlify.app', // Current Netlify domain
   'https://voluble-kleicha-433797.netlify.app', // Old Netlify domain (backup)
-  'https://haxarena.net.tr', // Custom domain
+  'https://haxarena.net.tr', // Custom domain (Anksoft)
+  'http://haxarena.net.tr', // Custom domain HTTP (fallback)
   'http://localhost:5173', // Vite dev server
   'http://localhost:5000', // Local development
 ].filter(Boolean); // Remove undefined values
