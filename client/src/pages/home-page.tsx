@@ -16,10 +16,6 @@ export default function HomePage() {
   const { user, logout } = useAuth();
   const allRooms = [
     {
-      matchName: "Beşiktaş vs Trabzonspor",
-      link: "https://www.haxball.com/play?c=S94fRiqX_MI"
-    },
-    {
       matchName: "Kocaelispor vs Gaziantepspor",
       link: "https://www.haxball.com/play?c=SQiZbOZdvCU"
     },

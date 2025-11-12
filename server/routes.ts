@@ -760,17 +760,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/forum-posts", isAuthenticated, isNotBanned, async (req, res) => {
     try {
       const { title, content, category, imageUrl } = req.body;
-      const post = await storage.createForumPost({
+      
+      // Validate required fields
+      if (!title || typeof title !== 'string' || title.trim().length < 5) {
+        return res.status(400).json({ error: "Başlık en az 5 karakter olmalıdır" });
+      }
+      if (!content || typeof content !== 'string' || content.trim().length < 10) {
+        return res.status(400).json({ error: "İçerik en az 10 karakter olmalıdır" });
+      }
+      if (!category || typeof category !== 'string' || category.trim().length === 0) {
+        return res.status(400).json({ error: "Kategori seçiniz" });
+      }
+      
+      // Convert empty string to undefined for optional imageUrl
+      const postData: any = {
         userId: req.user!.id,
-        title,
-        content,
-        category,
-        imageUrl,
-      });
+        title: title.trim(),
+        content: content.trim(),
+        category: category.trim(),
+      };
+      
+      if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim().length > 0) {
+        postData.imageUrl = imageUrl.trim();
+      }
+      
+      const post = await storage.createForumPost(postData);
       return res.json(post);
     } catch (error: any) {
       console.error("Error creating forum post:", error);
-      return res.status(500).json({ error: "Konu oluşturulamadı", details: error?.message });
+      console.error("Error details:", {
+        message: error?.message,
+        code: error?.code,
+        constraint: error?.constraint,
+        detail: error?.detail,
+        stack: error?.stack,
+      });
+      return res.status(500).json({ 
+        error: "Konu oluşturulamadı", 
+        details: error?.message || error?.detail || "Bilinmeyen hata" 
+      });
     }
   });
 
@@ -785,6 +813,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         posts = await storage.getForumPosts(category, includeArchived);
       } catch (postsError: any) {
         console.error("Error getting forum posts from storage:", postsError);
+        console.error("Error message:", postsError?.message);
+        console.error("Error code:", postsError?.code);
+        console.error("Error detail:", postsError?.detail);
+        console.error("Error constraint:", postsError?.constraint);
         console.error("Error stack:", postsError?.stack);
         // Return empty array instead of error
         return res.json([]);
@@ -830,6 +862,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(postsWithRoles);
     } catch (error: any) {
       console.error("Error in /api/forum-posts route:", error);
+      console.error("Error message:", error?.message);
+      console.error("Error code:", error?.code);
+      console.error("Error detail:", error?.detail);
       console.error("Error stack:", error?.stack);
       // Return empty array instead of error to prevent frontend crash
       return res.json([]);

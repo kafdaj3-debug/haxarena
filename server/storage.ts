@@ -54,8 +54,8 @@ import {
   customRoles,
   userCustomRoles
 } from "@shared/schema";
-import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { db, pool } from "./db";
+import { eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -383,54 +383,138 @@ export class DBStorage implements IStorage {
 
   // Forum post operations
   async createForumPost(post: InsertForumPost): Promise<ForumPost> {
+    // Filter out undefined values to avoid database issues
+    // Explicitly exclude editedAt to avoid column not found errors
+    const cleanPost: any = {
+      userId: post.userId,
+      title: post.title,
+      content: post.content,
+      category: post.category,
+    };
+    
+    // Only include imageUrl if it's defined and not empty
+    if (post.imageUrl !== undefined && post.imageUrl !== null && post.imageUrl !== '') {
+      cleanPost.imageUrl = post.imageUrl;
+    }
+    
+    // Explicitly exclude editedAt - it's optional and should not be set on creation
+    // This prevents errors if the column doesn't exist yet in the database
+    
     try {
-      const [forumPost] = await db.insert(forumPosts).values(post).returning();
-      if (!forumPost) {
+      // Insert without returning to avoid edited_at column error
+      // Use raw SQL to insert and get the ID back
+      const result = await db.execute(sql`
+        INSERT INTO forum_posts (user_id, title, content, category, image_url, is_locked, is_archived, created_at)
+        VALUES (${cleanPost.userId}, ${cleanPost.title}, ${cleanPost.content}, ${cleanPost.category}, ${cleanPost.imageUrl || null}, false, false, NOW())
+        RETURNING id, user_id, title, content, category, image_url, is_locked, is_archived, created_at
+      `);
+      
+      if (!result.rows || result.rows.length === 0) {
         throw new Error("Failed to create forum post - no post returned");
       }
+      
+      const row = result.rows[0] as any;
+      
+      // Map the raw SQL result to ForumPost type
+      const forumPost: ForumPost = {
+        id: row.id,
+        userId: row.user_id,
+        title: row.title,
+        content: row.content,
+        category: row.category,
+        imageUrl: row.image_url || null,
+        isLocked: row.is_locked,
+        isArchived: row.is_archived,
+        createdAt: row.created_at,
+        editedAt: null, // Will be set when column exists
+      };
+      
       return forumPost;
     } catch (error: any) {
       console.error("Error in createForumPost:", error);
       console.error("Post data:", post);
+      console.error("Clean post data:", cleanPost);
       console.error("Error stack:", error?.stack);
+      console.error("Error code:", error?.code);
+      console.error("Error constraint:", error?.constraint);
+      console.error("Error detail:", error?.detail);
       throw error; // Re-throw to be caught by route handler
     }
   }
 
   async getForumPosts(category?: string, includeArchived: boolean = false): Promise<(ForumPost & { user: User; replyCount: number })[]> {
     try {
-      let posts;
+      let posts: any[];
       
+      // Use sql template with db.execute to avoid Drizzle schema issues with edited_at column
+      // But select only existing columns
       if (category) {
-        posts = includeArchived
-          ? await db.select().from(forumPosts)
-              .where(eq(forumPosts.category, category))
-              .orderBy(desc(forumPosts.createdAt))
-          : await db.select().from(forumPosts)
-              .where(eq(forumPosts.category, category))
-              .orderBy(desc(forumPosts.createdAt));
+        if (includeArchived) {
+          const result = await db.execute(sql`
+            SELECT id, user_id, title, content, category, image_url, is_locked, is_archived, created_at
+            FROM forum_posts
+            WHERE category = ${category}
+            ORDER BY created_at DESC
+          `);
+          posts = result.rows as any[];
+        } else {
+          const result = await db.execute(sql`
+            SELECT id, user_id, title, content, category, image_url, is_locked, is_archived, created_at
+            FROM forum_posts
+            WHERE category = ${category} AND is_archived = false
+            ORDER BY created_at DESC
+          `);
+          posts = result.rows as any[];
+        }
       } else {
-        posts = includeArchived
-          ? await db.select().from(forumPosts)
-              .orderBy(desc(forumPosts.createdAt))
-          : await db.select().from(forumPosts)
-              .orderBy(desc(forumPosts.createdAt));
+        if (includeArchived) {
+          const result = await db.execute(sql`
+            SELECT id, user_id, title, content, category, image_url, is_locked, is_archived, created_at
+            FROM forum_posts
+            ORDER BY created_at DESC
+          `);
+          posts = result.rows as any[];
+        } else {
+          const result = await db.execute(sql`
+            SELECT id, user_id, title, content, category, image_url, is_locked, is_archived, created_at
+            FROM forum_posts
+            WHERE is_archived = false
+            ORDER BY created_at DESC
+          `);
+          posts = result.rows as any[];
+        }
       }
       
-      if (!includeArchived) {
-        posts = posts.filter(p => !p.isArchived);
-      }
+      // Map raw SQL results to ForumPost format
+      const mappedPosts = posts.map((row: any) => ({
+        id: row.id,
+        userId: row.user_id,
+        title: row.title,
+        content: row.content,
+        category: row.category,
+        imageUrl: row.image_url || null,
+        isLocked: row.is_locked,
+        isArchived: row.is_archived,
+        createdAt: row.created_at instanceof Date ? row.created_at : new Date(row.created_at),
+        editedAt: null, // Will be set when column exists
+      }));
 
       const postsWithUserAndCount = await Promise.all(
-        posts.map(async (post) => {
+        mappedPosts.map(async (post) => {
           try {
             const [user] = await db.select().from(users).where(eq(users.id, post.userId)).limit(1);
             if (!user) {
               console.error(`User not found for post ${post.id}, userId: ${post.userId}`);
               return null; // Skip posts with missing users
             }
-            const replies = await db.select().from(forumReplies).where(eq(forumReplies.postId, post.id));
-            return { ...post, user, replyCount: replies.length };
+            // Use sql template for replies count to avoid edited_at issues
+            const repliesResult = await db.execute(sql`
+              SELECT COUNT(*) as count
+              FROM forum_replies
+              WHERE post_id = ${post.id}
+            `);
+            const replyCount = repliesResult.rows[0] ? parseInt((repliesResult.rows[0] as any).count) : 0;
+            return { ...post, user, replyCount };
           } catch (error: any) {
             console.error(`Error processing post ${post.id}:`, error);
             return null; // Skip posts with errors
@@ -439,7 +523,7 @@ export class DBStorage implements IStorage {
       );
 
       // Filter out null posts (posts with missing users or errors)
-      return postsWithUserAndCount.filter((post): post is ForumPost & { user: User; replyCount: number } => post !== null);
+      return postsWithUserAndCount.filter((post) => post !== null) as (ForumPost & { user: User; replyCount: number })[];
     } catch (error: any) {
       console.error("Error in getForumPosts:", error);
       console.error("Error stack:", error?.stack);
@@ -448,19 +532,119 @@ export class DBStorage implements IStorage {
   }
 
   async getForumPost(id: string): Promise<(ForumPost & { user: User }) | undefined> {
-    const [post] = await db.select().from(forumPosts).where(eq(forumPosts.id, id)).limit(1);
-    if (!post) return undefined;
-
-    const [user] = await db.select().from(users).where(eq(users.id, post.userId)).limit(1);
-    return { ...post, user };
+    try {
+      // Use raw SQL to avoid edited_at column issues
+      const result = await db.execute(sql`
+        SELECT id, user_id, title, content, category, image_url, is_locked, is_archived, created_at
+        FROM forum_posts
+        WHERE id = ${id}
+        LIMIT 1
+      `);
+      
+      if (!result.rows || result.rows.length === 0) {
+        return undefined;
+      }
+      
+      const row = result.rows[0] as any;
+      const post: ForumPost = {
+        id: row.id,
+        userId: row.user_id,
+        title: row.title,
+        content: row.content,
+        category: row.category,
+        imageUrl: row.image_url || null,
+        isLocked: row.is_locked,
+        isArchived: row.is_archived,
+        createdAt: row.created_at,
+        editedAt: null,
+      };
+      
+      const [user] = await db.select().from(users).where(eq(users.id, post.userId)).limit(1);
+      if (!user) return undefined;
+      
+      return { ...post, user };
+    } catch (error: any) {
+      console.error("Error in getForumPost:", error);
+      throw error;
+    }
   }
 
   async updateForumPost(id: string, updates: Partial<ForumPost>): Promise<ForumPost | undefined> {
-    const [updated] = await db.update(forumPosts)
-      .set(updates)
-      .where(eq(forumPosts.id, id))
-      .returning();
-    return updated;
+    try {
+      // Build update query dynamically
+      const updateParts: string[] = [];
+      const values: any[] = [];
+      let paramIndex = 1;
+      
+      if (updates.title !== undefined) {
+        updateParts.push(`title = $${paramIndex}`);
+        values.push(updates.title);
+        paramIndex++;
+      }
+      if (updates.content !== undefined) {
+        updateParts.push(`content = $${paramIndex}`);
+        values.push(updates.content);
+        paramIndex++;
+      }
+      if (updates.category !== undefined) {
+        updateParts.push(`category = $${paramIndex}`);
+        values.push(updates.category);
+        paramIndex++;
+      }
+      if (updates.imageUrl !== undefined) {
+        updateParts.push(`image_url = $${paramIndex}`);
+        values.push(updates.imageUrl);
+        paramIndex++;
+      }
+      if (updates.isLocked !== undefined) {
+        updateParts.push(`is_locked = $${paramIndex}`);
+        values.push(updates.isLocked);
+        paramIndex++;
+      }
+      if (updates.isArchived !== undefined) {
+        updateParts.push(`is_archived = $${paramIndex}`);
+        values.push(updates.isArchived);
+        paramIndex++;
+      }
+      
+      if (updateParts.length === 0) {
+        // No updates, just return the post
+        return await this.getForumPost(id);
+      }
+      
+      // Use pool directly for dynamic updates
+      values.push(id);
+      const setClause = updateParts.join(', ');
+      const queryText = `
+        UPDATE forum_posts
+        SET ${setClause}
+        WHERE id = $${paramIndex}
+        RETURNING id, user_id, title, content, category, image_url, is_locked, is_archived, created_at
+      `;
+      
+      const result = await pool.query(queryText, values);
+      
+      if (!result.rows || result.rows.length === 0) {
+        return undefined;
+      }
+      
+      const row = result.rows[0] as any;
+      return {
+        id: row.id,
+        userId: row.user_id,
+        title: row.title,
+        content: row.content,
+        category: row.category,
+        imageUrl: row.image_url || null,
+        isLocked: row.is_locked,
+        isArchived: row.is_archived,
+        createdAt: row.created_at,
+        editedAt: null,
+      };
+    } catch (error: any) {
+      console.error("Error in updateForumPost:", error);
+      throw error;
+    }
   }
 
   async deleteForumPost(id: string): Promise<void> {
@@ -469,36 +653,160 @@ export class DBStorage implements IStorage {
 
   // Forum reply operations
   async createForumReply(reply: InsertForumReply): Promise<ForumReply> {
-    const [forumReply] = await db.insert(forumReplies).values(reply).returning();
-    return forumReply;
+    try {
+      // Use raw SQL to avoid edited_at column issues
+      const result = await db.execute(sql`
+        INSERT INTO forum_replies (post_id, user_id, content, image_url, quoted_reply_id, created_at)
+        VALUES (${reply.postId}, ${reply.userId}, ${reply.content}, ${reply.imageUrl || null}, ${reply.quotedReplyId || null}, NOW())
+        RETURNING id, post_id, user_id, content, image_url, quoted_reply_id, created_at
+      `);
+      
+      if (!result.rows || result.rows.length === 0) {
+        throw new Error("Failed to create forum reply - no reply returned");
+      }
+      
+      const row = result.rows[0] as any;
+      return {
+        id: row.id,
+        postId: row.post_id,
+        userId: row.user_id,
+        content: row.content,
+        imageUrl: row.image_url || null,
+        quotedReplyId: row.quoted_reply_id || null,
+        createdAt: row.created_at,
+        editedAt: null,
+      };
+    } catch (error: any) {
+      console.error("Error in createForumReply:", error);
+      throw error;
+    }
   }
 
   async getForumReplies(postId: string): Promise<(ForumReply & { user: User })[]> {
-    const replies = await db.select().from(forumReplies)
-      .where(eq(forumReplies.postId, postId))
-      .orderBy(desc(forumReplies.createdAt));
+    try {
+      // Use raw SQL to avoid edited_at column issues
+      const result = await db.execute(sql`
+        SELECT id, post_id, user_id, content, image_url, quoted_reply_id, created_at
+        FROM forum_replies
+        WHERE post_id = ${postId}
+        ORDER BY created_at DESC
+      `);
+      
+      const replies = result.rows.map((row: any) => ({
+        id: row.id,
+        postId: row.post_id,
+        userId: row.user_id,
+        content: row.content,
+        imageUrl: row.image_url || null,
+        quotedReplyId: row.quoted_reply_id || null,
+        createdAt: row.created_at,
+        editedAt: null,
+      }));
 
-    const repliesWithUser = await Promise.all(
-      replies.map(async (reply) => {
-        const [user] = await db.select().from(users).where(eq(users.id, reply.userId)).limit(1);
-        return { ...reply, user };
-      })
-    );
+      const repliesWithUser = await Promise.all(
+        replies.map(async (reply) => {
+          const [user] = await db.select().from(users).where(eq(users.id, reply.userId)).limit(1);
+          return { ...reply, user };
+        })
+      );
 
-    return repliesWithUser;
+      return repliesWithUser;
+    } catch (error: any) {
+      console.error("Error in getForumReplies:", error);
+      throw error;
+    }
   }
 
   async getForumReply(id: string): Promise<(ForumReply & { user: User }) | undefined> {
-    const [reply] = await db.select().from(forumReplies).where(eq(forumReplies.id, id)).limit(1);
-    if (!reply) return undefined;
-
-    const [user] = await db.select().from(users).where(eq(users.id, reply.userId)).limit(1);
-    return { ...reply, user };
+    try {
+      // Use raw SQL to avoid edited_at column issues
+      const result = await db.execute(sql`
+        SELECT id, post_id, user_id, content, image_url, quoted_reply_id, created_at
+        FROM forum_replies
+        WHERE id = ${id}
+        LIMIT 1
+      `);
+      
+      if (!result.rows || result.rows.length === 0) {
+        return undefined;
+      }
+      
+      const row = result.rows[0] as any;
+      const reply: ForumReply = {
+        id: row.id,
+        postId: row.post_id,
+        userId: row.user_id,
+        content: row.content,
+        imageUrl: row.image_url || null,
+        quotedReplyId: row.quoted_reply_id || null,
+        createdAt: row.created_at,
+        editedAt: null,
+      };
+      
+      const [user] = await db.select().from(users).where(eq(users.id, reply.userId)).limit(1);
+      if (!user) return undefined;
+      
+      return { ...reply, user };
+    } catch (error: any) {
+      console.error("Error in getForumReply:", error);
+      throw error;
+    }
   }
 
   async updateForumReply(id: string, updates: Partial<ForumReply>): Promise<ForumReply | undefined> {
-    const [reply] = await db.update(forumReplies).set(updates).where(eq(forumReplies.id, id)).returning();
-    return reply;
+    try {
+      // Build update query dynamically
+      const updateParts: string[] = [];
+      const values: any[] = [];
+      let paramIndex = 1;
+      
+      if (updates.content !== undefined) {
+        updateParts.push(`content = $${paramIndex}`);
+        values.push(updates.content);
+        paramIndex++;
+      }
+      if (updates.imageUrl !== undefined) {
+        updateParts.push(`image_url = $${paramIndex}`);
+        values.push(updates.imageUrl);
+        paramIndex++;
+      }
+      
+      if (updateParts.length === 0) {
+        // No updates, just return the reply
+        return await this.getForumReply(id);
+      }
+      
+      // Use pool directly for dynamic updates
+      values.push(id);
+      const setClause = updateParts.join(', ');
+      const queryText = `
+        UPDATE forum_replies
+        SET ${setClause}
+        WHERE id = $${paramIndex}
+        RETURNING id, post_id, user_id, content, image_url, quoted_reply_id, created_at
+      `;
+      
+      const result = await pool.query(queryText, values);
+      
+      if (!result.rows || result.rows.length === 0) {
+        return undefined;
+      }
+      
+      const row = result.rows[0] as any;
+      return {
+        id: row.id,
+        postId: row.post_id,
+        userId: row.user_id,
+        content: row.content,
+        imageUrl: row.image_url || null,
+        quotedReplyId: row.quoted_reply_id || null,
+        createdAt: row.created_at,
+        editedAt: null,
+      };
+    } catch (error: any) {
+      console.error("Error in updateForumReply:", error);
+      throw error;
+    }
   }
 
   async deleteForumReply(id: string): Promise<void> {

@@ -243,6 +243,57 @@ app.use((req, res, next) => {
         }
       }
       
+      // Forum table columns - check if table exists first
+      try {
+        // Check if forum_posts table exists
+        const forumPostsCheck = await db.execute(sql`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'forum_posts'
+          )
+        `);
+        
+        if (forumPostsCheck.rows && forumPostsCheck.rows[0] && (forumPostsCheck.rows[0] as any).exists) {
+          // Add edited_at column if it doesn't exist
+          try {
+            await db.execute(sql`ALTER TABLE forum_posts ADD COLUMN IF NOT EXISTS edited_at TIMESTAMP`);
+            log("✓ Added edited_at column to forum_posts");
+          } catch (e: any) {
+            if (!e.message?.includes("already exists") && !e.message?.includes("duplicate")) {
+              log(`⚠️  Warning adding edited_at to forum_posts: ${e.message}`);
+            }
+          }
+        }
+      } catch (e: any) {
+        log(`⚠️  Warning checking forum_posts table: ${e.message}`);
+      }
+      
+      try {
+        // Check if forum_replies table exists
+        const forumRepliesCheck = await db.execute(sql`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'forum_replies'
+          )
+        `);
+        
+        if (forumRepliesCheck.rows && forumRepliesCheck.rows[0] && (forumRepliesCheck.rows[0] as any).exists) {
+          // Add edited_at column if it doesn't exist
+          try {
+            await db.execute(sql`ALTER TABLE forum_replies ADD COLUMN IF NOT EXISTS edited_at TIMESTAMP`);
+            log("✓ Added edited_at column to forum_replies");
+          } catch (e: any) {
+            if (!e.message?.includes("already exists") && !e.message?.includes("duplicate")) {
+              log(`⚠️  Warning adding edited_at to forum_replies: ${e.message}`);
+            }
+          }
+        }
+      } catch (e: any) {
+        log(`⚠️  Warning checking forum_replies table: ${e.message}`);
+      }
+      
       // Fix: Make email column nullable (old migration leftover)
       try {
         await db.execute(sql`ALTER TABLE users ALTER COLUMN email DROP NOT NULL`);

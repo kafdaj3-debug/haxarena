@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Send, MessageSquare, UserPlus, Search, Image as ImageIcon, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -200,6 +200,9 @@ export default function MessagesPage() {
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Yeni Mesaj Gönder</DialogTitle>
+                        <DialogDescription>
+                          Bir kullanıcıya özel mesaj gönderin.
+                        </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
                         <div className="relative">
