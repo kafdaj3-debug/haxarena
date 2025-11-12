@@ -768,8 +768,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         imageUrl,
       });
       return res.json(post);
-    } catch (error) {
-      return res.status(500).json({ error: "Konu oluşturulamadı" });
+    } catch (error: any) {
+      console.error("Error creating forum post:", error);
+      return res.status(500).json({ error: "Konu oluşturulamadı", details: error?.message });
     }
   });
 
@@ -784,18 +785,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Her post için kullanıcının custom rollerini getir
       const postsWithRoles = await Promise.all(
         posts.map(async (post) => {
-          const customRoles = await storage.getUserCustomRoles(post.user.id);
-          return {
-            ...post,
-            staffRole: staffMap.get(post.user.username) || null,
-            customRoles: customRoles.map(cr => cr.role),
-          };
+          try {
+            const customRoles = await storage.getUserCustomRoles(post.user.id);
+            return {
+              ...post,
+              staffRole: staffMap.get(post.user.username) || null,
+              customRoles: customRoles.map(cr => cr.role),
+            };
+          } catch (roleError: any) {
+            // Custom roles hatası varsa, roles olmadan devam et
+            console.error("Error getting custom roles for user:", post.user.id, roleError);
+            return {
+              ...post,
+              staffRole: staffMap.get(post.user.username) || null,
+              customRoles: [],
+            };
+          }
         })
       );
       
       return res.json(postsWithRoles);
-    } catch (error) {
-      return res.status(500).json({ error: "Konular yüklenemedi" });
+    } catch (error: any) {
+      console.error("Error getting forum posts:", error);
+      return res.status(500).json({ error: "Konular yüklenemedi", details: error?.message });
     }
   });
 

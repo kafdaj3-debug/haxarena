@@ -1010,29 +1010,35 @@ export class DBStorage implements IStorage {
 
   // User custom role assignments
   async getUserCustomRoles(userId: string): Promise<(UserCustomRole & { role: CustomRole })[]> {
-    const results = await db
-      .select({
-        id: userCustomRoles.id,
-        userId: userCustomRoles.userId,
-        roleId: userCustomRoles.roleId,
-        assignedAt: userCustomRoles.assignedAt,
-        role: customRoles,
-      })
-      .from(userCustomRoles)
-      .leftJoin(customRoles, eq(userCustomRoles.roleId, customRoles.id))
-      .where(eq(userCustomRoles.userId, userId))
-      .orderBy(desc(customRoles.priority));
-    
-    // Silinen rolleri filtrele (role null ise)
-    return results
-      .filter(r => r.role !== null)
-      .map(r => ({
-        id: r.id,
-        userId: r.userId,
-        roleId: r.roleId,
-        assignedAt: r.assignedAt,
-        role: r.role!
-      }));
+    try {
+      const results = await db
+        .select({
+          id: userCustomRoles.id,
+          userId: userCustomRoles.userId,
+          roleId: userCustomRoles.roleId,
+          assignedAt: userCustomRoles.assignedAt,
+          role: customRoles,
+        })
+        .from(userCustomRoles)
+        .leftJoin(customRoles, eq(userCustomRoles.roleId, customRoles.id))
+        .where(eq(userCustomRoles.userId, userId))
+        .orderBy(desc(customRoles.priority));
+      
+      // Silinen rolleri filtrele (role null ise)
+      return results
+        .filter(r => r.role !== null)
+        .map(r => ({
+          id: r.id,
+          userId: r.userId,
+          roleId: r.roleId,
+          assignedAt: r.assignedAt,
+          role: r.role!
+        }));
+    } catch (error: any) {
+      // Tablo yoksa veya hata varsa boş array döndür
+      console.error("Error getting user custom roles:", error);
+      return [];
+    }
   }
 
   async assignRoleToUser(userId: string, roleId: string): Promise<UserCustomRole> {
