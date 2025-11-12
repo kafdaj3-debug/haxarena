@@ -247,7 +247,8 @@ export default function LeaguePage() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         {currentWeekMatches.map((fixture: any) => {
-                          const matchDate = new Date(fixture.matchDate);
+                          // Ensure matchDate is always available, even after score update
+                          const matchDate = fixture.matchDate ? new Date(fixture.matchDate) : new Date();
                           const isToday = matchDate.toDateString() === new Date().toDateString();
                           const isPast = matchDate < new Date();
                           
@@ -317,33 +318,28 @@ export default function LeaguePage() {
                               </div>
                               
                               <div className="flex items-center justify-between pt-3 border-t">
+                                <div className="flex-1"></div>
                                 <div className="flex items-center gap-2 text-sm">
                                   <Calendar className="w-4 h-4 text-muted-foreground" />
                                   <span className="font-medium">
-                                    {matchDate.toLocaleDateString('tr-TR', {
+                                    {matchDate.toLocaleString('tr-TR', {
                                       weekday: 'long',
                                       day: 'numeric',
                                       month: 'long',
                                       year: 'numeric',
-                                      timeZone: 'Europe/Istanbul'
-                                    })}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm">
-                                  <span className="text-muted-foreground">Saat:</span>
-                                  <span className="font-semibold">
-                                    {matchDate.toLocaleTimeString('tr-TR', {
                                       hour: '2-digit',
                                       minute: '2-digit',
                                       timeZone: 'Europe/Istanbul'
                                     })}
                                   </span>
                                 </div>
-                                {fixture.isPlayed && (
-                                  <span className="text-xs font-semibold text-green-600 bg-green-600/20 px-2 py-1 rounded-full">
-                                    OYNANDI
-                                  </span>
-                                )}
+                                <div className="flex items-center gap-2">
+                                  {fixture.isPlayed && (
+                                    <span className="text-xs font-semibold text-green-600 bg-green-600/20 px-2 py-1 rounded-full">
+                                      OYNANDI
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           );
