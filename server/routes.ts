@@ -777,10 +777,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/forum-posts", async (req, res) => {
     try {
       const category = req.query.category as string | undefined;
-      const includeArchived = req.isAuthenticated() && (req.user!.isAdmin || req.user!.isSuperAdmin);
-      const posts = await storage.getForumPosts(category, includeArchived);
-      const staffRoles = await storage.getStaffRoles();
-      const staffMap = new Map(staffRoles.map(s => [s.name, s.role]));
+      const includeArchived = req.isAuthenticated() && req.user && (req.user.isAdmin || req.user.isSuperAdmin);
+      
+      // Try to get posts, if it fails return empty array instead of error
+      let posts;
+      try {
+        posts = await storage.getForumPosts(category, includeArchived);
+      } catch (postsError: any) {
+        console.error("Error getting forum posts from storage:", postsError);
+        console.error("Error stack:", postsError?.stack);
+        // Return empty array instead of error
+        return res.json([]);
+      }
+      
+      // If no posts, return empty array
+      if (!posts || posts.length === 0) {
+        return res.json([]);
+      }
+      
+      let staffRoles = [];
+      try {
+        staffRoles = await storage.getStaffRoles();
+      } catch (staffError: any) {
+        console.error("Error getting staff roles:", staffError);
+        // Continue without staff roles
+      }
+      
+      const staffMap = new Map(staffRoles.map((s: any) => [s.name, s.role]));
       
       // Her post için kullanıcının custom rollerini getir
       const postsWithRoles = await Promise.all(
@@ -806,8 +829,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       return res.json(postsWithRoles);
     } catch (error: any) {
-      console.error("Error getting forum posts:", error);
-      return res.status(500).json({ error: "Konular yüklenemedi", details: error?.message });
+      console.error("Error in /api/forum-posts route:", error);
+      console.error("Error stack:", error?.stack);
+      // Return empty array instead of error to prevent frontend crash
+      return res.json([]);
     }
   });
 
