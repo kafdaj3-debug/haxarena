@@ -244,15 +244,34 @@ export function setupAuth(app: Express) {
   app.post("/api/auth/logout", (req, res) => {
     req.logout((err) => {
       if (err) {
+        console.error("Logout error:", err);
         return res.status(500).json({ error: "Çıkış yapılamadı" });
       }
-      res.json({ message: "Başarıyla çıkış yapıldı" });
+      
+      // Session destroy - optional chaining for safety
+      if (req.session && req.session.destroy) {
+        req.session.destroy((destroyErr) => {
+          if (destroyErr) {
+            console.error("Session destroy error:", destroyErr);
+          }
+          res.clearCookie('connect.sid');
+          res.json({ message: "Başarıyla çıkış yapıldı" });
+        });
+      } else {
+        res.clearCookie('connect.sid');
+        res.json({ message: "Başarıyla çıkış yapıldı" });
+      }
     });
   });
 
-  app.get("/api/auth/me", (req, res) => {
+  app.get("/api/auth/me", async (req, res) => {
     if (req.isAuthenticated()) {
-      return res.json(req.user);
+      // Kullanıcının custom rollerini getir
+      const customRoles = await storage.getUserCustomRoles(req.user!.id);
+      return res.json({
+        ...req.user,
+        customRoles: customRoles.map(cr => cr.role),
+      });
     }
     res.status(401).json({ error: "Giriş yapılmamış" });
   });

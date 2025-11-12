@@ -28,6 +28,13 @@ export default function Header({ user, onLogout }: HeaderProps) {
     refetchInterval: 30000, // Her 30 saniyede bir yenile
   });
 
+  const { data: settings } = useQuery<any>({
+    queryKey: ["/api/settings"],
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+  });
+
   const deleteNotificationMutation = useMutation({
     mutationFn: async (id: string) => {
       return await apiRequest("DELETE", `/api/notifications/${id}`, {});
@@ -93,16 +100,13 @@ export default function Header({ user, onLogout }: HeaderProps) {
               Admin Başvurusu
             </Button>
           </Link>
-          <Link href="/takim-basvuru" data-testid="link-nav-team-application">
-            <Button variant="ghost" className="hover-elevate active-elevate-2">
-              Takım Başvurusu
-            </Button>
-          </Link>
-          <Link href="/istatistikler" data-testid="link-nav-stats">
-            <Button variant="ghost" className="hover-elevate active-elevate-2">
-              İstatistikler
-            </Button>
-          </Link>
+          {settings?.statisticsVisible === true && (
+            <Link href="/istatistikler" data-testid="link-nav-stats">
+              <Button variant="ghost" className="hover-elevate active-elevate-2">
+                İstatistikler
+              </Button>
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -157,16 +161,13 @@ export default function Header({ user, onLogout }: HeaderProps) {
                     Admin Başvurusu
                   </Button>
                 </Link>
-                <Link href="/takim-basvuru" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-team-application">
-                  <Button variant="ghost" className="w-full justify-start hover-elevate active-elevate-2">
-                    Takım Başvurusu
-                  </Button>
-                </Link>
-                <Link href="/istatistikler" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-stats">
-                  <Button variant="ghost" className="w-full justify-start hover-elevate active-elevate-2">
-                    İstatistikler
-                  </Button>
-                </Link>
+                {settings?.statisticsVisible === true && (
+                  <Link href="/istatistikler" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-stats">
+                    <Button variant="ghost" className="w-full justify-start hover-elevate active-elevate-2">
+                      İstatistikler
+                    </Button>
+                  </Link>
+                )}
               </div>
             </SheetContent>
           </Sheet>
@@ -240,7 +241,24 @@ export default function Header({ user, onLogout }: HeaderProps) {
                 <Button variant="ghost" className="hover-elevate active-elevate-2 flex items-center gap-2">
                   <UserCircle className="w-5 h-5" />
                   <span className="hidden md:inline">{user.username}</span>
-                  {user.role && (
+                {/* Custom Roller (öncelikli) */}
+                {(user as any).customRoles?.filter((role: any) => role && role.id && role.name).map((role: any) => (
+                    <Badge 
+                        key={role.id}
+                        className={`hidden md:inline-flex font-semibold ${role.name === 'Kurucu' ? 'font-extrabold border-2' : ''}`}
+                        style={{ 
+                            backgroundColor: role.name === 'Kurucu' ? `${role.color}30` : `${role.color}15`,
+                            color: role.color,
+                            borderColor: role.name === 'Kurucu' ? role.color : `${role.color}40`,
+                            textShadow: role.name === 'Kurucu' ? `0 0 4px ${role.color}` : 'none',
+                            boxShadow: role.name === 'Kurucu' ? `0 0 6px ${role.color}40` : 'none'
+                        }}
+                    >
+                        {role.name}
+                    </Badge>
+                ))}
+                  {/* Varsayılan rol */}
+                  {user.role && !(user as any).customRoles?.length && (
                     <Badge variant="secondary" className="hidden md:inline-flex">
                       {user.role}
                     </Badge>

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -14,8 +15,86 @@ const __dirname = path.dirname(__filename);
 const app = express();
 // Trust first proxy (Replit HTTPS termination)
 app.set('trust proxy', 1);
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+
+// CORS configuration - Allow requests from Netlify and localhost
+const allowedOrigins = [
+  process.env.FRONTEND_URL, // Netlify URL (e.g., https://your-site.netlify.app)
+  'https://haxarena.netlify.app', // Current Netlify domain
+  'https://voluble-kleicha-433797.netlify.app', // Old Netlify domain (backup)
+  'http://localhost:5173', // Vite dev server
+  'http://localhost:5000', // Local development
+].filter(Boolean); // Remove undefined values
+
+// Normalize origins (remove trailing slashes)
+const normalizedOrigins = allowedOrigins.map(origin => origin.replace(/\/$/, ''));
+
+// Debug: Log allowed origins in production
+if (process.env.NODE_ENV === 'production') {
+  log(`CORS Allowed Origins: ${normalizedOrigins.join(', ')}`);
+  log(`FRONTEND_URL: ${process.env.FRONTEND_URL || 'not set'}`);
+}
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // Always set CORS headers for API requests
+  if (req.path.startsWith('/api')) {
+    // Normalize origin (remove trailing slash)
+    const normalizedOrigin = origin ? origin.replace(/\/$/, '') : null;
+    
+    // Allow all Netlify domains (most permissive approach)
+    if (normalizedOrigin && (
+      normalizedOrigins.includes(normalizedOrigin) ||
+      normalizedOrigin.endsWith('.netlify.app') ||
+      normalizedOrigin.endsWith('.netlify.com') ||
+      normalizedOrigin.includes('netlify')
+    )) {
+      // Set CORS headers for allowed origin
+      res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      
+      // Handle preflight requests
+      if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+      }
+    } else if (normalizedOrigin) {
+      // For other origins, check if it's localhost or in allowed list
+      if (normalizedOrigin.startsWith('http://localhost') || normalizedOrigins.includes(normalizedOrigin)) {
+        res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        
+        if (req.method === 'OPTIONS') {
+          return res.sendStatus(200);
+        }
+      } else {
+        // Log blocked origin for debugging
+        if (process.env.NODE_ENV === 'production') {
+          log(`⚠️ CORS blocked origin: ${normalizedOrigin} (not in allowed list)`);
+        }
+      }
+    } else {
+      // No origin header (same-origin or direct request) - allow
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    }
+    
+    // Debug logging in production
+    if (process.env.NODE_ENV === 'production' && normalizedOrigin) {
+      log(`CORS: ${req.method} ${req.path} from origin: ${normalizedOrigin}`);
+    }
+  }
+  
+  next();
+});
+
+// Increase payload limit for base64 images (team logos, etc.)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: false }));
 
 setupAuth(app);
 
@@ -358,6 +437,19 @@ app.use((req, res, next) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
+    // Ensure CORS headers are set even on errors
+    const origin = _req.headers.origin;
+    if (origin && _req.path.startsWith('/api')) {
+      const normalizedOrigin = origin.replace(/\/$/, '');
+      if (normalizedOrigin.includes('netlify') || 
+          normalizedOrigin.endsWith('.netlify.app') || 
+          normalizedOrigin.endsWith('.netlify.com') ||
+          normalizedOrigins.includes(normalizedOrigin)) {
+        res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+      }
+    }
+
     res.status(status).json({ message });
     throw err;
   });
@@ -376,11 +468,15 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
+  
+  // Production: Listen on all interfaces (0.0.0.0) for cloud platforms
+  // Development: Use localhost for Windows compatibility
+  const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+  server.listen(port, host, () => {
+    log(`Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
+    if (process.env.NODE_ENV === 'production') {
+      log(`Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
+      log(`Database: ${process.env.DATABASE_URL ? 'connected' : 'not configured'}`);
+    }
   });
 })();

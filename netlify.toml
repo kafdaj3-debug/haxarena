@@ -1,0 +1,27 @@
+[build]
+  command = "npm run build"
+  publish = "dist/public"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# ÖNEMLİ: Backend URL'ini Netlify Dashboard → Site settings → Environment variables → VITE_API_URL olarak ayarlayın
+# Örnek: https://your-backend-app.onrender.com
+# Backend URL'i olmadan API istekleri çalışmaz!
+
+# API isteklerini backend'e proxy'lemek için redirect kuralı
+# Backend URL'ini yukarıda belirtilen environment variable'dan alacak
+# Eğer backend URL'i ayarlanmamışsa, aşağıdaki satırı düzenleyip backend URL'inizi yazın:
+# [[redirects]]
+#   from = "/api/*"
+#   to = "https://your-backend-url.onrender.com/api/:splat"
+#   status = 200
+#   force = true
+
+# SPA routing için - Tüm istekleri index.html'e yönlendir
+# Not: API istekleri frontend kodunda environment variable ile yönetiliyor
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+

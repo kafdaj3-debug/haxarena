@@ -12,8 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Shield, ShieldOff, CheckCircle, XCircle, User, Trash2, Plus, Lock, Unlock, Archive, ArchiveRestore } from "lucide-react";
+import { queryClient, apiRequest, buildApiUrl } from "@/lib/queryClient";
+import { Shield, ShieldOff, CheckCircle, XCircle, User, Trash2, Plus, Lock, Unlock, Archive, ArchiveRestore, Calendar, Image as ImageIcon, X, Edit } from "lucide-react";
 
 const ROLES = ["DIAMOND VIP", "GOLD VIP", "SILVER VIP", "Lig Oyuncusu", "HaxArena Üye"];
 const PLAYER_ROLES = ["Kaleci", "Defans", "Orta Saha", "Forvet", "Yedek"];
@@ -27,6 +27,16 @@ const STAFF_ROLES = [
   "Arena Admin"
 ];
 
+// Helper function: datetime-local formatı için local timezone string
+const getLocalDateTimeString = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 export default function ManagementPanelPage() {
   const { user, logout, isLoading } = useAuth();
   const [, navigate] = useLocation();
@@ -39,6 +49,56 @@ export default function ManagementPanelPage() {
   const [adminUsername, setAdminUsername] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [adminConfirmPassword, setAdminConfirmPassword] = useState("");
+  
+  // League state
+  const [teamName, setTeamName] = useState("");
+  const [teamLogo, setTeamLogo] = useState("");
+  const [homeTeamId, setHomeTeamId] = useState("");
+  const [awayTeamId, setAwayTeamId] = useState("");
+  const [matchDate, setMatchDate] = useState(() => {
+    // Varsayılan olarak bugün saat 20:00 (Local timezone)
+    const now = new Date();
+    now.setHours(20, 0, 0, 0);
+    return getLocalDateTimeString(now);
+  });
+  const [week, setWeek] = useState("");
+  const [selectedFixture, setSelectedFixture] = useState<any>(null);
+  const [homeScore, setHomeScore] = useState("");
+  const [awayScore, setAwayScore] = useState("");
+  
+  // Player stats state
+  const [selectedFixtureForStats, setSelectedFixtureForStats] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [selectedTeamIdForStats, setSelectedTeamIdForStats] = useState("");
+  const [statsGoals, setStatsGoals] = useState("");
+  const [statsAssists, setStatsAssists] = useState("");
+  const [statsDm, setStatsDm] = useState("");
+  const [statsCleanSheets, setStatsCleanSheets] = useState("");
+  const [statsSaves, setStatsSaves] = useState("");
+  const [editingStatsId, setEditingStatsId] = useState<string | null>(null);
+  
+  // Team of week state
+  const [totwWeek, setTotwWeek] = useState("");
+  const [totwImage, setTotwImage] = useState("");
+  
+  // Manual team edit state
+  const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
+  const [manualPoints, setManualPoints] = useState("");
+  const [manualPlayed, setManualPlayed] = useState("");
+  const [manualWon, setManualWon] = useState("");
+  const [manualDrawn, setManualDrawn] = useState("");
+  const [manualLost, setManualLost] = useState("");
+  const [manualGoalsFor, setManualGoalsFor] = useState("");
+  const [manualGoalsAgainst, setManualGoalsAgainst] = useState("");
+  const [manualHeadToHead, setManualHeadToHead] = useState("");
+
+  // Custom roles state
+  const [roleName, setRoleName] = useState("");
+  const [roleColor, setRoleColor] = useState("#3b82f6");
+  const [rolePriority, setRolePriority] = useState("");
+  const [editingRoleId, setEditingRoleId] = useState<string | null>(null);
+  const [selectedUserForRole, setSelectedUserForRole] = useState("");
+  const [selectedRoleToAssign, setSelectedRoleToAssign] = useState("");
 
   // Redirect to management login if not super admin (using useEffect)
   useEffect(() => {
@@ -93,13 +153,30 @@ export default function ManagementPanelPage() {
     enabled: !!user?.isSuperAdmin,
   });
 
+  const { data: leagueTeams } = useQuery<any[]>({
+    queryKey: ["/api/league/teams"],
+    enabled: !!user?.isSuperAdmin,
+  });
+
+  const { data: leagueFixtures } = useQuery<any[]>({
+    queryKey: ["/api/league/fixtures"],
+    enabled: !!user?.isSuperAdmin,
+  });
+
+  const { data: customRoles } = useQuery<any[]>({
+    queryKey: ["/api/custom-roles"],
+    enabled: !!user?.isSuperAdmin,
+  });
+
   const settingsMutation = useMutation({
     mutationFn: async (data: any) => {
       return await apiRequest("PATCH", "/api/settings", data);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({ title: "Başarılı", description: "Ayarlar güncellendi" });
-      queryClient.invalidateQueries({ queryKey: ["/api/settings"] });
+      // Force refetch of settings on all pages
+      await queryClient.invalidateQueries({ queryKey: ["/api/settings"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/settings"] });
     },
     onError: () => {
       toast({ title: "Hata", description: "Ayarlar güncellenemedi", variant: "destructive" });
@@ -345,7 +422,7 @@ export default function ManagementPanelPage() {
 
   const resetPasswordMutation = useMutation({
     mutationFn: async (username: string) => {
-      const response = await fetch("/api/password-reset/request", {
+      const response = await fetch(buildApiUrl("/api/password-reset/request"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -393,6 +470,306 @@ export default function ManagementPanelPage() {
     },
   });
 
+  // League mutations
+  const createTeamMutation = useMutation({
+    mutationFn: async (data: { name: string; logo?: string }) => {
+      return await apiRequest("POST", "/api/league/teams", data);
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Takım oluşturuldu" });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/teams"] });
+      setTeamName("");
+      setTeamLogo("");
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Takım oluşturulamadı", variant: "destructive" });
+    },
+  });
+
+  const deleteTeamMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest("DELETE", `/api/league/teams/${id}`, {});
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Takım silindi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/teams"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/fixtures"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Takım silinemedi", variant: "destructive" });
+    },
+  });
+
+  const createFixtureMutation = useMutation({
+    mutationFn: async (data: { homeTeamId: string; awayTeamId: string; matchDate: string; week: number }) => {
+      return await apiRequest("POST", "/api/league/fixtures", data);
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Maç oluşturuldu" });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/fixtures"] });
+      setHomeTeamId("");
+      setAwayTeamId("");
+      // Varsayılan olarak bugün saat 20:00'a sıfırla
+      const now = new Date();
+      now.setHours(20, 0, 0, 0);
+      setMatchDate(getLocalDateTimeString(now));
+      setWeek("");
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Maç oluşturulamadı", variant: "destructive" });
+    },
+  });
+
+  const updateFixtureScoreMutation = useMutation({
+    mutationFn: async ({ id, homeScore, awayScore }: { id: string; homeScore: number; awayScore: number }) => {
+      return await apiRequest("PATCH", `/api/league/fixtures/${id}`, { homeScore, awayScore });
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Maç sonucu güncellendi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/fixtures"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/teams"] });
+      setSelectedFixture(null);
+      setHomeScore("");
+      setAwayScore("");
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Maç sonucu güncellenemedi", variant: "destructive" });
+    },
+  });
+
+  const deleteFixtureMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest("DELETE", `/api/league/fixtures/${id}`, {});
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Maç silindi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/fixtures"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Maç silinemedi", variant: "destructive" });
+    },
+  });
+
+  // Manual team update mutation
+  const manualTeamUpdateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      return await apiRequest("PATCH", `/api/league/teams/${id}/manual`, data);
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Takım istatistikleri güncellendi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/teams"] });
+      setEditingTeamId(null);
+      setManualPoints("");
+      setManualPlayed("");
+      setManualWon("");
+      setManualDrawn("");
+      setManualLost("");
+      setManualGoalsFor("");
+      setManualGoalsAgainst("");
+      setManualHeadToHead("");
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "İstatistikler güncellenemedi", variant: "destructive" });
+    },
+  });
+
+  // Player stats queries and mutations
+  const { data: allUsers } = useQuery<any[]>({
+    queryKey: ["/api/management/users"],
+    enabled: !!user?.isSuperAdmin,
+  });
+
+  const { data: playerStats } = useQuery<any[]>({
+    queryKey: ["/api/league/fixtures", selectedFixtureForStats, "stats"],
+    queryFn: async () => {
+      if (!selectedFixtureForStats) return [];
+      const res = await fetch(`/api/league/fixtures/${selectedFixtureForStats}/stats`);
+      if (!res.ok) throw new Error("Failed to fetch stats");
+      return res.json();
+    },
+    enabled: !!selectedFixtureForStats,
+  });
+
+  const createPlayerStatsMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("POST", "/api/league/stats", data);
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Oyuncu istatistiği eklendi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/fixtures", selectedFixtureForStats, "stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/stats/leaderboard"] });
+      setSelectedUserId("");
+      setSelectedTeamIdForStats("");
+      setStatsGoals("");
+      setStatsAssists("");
+      setStatsDm("");
+      setStatsCleanSheets("");
+      setStatsSaves("");
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "İstatistik eklenemedi", variant: "destructive" });
+    },
+  });
+
+  const updatePlayerStatsMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      return await apiRequest("PATCH", `/api/league/stats/${id}`, data);
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "İstatistik güncellendi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/fixtures", selectedFixtureForStats, "stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/stats/leaderboard"] });
+      setEditingStatsId(null);
+      setStatsGoals("");
+      setStatsAssists("");
+      setStatsDm("");
+      setStatsCleanSheets("");
+      setStatsSaves("");
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "İstatistik güncellenemedi", variant: "destructive" });
+    },
+  });
+
+  const deletePlayerStatsMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest("DELETE", `/api/league/stats/${id}`, {});
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "İstatistik silindi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/fixtures", selectedFixtureForStats, "stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/stats/leaderboard"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "İstatistik silinemedi", variant: "destructive" });
+    },
+  });
+
+  // Team of week mutations
+  const { data: teamsOfWeek } = useQuery<any[]>({
+    queryKey: ["/api/league/team-of-week"],
+  });
+
+  const createTotwMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("POST", "/api/league/team-of-week", data);
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Haftanın kadrosu eklendi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/team-of-week"] });
+      setTotwWeek("");
+      setTotwImage("");
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Kadro eklenemedi", variant: "destructive" });
+    },
+  });
+
+  const deleteTotwMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest("DELETE", `/api/league/team-of-week/${id}`, {});
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Haftanın kadrosu silindi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/team-of-week"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Kadro silinemedi", variant: "destructive" });
+    },
+  });
+
+  // Custom roles mutations
+  const createRoleMutation = useMutation({
+    mutationFn: async (data: { name: string; color: string; priority: number }) => {
+      return await apiRequest("POST", "/api/custom-roles", data);
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Rol oluşturuldu" });
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-roles"] });
+      setRoleName("");
+      setRoleColor("#3b82f6");
+      setRolePriority("");
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Rol oluşturulamadı", variant: "destructive" });
+    },
+  });
+
+  const updateRoleMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      return await apiRequest("PATCH", `/api/custom-roles/${id}`, data);
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Rol güncellendi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-roles"] });
+      setEditingRoleId(null);
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Rol güncellenemedi", variant: "destructive" });
+    },
+  });
+
+  const deleteRoleMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest("DELETE", `/api/custom-roles/${id}`, {});
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Rol silindi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-roles"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Rol silinemedi", variant: "destructive" });
+    },
+  });
+
+  const assignRoleMutation = useMutation({
+    mutationFn: async ({ userId, roleId }: { userId: string; roleId: string }) => {
+      return await apiRequest("POST", `/api/users/${userId}/custom-roles`, { roleId });
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Rol atandı" });
+      queryClient.invalidateQueries({ queryKey: ["/api/management/users"] });
+      setSelectedUserForRole("");
+      setSelectedRoleToAssign("");
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Rol atanamadı", variant: "destructive" });
+    },
+  });
+
+  const unassignRoleMutation = useMutation({
+    mutationFn: async ({ userId, roleId }: { userId: string; roleId: string }) => {
+      return await apiRequest("DELETE", `/api/users/${userId}/custom-roles/${roleId}`, {});
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Rol kaldırıldı" });
+      queryClient.invalidateQueries({ queryKey: ["/api/management/users"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Rol kaldırılamadı", variant: "destructive" });
+    },
+  });
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (base64: string) => void) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Hata",
+        description: "Görsel boyutu 5MB'dan küçük olmalıdır",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      callback(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const pendingUsers = users?.filter(u => !u.isApproved) || [];
   const approvedUsers = users?.filter(u => u.isApproved) || [];
   const pendingApplications = adminApplications?.filter(a => a.status === "pending") || [];
@@ -433,22 +810,23 @@ export default function ManagementPanelPage() {
                     data-testid="switch-admin-applications"
                   />
                 </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="team-apps" className="cursor-pointer">
+
+                <div className="flex items-center justify-between pt-4 border-t">
+                  <Label htmlFor="statistics-visible" className="cursor-pointer">
                     <div>
-                      <p className="font-medium">Takım Başvuruları</p>
+                      <p className="font-medium">İstatistikler Bölümü</p>
                       <p className="text-sm text-muted-foreground">
-                        {settings?.teamApplicationsOpen ? "Açık" : "Kapalı"}
+                        Ana sayfada {settings?.statisticsVisible ? "görünür" : "gizli"}
                       </p>
                     </div>
                   </Label>
                   <Switch
-                    id="team-apps"
-                    checked={settings?.teamApplicationsOpen || false}
+                    id="statistics-visible"
+                    checked={settings?.statisticsVisible ?? true}
                     onCheckedChange={(checked) => 
-                      settingsMutation.mutate({ teamApplicationsOpen: checked })
+                      settingsMutation.mutate({ statisticsVisible: checked })
                     }
-                    data-testid="switch-team-applications"
+                    data-testid="switch-statistics-visible"
                   />
                 </div>
               </CardContent>
@@ -647,10 +1025,22 @@ export default function ManagementPanelPage() {
                   {approvedUsers.map((u) => (
                     <div key={u.id} className="p-4 border rounded-lg space-y-3">
                       <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <p className="font-medium">{u.username}</p>
                           <Badge variant="secondary">{u.role}</Badge>
                           {u.isAdmin && <Badge variant="default">Admin</Badge>}
+                          {u.customRoles?.filter((role: any) => role && role.id && role.name).map((role: any) => (
+                            <Badge 
+                              key={role.id} 
+                              style={{ 
+                                backgroundColor: role.color, 
+                                color: '#fff',
+                                borderColor: role.color 
+                              }}
+                            >
+                              {role.name}
+                            </Badge>
+                          ))}
                         </div>
                         <Button
                           size="sm"
@@ -1049,6 +1439,1040 @@ export default function ManagementPanelPage() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Lig Yönetimi */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Lig Yönetimi</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Takım Ekleme */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Takım Ekle</h3>
+                  <div className="space-y-4">
+                    <Input
+                      placeholder="Takım Adı"
+                      value={teamName}
+                      onChange={(e) => setTeamName(e.target.value)}
+                    />
+                    <div className="space-y-2">
+                      <Label>Takım Logosu (Opsiyonel)</Label>
+                      {teamLogo ? (
+                        <div className="relative inline-block">
+                          <img 
+                            src={teamLogo} 
+                            alt="Team Logo" 
+                            className="w-20 h-20 object-contain rounded-md border"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2 h-6 w-6"
+                            onClick={() => setTeamLogo("")}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleImageUpload(e, setTeamLogo)}
+                            className="max-w-xs"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => document.querySelector<HTMLInputElement>('input[type="file"]')?.click()}
+                          >
+                            <ImageIcon className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      onClick={() => {
+                        if (teamName.trim()) {
+                          createTeamMutation.mutate({ 
+                            name: teamName.trim(), 
+                            logo: teamLogo || undefined 
+                          });
+                        }
+                      }}
+                      disabled={!teamName.trim() || createTeamMutation.isPending}
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Takım Ekle
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Takımlar Listesi */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Takımlar</h3>
+                  <div className="space-y-2">
+                    {leagueTeams?.map((team: any) => (
+                      <div key={team.id} className="space-y-2">
+                        <div className="p-3 border rounded-lg flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {team.logo && (
+                              <img 
+                                src={team.logo} 
+                                alt={team.name} 
+                                className="w-10 h-10 object-contain"
+                              />
+                            )}
+                            <div>
+                              <p className="font-medium">{team.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                Puan: {team.points} | O: {team.played} | G: {team.won} | B: {team.drawn} | M: {team.lost}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setEditingTeamId(team.id);
+                                setManualPoints(team.points.toString());
+                                setManualPlayed(team.played.toString());
+                                setManualWon(team.won.toString());
+                                setManualDrawn(team.drawn.toString());
+                                setManualLost(team.lost.toString());
+                                setManualGoalsFor(team.goalsFor.toString());
+                                setManualGoalsAgainst(team.goalsAgainst.toString());
+                                setManualHeadToHead((team.headToHead || 0).toString());
+                              }}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                if (confirm(`${team.name} takımını silmek istediğinizden emin misiniz?`)) {
+                                  deleteTeamMutation.mutate(team.id);
+                                }
+                              }}
+                              disabled={deleteTeamMutation.isPending}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        {/* Manuel Düzenleme Formu */}
+                        {editingTeamId === team.id && (
+                          <div className="p-4 border rounded-lg bg-muted/20 space-y-3">
+                            <h4 className="font-medium text-sm">Manuel İstatistik Düzenleme</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                              <div className="space-y-1">
+                                <Label className="text-xs">Puan</Label>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={manualPoints}
+                                  onChange={(e) => setManualPoints(e.target.value)}
+                                  className="h-8 text-sm"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">Oynanan</Label>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={manualPlayed}
+                                  onChange={(e) => setManualPlayed(e.target.value)}
+                                  className="h-8 text-sm"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">Galibiyet</Label>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={manualWon}
+                                  onChange={(e) => setManualWon(e.target.value)}
+                                  className="h-8 text-sm"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">Beraberlik</Label>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={manualDrawn}
+                                  onChange={(e) => setManualDrawn(e.target.value)}
+                                  className="h-8 text-sm"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">Mağlubiyet</Label>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={manualLost}
+                                  onChange={(e) => setManualLost(e.target.value)}
+                                  className="h-8 text-sm"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">Atılan Gol</Label>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={manualGoalsFor}
+                                  onChange={(e) => setManualGoalsFor(e.target.value)}
+                                  className="h-8 text-sm"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">Yenilen Gol</Label>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={manualGoalsAgainst}
+                                  onChange={(e) => setManualGoalsAgainst(e.target.value)}
+                                  className="h-8 text-sm"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">İkili Averaj</Label>
+                                <Input
+                                  type="number"
+                                  value={manualHeadToHead}
+                                  onChange={(e) => setManualHeadToHead(e.target.value)}
+                                  className="h-8 text-sm"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  const data: any = {};
+                                  if (manualPoints) data.points = parseInt(manualPoints);
+                                  if (manualPlayed) data.played = parseInt(manualPlayed);
+                                  if (manualWon) data.won = parseInt(manualWon);
+                                  if (manualDrawn) data.drawn = parseInt(manualDrawn);
+                                  if (manualLost) data.lost = parseInt(manualLost);
+                                  if (manualGoalsFor) data.goalsFor = parseInt(manualGoalsFor);
+                                  if (manualGoalsAgainst) data.goalsAgainst = parseInt(manualGoalsAgainst);
+                                  if (manualHeadToHead) data.headToHead = parseInt(manualHeadToHead);
+                                  
+                                  manualTeamUpdateMutation.mutate({ id: team.id, data });
+                                }}
+                                disabled={manualTeamUpdateMutation.isPending}
+                              >
+                                Kaydet
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setEditingTeamId(null)}
+                              >
+                                İptal
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {!leagueTeams?.length && (
+                      <p className="text-center text-muted-foreground py-4">Henüz takım eklenmedi</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Maç Oluşturma */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Maç Oluştur</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Ev Sahibi Takım</Label>
+                      <Select value={homeTeamId} onValueChange={setHomeTeamId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Takım seçin" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {leagueTeams?.map((team: any) => (
+                            <SelectItem key={team.id} value={team.id}>
+                              {team.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Deplasman Takımı</Label>
+                      <Select value={awayTeamId} onValueChange={setAwayTeamId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Takım seçin" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {leagueTeams?.filter((t: any) => t.id !== homeTeamId).map((team: any) => (
+                            <SelectItem key={team.id} value={team.id}>
+                              {team.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Maç Tarihi ve Saati</Label>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="space-y-1">
+                          <Input
+                            type="date"
+                            value={matchDate.split('T')[0]}
+                            onChange={(e) => {
+                              const time = matchDate.split('T')[1] || '20:00';
+                              setMatchDate(`${e.target.value}T${time}`);
+                            }}
+                          />
+                          <p className="text-xs text-muted-foreground">Tarih</p>
+                        </div>
+                        <div className="space-y-1">
+                          <Select
+                            value={matchDate.split('T')[1]?.split(':')[0] || '20'}
+                            onValueChange={(hour) => {
+                              const date = matchDate.split('T')[0];
+                              const minute = matchDate.split('T')[1]?.split(':')[1] || '00';
+                              setMatchDate(`${date}T${hour}:${minute}`);
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Saat" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Array.from({ length: 24 }, (_, i) => {
+                                const hour = i.toString().padStart(2, '0');
+                                return <SelectItem key={hour} value={hour}>{hour}</SelectItem>;
+                              })}
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-muted-foreground">Saat (00-23)</p>
+                        </div>
+                        <div className="space-y-1">
+                          <Select
+                            value={matchDate.split('T')[1]?.split(':')[1] || '00'}
+                            onValueChange={(minute) => {
+                              const date = matchDate.split('T')[0];
+                              const hour = matchDate.split('T')[1]?.split(':')[0] || '20';
+                              setMatchDate(`${date}T${hour}:${minute}`);
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Dakika" />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-[200px]">
+                              {Array.from({ length: 60 }, (_, i) => {
+                                const minute = i.toString().padStart(2, '0');
+                                return <SelectItem key={minute} value={minute}>{minute}</SelectItem>;
+                              })}
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-muted-foreground">Dakika (00-59)</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Hafta</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        placeholder="Hafta"
+                        value={week}
+                        onChange={(e) => setWeek(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      if (homeTeamId && awayTeamId && matchDate && week) {
+                        createFixtureMutation.mutate({
+                          homeTeamId,
+                          awayTeamId,
+                          matchDate,
+                          week: parseInt(week),
+                        });
+                      }
+                    }}
+                    disabled={!homeTeamId || !awayTeamId || !matchDate || !week || createFixtureMutation.isPending}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Maç Oluştur
+                  </Button>
+                </div>
+
+                {/* Fikstür Listesi ve Skor Girişi */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Fikstür ve Skor Girişi</h3>
+                  <div className="space-y-3">
+                    {leagueFixtures?.map((fixture: any) => (
+                      <div key={fixture.id} className="p-4 border rounded-lg space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 flex-1">
+                            <div className="flex items-center gap-2 flex-1">
+                              {fixture.homeTeam.logo && (
+                                <img src={fixture.homeTeam.logo} alt="" className="w-8 h-8 object-contain" />
+                              )}
+                              <span className="font-medium">{fixture.homeTeam.name}</span>
+                            </div>
+                            <div className="text-center px-4">
+                              {fixture.isPlayed ? (
+                                <span className="text-xl font-bold">
+                                  {fixture.homeScore} - {fixture.awayScore}
+                                </span>
+                              ) : (
+                                <span className="text-muted-foreground">VS</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 flex-1 justify-end">
+                              <span className="font-medium">{fixture.awayTeam.name}</span>
+                              {fixture.awayTeam.logo && (
+                                <img src={fixture.awayTeam.logo} alt="" className="w-8 h-8 object-contain" />
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {new Date(fixture.matchDate).toLocaleString('tr-TR', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              timeZone: 'Europe/Istanbul'
+                            })}
+                          </span>
+                          <span>Hafta {fixture.week}</span>
+                        </div>
+                        {selectedFixture?.id === fixture.id ? (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              min="0"
+                              placeholder="Ev Sahibi"
+                              value={homeScore}
+                              onChange={(e) => setHomeScore(e.target.value)}
+                              className="w-20"
+                            />
+                            <span>-</span>
+                            <Input
+                              type="number"
+                              min="0"
+                              placeholder="Deplasman"
+                              value={awayScore}
+                              onChange={(e) => setAwayScore(e.target.value)}
+                              className="w-20"
+                            />
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                if (homeScore !== "" && awayScore !== "") {
+                                  updateFixtureScoreMutation.mutate({
+                                    id: fixture.id,
+                                    homeScore: parseInt(homeScore),
+                                    awayScore: parseInt(awayScore),
+                                  });
+                                }
+                              }}
+                              disabled={updateFixtureScoreMutation.isPending}
+                            >
+                              Kaydet
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedFixture(null);
+                                setHomeScore("");
+                                setAwayScore("");
+                              }}
+                            >
+                              İptal
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedFixture(fixture);
+                                setHomeScore(fixture.homeScore?.toString() || "");
+                                setAwayScore(fixture.awayScore?.toString() || "");
+                              }}
+                            >
+                              {fixture.isPlayed ? "Skoru Düzenle" : "Skor Gir"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                if (confirm("Bu maçı silmek istediğinizden emin misiniz?")) {
+                                  deleteFixtureMutation.mutate(fixture.id);
+                                }
+                              }}
+                              disabled={deleteFixtureMutation.isPending}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {!leagueFixtures?.length && (
+                      <p className="text-center text-muted-foreground py-4">Henüz maç eklenmedi</p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Oyuncu İstatistikleri Yönetimi */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Oyuncu İstatistikleri Yönetimi</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Maç Seç */}
+                <div className="space-y-4">
+                  <Label>Maç Seçin</Label>
+                  <Select value={selectedFixtureForStats} onValueChange={setSelectedFixtureForStats}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Maç seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {leagueFixtures?.filter((f: any) => f.isPlayed).map((fixture: any) => (
+                        <SelectItem key={fixture.id} value={fixture.id}>
+                          {fixture.homeTeam.name} vs {fixture.awayTeam.name} ({fixture.homeScore}-{fixture.awayScore})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {selectedFixtureForStats && (
+                  <>
+                    {/* Oyuncu İstatistiği Ekle */}
+                    <div className="space-y-4 border-t pt-4">
+                      <h3 className="font-semibold">İstatistik Ekle</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Oyuncu</Label>
+                          <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Oyuncu seçin" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {allUsers?.map((user: any) => (
+                                <SelectItem key={user.id} value={user.id}>
+                                  {user.username}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Takım</Label>
+                          <Select value={selectedTeamIdForStats} onValueChange={setSelectedTeamIdForStats}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Takım seçin" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {leagueTeams?.map((team: any) => (
+                                <SelectItem key={team.id} value={team.id}>
+                                  {team.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="Gol"
+                          value={statsGoals}
+                          onChange={(e) => setStatsGoals(e.target.value)}
+                        />
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="Asist"
+                          value={statsAssists}
+                          onChange={(e) => setStatsAssists(e.target.value)}
+                        />
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="DM"
+                          value={statsDm}
+                          onChange={(e) => setStatsDm(e.target.value)}
+                        />
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="CS (Clean Sheet)"
+                          value={statsCleanSheets}
+                          onChange={(e) => setStatsCleanSheets(e.target.value)}
+                        />
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="Kurtarış"
+                          value={statsSaves}
+                          onChange={(e) => setStatsSaves(e.target.value)}
+                        />
+                      </div>
+                      <Button
+                        onClick={() => {
+                          if (selectedUserId && selectedTeamIdForStats) {
+                            createPlayerStatsMutation.mutate({
+                              fixtureId: selectedFixtureForStats,
+                              userId: selectedUserId,
+                              teamId: selectedTeamIdForStats,
+                              goals: parseInt(statsGoals) || 0,
+                              assists: parseInt(statsAssists) || 0,
+                              dm: parseInt(statsDm) || 0,
+                              cleanSheets: parseInt(statsCleanSheets) || 0,
+                              saves: parseInt(statsSaves) || 0,
+                            });
+                          }
+                        }}
+                        disabled={!selectedUserId || !selectedTeamIdForStats || createPlayerStatsMutation.isPending}
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        İstatistik Ekle
+                      </Button>
+                    </div>
+
+                    {/* İstatistikler Listesi */}
+                    <div className="space-y-4 border-t pt-4">
+                      <h3 className="font-semibold">Maç İstatistikleri</h3>
+                      <div className="space-y-2">
+                        {playerStats?.map((stat: any) => (
+                          <div key={stat.id} className="space-y-2">
+                            <div className="p-3 border rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <div>
+                                  <p className="font-medium">{stat.user.username}</p>
+                                  <p className="text-xs text-muted-foreground">{stat.team.name}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setEditingStatsId(stat.id);
+                                      setStatsGoals(stat.goals.toString());
+                                      setStatsAssists(stat.assists.toString());
+                                      setStatsDm(stat.dm.toString());
+                                      setStatsCleanSheets(stat.cleanSheets.toString());
+                                      setStatsSaves(stat.saves.toString());
+                                    }}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      if (confirm("Bu istatistiği silmek istediğinizden emin misiniz?")) {
+                                        deletePlayerStatsMutation.mutate(stat.id);
+                                      }
+                                    }}
+                                    disabled={deletePlayerStatsMutation.isPending}
+                                  >
+                                    <Trash2 className="w-4 h-4 text-destructive" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-5 gap-2 text-sm">
+                                <div>
+                                  <span className="text-muted-foreground">Gol:</span>
+                                  <span className="font-medium ml-1">{stat.goals}</span>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Asist:</span>
+                                  <span className="font-medium ml-1">{stat.assists}</span>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">DM:</span>
+                                  <span className="font-medium ml-1">{stat.dm}</span>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">CS:</span>
+                                  <span className="font-medium ml-1">{stat.cleanSheets}</span>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Kurtarış:</span>
+                                  <span className="font-medium ml-1">{stat.saves}</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Düzenleme Formu */}
+                            {editingStatsId === stat.id && (
+                              <div className="p-4 border rounded-lg bg-muted/20 space-y-3">
+                                <h4 className="font-medium text-sm">İstatistik Düzenleme</h4>
+                                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                                  <div className="space-y-1">
+                                    <Label className="text-xs">Gol</Label>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      value={statsGoals}
+                                      onChange={(e) => setStatsGoals(e.target.value)}
+                                      className="h-8 text-sm"
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label className="text-xs">Asist</Label>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      value={statsAssists}
+                                      onChange={(e) => setStatsAssists(e.target.value)}
+                                      className="h-8 text-sm"
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label className="text-xs">DM</Label>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      value={statsDm}
+                                      onChange={(e) => setStatsDm(e.target.value)}
+                                      className="h-8 text-sm"
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label className="text-xs">CS</Label>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      value={statsCleanSheets}
+                                      onChange={(e) => setStatsCleanSheets(e.target.value)}
+                                      className="h-8 text-sm"
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label className="text-xs">Kurtarış</Label>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      value={statsSaves}
+                                      onChange={(e) => setStatsSaves(e.target.value)}
+                                      className="h-8 text-sm"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      const data: any = {};
+                                      if (statsGoals) data.goals = parseInt(statsGoals);
+                                      if (statsAssists) data.assists = parseInt(statsAssists);
+                                      if (statsDm) data.dm = parseInt(statsDm);
+                                      if (statsCleanSheets) data.cleanSheets = parseInt(statsCleanSheets);
+                                      if (statsSaves) data.saves = parseInt(statsSaves);
+                                      
+                                      updatePlayerStatsMutation.mutate({ id: stat.id, data });
+                                    }}
+                                    disabled={updatePlayerStatsMutation.isPending}
+                                  >
+                                    Kaydet
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      setEditingStatsId(null);
+                                      setStatsGoals("");
+                                      setStatsAssists("");
+                                      setStatsDm("");
+                                      setStatsCleanSheets("");
+                                      setStatsSaves("");
+                                    }}
+                                  >
+                                    İptal
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        {!playerStats?.length && (
+                          <p className="text-center text-muted-foreground py-4">Bu maç için henüz istatistik eklenmedi</p>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Kullanıcı Rolleri Yönetimi */}
+            <Card>
+              <CardHeader>
+                <CardTitle>🎭 Kullanıcı Rolleri</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Rol Oluştur */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Yeni Rol Oluştur</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label>Rol Adı</Label>
+                      <Input
+                        placeholder="Örn: VIP Üye"
+                        value={roleName}
+                        onChange={(e) => setRoleName(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Renk</Label>
+                      <Input
+                        type="color"
+                        value={roleColor}
+                        onChange={(e) => setRoleColor(e.target.value)}
+                        className="h-10"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Öncelik (Yüksek = Önde)</Label>
+                      <Input
+                        type="number"
+                        placeholder="0"
+                        value={rolePriority}
+                        onChange={(e) => setRolePriority(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      if (roleName) {
+                        createRoleMutation.mutate({
+                          name: roleName,
+                          color: roleColor,
+                          priority: parseInt(rolePriority) || 0,
+                        });
+                      }
+                    }}
+                    disabled={!roleName || createRoleMutation.isPending}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Rol Oluştur
+                  </Button>
+                </div>
+
+                {/* Roller Listesi */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Mevcut Roller</h3>
+                  <div className="space-y-3">
+                    {customRoles?.map((role: any) => (
+                      <div key={role.id} className="p-3 border rounded-lg flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Badge style={{ backgroundColor: role.color, color: '#fff' }}>
+                            {role.name}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">Öncelik: {role.priority}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setEditingRoleId(role.id)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              if (confirm("Bu rolü silmek istediğinizden emin misiniz?")) {
+                                deleteRoleMutation.mutate(role.id);
+                              }
+                            }}
+                            disabled={deleteRoleMutation.isPending}
+                          >
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    {!customRoles?.length && (
+                      <p className="text-center text-muted-foreground py-4">Henüz rol oluşturulmadı</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Kullanıcıya Rol Ata */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Kullanıcıya Rol Ata</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Select value={selectedUserForRole} onValueChange={setSelectedUserForRole}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Kullanıcı Seç" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {users?.map((u: any) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.username}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={selectedRoleToAssign} onValueChange={setSelectedRoleToAssign}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Rol Seç" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {customRoles?.map((role: any) => (
+                          <SelectItem key={role.id} value={role.id}>
+                            {role.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      if (selectedUserForRole && selectedRoleToAssign) {
+                        assignRoleMutation.mutate({
+                          userId: selectedUserForRole,
+                          roleId: selectedRoleToAssign,
+                        });
+                      }
+                    }}
+                    disabled={!selectedUserForRole || !selectedRoleToAssign || assignRoleMutation.isPending}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Rol Ata
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Haftanın Kadrosu */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Haftanın Kadrosu</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Kadro Ekle */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Yeni Kadro Ekle</h3>
+                  <div className="space-y-4">
+                    <Input
+                      type="number"
+                      min="1"
+                      placeholder="Hafta"
+                      value={totwWeek}
+                      onChange={(e) => setTotwWeek(e.target.value)}
+                    />
+                    <div className="space-y-2">
+                      <Label>Kadro Görseli</Label>
+                      {totwImage ? (
+                        <div className="relative inline-block">
+                          <img 
+                            src={totwImage} 
+                            alt="Team of Week" 
+                            className="max-w-full h-auto rounded-md border"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2 h-6 w-6"
+                            onClick={() => setTotwImage("")}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleImageUpload(e, setTotwImage)}
+                            className="max-w-xs"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => {
+                              const inputs = document.querySelectorAll<HTMLInputElement>('input[type="file"]');
+                              inputs[inputs.length - 1]?.click();
+                            }}
+                          >
+                            <ImageIcon className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      onClick={() => {
+                        if (totwWeek && totwImage) {
+                          createTotwMutation.mutate({
+                            week: parseInt(totwWeek),
+                            image: totwImage,
+                          });
+                        }
+                      }}
+                      disabled={!totwWeek || !totwImage || createTotwMutation.isPending}
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Kadro Ekle
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Kadrolar Listesi */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Mevcut Kadrolar</h3>
+                  <div className="space-y-3">
+                    {teamsOfWeek?.map((totw: any) => (
+                      <div key={totw.id} className="p-4 border rounded-lg">
+                        <div className="flex items-start justify-between mb-3">
+                          <h4 className="font-medium">Hafta {totw.week}</h4>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              if (confirm("Bu kadroyu silmek istediğinizden emin misiniz?")) {
+                                deleteTotwMutation.mutate(totw.id);
+                              }
+                            }}
+                            disabled={deleteTotwMutation.isPending}
+                          >
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </div>
+                        <img 
+                          src={totw.image} 
+                          alt={`Hafta ${totw.week}`} 
+                          className="max-w-full h-auto rounded-md border"
+                        />
+                      </div>
+                    ))}
+                    {!teamsOfWeek?.length && (
+                      <p className="text-center text-muted-foreground py-4">Henüz kadro eklenmedi</p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>

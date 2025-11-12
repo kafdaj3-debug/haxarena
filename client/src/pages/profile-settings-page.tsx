@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, X } from "lucide-react";
+import { buildApiUrl } from "@/lib/queryClient";
 
 export default function ProfileSettingsPage() {
   const { user, logout } = useAuth();
@@ -27,7 +28,7 @@ export default function ProfileSettingsPage() {
     e.preventDefault();
     setIsLoadingUsername(true);
     try {
-      const response = await fetch("/api/profile/username", {
+      const response = await fetch(buildApiUrl("/api/profile/username"), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -65,7 +66,7 @@ export default function ProfileSettingsPage() {
     e.preventDefault();
     setIsLoadingPassword(true);
     try {
-      const response = await fetch("/api/profile/password", {
+      const response = await fetch(buildApiUrl("/api/profile/password"), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -135,7 +136,7 @@ export default function ProfileSettingsPage() {
 
     setIsLoadingPicture(true);
     try {
-      const response = await fetch("/api/profile/picture", {
+      const response = await fetch(buildApiUrl("/api/profile/picture"), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -172,7 +173,7 @@ export default function ProfileSettingsPage() {
   const handleRemovePicture = async () => {
     setIsLoadingPicture(true);
     try {
-      const response = await fetch("/api/profile/picture", {
+      const response = await fetch(buildApiUrl("/api/profile/picture"), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

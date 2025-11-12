@@ -7,6 +7,7 @@ import { Link } from "wouter";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { buildApiUrl } from "@/lib/queryClient";
 
 export default function AuthPage() {
   const [loginData, setLoginData] = useState({ username: "", password: "" });
@@ -19,20 +20,31 @@ export default function AuthPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/login", {
+      const apiUrl = buildApiUrl("/api/auth/login");
+      console.log("🔗 Login API URL:", apiUrl);
+      
+      // Timeout ekle (30 saniye - Render free tier yavaş olabilir)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      
+      const response = await fetch(apiUrl, {
         method: "POST",
         body: JSON.stringify(loginData),
         headers: { "Content-Type": "application/json" },
         credentials: "include",
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
-        const error = await response.json();
+        const error = await response.json().catch(() => ({ error: "Bilinmeyen hata" }));
         toast({
           title: "Giriş Başarısız",
           description: error.error || "Kullanıcı adı veya şifre hatalı",
           variant: "destructive",
         });
+        setIsLoading(false);
         return;
       }
 
@@ -42,13 +54,24 @@ export default function AuthPage() {
         description: "Hoş geldiniz!",
       });
       window.location.href = "/";
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Login error:", error);
+      
+      let errorMessage = "Bir hata oluştu, lütfen tekrar deneyin";
+      
+      if (error.name === "AbortError") {
+        errorMessage = "İstek zaman aşımına uğradı. Backend'e bağlanılamıyor.";
+      } else if (error.message?.includes("Failed to fetch") || error.message?.includes("NetworkError")) {
+        errorMessage = "Backend'e bağlanılamıyor. Backend'in çalıştığından emin olun.";
+      } else if (error.message?.includes("CORS")) {
+        errorMessage = "CORS hatası. Backend CORS ayarlarını kontrol edin.";
+      }
+      
       toast({
-        title: "Hata",
-        description: "Bir hata oluştu, lütfen tekrar deneyin",
+        title: "Bağlantı Hatası",
+        description: errorMessage,
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -57,7 +80,7 @@ export default function AuthPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/register", {
+      const response = await fetch(buildApiUrl("/api/auth/register"), {
         method: "POST",
         body: JSON.stringify(registerData),
         headers: { "Content-Type": "application/json" },

@@ -23,12 +23,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/istatistikler" className="text-muted-foreground hover:text-foreground flex items-center gap-2 text-sm hover-elevate py-1 px-2 rounded-md -ml-2">
-                  <Trophy className="w-4 h-4" />
-                  İstatistikler
-                </Link>
-              </li>
-              <li>
                 <Link href="/vip" className="text-muted-foreground hover:text-foreground flex items-center gap-2 text-sm hover-elevate py-1 px-2 rounded-md -ml-2">
                   <Shield className="w-4 h-4" />
                   VIP Paketi

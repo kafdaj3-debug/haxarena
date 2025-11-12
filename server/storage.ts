@@ -23,6 +23,18 @@ import {
   type InsertPasswordResetToken,
   type PrivateMessage,
   type InsertPrivateMessage,
+  type LeagueTeam,
+  type InsertLeagueTeam,
+  type LeagueFixture,
+  type InsertLeagueFixture,
+  type PlayerStats,
+  type InsertPlayerStats,
+  type TeamOfWeek,
+  type InsertTeamOfWeek,
+  type CustomRole,
+  type InsertCustomRole,
+  type UserCustomRole,
+  type InsertUserCustomRole,
   users,
   adminApplications,
   teamApplications,
@@ -34,7 +46,13 @@ import {
   chatMessages,
   bannedIps,
   passwordResetTokens,
-  privateMessages
+  privateMessages,
+  leagueTeams,
+  leagueFixtures,
+  playerStats,
+  teamOfWeek,
+  customRoles,
+  userCustomRoles
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -122,6 +140,45 @@ export interface IStorage {
   getPlayerByUsername(username: string): Promise<User | undefined>;
   getPlayersRanking(): Promise<User[]>;
   updatePlayerStats(userId: string, stats: { goals?: number; assists?: number; saves?: number; matchTime?: number; rank?: string }): Promise<User | undefined>;
+  
+  // League operations
+  getLeagueTeams(): Promise<LeagueTeam[]>;
+  getLeagueTeam(id: string): Promise<LeagueTeam | undefined>;
+  createLeagueTeam(team: InsertLeagueTeam): Promise<LeagueTeam>;
+  updateLeagueTeam(id: string, updates: Partial<LeagueTeam>): Promise<LeagueTeam | undefined>;
+  deleteLeagueTeam(id: string): Promise<void>;
+  
+  getLeagueFixtures(): Promise<(LeagueFixture & { homeTeam: LeagueTeam; awayTeam: LeagueTeam })[]>;
+  getLeagueFixture(id: string): Promise<(LeagueFixture & { homeTeam: LeagueTeam; awayTeam: LeagueTeam }) | undefined>;
+  createLeagueFixture(fixture: InsertLeagueFixture): Promise<LeagueFixture>;
+  updateLeagueFixtureScore(id: string, homeScore: number, awayScore: number): Promise<LeagueFixture | undefined>;
+  deleteLeagueFixture(id: string): Promise<void>;
+  
+  // Player match stats operations
+  createPlayerStats(stats: InsertPlayerStats): Promise<PlayerStats>;
+  getPlayerStatsByFixture(fixtureId: string): Promise<(PlayerStats & { user: User; team: LeagueTeam })[]>;
+  getPlayerStatsLeaderboard(): Promise<Array<{ userId: string; username: string; totalGoals: number; totalAssists: number; totalDm: number; totalCleanSheets: number; totalSaves: number }>>;
+  updatePlayerStats(id: string, updates: Partial<PlayerStats>): Promise<PlayerStats | undefined>;
+  deletePlayerStats(id: string): Promise<void>;
+  deletePlayerStatsByFixture(fixtureId: string): Promise<void>;
+  
+  // Team of week operations
+  createOrUpdateTeamOfWeek(week: number, image: string): Promise<TeamOfWeek>;
+  getTeamOfWeek(week: number): Promise<TeamOfWeek | undefined>;
+  getAllTeamsOfWeek(): Promise<TeamOfWeek[]>;
+  deleteTeamOfWeek(id: string): Promise<void>;
+  
+  // Custom role operations
+  getCustomRoles(): Promise<CustomRole[]>;
+  getCustomRole(id: string): Promise<CustomRole | undefined>;
+  createCustomRole(role: InsertCustomRole): Promise<CustomRole>;
+  updateCustomRole(id: string, updates: Partial<CustomRole>): Promise<CustomRole | undefined>;
+  deleteCustomRole(id: string): Promise<void>;
+  
+  // User custom role assignments
+  getUserCustomRoles(userId: string): Promise<(UserCustomRole & { role: CustomRole })[]>;
+  assignRoleToUser(userId: string, roleId: string): Promise<UserCustomRole>;
+  unassignRoleFromUser(userId: string, roleId: string): Promise<void>;
 }
 
 export class DBStorage implements IStorage {
@@ -246,8 +303,19 @@ export class DBStorage implements IStorage {
         id: "",
         adminApplicationsOpen: true,
         teamApplicationsOpen: true,
+        statisticsVisible: true,
       };
     }
+    
+    // Eğer statisticsVisible undefined ise, güncelle
+    if (setting.statisticsVisible === undefined || setting.statisticsVisible === null) {
+      const [updated] = await db.update(settings)
+        .set({ statisticsVisible: true })
+        .where(eq(settings.id, setting.id))
+        .returning();
+      return updated;
+    }
+    
     return setting;
   }
 
@@ -627,6 +695,358 @@ export class DBStorage implements IStorage {
     await db.update(users).set(stats).where(eq(users.id, userId));
     const [updatedUser] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
     return updatedUser;
+  }
+
+  // League operations
+  async getLeagueTeams(): Promise<LeagueTeam[]> {
+    const { desc } = await import("drizzle-orm");
+    return await db.select().from(leagueTeams).orderBy(desc(leagueTeams.points), desc(leagueTeams.goalDifference));
+  }
+
+  async getLeagueTeam(id: string): Promise<LeagueTeam | undefined> {
+    const [team] = await db.select().from(leagueTeams).where(eq(leagueTeams.id, id)).limit(1);
+    return team;
+  }
+
+  async createLeagueTeam(team: InsertLeagueTeam): Promise<LeagueTeam> {
+    const [newTeam] = await db.insert(leagueTeams).values(team).returning();
+    return newTeam;
+  }
+
+  async updateLeagueTeam(id: string, updates: Partial<LeagueTeam>): Promise<LeagueTeam | undefined> {
+    // Recalculate goal difference if goals change
+    if (updates.goalsFor !== undefined || updates.goalsAgainst !== undefined) {
+      const team = await this.getLeagueTeam(id);
+      if (team) {
+        const goalsFor = updates.goalsFor ?? team.goalsFor;
+        const goalsAgainst = updates.goalsAgainst ?? team.goalsAgainst;
+        updates.goalDifference = goalsFor - goalsAgainst;
+      }
+    }
+    
+    await db.update(leagueTeams).set(updates).where(eq(leagueTeams.id, id));
+    return await this.getLeagueTeam(id);
+  }
+
+  async deleteLeagueTeam(id: string): Promise<void> {
+    await db.delete(leagueTeams).where(eq(leagueTeams.id, id));
+  }
+
+  async getLeagueFixtures(): Promise<(LeagueFixture & { homeTeam: LeagueTeam; awayTeam: LeagueTeam })[]> {
+    const { asc } = await import("drizzle-orm");
+    const fixtures = await db.select().from(leagueFixtures).orderBy(asc(leagueFixtures.week), asc(leagueFixtures.matchDate));
+    
+    const fixturesWithTeams = await Promise.all(
+      fixtures.map(async (fixture) => {
+        const homeTeam = await this.getLeagueTeam(fixture.homeTeamId);
+        const awayTeam = await this.getLeagueTeam(fixture.awayTeamId);
+        return {
+          ...fixture,
+          homeTeam: homeTeam!,
+          awayTeam: awayTeam!,
+        };
+      })
+    );
+    
+    return fixturesWithTeams;
+  }
+
+  async getLeagueFixture(id: string): Promise<(LeagueFixture & { homeTeam: LeagueTeam; awayTeam: LeagueTeam }) | undefined> {
+    const [fixture] = await db.select().from(leagueFixtures).where(eq(leagueFixtures.id, id)).limit(1);
+    if (!fixture) return undefined;
+    
+    const homeTeam = await this.getLeagueTeam(fixture.homeTeamId);
+    const awayTeam = await this.getLeagueTeam(fixture.awayTeamId);
+    
+    return {
+      ...fixture,
+      homeTeam: homeTeam!,
+      awayTeam: awayTeam!,
+    };
+  }
+
+  async createLeagueFixture(fixture: InsertLeagueFixture): Promise<LeagueFixture> {
+    const [newFixture] = await db.insert(leagueFixtures).values(fixture).returning();
+    return newFixture;
+  }
+
+  async updateLeagueFixtureScore(id: string, homeScore: number, awayScore: number): Promise<LeagueFixture | undefined> {
+    const fixture = await this.getLeagueFixture(id);
+    if (!fixture) return undefined;
+
+    // If match was already played, revert the previous score effects
+    if (fixture.isPlayed && fixture.homeScore !== null && fixture.awayScore !== null) {
+      await this.revertMatchResult(fixture.homeTeamId, fixture.awayTeamId, fixture.homeScore, fixture.awayScore);
+    }
+
+    // Update fixture
+    await db.update(leagueFixtures).set({
+      homeScore,
+      awayScore,
+      isPlayed: true,
+    }).where(eq(leagueFixtures.id, id));
+
+    // Update team standings
+    await this.updateTeamStandings(fixture.homeTeamId, fixture.awayTeamId, homeScore, awayScore);
+
+    const [updated] = await db.select().from(leagueFixtures).where(eq(leagueFixtures.id, id)).limit(1);
+    return updated;
+  }
+
+  private async updateTeamStandings(homeTeamId: string, awayTeamId: string, homeScore: number, awayScore: number): Promise<void> {
+    const homeTeam = await this.getLeagueTeam(homeTeamId);
+    const awayTeam = await this.getLeagueTeam(awayTeamId);
+    
+    if (!homeTeam || !awayTeam) return;
+
+    // Update home team
+    const homeUpdates: Partial<LeagueTeam> = {
+      played: homeTeam.played + 1,
+      goalsFor: homeTeam.goalsFor + homeScore,
+      goalsAgainst: homeTeam.goalsAgainst + awayScore,
+    };
+
+    // Update away team
+    const awayUpdates: Partial<LeagueTeam> = {
+      played: awayTeam.played + 1,
+      goalsFor: awayTeam.goalsFor + awayScore,
+      goalsAgainst: awayTeam.goalsAgainst + homeScore,
+    };
+
+    // Determine result
+    if (homeScore > awayScore) {
+      // Home win
+      homeUpdates.won = homeTeam.won + 1;
+      homeUpdates.points = homeTeam.points + 3;
+      awayUpdates.lost = awayTeam.lost + 1;
+    } else if (homeScore < awayScore) {
+      // Away win
+      awayUpdates.won = awayTeam.won + 1;
+      awayUpdates.points = awayTeam.points + 3;
+      homeUpdates.lost = homeTeam.lost + 1;
+    } else {
+      // Draw
+      homeUpdates.drawn = homeTeam.drawn + 1;
+      homeUpdates.points = homeTeam.points + 1;
+      awayUpdates.drawn = awayTeam.drawn + 1;
+      awayUpdates.points = awayTeam.points + 1;
+    }
+
+    // Calculate goal difference
+    homeUpdates.goalDifference = (homeTeam.goalsFor + homeScore) - (homeTeam.goalsAgainst + awayScore);
+    awayUpdates.goalDifference = (awayTeam.goalsFor + awayScore) - (awayTeam.goalsAgainst + homeScore);
+
+    await this.updateLeagueTeam(homeTeamId, homeUpdates);
+    await this.updateLeagueTeam(awayTeamId, awayUpdates);
+  }
+
+  private async revertMatchResult(homeTeamId: string, awayTeamId: string, homeScore: number, awayScore: number): Promise<void> {
+    const homeTeam = await this.getLeagueTeam(homeTeamId);
+    const awayTeam = await this.getLeagueTeam(awayTeamId);
+    
+    if (!homeTeam || !awayTeam) return;
+
+    // Revert home team
+    const homeUpdates: Partial<LeagueTeam> = {
+      played: homeTeam.played - 1,
+      goalsFor: homeTeam.goalsFor - homeScore,
+      goalsAgainst: homeTeam.goalsAgainst - awayScore,
+    };
+
+    // Revert away team
+    const awayUpdates: Partial<LeagueTeam> = {
+      played: awayTeam.played - 1,
+      goalsFor: awayTeam.goalsFor - awayScore,
+      goalsAgainst: awayTeam.goalsAgainst - homeScore,
+    };
+
+    // Revert result
+    if (homeScore > awayScore) {
+      homeUpdates.won = homeTeam.won - 1;
+      homeUpdates.points = homeTeam.points - 3;
+      awayUpdates.lost = awayTeam.lost - 1;
+    } else if (homeScore < awayScore) {
+      awayUpdates.won = awayTeam.won - 1;
+      awayUpdates.points = awayTeam.points - 3;
+      homeUpdates.lost = homeTeam.lost - 1;
+    } else {
+      homeUpdates.drawn = homeTeam.drawn - 1;
+      homeUpdates.points = homeTeam.points - 1;
+      awayUpdates.drawn = awayTeam.drawn - 1;
+      awayUpdates.points = awayTeam.points - 1;
+    }
+
+    homeUpdates.goalDifference = (homeTeam.goalsFor - homeScore) - (homeTeam.goalsAgainst - awayScore);
+    awayUpdates.goalDifference = (awayTeam.goalsFor - awayScore) - (awayTeam.goalsAgainst - homeScore);
+
+    await this.updateLeagueTeam(homeTeamId, homeUpdates);
+    await this.updateLeagueTeam(awayTeamId, awayUpdates);
+  }
+
+  async deleteLeagueFixture(id: string): Promise<void> {
+    await db.delete(leagueFixtures).where(eq(leagueFixtures.id, id));
+  }
+
+  // Player match stats operations
+  async createPlayerStats(stats: InsertPlayerStats): Promise<PlayerStats> {
+    const [newStats] = await db.insert(playerStats).values(stats).returning();
+    return newStats;
+  }
+
+  async getPlayerStatsByFixture(fixtureId: string): Promise<(PlayerStats & { user: User; team: LeagueTeam })[]> {
+    const stats = await db.select()
+      .from(playerStats)
+      .where(eq(playerStats.fixtureId, fixtureId));
+    
+    const result = [];
+    for (const stat of stats) {
+      const [user] = await db.select().from(users).where(eq(users.id, stat.userId)).limit(1);
+      const [team] = await db.select().from(leagueTeams).where(eq(leagueTeams.id, stat.teamId)).limit(1);
+      if (user && team) {
+        result.push({ ...stat, user, team });
+      }
+    }
+    return result;
+  }
+
+  async getPlayerStatsLeaderboard(): Promise<Array<{ userId: string; username: string; totalGoals: number; totalAssists: number; totalDm: number; totalCleanSheets: number; totalSaves: number }>> {
+    const { sql, sum } = await import("drizzle-orm");
+    
+    const leaderboard = await db
+      .select({
+        userId: playerStats.userId,
+        username: users.username,
+        totalGoals: sum(playerStats.goals),
+        totalAssists: sum(playerStats.assists),
+        totalDm: sum(playerStats.dm),
+        totalCleanSheets: sum(playerStats.cleanSheets),
+        totalSaves: sum(playerStats.saves),
+      })
+      .from(playerStats)
+      .leftJoin(users, eq(playerStats.userId, users.id))
+      .groupBy(playerStats.userId, users.username)
+      .orderBy(desc(sum(playerStats.goals)));
+    
+    return leaderboard.map(row => ({
+      userId: row.userId,
+      username: row.username || '',
+      totalGoals: Number(row.totalGoals) || 0,
+      totalAssists: Number(row.totalAssists) || 0,
+      totalDm: Number(row.totalDm) || 0,
+      totalCleanSheets: Number(row.totalCleanSheets) || 0,
+      totalSaves: Number(row.totalSaves) || 0,
+    }));
+  }
+
+  async updatePlayerStats(id: string, updates: Partial<PlayerStats>): Promise<PlayerStats | undefined> {
+    const [updated] = await db.update(playerStats).set(updates).where(eq(playerStats.id, id)).returning();
+    return updated;
+  }
+
+  async deletePlayerStats(id: string): Promise<void> {
+    await db.delete(playerStats).where(eq(playerStats.id, id));
+  }
+
+  async deletePlayerStatsByFixture(fixtureId: string): Promise<void> {
+    await db.delete(playerStats).where(eq(playerStats.fixtureId, fixtureId));
+  }
+
+  // Team of week operations
+  async createOrUpdateTeamOfWeek(week: number, image: string): Promise<TeamOfWeek> {
+    const { sql } = await import("drizzle-orm");
+    const existing = await this.getTeamOfWeek(week);
+    
+    if (existing) {
+      const [updated] = await db.update(teamOfWeek)
+        .set({ image, updatedAt: sql`NOW()` })
+        .where(eq(teamOfWeek.week, week))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(teamOfWeek).values({ week, image }).returning();
+      return created;
+    }
+  }
+
+  async getTeamOfWeek(week: number): Promise<TeamOfWeek | undefined> {
+    const [result] = await db.select().from(teamOfWeek).where(eq(teamOfWeek.week, week)).limit(1);
+    return result;
+  }
+
+  async getAllTeamsOfWeek(): Promise<TeamOfWeek[]> {
+    return await db.select().from(teamOfWeek).orderBy(desc(teamOfWeek.week));
+  }
+
+  async deleteTeamOfWeek(id: string): Promise<void> {
+    await db.delete(teamOfWeek).where(eq(teamOfWeek.id, id));
+  }
+
+  // Custom role operations
+  async getCustomRoles(): Promise<CustomRole[]> {
+    return await db.select().from(customRoles).orderBy(desc(customRoles.priority));
+  }
+
+  async getCustomRole(id: string): Promise<CustomRole | undefined> {
+    const [role] = await db.select().from(customRoles).where(eq(customRoles.id, id)).limit(1);
+    return role;
+  }
+
+  async createCustomRole(role: InsertCustomRole): Promise<CustomRole> {
+    const [created] = await db.insert(customRoles).values(role).returning();
+    return created;
+  }
+
+  async updateCustomRole(id: string, updates: Partial<CustomRole>): Promise<CustomRole | undefined> {
+    const [updated] = await db.update(customRoles)
+      .set(updates)
+      .where(eq(customRoles.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteCustomRole(id: string): Promise<void> {
+    await db.delete(customRoles).where(eq(customRoles.id, id));
+  }
+
+  // User custom role assignments
+  async getUserCustomRoles(userId: string): Promise<(UserCustomRole & { role: CustomRole })[]> {
+    const results = await db
+      .select({
+        id: userCustomRoles.id,
+        userId: userCustomRoles.userId,
+        roleId: userCustomRoles.roleId,
+        assignedAt: userCustomRoles.assignedAt,
+        role: customRoles,
+      })
+      .from(userCustomRoles)
+      .leftJoin(customRoles, eq(userCustomRoles.roleId, customRoles.id))
+      .where(eq(userCustomRoles.userId, userId))
+      .orderBy(desc(customRoles.priority));
+    
+    // Silinen rolleri filtrele (role null ise)
+    return results
+      .filter(r => r.role !== null)
+      .map(r => ({
+        id: r.id,
+        userId: r.userId,
+        roleId: r.roleId,
+        assignedAt: r.assignedAt,
+        role: r.role!
+      }));
+  }
+
+  async assignRoleToUser(userId: string, roleId: string): Promise<UserCustomRole> {
+    const [assigned] = await db.insert(userCustomRoles).values({ userId, roleId }).returning();
+    return assigned;
+  }
+
+  async unassignRoleFromUser(userId: string, roleId: string): Promise<void> {
+    const { and } = await import("drizzle-orm");
+    await db.delete(userCustomRoles)
+      .where(and(
+        eq(userCustomRoles.userId, userId),
+        eq(userCustomRoles.roleId, roleId)
+      ));
   }
 }
 

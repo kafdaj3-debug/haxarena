@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: gamehubarena-backend
+    env: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: postgresql://neondb_owner:npg_opHF3Gn6BPXJ@ep-snowy-forest-agexjaet-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+      - key: SESSION_SECRET
+        value: haxarena2025secretkey123456789abcdef
+      - key: FRONTEND_URL
+        value: https://haxarena.netlify.app
+      - key: PORT
+        fromService:
+          type: web
+          name: gamehubarena-backend
+          property: port
+

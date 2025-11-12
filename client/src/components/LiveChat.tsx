@@ -122,7 +122,26 @@ export default function LiveChat() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-medium text-sm">{msg.user.username}</span>
                   
-                  {msg.user.isSuperAdmin && (
+                  {/* Custom Roller (önce göster) */}
+                  {msg.customRoles?.filter((role: any) => role && role.id && role.name).map((role: any) => (
+                    <Badge 
+                      key={role.id}
+                      variant="outline" 
+                      className={`text-xs font-semibold px-2 py-0.5 ${role.name === 'Kurucu' ? 'font-extrabold border-2' : 'shadow-sm'}`}
+                      style={{ 
+                        backgroundColor: role.name === 'Kurucu' ? `${role.color}30` : `${role.color}15`,
+                        color: role.color,
+                        borderColor: role.name === 'Kurucu' ? role.color : `${role.color}40`,
+                        textShadow: role.name === 'Kurucu' ? `0 0 4px ${role.color}` : 'none',
+                        boxShadow: role.name === 'Kurucu' ? `0 0 6px ${role.color}40` : 'none'
+                      }}
+                    >
+                      {role.name}
+                    </Badge>
+                  ))}
+                  
+                  {/* YÖNETİM badge'i sadece custom rolü yoksa göster */}
+                  {msg.user.isSuperAdmin && !msg.customRoles?.length && (
                     <Badge 
                       variant="outline" 
                       className="bg-red-500/20 text-red-300 border-red-500/30 text-xs font-bold"

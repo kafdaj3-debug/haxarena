@@ -66,6 +66,7 @@ export const settings = pgTable("settings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   adminApplicationsOpen: boolean("admin_applications_open").notNull().default(false),
   teamApplicationsOpen: boolean("team_applications_open").notNull().default(false),
+  statisticsVisible: boolean("statistics_visible").notNull().default(true),
 });
 
 export const staffRoles = pgTable("staff_roles", {
@@ -74,6 +75,23 @@ export const staffRoles = pgTable("staff_roles", {
   role: text("role").notNull(),
   managementAccess: boolean("management_access").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Custom Discord-like user roles
+export const customRoles = pgTable("custom_roles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull().unique(),
+  color: text("color").notNull().default("#808080"), // hex color
+  priority: integer("priority").notNull().default(0), // higher = shows first
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Junction table for user custom roles
+export const userCustomRoles = pgTable("user_custom_roles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  roleId: varchar("role_id").notNull().references(() => customRoles.id, { onDelete: "cascade" }),
+  assignedAt: timestamp("assigned_at").notNull().defaultNow(),
 });
 
 export const notifications = pgTable("notifications", {
@@ -139,6 +157,58 @@ export const privateMessages = pgTable("private_messages", {
   imageUrl: text("image_url"), // base64 image, max 5MB
   isRead: boolean("is_read").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const leagueTeams = pgTable("league_teams", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  logo: text("logo"), // base64 image
+  played: integer("played").notNull().default(0),
+  won: integer("won").notNull().default(0),
+  drawn: integer("drawn").notNull().default(0),
+  lost: integer("lost").notNull().default(0),
+  goalsFor: integer("goals_for").notNull().default(0),
+  goalsAgainst: integer("goals_against").notNull().default(0),
+  goalDifference: integer("goal_difference").notNull().default(0),
+  headToHead: integer("head_to_head").notNull().default(0), // İkili averaj
+  points: integer("points").notNull().default(0),
+  position: integer("position").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const leagueFixtures = pgTable("league_fixtures", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  homeTeamId: varchar("home_team_id").notNull().references(() => leagueTeams.id, { onDelete: "cascade" }),
+  awayTeamId: varchar("away_team_id").notNull().references(() => leagueTeams.id, { onDelete: "cascade" }),
+  homeScore: integer("home_score"),
+  awayScore: integer("away_score"),
+  matchDate: timestamp("match_date").notNull(),
+  isPlayed: boolean("is_played").notNull().default(false),
+  week: integer("week").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Player statistics for each match
+export const playerStats = pgTable("player_stats", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fixtureId: varchar("fixture_id").notNull().references(() => leagueFixtures.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  teamId: varchar("team_id").notNull().references(() => leagueTeams.id, { onDelete: "cascade" }),
+  goals: integer("goals").notNull().default(0),
+  assists: integer("assists").notNull().default(0),
+  dm: integer("dm").notNull().default(0),
+  cleanSheets: integer("clean_sheets").notNull().default(0), // CS
+  saves: integer("saves").notNull().default(0), // Kurtarış
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Team of the week
+export const teamOfWeek = pgTable("team_of_week", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  week: integer("week").notNull().unique(),
+  image: text("image").notNull(), // base64 image
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({
@@ -209,6 +279,47 @@ export const insertPrivateMessageSchema = createInsertSchema(privateMessages).om
   createdAt: true,
 });
 
+export const insertLeagueTeamSchema = createInsertSchema(leagueTeams).omit({
+  id: true,
+  played: true,
+  won: true,
+  drawn: true,
+  lost: true,
+  goalsFor: true,
+  goalsAgainst: true,
+  goalDifference: true,
+  points: true,
+  position: true,
+  createdAt: true,
+});
+
+export const insertLeagueFixtureSchema = createInsertSchema(leagueFixtures).omit({
+  id: true,
+  isPlayed: true,
+  createdAt: true,
+});
+
+export const insertPlayerStatsSchema = createInsertSchema(playerStats).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertTeamOfWeekSchema = createInsertSchema(teamOfWeek).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCustomRoleSchema = createInsertSchema(customRoles).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserCustomRoleSchema = createInsertSchema(userCustomRoles).omit({
+  id: true,
+  assignedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type AdminApplication = typeof adminApplications.$inferSelect;
@@ -233,3 +344,15 @@ export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;
 export type PrivateMessage = typeof privateMessages.$inferSelect;
 export type InsertPrivateMessage = z.infer<typeof insertPrivateMessageSchema>;
+export type LeagueTeam = typeof leagueTeams.$inferSelect;
+export type InsertLeagueTeam = z.infer<typeof insertLeagueTeamSchema>;
+export type LeagueFixture = typeof leagueFixtures.$inferSelect;
+export type InsertLeagueFixture = z.infer<typeof insertLeagueFixtureSchema>;
+export type PlayerStats = typeof playerStats.$inferSelect;
+export type InsertPlayerStats = z.infer<typeof insertPlayerStatsSchema>;
+export type TeamOfWeek = typeof teamOfWeek.$inferSelect;
+export type InsertTeamOfWeek = z.infer<typeof insertTeamOfWeekSchema>;
+export type CustomRole = typeof customRoles.$inferSelect;
+export type InsertCustomRole = z.infer<typeof insertCustomRoleSchema>;
+export type UserCustomRole = typeof userCustomRoles.$inferSelect;
+export type InsertUserCustomRole = z.infer<typeof insertUserCustomRoleSchema>;

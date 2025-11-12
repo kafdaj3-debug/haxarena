@@ -96,7 +96,21 @@ function isNotChatMuted(req: any, res: any, next: any) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // IP ban middleware - tüm route'larda kontrol edilir
+  // Health check endpoint (for deployment platforms)
+  app.get("/api/health", async (req, res) => {
+    try {
+      // Simple health check - just return OK if server is running
+      return res.json({ 
+        status: "ok", 
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+      });
+    } catch (error) {
+      return res.status(500).json({ status: "error" });
+    }
+  });
+
+  // IP ban middleware - tüm route'larda kontrol edilir (health check hariç)
   app.use(checkIpBan);
   // Profile routes
   app.get("/api/profile", isAuthenticated, isNotBanned, async (req, res) => {
@@ -457,9 +471,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/management/users", isSuperAdmin, async (req, res) => {
     try {
       const users = await storage.getAllUsers();
-      // Güvenlik: Şifreleri frontend'e göndermiyoruz
-      const usersWithoutPasswords = users.map(({ password, ...user }) => user);
-      return res.json(usersWithoutPasswords);
+      // Her kullanıcı için custom role'lerini getir
+      const usersWithRoles = await Promise.all(
+        users.map(async (user) => {
+          const { password, ...userWithoutPassword } = user;
+          const customRoles = await storage.getUserCustomRoles(user.id);
+          return {
+            ...userWithoutPassword,
+            customRoles: customRoles.map(cr => cr.role),
+          };
+        })
+      );
+      return res.json(usersWithRoles);
     } catch (error) {
       return res.status(500).json({ error: "Kullanıcılar yüklenemedi" });
     }
@@ -758,12 +781,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const staffRoles = await storage.getStaffRoles();
       const staffMap = new Map(staffRoles.map(s => [s.name, s.role]));
       
-      const postsWithStaffRole = posts.map(post => ({
-        ...post,
-        staffRole: staffMap.get(post.user.username) || null,
-      }));
+      // Her post için kullanıcının custom rollerini getir
+      const postsWithRoles = await Promise.all(
+        posts.map(async (post) => {
+          const customRoles = await storage.getUserCustomRoles(post.user.id);
+          return {
+            ...post,
+            staffRole: staffMap.get(post.user.username) || null,
+            customRoles: customRoles.map(cr => cr.role),
+          };
+        })
+      );
       
-      return res.json(postsWithStaffRole);
+      return res.json(postsWithRoles);
     } catch (error) {
       return res.status(500).json({ error: "Konular yüklenemedi" });
     }
@@ -778,13 +808,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const staffRoles = await storage.getStaffRoles();
       const staffMap = new Map(staffRoles.map(s => [s.name, s.role]));
+      const customRoles = await storage.getUserCustomRoles(post.user.id);
       
-      const postWithStaffRole = {
+      const postWithRoles = {
         ...post,
         staffRole: staffMap.get(post.user.username) || null,
+        customRoles: customRoles.map(cr => cr.role),
       };
       
-      return res.json(postWithStaffRole);
+      return res.json(postWithRoles);
     } catch (error) {
       return res.status(500).json({ error: "Konu yüklenemedi" });
     }
@@ -903,12 +935,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const staffRoles = await storage.getStaffRoles();
       const staffMap = new Map(staffRoles.map(s => [s.name, s.role]));
       
-      const repliesWithStaffRole = replies.map(reply => ({
-        ...reply,
-        staffRole: staffMap.get(reply.user.username) || null,
-      }));
+      // Her reply için kullanıcının custom rollerini getir
+      const repliesWithRoles = await Promise.all(
+        replies.map(async (reply) => {
+          const customRoles = await storage.getUserCustomRoles(reply.user.id);
+          return {
+            ...reply,
+            staffRole: staffMap.get(reply.user.username) || null,
+            customRoles: customRoles.map(cr => cr.role),
+          };
+        })
+      );
       
-      return res.json(repliesWithStaffRole);
+      return res.json(repliesWithRoles);
     } catch (error) {
       return res.status(500).json({ error: "Cevaplar yüklenemedi" });
     }
@@ -976,12 +1015,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const staffRoles = await storage.getStaffRoles();
       const staffMap = new Map(staffRoles.map(s => [s.name, s.role]));
       
-      const messagesWithStaffRole = messages.map(msg => ({
-        ...msg,
-        staffRole: staffMap.get(msg.user.username) || null,
-      }));
+      // Her mesaj için kullanıcının custom rollerini getir
+      const messagesWithRoles = await Promise.all(
+        messages.map(async (msg) => {
+          const customRoles = await storage.getUserCustomRoles(msg.user.id);
+          return {
+            ...msg,
+            staffRole: staffMap.get(msg.user.username) || null,
+            customRoles: customRoles.map(cr => cr.role),
+          };
+        })
+      );
       
-      return res.json(messagesWithStaffRole);
+      return res.json(messagesWithRoles);
     } catch (error) {
       return res.status(500).json({ error: "Mesajlar yüklenemedi" });
     }
@@ -1321,6 +1367,400 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(sanitized);
     } catch (error) {
       return res.status(500).json({ error: "Sıralama yüklenemedi" });
+    }
+  });
+
+  // ====== LEAGUE ROUTES ======
+  
+  // Get all league teams (standings)
+  app.get("/api/league/teams", async (req, res) => {
+    try {
+      const teams = await storage.getLeagueTeams();
+      return res.json(teams);
+    } catch (error) {
+      console.error("Error getting league teams:", error);
+      return res.status(500).json({ error: "Puan durumu yüklenemedi" });
+    }
+  });
+
+  // Get all fixtures
+  app.get("/api/league/fixtures", async (req, res) => {
+    try {
+      const fixtures = await storage.getLeagueFixtures();
+      return res.json(fixtures);
+    } catch (error) {
+      console.error("Error getting fixtures:", error);
+      return res.status(500).json({ error: "Fikstür yüklenemedi" });
+    }
+  });
+
+  // Create team (super admin only)
+  app.post("/api/league/teams", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { name, logo } = req.body;
+      if (!name) {
+        return res.status(400).json({ error: "Takım adı gereklidir" });
+      }
+      const team = await storage.createLeagueTeam({ name, logo });
+      return res.json(team);
+    } catch (error) {
+      console.error("Error creating team:", error);
+      return res.status(500).json({ error: "Takım oluşturulamadı" });
+    }
+  });
+
+  // Update team (super admin only)
+  app.patch("/api/league/teams/:id", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      const team = await storage.updateLeagueTeam(id, updates);
+      return res.json(team);
+    } catch (error) {
+      console.error("Error updating team:", error);
+      return res.status(500).json({ error: "Takım güncellenemedi" });
+    }
+  });
+
+  // Delete team (super admin only)
+  app.delete("/api/league/teams/:id", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteLeagueTeam(id);
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting team:", error);
+      return res.status(500).json({ error: "Takım silinemedi" });
+    }
+  });
+
+  // Create fixture (super admin only)
+  app.post("/api/league/fixtures", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { homeTeamId, awayTeamId, matchDate, week } = req.body;
+      if (!homeTeamId || !awayTeamId || !matchDate || !week) {
+        return res.status(400).json({ error: "Tüm alanlar gereklidir" });
+      }
+      
+      // Parse matchDate as Turkey local time (GMT+3)
+      // Input format: "2025-01-30T20:00"
+      // We need to convert this to UTC for database storage
+      const [datePart, timePart] = matchDate.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hour, minute] = timePart.split(':').map(Number);
+      
+      // Create date in UTC, then subtract 3 hours to convert Turkey time to UTC
+      const turkeyDate = new Date(Date.UTC(year, month - 1, day, hour - 3, minute, 0));
+      
+      const fixture = await storage.createLeagueFixture({ 
+        homeTeamId, 
+        awayTeamId, 
+        matchDate: turkeyDate, 
+        week 
+      });
+      return res.json(fixture);
+    } catch (error) {
+      console.error("Error creating fixture:", error);
+      return res.status(500).json({ error: "Maç oluşturulamadı" });
+    }
+  });
+
+  // Update fixture score (super admin only) - this also updates team standings
+  app.patch("/api/league/fixtures/:id", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { homeScore, awayScore } = req.body;
+      
+      if (homeScore === undefined || awayScore === undefined) {
+        return res.status(400).json({ error: "Maç skorları gereklidir" });
+      }
+
+      const fixture = await storage.updateLeagueFixtureScore(id, homeScore, awayScore);
+      return res.json(fixture);
+    } catch (error) {
+      console.error("Error updating fixture:", error);
+      return res.status(500).json({ error: "Maç sonucu güncellenemedi" });
+    }
+  });
+
+  // Delete fixture (super admin only)
+  app.delete("/api/league/fixtures/:id", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteLeagueFixture(id);
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting fixture:", error);
+      return res.status(500).json({ error: "Maç silinemedi" });
+    }
+  });
+
+  // Manual team update (super admin only) - for manual stats adjustment
+  app.patch("/api/league/teams/:id/manual", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      // Recalculate goal difference if goals change
+      if (updates.goalsFor !== undefined || updates.goalsAgainst !== undefined) {
+        const team = await storage.getLeagueTeam(id);
+        if (team) {
+          const goalsFor = updates.goalsFor ?? team.goalsFor;
+          const goalsAgainst = updates.goalsAgainst ?? team.goalsAgainst;
+          updates.goalDifference = goalsFor - goalsAgainst;
+        }
+      }
+      
+      const team = await storage.updateLeagueTeam(id, updates);
+      return res.json(team);
+    } catch (error) {
+      console.error("Error updating team manually:", error);
+      return res.status(500).json({ error: "Takım güncellenemedi" });
+    }
+  });
+
+  // ===== PLAYER STATS ROUTES =====
+
+  // Get player stats by fixture
+  app.get("/api/league/fixtures/:fixtureId/stats", async (req, res) => {
+    try {
+      const { fixtureId } = req.params;
+      const stats = await storage.getPlayerStatsByFixture(fixtureId);
+      return res.json(stats);
+    } catch (error) {
+      console.error("Error getting player stats:", error);
+      return res.status(500).json({ error: "Oyuncu istatistikleri yüklenemedi" });
+    }
+  });
+
+  // Get player stats leaderboard
+  app.get("/api/league/stats/leaderboard", async (req, res) => {
+    try {
+      const leaderboard = await storage.getPlayerStatsLeaderboard();
+      return res.json(leaderboard);
+    } catch (error) {
+      console.error("Error getting leaderboard:", error);
+      return res.status(500).json({ error: "Lider tablosu yüklenemedi" });
+    }
+  });
+
+  // Create player stats (super admin only)
+  app.post("/api/league/stats", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { fixtureId, userId, teamId, goals, assists, dm, cleanSheets, saves } = req.body;
+      
+      if (!fixtureId || !userId || !teamId) {
+        return res.status(400).json({ error: "Fikstür ID, kullanıcı ID ve takım ID gereklidir" });
+      }
+      
+      const stats = await storage.createPlayerStats({
+        fixtureId,
+        userId,
+        teamId,
+        goals: goals || 0,
+        assists: assists || 0,
+        dm: dm || 0,
+        cleanSheets: cleanSheets || 0,
+        saves: saves || 0,
+      });
+      
+      return res.json(stats);
+    } catch (error) {
+      console.error("Error creating player stats:", error);
+      return res.status(500).json({ error: "Oyuncu istatistiği oluşturulamadı" });
+    }
+  });
+
+  // Update player stats (super admin only)
+  app.patch("/api/league/stats/:id", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      const stats = await storage.updatePlayerStats(id, updates);
+      return res.json(stats);
+    } catch (error) {
+      console.error("Error updating player stats:", error);
+      return res.status(500).json({ error: "Oyuncu istatistiği güncellenemedi" });
+    }
+  });
+
+  // Delete player stats (super admin only)
+  app.delete("/api/league/stats/:id", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deletePlayerStats(id);
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting player stats:", error);
+      return res.status(500).json({ error: "Oyuncu istatistiği silinemedi" });
+    }
+  });
+
+  // ===== TEAM OF WEEK ROUTES =====
+
+  // Get all teams of week
+  app.get("/api/league/team-of-week", async (req, res) => {
+    try {
+      const teams = await storage.getAllTeamsOfWeek();
+      return res.json(teams);
+    } catch (error) {
+      console.error("Error getting teams of week:", error);
+      return res.status(500).json({ error: "Haftanın kadroları yüklenemedi" });
+    }
+  });
+
+  // Get team of week by week number
+  app.get("/api/league/team-of-week/:week", async (req, res) => {
+    try {
+      const { week } = req.params;
+      const team = await storage.getTeamOfWeek(parseInt(week));
+      if (!team) {
+        return res.status(404).json({ error: "Haftanın kadrosu bulunamadı" });
+      }
+      return res.json(team);
+    } catch (error) {
+      console.error("Error getting team of week:", error);
+      return res.status(500).json({ error: "Haftanın kadrosu yüklenemedi" });
+    }
+  });
+
+  // Create or update team of week (super admin only)
+  app.post("/api/league/team-of-week", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { week, image } = req.body;
+      
+      if (!week || !image) {
+        return res.status(400).json({ error: "Hafta ve görsel gereklidir" });
+      }
+      
+      const team = await storage.createOrUpdateTeamOfWeek(week, image);
+      return res.json(team);
+    } catch (error) {
+      console.error("Error creating/updating team of week:", error);
+      return res.status(500).json({ error: "Haftanın kadrosu oluşturulamadı" });
+    }
+  });
+
+  // Delete team of week (super admin only)
+  app.delete("/api/league/team-of-week/:id", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteTeamOfWeek(id);
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting team of week:", error);
+      return res.status(500).json({ error: "Haftanın kadrosu silinemedi" });
+    }
+  });
+
+  // ===== CUSTOM ROLES =====
+  
+  // Get all custom roles
+  app.get("/api/custom-roles", async (req, res) => {
+    try {
+      const roles = await storage.getCustomRoles();
+      return res.json(roles);
+    } catch (error) {
+      console.error("Error getting custom roles:", error);
+      return res.status(500).json({ error: "Roller yüklenemedi" });
+    }
+  });
+
+  // Create custom role (super admin only)
+  app.post("/api/custom-roles", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { name, color, priority } = req.body;
+      
+      if (!name) {
+        return res.status(400).json({ error: "Rol adı gereklidir" });
+      }
+      
+      const role = await storage.createCustomRole({ 
+        name, 
+        color: color || "#808080",
+        priority: priority || 0
+      });
+      return res.json(role);
+    } catch (error: any) {
+      console.error("Error creating custom role:", error);
+      if (error.code === '23505') { // Unique constraint violation
+        return res.status(400).json({ error: "Bu rol adı zaten kullanılıyor" });
+      }
+      return res.status(500).json({ error: "Rol oluşturulamadı" });
+    }
+  });
+
+  // Update custom role (super admin only)
+  app.patch("/api/custom-roles/:id", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const role = await storage.updateCustomRole(id, updates);
+      if (!role) {
+        return res.status(404).json({ error: "Rol bulunamadı" });
+      }
+      return res.json(role);
+    } catch (error: any) {
+      console.error("Error updating custom role:", error);
+      if (error.code === '23505') {
+        return res.status(400).json({ error: "Bu rol adı zaten kullanılıyor" });
+      }
+      return res.status(500).json({ error: "Rol güncellenemedi" });
+    }
+  });
+
+  // Delete custom role (super admin only)
+  app.delete("/api/custom-roles/:id", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteCustomRole(id);
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting custom role:", error);
+      return res.status(500).json({ error: "Rol silinemedi" });
+    }
+  });
+
+  // Get user's custom roles
+  app.get("/api/users/:userId/custom-roles", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const roles = await storage.getUserCustomRoles(userId);
+      return res.json(roles);
+    } catch (error) {
+      console.error("Error getting user custom roles:", error);
+      return res.status(500).json({ error: "Kullanıcı rolleri yüklenemedi" });
+    }
+  });
+
+  // Assign role to user (super admin only)
+  app.post("/api/users/:userId/custom-roles", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { roleId } = req.body;
+      
+      if (!roleId) {
+        return res.status(400).json({ error: "Rol ID gereklidir" });
+      }
+      
+      const assignment = await storage.assignRoleToUser(userId, roleId);
+      return res.json(assignment);
+    } catch (error) {
+      console.error("Error assigning role to user:", error);
+      return res.status(500).json({ error: "Rol atanamadı" });
+    }
+  });
+
+  // Unassign role from user (super admin only)
+  app.delete("/api/users/:userId/custom-roles/:roleId", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { userId, roleId } = req.params;
+      await storage.unassignRoleFromUser(userId, roleId);
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Error unassigning role from user:", error);
+      return res.status(500).json({ error: "Rol kaldırılamadı" });
     }
   });
 

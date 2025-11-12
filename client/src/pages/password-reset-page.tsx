@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { buildApiUrl } from "@/lib/queryClient";
 
 export default function PasswordResetPage() {
   const [username, setUsername] = useState("");
@@ -37,7 +38,7 @@ export default function PasswordResetPage() {
 
     setIsLoading(true);
     try {
-      const response = await fetch("/api/password-reset/verify", {
+      const response = await fetch(buildApiUrl("/api/password-reset/verify"), {
         method: "POST",
         body: JSON.stringify({ username, token, newPassword }),
         headers: { "Content-Type": "application/json" },

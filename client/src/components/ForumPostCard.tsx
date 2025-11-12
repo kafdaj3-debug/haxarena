@@ -15,6 +15,7 @@ interface ForumPostCardProps {
   authorPlayerRole?: string;
   authorIsAdmin?: boolean;
   authorIsSuperAdmin?: boolean;
+  authorCustomRoles?: any[];
   category: string;
   replyCount: number;
   createdAt: string;
@@ -46,6 +47,7 @@ export default function ForumPostCard({
   authorPlayerRole,
   authorIsAdmin,
   authorIsSuperAdmin,
+  authorCustomRoles,
   category,
   replyCount,
   createdAt,
@@ -81,8 +83,26 @@ export default function ForumPostCard({
               <div className="flex items-center gap-2 flex-wrap mb-2">
                 <span className="text-base font-bold text-foreground" data-testid="text-author">{author}</span>
                 
-                {/* Yönetim etiketi (en öncelikli) */}
-                {authorIsSuperAdmin && (
+                {/* Custom Roller (en önce) */}
+                {authorCustomRoles?.filter((role: any) => role && role.id && role.name).map((role: any) => (
+                  <Badge 
+                    key={role.id}
+                    variant="outline" 
+                    className={`text-xs font-semibold px-2 py-0.5 ${role.name === 'Kurucu' ? 'font-extrabold border-2' : 'shadow-sm'}`}
+                    style={{ 
+                      backgroundColor: role.name === 'Kurucu' ? `${role.color}30` : `${role.color}15`,
+                      color: role.color,
+                      borderColor: role.name === 'Kurucu' ? role.color : `${role.color}40`,
+                      textShadow: role.name === 'Kurucu' ? `0 0 4px ${role.color}` : 'none',
+                      boxShadow: role.name === 'Kurucu' ? `0 0 6px ${role.color}40` : 'none'
+                    }}
+                  >
+                    {role.name}
+                  </Badge>
+                ))}
+                
+                {/* Yönetim etiketi - sadece custom rol yoksa */}
+                {authorIsSuperAdmin && !authorCustomRoles?.length && (
                   <Badge 
                     variant="outline" 
                     className="bg-red-500/20 text-red-300 border-red-500/30 text-xs font-bold"
@@ -103,7 +123,7 @@ export default function ForumPostCard({
                   </Badge>
                 )}
                 
-                {/* Oyuncu rolü (admin rolünden sonra) */}
+                {/* Oyuncu rolü */}
                 {authorPlayerRole && (
                   <Badge 
                     variant="outline" 

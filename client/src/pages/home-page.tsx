@@ -6,7 +6,7 @@ import LiveChat from "@/components/LiveChat";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Trophy, BarChart3, MessageSquare, Shield } from "lucide-react";
+import { Trophy, MessageSquare, Shield } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
@@ -36,6 +36,14 @@ export default function HomePage() {
   const { data: forumPosts = [] } = useQuery<any[]>({
     queryKey: ["/api/forum-posts"],
   });
+
+  const { data: leaderboard = [] } = useQuery<any[]>({
+    queryKey: ["/api/league/stats/leaderboard"],
+  });
+
+  const topScorers = leaderboard
+    .sort((a, b) => b.totalGoals - a.totalGoals)
+    .slice(0, 5);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -105,13 +113,13 @@ export default function HomePage() {
                 </Card>
               </Link>
 
-              <Link href="/istatistikler" data-testid="link-feature-statistics">
+              <Link href="/lig?tab=goals" data-testid="link-feature-top-scorers">
                 <Card className="hover-elevate active-elevate-2 overflow-visible cursor-pointer">
                   <CardHeader>
-                    <BarChart3 className="w-10 h-10 text-primary mb-2" />
-                    <CardTitle>İstatistikler</CardTitle>
+                    <Trophy className="w-10 h-10 text-primary mb-2" />
+                    <CardTitle>⚽ Gol Krallığı</CardTitle>
                     <CardDescription>
-                      Oyuncu sıralamalarını ve performans istatistiklerini inceleyin
+                      Ligin en golcü oyuncularını keşfedin
                     </CardDescription>
                   </CardHeader>
                 </Card>
@@ -142,6 +150,7 @@ export default function HomePage() {
                         authorPlayerRole={post.user?.playerRole}
                         authorIsAdmin={post.user?.isAdmin}
                         authorIsSuperAdmin={post.user?.isSuperAdmin}
+                        authorCustomRoles={post.customRoles}
                         category={post.category}
                         replyCount={post.replyCount}
                         createdAt={formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: tr })}

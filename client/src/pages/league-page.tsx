@@ -1,11 +1,66 @@
+import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, Trophy, Award, Users } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 
 export default function LeaguePage() {
   const { user, logout } = useAuth();
+  const [location] = useLocation();
+  const [selectedTotwWeek, setSelectedTotwWeek] = useState("");
+  const [activeTab, setActiveTab] = useState("standings");
+
+  // URL parametresinden tab değerini oku
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [location]);
+
+  const { data: teams, isLoading: teamsLoading } = useQuery<any[]>({
+    queryKey: ["/api/league/teams"],
+  });
+
+  const { data: fixtures, isLoading: fixturesLoading } = useQuery<any[]>({
+    queryKey: ["/api/league/fixtures"],
+  });
+
+  const { data: leaderboard, isLoading: leaderboardLoading } = useQuery<any[]>({
+    queryKey: ["/api/league/stats/leaderboard"],
+  });
+
+  const { data: teamsOfWeek } = useQuery<any[]>({
+    queryKey: ["/api/league/team-of-week"],
+  });
+
+  const { data: selectedTotw } = useQuery<any>({
+    queryKey: ["/api/league/team-of-week", selectedTotwWeek],
+    queryFn: async () => {
+      if (!selectedTotwWeek) return null;
+      const res = await fetch(`/api/league/team-of-week/${selectedTotwWeek}`);
+      if (!res.ok) return null;
+      return res.json();
+    },
+    enabled: !!selectedTotwWeek,
+  });
+
+  // Group fixtures by week
+  const fixturesByWeek = fixtures?.reduce((acc, fixture) => {
+    if (!acc[fixture.week]) {
+      acc[fixture.week] = [];
+    }
+    acc[fixture.week].push(fixture);
+    return acc;
+  }, {} as Record<number, any[]>) || {};
+
+  const weeks = Object.keys(fixturesByWeek).sort((a, b) => parseInt(a) - parseInt(b));
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -17,13 +72,463 @@ export default function LeaguePage() {
             <h1 className="text-4xl font-heading font-bold mb-4" data-testid="text-page-title">
               Lig
             </h1>
-            <Alert>
-              <Info className="w-4 h-4" />
-              <AlertDescription data-testid="text-league-info">
-                Şu anda aktif bir lig sezonumuz bulunmamaktadır. Yeni sezon duyuruları için Discord kanalımızı takip edin.
-              </AlertDescription>
-            </Alert>
+            <p className="text-muted-foreground">HaxArena Ligi puan durumu ve fikstür bilgileri</p>
           </div>
+
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <div className="border rounded-lg p-2 bg-muted/30">
+              <TabsList className="w-full h-auto flex flex-wrap gap-2 bg-transparent">
+                <TabsTrigger value="standings" data-testid="tab-standings" className="flex-1 min-w-[140px]">
+                  📈 Puan Durumu
+                </TabsTrigger>
+                <TabsTrigger value="fixtures" data-testid="tab-fixtures" className="flex-1 min-w-[140px]">
+                  🗓️ Fikstür
+                </TabsTrigger>
+                <TabsTrigger value="totw" data-testid="tab-totw" className="flex-1 min-w-[140px]">
+                  🏟️ Haftanın Kadrosu
+                </TabsTrigger>
+                <TabsTrigger value="goals" data-testid="tab-goals" className="flex-1 min-w-[140px]">
+                  <span className="mr-1">⚽</span> Gol Krallığı
+                </TabsTrigger>
+                <TabsTrigger value="assists" data-testid="tab-assists" className="flex-1 min-w-[140px]">
+                  <span className="mr-1">🎯</span> Asist Krallığı
+                </TabsTrigger>
+                <TabsTrigger value="dm" data-testid="tab-dm" className="flex-1 min-w-[100px]">
+                  <span className="mr-1">🛡️</span> DM
+                </TabsTrigger>
+                <TabsTrigger value="cs" data-testid="tab-cs" className="flex-1 min-w-[100px]">
+                  <span className="mr-1">🥅</span> CS
+                </TabsTrigger>
+                <TabsTrigger value="saves" data-testid="tab-saves" className="flex-1 min-w-[140px]">
+                  <span className="mr-1">🧤</span> Kurtarış
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="standings" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Puan Durumu</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {teamsLoading ? (
+                    <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
+                  ) : !teams?.length ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      Henüz takım bulunmamaktadır
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left p-3 font-semibold">#</th>
+                            <th className="text-left p-3 font-semibold">Takım</th>
+                            <th className="text-center p-3 font-semibold">O</th>
+                            <th className="text-center p-3 font-semibold">G</th>
+                            <th className="text-center p-3 font-semibold">B</th>
+                            <th className="text-center p-3 font-semibold">M</th>
+                            <th className="text-center p-3 font-semibold">A</th>
+                            <th className="text-center p-3 font-semibold">Y</th>
+                            <th className="text-center p-3 font-semibold">AV</th>
+                            <th className="text-center p-3 font-semibold">İA</th>
+                            <th className="text-center p-3 font-semibold">P</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {teams?.map((team, index) => (
+                            <tr 
+                              key={team.id} 
+                              className="border-b hover:bg-muted/50 transition-colors"
+                              data-testid={`row-team-${team.id}`}
+                            >
+                              <td className="p-3 font-bold text-center">{index + 1}</td>
+                              <td className="p-3">
+                                <div className="flex items-center gap-3">
+                                  {team.logo && (
+                                    <img 
+                                      src={team.logo} 
+                                      alt={team.name} 
+                                      className="w-8 h-8 object-contain"
+                                    />
+                                  )}
+                                  <span className="font-medium">{team.name}</span>
+                                </div>
+                              </td>
+                              <td className="p-3 text-center">{team.played}</td>
+                              <td className="p-3 text-center">{team.won}</td>
+                              <td className="p-3 text-center">{team.drawn}</td>
+                              <td className="p-3 text-center">{team.lost}</td>
+                              <td className="p-3 text-center">{team.goalsFor}</td>
+                              <td className="p-3 text-center">{team.goalsAgainst}</td>
+                              <td className="p-3 text-center font-medium">
+                                <span className={team.goalDifference > 0 ? "text-green-600" : team.goalDifference < 0 ? "text-red-600" : ""}>
+                                  {team.goalDifference > 0 ? "+" : ""}{team.goalDifference}
+                                </span>
+                              </td>
+                              <td className="p-3 text-center font-medium">
+                                <span className={team.headToHead > 0 ? "text-green-600" : team.headToHead < 0 ? "text-red-600" : ""}>
+                                  {team.headToHead > 0 ? "+" : ""}{team.headToHead || 0}
+                                </span>
+                              </td>
+                              <td className="p-3 text-center font-bold text-primary">{team.points}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                  <div className="mt-4 text-xs text-muted-foreground space-y-1">
+                    <p><strong>O:</strong> Oynanan, <strong>G:</strong> Galibiyet, <strong>B:</strong> Beraberlik, <strong>M:</strong> Mağlubiyet</p>
+                    <p><strong>A:</strong> Atılan Gol, <strong>Y:</strong> Yenilen Gol, <strong>AV:</strong> Averaj, <strong>İA:</strong> İkili Averaj, <strong>P:</strong> Puan</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="fixtures" className="space-y-6">
+              {fixturesLoading ? (
+                <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
+              ) : !fixtures?.length ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Henüz maç bulunmamaktadır
+                </div>
+              ) : (
+                weeks.map((week) => (
+                  <Card key={week}>
+                    <CardHeader>
+                      <CardTitle>{week}. Hafta</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {fixturesByWeek[parseInt(week)].map((fixture: any) => (
+                        <div 
+                          key={fixture.id} 
+                          className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                          data-testid={`fixture-${fixture.id}`}
+                        >
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-3 flex-1">
+                              {fixture.homeTeam.logo && (
+                                <img 
+                                  src={fixture.homeTeam.logo} 
+                                  alt={fixture.homeTeam.name} 
+                                  className="w-10 h-10 object-contain"
+                                />
+                              )}
+                              <span className="font-medium text-right flex-1">{fixture.homeTeam.name}</span>
+                            </div>
+                            
+                            <div className="flex items-center justify-center min-w-[100px]">
+                              {fixture.isPlayed ? (
+                                <div className="text-2xl font-bold flex items-center gap-2">
+                                  <span className={fixture.homeScore > fixture.awayScore ? "text-green-600" : fixture.homeScore < fixture.awayScore ? "text-muted-foreground" : ""}>
+                                    {fixture.homeScore}
+                                  </span>
+                                  <span className="text-muted-foreground">-</span>
+                                  <span className={fixture.awayScore > fixture.homeScore ? "text-green-600" : fixture.awayScore < fixture.homeScore ? "text-muted-foreground" : ""}>
+                                    {fixture.awayScore}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground font-medium">VS</span>
+                              )}
+                            </div>
+                            
+                            <div className="flex items-center gap-3 flex-1">
+                              <span className="font-medium flex-1">{fixture.awayTeam.name}</span>
+                              {fixture.awayTeam.logo && (
+                                <img 
+                                  src={fixture.awayTeam.logo} 
+                                  alt={fixture.awayTeam.name} 
+                                  className="w-10 h-10 object-contain"
+                                />
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="mt-3 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                            <Calendar className="w-4 h-4" />
+                            <span>{new Date(fixture.matchDate).toLocaleString('tr-TR', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              timeZone: 'Europe/Istanbul'
+                            })}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </TabsContent>
+
+            {/* ⚽ Gol Krallığı */}
+            <TabsContent value="goals" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <span>⚽</span> Gol Krallığı
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {leaderboardLoading ? (
+                    <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
+                  ) : !leaderboard?.length ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      Henüz gol atan yok
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {leaderboard
+                        .filter((p: any) => p.totalGoals > 0)
+                        .sort((a: any, b: any) => b.totalGoals - a.totalGoals)
+                        .slice(0, 10)
+                        .map((player: any, index: number) => (
+                          <div 
+                            key={player.userId} 
+                            className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className={`font-bold ${index === 0 ? "text-yellow-600 text-lg" : "text-muted-foreground"}`}>
+                                {index + 1}
+                              </span>
+                              <span className="font-medium">{player.username}</span>
+                            </div>
+                            <span className="font-bold text-primary">{player.totalGoals} Gol</span>
+                          </div>
+                        ))}
+                      {leaderboard.filter((p: any) => p.totalGoals > 0).length === 0 && (
+                        <p className="text-center text-muted-foreground py-4">Henüz gol atan yok</p>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* 🎯 Asist Krallığı */}
+            <TabsContent value="assists" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <span>🎯</span> Asist Krallığı
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {leaderboardLoading ? (
+                    <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
+                  ) : !leaderboard?.length ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      Henüz asist yapan yok
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {leaderboard
+                        .filter((p: any) => p.totalAssists > 0)
+                        .sort((a: any, b: any) => b.totalAssists - a.totalAssists)
+                        .slice(0, 10)
+                        .map((player: any, index: number) => (
+                          <div 
+                            key={player.userId} 
+                            className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className={`font-bold ${index === 0 ? "text-blue-600 text-lg" : "text-muted-foreground"}`}>
+                                {index + 1}
+                              </span>
+                              <span className="font-medium">{player.username}</span>
+                            </div>
+                            <span className="font-bold text-blue-600">{player.totalAssists} Asist</span>
+                          </div>
+                        ))}
+                      {leaderboard.filter((p: any) => p.totalAssists > 0).length === 0 && (
+                        <p className="text-center text-muted-foreground py-4">Henüz asist yapan yok</p>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* 🧤 En Çok Kurtarış */}
+            <TabsContent value="saves" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <span>🧤</span> En Çok Kurtarış
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {leaderboardLoading ? (
+                    <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
+                  ) : !leaderboard?.length ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      Henüz kurtarış yapan yok
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {leaderboard
+                        .filter((p: any) => p.totalSaves > 0)
+                        .sort((a: any, b: any) => b.totalSaves - a.totalSaves)
+                        .slice(0, 10)
+                        .map((player: any, index: number) => (
+                          <div 
+                            key={player.userId} 
+                            className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className={`font-bold ${index === 0 ? "text-green-600 text-lg" : "text-muted-foreground"}`}>
+                                {index + 1}
+                              </span>
+                              <span className="font-medium">{player.username}</span>
+                            </div>
+                            <span className="font-bold text-green-600">{player.totalSaves} Kurtarış</span>
+                          </div>
+                        ))}
+                      {leaderboard.filter((p: any) => p.totalSaves > 0).length === 0 && (
+                        <p className="text-center text-muted-foreground py-4">Henüz kurtarış yapan yok</p>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* 🛡️ DM */}
+            <TabsContent value="dm" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <span>🛡️</span> DM
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {leaderboardLoading ? (
+                    <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
+                  ) : !leaderboard?.length ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      Henüz DM yok
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {leaderboard
+                        .filter((p: any) => p.totalDm > 0)
+                        .sort((a: any, b: any) => b.totalDm - a.totalDm)
+                        .slice(0, 10)
+                        .map((player: any, index: number) => (
+                          <div 
+                            key={player.userId} 
+                            className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className={`font-bold ${index === 0 ? "text-red-600 text-lg" : "text-muted-foreground"}`}>
+                                {index + 1}
+                              </span>
+                              <span className="font-medium">{player.username}</span>
+                            </div>
+                            <span className="font-bold text-red-600">{player.totalDm} DM</span>
+                          </div>
+                        ))}
+                      {leaderboard.filter((p: any) => p.totalDm > 0).length === 0 && (
+                        <p className="text-center text-muted-foreground py-4">Henüz DM yok</p>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* 🥅 CS */}
+            <TabsContent value="cs" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <span>🥅</span> CS
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {leaderboardLoading ? (
+                    <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
+                  ) : !leaderboard?.length ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      Henüz CS yok
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {leaderboard
+                        .filter((p: any) => p.totalCleanSheets > 0)
+                        .sort((a: any, b: any) => b.totalCleanSheets - a.totalCleanSheets)
+                        .slice(0, 10)
+                        .map((player: any, index: number) => (
+                          <div 
+                            key={player.userId} 
+                            className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className={`font-bold ${index === 0 ? "text-purple-600 text-lg" : "text-muted-foreground"}`}>
+                                {index + 1}
+                              </span>
+                              <span className="font-medium">{player.username}</span>
+                            </div>
+                            <span className="font-bold text-purple-600">{player.totalCleanSheets} CS</span>
+                          </div>
+                        ))}
+                      {leaderboard.filter((p: any) => p.totalCleanSheets > 0).length === 0 && (
+                        <p className="text-center text-muted-foreground py-4">Henüz CS yok</p>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="totw" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Haftanın Kadrosu</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Hafta Seçin</label>
+                      <Select value={selectedTotwWeek} onValueChange={setSelectedTotwWeek}>
+                        <SelectTrigger className="max-w-xs">
+                          <SelectValue placeholder="Hafta seçin" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {teamsOfWeek?.map((totw: any) => (
+                            <SelectItem key={totw.id} value={totw.week.toString()}>
+                              Hafta {totw.week}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {selectedTotw ? (
+                      <div className="mt-6">
+                        <h3 className="font-semibold mb-4">Hafta {selectedTotw.week} - Haftanın Kadrosu</h3>
+                        <img 
+                          src={selectedTotw.image} 
+                          alt={`Hafta ${selectedTotw.week} Kadrosu`} 
+                          className="w-full h-auto rounded-lg border shadow-lg"
+                        />
+                      </div>
+                    ) : selectedTotwWeek ? (
+                      <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        {teamsOfWeek?.length ? "Lütfen bir hafta seçin" : "Henüz haftanın kadrosu eklenmedi"}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
 
