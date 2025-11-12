@@ -16,11 +16,12 @@ const app = express();
 // Trust first proxy (Replit HTTPS termination)
 app.set('trust proxy', 1);
 
-// CORS configuration - Allow requests from Netlify and localhost
+// CORS configuration - Allow requests from Netlify, Vercel and localhost
 const allowedOrigins = [
-  process.env.FRONTEND_URL, // Netlify URL (e.g., https://your-site.netlify.app)
+  process.env.FRONTEND_URL, // Frontend URL (Netlify, Vercel, etc.)
   'https://haxarena.netlify.app', // Current Netlify domain
   'https://voluble-kleicha-433797.netlify.app', // Old Netlify domain (backup)
+  'https://haxarena.net.tr', // Custom domain
   'http://localhost:5173', // Vite dev server
   'http://localhost:5000', // Local development
 ].filter(Boolean); // Remove undefined values
@@ -46,12 +47,15 @@ app.use((req, res, next) => {
     const backendUrl = process.env.RENDER_EXTERNAL_URL || req.get('host');
     const isBackendOrigin = normalizedOrigin && backendUrl && normalizedOrigin.includes(backendUrl);
     
-    // Allow all Netlify domains (most permissive approach)
+    // Allow all Netlify and Vercel domains (most permissive approach)
     if (normalizedOrigin && (
       normalizedOrigins.includes(normalizedOrigin) ||
       normalizedOrigin.endsWith('.netlify.app') ||
       normalizedOrigin.endsWith('.netlify.com') ||
-      normalizedOrigin.includes('netlify')
+      normalizedOrigin.includes('netlify') ||
+      normalizedOrigin.endsWith('.vercel.app') ||
+      normalizedOrigin.endsWith('.vercel.sh') ||
+      normalizedOrigin.includes('vercel')
     )) {
       // Set CORS headers for allowed origin
       res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
@@ -620,6 +624,9 @@ app.use((req, res, next) => {
       if (normalizedOrigin.includes('netlify') || 
           normalizedOrigin.endsWith('.netlify.app') || 
           normalizedOrigin.endsWith('.netlify.com') ||
+          normalizedOrigin.endsWith('.vercel.app') ||
+          normalizedOrigin.endsWith('.vercel.sh') ||
+          normalizedOrigin.includes('vercel') ||
           normalizedOrigins.includes(normalizedOrigin)) {
         res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
         res.setHeader('Access-Control-Allow-Credentials', 'true');
