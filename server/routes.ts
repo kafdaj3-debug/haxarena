@@ -1576,7 +1576,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const updates = req.body;
-      const stats = await storage.updatePlayerStats(id, updates);
+      const stats = await storage.updatePlayerMatchStats(id, updates);
       return res.json(stats);
     } catch (error) {
       console.error("Error updating player stats:", error);

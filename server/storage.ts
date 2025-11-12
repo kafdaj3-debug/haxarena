@@ -158,7 +158,7 @@ export interface IStorage {
   createPlayerStats(stats: InsertPlayerStats): Promise<PlayerStats>;
   getPlayerStatsByFixture(fixtureId: string): Promise<(PlayerStats & { user: User; team: LeagueTeam })[]>;
   getPlayerStatsLeaderboard(): Promise<Array<{ userId: string; username: string; totalGoals: number; totalAssists: number; totalDm: number; totalCleanSheets: number; totalSaves: number }>>;
-  updatePlayerStats(id: string, updates: Partial<PlayerStats>): Promise<PlayerStats | undefined>;
+  updatePlayerMatchStats(id: string, updates: Partial<PlayerStats>): Promise<PlayerStats | undefined>;
   deletePlayerStats(id: string): Promise<void>;
   deletePlayerStatsByFixture(fixtureId: string): Promise<void>;
   
@@ -938,7 +938,7 @@ export class DBStorage implements IStorage {
     }));
   }
 
-  async updatePlayerStats(id: string, updates: Partial<PlayerStats>): Promise<PlayerStats | undefined> {
+  async updatePlayerMatchStats(id: string, updates: Partial<PlayerStats>): Promise<PlayerStats | undefined> {
     const [updated] = await db.update(playerStats).set(updates).where(eq(playerStats.id, id)).returning();
     return updated;
   }
