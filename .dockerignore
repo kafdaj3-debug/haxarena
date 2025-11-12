@@ -5,11 +5,9 @@ dist
 .env.local
 *.log
 .DS_Store
-client
 attached_assets
 *.png
 *.jpg
-*.md
 .replit
 replit.md
 
