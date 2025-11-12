@@ -383,52 +383,68 @@ export class DBStorage implements IStorage {
 
   // Forum post operations
   async createForumPost(post: InsertForumPost): Promise<ForumPost> {
-    const [forumPost] = await db.insert(forumPosts).values(post).returning();
-    return forumPost;
+    try {
+      const [forumPost] = await db.insert(forumPosts).values(post).returning();
+      if (!forumPost) {
+        throw new Error("Failed to create forum post - no post returned");
+      }
+      return forumPost;
+    } catch (error: any) {
+      console.error("Error in createForumPost:", error);
+      console.error("Post data:", post);
+      console.error("Error stack:", error?.stack);
+      throw error; // Re-throw to be caught by route handler
+    }
   }
 
   async getForumPosts(category?: string, includeArchived: boolean = false): Promise<(ForumPost & { user: User; replyCount: number })[]> {
-    let posts;
-    
-    if (category) {
-      posts = includeArchived
-        ? await db.select().from(forumPosts)
-            .where(eq(forumPosts.category, category))
-            .orderBy(desc(forumPosts.createdAt))
-        : await db.select().from(forumPosts)
-            .where(eq(forumPosts.category, category))
-            .orderBy(desc(forumPosts.createdAt));
-    } else {
-      posts = includeArchived
-        ? await db.select().from(forumPosts)
-            .orderBy(desc(forumPosts.createdAt))
-        : await db.select().from(forumPosts)
-            .orderBy(desc(forumPosts.createdAt));
-    }
-    
-    if (!includeArchived) {
-      posts = posts.filter(p => !p.isArchived);
-    }
+    try {
+      let posts;
+      
+      if (category) {
+        posts = includeArchived
+          ? await db.select().from(forumPosts)
+              .where(eq(forumPosts.category, category))
+              .orderBy(desc(forumPosts.createdAt))
+          : await db.select().from(forumPosts)
+              .where(eq(forumPosts.category, category))
+              .orderBy(desc(forumPosts.createdAt));
+      } else {
+        posts = includeArchived
+          ? await db.select().from(forumPosts)
+              .orderBy(desc(forumPosts.createdAt))
+          : await db.select().from(forumPosts)
+              .orderBy(desc(forumPosts.createdAt));
+      }
+      
+      if (!includeArchived) {
+        posts = posts.filter(p => !p.isArchived);
+      }
 
-    const postsWithUserAndCount = await Promise.all(
-      posts.map(async (post) => {
-        try {
-          const [user] = await db.select().from(users).where(eq(users.id, post.userId)).limit(1);
-          if (!user) {
-            console.error(`User not found for post ${post.id}, userId: ${post.userId}`);
-            return null; // Skip posts with missing users
+      const postsWithUserAndCount = await Promise.all(
+        posts.map(async (post) => {
+          try {
+            const [user] = await db.select().from(users).where(eq(users.id, post.userId)).limit(1);
+            if (!user) {
+              console.error(`User not found for post ${post.id}, userId: ${post.userId}`);
+              return null; // Skip posts with missing users
+            }
+            const replies = await db.select().from(forumReplies).where(eq(forumReplies.postId, post.id));
+            return { ...post, user, replyCount: replies.length };
+          } catch (error: any) {
+            console.error(`Error processing post ${post.id}:`, error);
+            return null; // Skip posts with errors
           }
-          const replies = await db.select().from(forumReplies).where(eq(forumReplies.postId, post.id));
-          return { ...post, user, replyCount: replies.length };
-        } catch (error: any) {
-          console.error(`Error processing post ${post.id}:`, error);
-          return null; // Skip posts with errors
-        }
-      })
-    );
+        })
+      );
 
-    // Filter out null posts (posts with missing users or errors)
-    return postsWithUserAndCount.filter((post): post is ForumPost & { user: User; replyCount: number } => post !== null);
+      // Filter out null posts (posts with missing users or errors)
+      return postsWithUserAndCount.filter((post): post is ForumPost & { user: User; replyCount: number } => post !== null);
+    } catch (error: any) {
+      console.error("Error in getForumPosts:", error);
+      console.error("Error stack:", error?.stack);
+      throw error; // Re-throw to be caught by route handler
+    }
   }
 
   async getForumPost(id: string): Promise<(ForumPost & { user: User }) | undefined> {
