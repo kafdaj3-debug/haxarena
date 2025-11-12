@@ -173,12 +173,7 @@ export default function LeaguePage() {
                             >
                               <td className="p-3 font-bold text-center">
                                 {isTopThree ? (
-                                  <div className="flex items-center justify-center gap-1">
-                                    {index === 0 && <span className="text-2xl">🥇</span>}
-                                    {index === 1 && <span className="text-2xl">🥈</span>}
-                                    {index === 2 && <span className="text-2xl">🥉</span>}
-                                    <span className={index === 0 ? "text-yellow-600" : index === 1 ? "text-gray-500" : "text-orange-600"}>{index + 1}</span>
-                                  </div>
+                                  <span className={index === 0 ? "text-yellow-600" : index === 1 ? "text-gray-500" : "text-orange-600"}>{index + 1}</span>
                                 ) : (
                                   index + 1
                                 )}
@@ -193,15 +188,6 @@ export default function LeaguePage() {
                                     />
                                   )}
                                   <span className={`font-medium ${isTopThree ? "text-lg" : ""}`}>{team.name}</span>
-                                  {isTopThree && (
-                                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
-                                      index === 0 ? "bg-yellow-500/20 text-yellow-700" 
-                                      : index === 1 ? "bg-gray-400/20 text-gray-700" 
-                                      : "bg-orange-600/20 text-orange-700"
-                                    }`}>
-                                      {index === 0 ? "ŞAMPİYON" : index === 1 ? "İKİNCİ" : "ÜÇÜNCÜ"}
-                                    </span>
-                                  )}
                                 </div>
                               </td>
                               <td className="p-3 text-center">{team.played}</td>
