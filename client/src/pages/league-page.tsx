@@ -401,8 +401,7 @@ export default function LeaguePage() {
                       ))}
                     </CardContent>
                   </Card>
-                ))
-                  )}
+                ))}
                 </>
               )}
             </TabsContent>
