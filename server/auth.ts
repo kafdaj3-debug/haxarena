@@ -295,14 +295,11 @@ export function setupAuth(app: Express) {
           }
           
           // Express-session cookie'yi otomatik olarak set edecek
-          // Cookie format: s:sessionID.signature (express-session otomatik imzalar)
-          // Manuel olarak set etmeye gerek yok, express-session middleware bunu yapıyor
-          // Sadece session'ın kaydedildiğinden emin oluyoruz
-          
+          // Ama browser cookie'yi göndermiyor, bu yüzden cookie'yi manuel olarak da kontrol ediyoruz
           console.log("✅ LOGIN - Session saved, cookie will be set by express-session middleware");
           console.log("✅ LOGIN - Session ID:", req.sessionID);
           
-          // Response gönder
+          // Response gönder - express-session middleware cookie'yi otomatik olarak set edecek
           return res.json(user);
         });
         
