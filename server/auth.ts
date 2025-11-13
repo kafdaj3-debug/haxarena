@@ -257,6 +257,16 @@ export function setupAuth(app: Express) {
           await storage.updateUser(user.id, { lastIpAddress: ip });
         }
         
+        // CORS headers'ı manuel olarak set et - cookie'nin browser tarafından kabul edilmesi için gerekli
+        const origin = req.headers.origin;
+        if (origin) {
+          // CORS headers'ı set et - cookie göndermek için kritik
+          res.setHeader('Access-Control-Allow-Origin', origin);
+          res.setHeader('Access-Control-Allow-Credentials', 'true');
+          res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        }
+        
         // Session'ı manuel olarak kaydet - cookie'nin set edilmesini garantile
         req.session.save((saveErr) => {
           if (saveErr) {
@@ -268,6 +278,8 @@ export function setupAuth(app: Express) {
           res.on('finish', () => {
             const setCookieHeader = res.getHeader('Set-Cookie');
             console.log("✅ LOGIN RESPONSE SENT - Set-Cookie header:", setCookieHeader ? "present" : "missing");
+            console.log("✅ LOGIN RESPONSE SENT - CORS Allow-Origin:", res.getHeader('Access-Control-Allow-Origin'));
+            console.log("✅ LOGIN RESPONSE SENT - CORS Allow-Credentials:", res.getHeader('Access-Control-Allow-Credentials'));
             if (setCookieHeader) {
               const cookieValue = Array.isArray(setCookieHeader) ? setCookieHeader[0] : setCookieHeader;
               console.log("✅ LOGIN RESPONSE - Full cookie value:", cookieValue);
@@ -286,6 +298,16 @@ export function setupAuth(app: Express) {
                 console.log("✅ LOGIN RESPONSE - HttpOnly: OK");
               } else {
                 console.log("⚠️  LOGIN RESPONSE - HttpOnly: MISSING");
+              }
+              // Check domain attribute
+              if (cookieValue.includes('Domain=')) {
+                console.log("⚠️  LOGIN RESPONSE - Domain attribute found (should NOT be set for cross-domain)");
+                const domainMatch = cookieValue.match(/Domain=([^;]+)/);
+                if (domainMatch) {
+                  console.log("  - Domain value:", domainMatch[1]);
+                }
+              } else {
+                console.log("✅ LOGIN RESPONSE - Domain attribute NOT set (correct for cross-domain)");
               }
             } else {
               console.log("❌ LOGIN RESPONSE - NO COOKIE SET! This is the problem!");
