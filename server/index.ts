@@ -19,6 +19,7 @@ app.set('trust proxy', 1);
 // CORS configuration - Allow requests from Netlify, Vercel, Anksoft and localhost
 const allowedOrigins = [
   process.env.FRONTEND_URL, // Frontend URL (Netlify, Vercel, Anksoft, etc.)
+  'https://haxarena.vercel.app', // Vercel domain
   'https://haxarena.netlify.app', // Current Netlify domain
   'https://voluble-kleicha-433797.netlify.app', // Old Netlify domain (backup)
   'https://haxarena.net.tr', // Custom domain (Anksoft)
@@ -50,8 +51,8 @@ app.use((req, res, next) => {
     const backendUrl = process.env.RENDER_EXTERNAL_URL || req.get('host');
     const isBackendOrigin = normalizedOrigin && backendUrl && normalizedOrigin.includes(backendUrl);
     
-    // Allow all Netlify and Vercel domains (most permissive approach)
-    if (normalizedOrigin && (
+    // Check if origin is allowed
+    const isAllowedOrigin = normalizedOrigin && (
       normalizedOrigins.includes(normalizedOrigin) ||
       normalizedOrigin.endsWith('.netlify.app') ||
       normalizedOrigin.endsWith('.netlify.com') ||
@@ -59,39 +60,47 @@ app.use((req, res, next) => {
       normalizedOrigin.endsWith('.vercel.app') ||
       normalizedOrigin.endsWith('.vercel.sh') ||
       normalizedOrigin.includes('vercel')
-    )) {
-      // Set CORS headers for allowed origin
+    );
+    
+    // Handle preflight requests FIRST - always respond to OPTIONS with CORS headers
+    if (req.method === 'OPTIONS') {
+      if (isAllowedOrigin || isBackendOrigin) {
+        res.setHeader('Access-Control-Allow-Origin', normalizedOrigin!);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        return res.sendStatus(200);
+      } else if (normalizedOrigin) {
+        // Even for potentially blocked origins, respond to preflight (browser requirement)
+        // But only if we have an origin header
+        res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        return res.sendStatus(200);
+      } else {
+        // No origin header for OPTIONS - respond anyway
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        return res.sendStatus(200);
+      }
+    }
+    
+    // Set CORS headers for actual requests
+    if (isAllowedOrigin || isBackendOrigin) {
+      res.setHeader('Access-Control-Allow-Origin', normalizedOrigin!);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    } else if (normalizedOrigin && normalizedOrigin.startsWith('http://localhost')) {
+      // Allow localhost in development
       res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
       res.setHeader('Access-Control-Allow-Credentials', 'true');
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-      
-      // Handle preflight requests
-      if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
-      }
-    } else if (normalizedOrigin && isBackendOrigin) {
-      // Backend's own domain - same-origin request, no CORS needed but allow it
-      // Don't log as blocked
-      if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
-      }
     } else if (normalizedOrigin) {
-      // For other origins, check if it's localhost or in allowed list
-      if (normalizedOrigin.startsWith('http://localhost') || normalizedOrigins.includes(normalizedOrigin)) {
-        res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-        
-        if (req.method === 'OPTIONS') {
-          return res.sendStatus(200);
-        }
-      } else {
-        // Log blocked origin for debugging (but not for backend's own domain)
-        if (process.env.NODE_ENV === 'production' && !isBackendOrigin) {
-          log(`⚠️ CORS blocked origin: ${normalizedOrigin} (not in allowed list)`);
-        }
+      // Log blocked origin for debugging (but not for backend's own domain)
+      if (process.env.NODE_ENV === 'production' && !isBackendOrigin) {
+        log(`⚠️ CORS blocked origin: ${normalizedOrigin} (not in allowed list)`);
       }
     } else {
       // No origin header (same-origin or direct request) - allow

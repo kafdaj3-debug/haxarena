@@ -16,7 +16,7 @@ services:
       - key: SESSION_SECRET
         value: haxarena2025secretkey123456789abcdef
       - key: FRONTEND_URL
-        value: https://haxarena.netlify.app
+        value: https://haxarena.vercel.app
       - key: PORT
         fromService:
           type: web
