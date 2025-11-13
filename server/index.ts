@@ -67,7 +67,7 @@ app.use((req, res, next) => {
       normalizedOrigin.endsWith('.vercel.app') ||
       normalizedOrigin.endsWith('.vercel.sh') ||
       normalizedOrigin.includes('vercel') ||
-      // Allow haxarena domains (with and without www)
+      // Allow haxarena domains (with and without www) - more flexible matching
       normalizedOrigin === 'https://haxarena.net.tr' ||
       normalizedOrigin === 'https://www.haxarena.net.tr' ||
       normalizedOrigin === 'http://haxarena.net.tr' ||
@@ -76,6 +76,9 @@ app.use((req, res, next) => {
       normalizedOrigin === 'https://www.haxarena.web.tr' ||
       normalizedOrigin === 'http://haxarena.web.tr' ||
       normalizedOrigin === 'http://www.haxarena.web.tr' ||
+      // Also allow if origin contains haxarena domains (for subdomains or variations)
+      normalizedOrigin.includes('haxarena.net.tr') ||
+      normalizedOrigin.includes('haxarena.web.tr') ||
       normalizedOrigin.startsWith('http://localhost')
     );
     

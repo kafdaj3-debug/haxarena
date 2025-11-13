@@ -74,10 +74,13 @@ export function setupAuth(app: Express) {
         path: "/", // Cookie path - root path
         // Note: domain is not set - browser will automatically send cookie to the domain that set it
         // For cross-domain cookies, domain should NOT be set
+        // IMPORTANT: For SameSite=None, Secure must be true (already set above)
       },
       // Force session to be saved even if it wasn't modified
       // This ensures cookie is set after req.login()
       rolling: false, // Don't reset expiration on every request
+      // Ensure session is saved on every request to maintain cookie
+      saveUninitialized: false,
     })
   );
 
@@ -260,11 +263,22 @@ export function setupAuth(app: Express) {
         // CORS headers'ı manuel olarak set et - cookie'nin browser tarafından kabul edilmesi için gerekli
         const origin = req.headers.origin;
         if (origin) {
+          // Normalize origin (remove trailing slash)
+          const normalizedOrigin = origin.replace(/\/$/, '');
+          
           // CORS headers'ı set et - cookie göndermek için kritik
-          res.setHeader('Access-Control-Allow-Origin', origin);
+          // IMPORTANT: Access-Control-Allow-Origin must be the exact origin (not wildcard) when credentials are used
+          res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
           res.setHeader('Access-Control-Allow-Credentials', 'true');
           res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
           res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+          
+          // Debug: Log CORS headers for www.haxarena.web.tr
+          if (normalizedOrigin.includes('haxarena.web.tr')) {
+            console.log("🌐 LOGIN CORS - Origin:", normalizedOrigin);
+            console.log("🌐 LOGIN CORS - Allow-Origin set to:", normalizedOrigin);
+            console.log("🌐 LOGIN CORS - Allow-Credentials: true");
+          }
         }
         
         // Session'ı manuel olarak kaydet - cookie'nin set edilmesini garantile
@@ -350,6 +364,16 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/auth/me", async (req, res) => {
+    // CORS headers'ı set et - cookie göndermek için kritik
+    const origin = req.headers.origin;
+    if (origin) {
+      const normalizedOrigin = origin.replace(/\/$/, '');
+      res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    }
+    
     // Debug: Session ve authentication durumunu logla (her zaman)
     console.log("🔍 /api/auth/me - isAuthenticated:", req.isAuthenticated());
     console.log("🔍 /api/auth/me - req.user:", req.user ? { id: req.user.id, username: req.user.username } : null);
@@ -413,6 +437,13 @@ export function setupAuth(app: Express) {
     
     if (process.env.NODE_ENV === 'production') {
       console.log("⚠️  /api/auth/me - Not authenticated");
+    }
+    
+    // CORS headers'ı set et (401 response için de gerekli)
+    if (origin) {
+      const normalizedOrigin = origin.replace(/\/$/, '');
+      res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
     }
     
     res.status(401).json({ error: "Giriş yapılmamış" });
