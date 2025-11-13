@@ -48,6 +48,12 @@ export default function ManagementLoginPage() {
 
       const userData = await response.json();
       
+      // JWT token'ı localStorage'a kaydet
+      if (userData.token) {
+        localStorage.setItem('auth_token', userData.token);
+        console.log("✅ Management Login - JWT token saved to localStorage");
+      }
+      
       // Check if user is super admin
       if (!userData.isSuperAdmin) {
         toast({
