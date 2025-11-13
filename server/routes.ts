@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 function normalizeClientIp(req: any): string {
   let ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
@@ -47,11 +48,53 @@ async function checkIpBan(req: any, res: any, next: any) {
   }
 }
 
-function isAuthenticated(req: any, res: any, next: any) {
-  if (req.isAuthenticated()) {
-    return next();
+// JWT token'dan user bilgisini al
+async function getUserFromToken(req: any): Promise<any | null> {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    try {
+      const jwtSecret = process.env.JWT_SECRET || process.env.SESSION_SECRET || "haxarena-v6-secret-key";
+      const decoded = jwt.verify(token, jwtSecret) as any;
+      const user = await storage.getUser(decoded.id);
+      return user;
+    } catch (error) {
+      return null;
+    }
   }
-  return res.status(401).json({ error: "Giriş yapmalısınız" });
+  return null;
+}
+
+function isAuthenticated(req: any, res: any, next: any) {
+  // Önce JWT token kontrolü yap
+  getUserFromToken(req).then((user) => {
+    if (user) {
+      req.user = {
+        id: user.id,
+        username: user.username,
+        profilePicture: user.profilePicture,
+        isAdmin: user.isAdmin,
+        isSuperAdmin: user.isSuperAdmin,
+        isApproved: user.isApproved,
+        role: user.role,
+        isBanned: user.isBanned,
+        isChatMuted: user.isChatMuted,
+      };
+      return next();
+    }
+    
+    // JWT token yoksa, session kontrolü yap (geriye dönük uyumluluk)
+    if (req.isAuthenticated()) {
+      return next();
+    }
+    return res.status(401).json({ error: "Giriş yapmalısınız" });
+  }).catch(() => {
+    // JWT token hatası varsa, session kontrolü yap
+    if (req.isAuthenticated()) {
+      return next();
+    }
+    return res.status(401).json({ error: "Giriş yapmalısınız" });
+  });
 }
 
 function isAdmin(req: any, res: any, next: any) {
@@ -62,6 +105,10 @@ function isAdmin(req: any, res: any, next: any) {
     isSuperAdmin: req.user?.isSuperAdmin
   });
   
+  // JWT token veya session kontrolü
+  if (req.user && (req.user.isAdmin || req.user.isSuperAdmin)) {
+    return next();
+  }
   if (req.isAuthenticated() && (req.user.isAdmin || req.user.isSuperAdmin)) {
     return next();
   }
@@ -69,6 +116,10 @@ function isAdmin(req: any, res: any, next: any) {
 }
 
 function isSuperAdmin(req: any, res: any, next: any) {
+  // JWT token veya session kontrolü
+  if (req.user && req.user.isSuperAdmin) {
+    return next();
+  }
   if (req.isAuthenticated() && req.user.isSuperAdmin) {
     return next();
   }
