@@ -33,7 +33,7 @@ export default function VIPPage() {
     "'!afk' ile spec'e geçme hakkı",
     "'!adminvip' ile admin olabilir (admin yokken)",
     "'!p' komutu ile 10 saniye oyunu durdurabilir",
-    "✅ Tüm VIP özelliklerine erişim hakkı"
+    "Tüm VIP özelliklerine erişim hakkı"
   ];
 
   return (
