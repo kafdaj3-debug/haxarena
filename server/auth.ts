@@ -270,7 +270,7 @@ export function setupAuth(app: Express) {
             console.log("✅ LOGIN RESPONSE SENT - Set-Cookie header:", setCookieHeader ? "present" : "missing");
             if (setCookieHeader) {
               const cookieValue = Array.isArray(setCookieHeader) ? setCookieHeader[0] : setCookieHeader;
-              console.log("✅ LOGIN RESPONSE - Cookie value:", cookieValue.substring(0, 150));
+              console.log("✅ LOGIN RESPONSE - Full cookie value:", cookieValue);
               // Cookie ayarlarını kontrol et
               if (cookieValue.includes('SameSite=None')) {
                 console.log("✅ LOGIN RESPONSE - SameSite=None: OK");
@@ -333,7 +333,18 @@ export function setupAuth(app: Express) {
     console.log("🔍 /api/auth/me - req.user:", req.user ? { id: req.user.id, username: req.user.username } : null);
     console.log("🔍 /api/auth/me - session ID:", req.sessionID);
     console.log("🔍 /api/auth/me - cookies:", req.headers.cookie ? "present" : "missing");
+    if (req.headers.cookie) {
+      console.log("🔍 /api/auth/me - cookie header:", req.headers.cookie);
+      // Check if connect.sid cookie is present
+      if (req.headers.cookie.includes('connect.sid')) {
+        console.log("✅ /api/auth/me - connect.sid cookie found in request");
+      } else {
+        console.log("⚠️  /api/auth/me - connect.sid cookie NOT found in request");
+      }
+    }
     console.log("🔍 /api/auth/me - origin:", req.headers.origin);
+    console.log("🔍 /api/auth/me - referer:", req.headers.referer);
+    console.log("🔍 /api/auth/me - host:", req.get('host'));
     
     if (req.isAuthenticated() && req.user) {
       try {
