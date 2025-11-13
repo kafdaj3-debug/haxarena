@@ -23,9 +23,13 @@ const allowedOrigins = [
   'https://haxarena.netlify.app', // Current Netlify domain
   'https://voluble-kleicha-433797.netlify.app', // Old Netlify domain (backup)
   'https://haxarena.net.tr', // Custom domain (Anksoft)
+  'https://www.haxarena.net.tr', // Custom domain www (Anksoft)
   'https://haxarena.web.tr', // Custom domain (Vercel)
+  'https://www.haxarena.web.tr', // Custom domain www (Vercel)
   'http://haxarena.net.tr', // Custom domain HTTP (fallback)
+  'http://www.haxarena.net.tr', // Custom domain www HTTP (fallback)
   'http://haxarena.web.tr', // Custom domain HTTP (fallback)
+  'http://www.haxarena.web.tr', // Custom domain www HTTP (fallback)
   'http://localhost:5173', // Vite dev server
   'http://localhost:5000', // Local development
 ].filter((origin): origin is string => Boolean(origin)); // Remove undefined values
@@ -60,6 +64,15 @@ app.use((req, res, next) => {
       normalizedOrigin.endsWith('.vercel.app') ||
       normalizedOrigin.endsWith('.vercel.sh') ||
       normalizedOrigin.includes('vercel') ||
+      // Allow haxarena domains (with and without www)
+      normalizedOrigin === 'https://haxarena.net.tr' ||
+      normalizedOrigin === 'https://www.haxarena.net.tr' ||
+      normalizedOrigin === 'http://haxarena.net.tr' ||
+      normalizedOrigin === 'http://www.haxarena.net.tr' ||
+      normalizedOrigin === 'https://haxarena.web.tr' ||
+      normalizedOrigin === 'https://www.haxarena.web.tr' ||
+      normalizedOrigin === 'http://haxarena.web.tr' ||
+      normalizedOrigin === 'http://www.haxarena.web.tr' ||
       normalizedOrigin.startsWith('http://localhost')
     );
     
