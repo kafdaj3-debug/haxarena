@@ -5,6 +5,7 @@ import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import MemoryStore from "memorystore";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import { storage } from "./storage";
 import type { User } from "@shared/schema";
 import { db, pool } from "./db";
@@ -82,7 +83,7 @@ export function setupAuth(app: Express) {
       rolling: false, // Don't reset expiration on every request
       // IMPORTANT: genid function to ensure unique session IDs
       genid: (req) => {
-        return require('crypto').randomBytes(16).toString('hex');
+        return crypto.randomBytes(16).toString('hex');
       },
     })
   );
