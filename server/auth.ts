@@ -80,6 +80,10 @@ export function setupAuth(app: Express) {
       // Force session to be saved even if it wasn't modified
       // This ensures cookie is set after req.login()
       rolling: false, // Don't reset expiration on every request
+      // IMPORTANT: genid function to ensure unique session IDs
+      genid: (req) => {
+        return require('crypto').randomBytes(16).toString('hex');
+      },
     })
   );
 
@@ -282,17 +286,28 @@ export function setupAuth(app: Express) {
         
         // Session'ı manuel olarak kaydet - cookie'nin set edilmesini garantile
         // IMPORTANT: req.session.save() callback'inde response gönderilmeli
+        // Express-session cookie'yi otomatik olarak set edecek
         req.session.save((saveErr) => {
           if (saveErr) {
             console.error("❌ SESSION SAVE ERROR:", saveErr);
             return res.status(500).json({ error: "Session kaydedilemedi" });
           }
           
-          // Cookie'nin set edildiğini kontrol et
+          // Cookie'nin set edildiğini kontrol et (response gönderilmeden önce)
+          // Express-session cookie'yi response gönderilirken set ediyor
+          // Bu yüzden burada henüz görünmeyebilir, bu normal
+          
+          // Response gönder - express-session middleware cookie'yi otomatik olarak set edecek
+          // Cookie, response gönderilirken Set-Cookie header'ına eklenecek
+          return res.json(user);
+        });
+        
+        // Response gönderildikten sonra cookie'nin set edilip edilmediğini kontrol et
+        res.on('finish', () => {
           const setCookieHeader = res.getHeader('Set-Cookie');
           if (setCookieHeader) {
             const cookieValue = Array.isArray(setCookieHeader) ? setCookieHeader[0] : setCookieHeader;
-            console.log("✅ LOGIN - Cookie will be set:", cookieValue.substring(0, 100) + "...");
+            console.log("✅ LOGIN RESPONSE SENT - Cookie was set:", cookieValue.substring(0, 100) + "...");
             
             // www.haxarena.web.tr için özel log
             if (origin && origin.includes('haxarena.web.tr')) {
@@ -303,12 +318,13 @@ export function setupAuth(app: Express) {
               console.log("  - Domain:", cookieValue.includes('Domain=') ? 'Set (WRONG!)' : 'Not set (CORRECT)');
             }
           } else {
-            console.log("⚠️  LOGIN - Cookie header not set yet (will be set by express-session)");
+            console.log("❌ LOGIN RESPONSE SENT - Cookie was NOT set! This is the problem!");
+            console.log("  - Session ID:", req.sessionID);
+            console.log("  - Session exists:", !!req.session);
+            console.log("  - Origin:", origin);
+            console.log("  - CORS Allow-Credentials:", res.getHeader('Access-Control-Allow-Credentials'));
+            console.log("  - CORS Allow-Origin:", res.getHeader('Access-Control-Allow-Origin'));
           }
-          
-          // Response gönder - cookie artık set edilmiş olmalı
-          // express-session middleware cookie'yi otomatik olarak set edecek
-          return res.json(user);
         });
       });
     })(req, res, next);
