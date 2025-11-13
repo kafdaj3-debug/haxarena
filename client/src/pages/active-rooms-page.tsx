@@ -27,6 +27,33 @@ export default function ActiveRoomsPage() {
     }
   ]);
 
+  const [preparationRooms] = useState([
+    {
+      id: 1,
+      matchName: "HaxArena Hazırlık Odası 1",
+      link: "https://www.haxball.com/play?c=NcuC9QTqbRs",
+      isActive: true
+    },
+    {
+      id: 2,
+      matchName: "HaxArena Hazırlık Odası 2",
+      link: "https://www.haxball.com/play?c=S4LRFStEi_U",
+      isActive: true
+    },
+    {
+      id: 3,
+      matchName: "HaxArena Hazırlık Odası 3",
+      link: "https://www.haxball.com/play?c=8URxRfc_Z94",
+      isActive: true
+    },
+    {
+      id: 4,
+      matchName: "HaxArena Hazırlık Odası 4",
+      link: "https://www.haxball.com/play?c=xCmch3e6pSQ",
+      isActive: true
+    }
+  ]);
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header user={user} onLogout={logout} />
@@ -42,24 +69,49 @@ export default function ActiveRoomsPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-            {rooms.map((room) => (
-              <ActiveRoomCard
-                key={room.id}
-                matchName={room.matchName}
-                link={room.link}
-                isActive={room.isActive}
-              />
-            ))}
+          {/* Aktif Odalar */}
+          <div className="mb-12">
+            <h2 className="text-2xl md:text-3xl font-heading font-bold mb-6">Maç Odaları</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+              {rooms.map((room) => (
+                <ActiveRoomCard
+                  key={room.id}
+                  matchName={room.matchName}
+                  link={room.link}
+                  isActive={room.isActive}
+                />
+              ))}
+            </div>
+            {rooms.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground text-lg" data-testid="text-no-rooms">
+                  Şu anda aktif oda bulunmamaktadır.
+                </p>
+              </div>
+            )}
           </div>
 
-          {rooms.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg" data-testid="text-no-rooms">
-                Şu anda aktif oda bulunmamaktadır.
-              </p>
+          {/* Hazırlık Odaları */}
+          <div>
+            <h2 className="text-2xl md:text-3xl font-heading font-bold mb-6">Hazırlık Odaları</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
+              {preparationRooms.map((room) => (
+                <ActiveRoomCard
+                  key={room.id}
+                  matchName={room.matchName}
+                  link={room.link}
+                  isActive={room.isActive}
+                />
+              ))}
             </div>
-          )}
+            {preparationRooms.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground text-lg">
+                  Şu anda hazırlık odası bulunmamaktadır.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </main>
 

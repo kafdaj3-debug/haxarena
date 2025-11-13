@@ -29,6 +29,25 @@ export default function HomePage() {
     }
   ];
 
+  const preparationRooms = [
+    {
+      matchName: "HaxArena Hazırlık Odası 1",
+      link: "https://www.haxball.com/play?c=NcuC9QTqbRs"
+    },
+    {
+      matchName: "HaxArena Hazırlık Odası 2",
+      link: "https://www.haxball.com/play?c=S4LRFStEi_U"
+    },
+    {
+      matchName: "HaxArena Hazırlık Odası 3",
+      link: "https://www.haxball.com/play?c=8URxRfc_Z94"
+    },
+    {
+      matchName: "HaxArena Hazırlık Odası 4",
+      link: "https://www.haxball.com/play?c=xCmch3e6pSQ"
+    }
+  ];
+
   const { data: forumPosts = [] } = useQuery<any[]>({
     queryKey: ["/api/forum-posts"],
   });
@@ -205,17 +224,35 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div>
-              <h2 className="text-2xl md:text-3xl font-heading font-bold mb-4 md:mb-6">Aktif Odalar</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-                {allRooms.map((room, index) => (
-                  <ActiveRoomCard
-                    key={index}
-                    matchName={room.matchName}
-                    link={room.link}
-                    isActive={true}
-                  />
-                ))}
+            <div className="space-y-8 md:space-y-12">
+              {/* Maç Odaları */}
+              <div>
+                <h2 className="text-2xl md:text-3xl font-heading font-bold mb-4 md:mb-6">Maç Odaları</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                  {allRooms.map((room, index) => (
+                    <ActiveRoomCard
+                      key={index}
+                      matchName={room.matchName}
+                      link={room.link}
+                      isActive={true}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Hazırlık Odaları */}
+              <div>
+                <h2 className="text-2xl md:text-3xl font-heading font-bold mb-4 md:mb-6">Hazırlık Odaları</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                  {preparationRooms.map((room, index) => (
+                    <ActiveRoomCard
+                      key={index}
+                      matchName={room.matchName}
+                      link={room.link}
+                      isActive={true}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
