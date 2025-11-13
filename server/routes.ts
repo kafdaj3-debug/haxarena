@@ -127,20 +127,24 @@ function isSuperAdmin(req: any, res: any, next: any) {
 }
 
 function isNotBanned(req: any, res: any, next: any) {
-  if (!req.isAuthenticated()) {
+  // JWT token veya session kontrolü
+  if (!req.user && !req.isAuthenticated()) {
     return next();
   }
-  if (req.user.isBanned) {
-    return res.status(403).json({ error: "Hesabınız yasaklandı. Sebep: " + (req.user.banReason || "Belirtilmemiş") });
+  const user = req.user || (req.isAuthenticated() ? req.user : null);
+  if (user && user.isBanned) {
+    return res.status(403).json({ error: "Hesabınız yasaklandı. Sebep: " + (user.banReason || "Belirtilmemiş") });
   }
   return next();
 }
 
 function isNotChatMuted(req: any, res: any, next: any) {
-  if (!req.isAuthenticated()) {
+  // JWT token veya session kontrolü
+  if (!req.user && !req.isAuthenticated()) {
     return next();
   }
-  if (req.user.isChatMuted) {
+  const user = req.user || (req.isAuthenticated() ? req.user : null);
+  if (user && user.isChatMuted) {
     return res.status(403).json({ error: "Sohbet yazma izniniz kaldırıldı" });
   }
   return next();
