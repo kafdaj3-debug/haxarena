@@ -267,24 +267,6 @@ export function setupAuth(app: Express) {
         
         // CORS headers'ı manuel olarak set et - cookie'nin browser tarafından kabul edilmesi için gerekli
         const origin = req.headers.origin;
-        if (origin) {
-          // Normalize origin (remove trailing slash)
-          const normalizedOrigin = origin.replace(/\/$/, '');
-          
-          // CORS headers'ı set et - cookie göndermek için kritik
-          // IMPORTANT: Access-Control-Allow-Origin must be the exact origin (not wildcard) when credentials are used
-          res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
-          res.setHeader('Access-Control-Allow-Credentials', 'true');
-          res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-          res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-          
-          // Debug: Log CORS headers for www.haxarena.web.tr
-          if (normalizedOrigin.includes('haxarena.web.tr')) {
-            console.log("🌐 LOGIN CORS - Origin:", normalizedOrigin);
-            console.log("🌐 LOGIN CORS - Allow-Origin set to:", normalizedOrigin);
-            console.log("🌐 LOGIN CORS - Allow-Credentials: true");
-          }
-        }
         
         // JWT token oluştur - cookie sorunu nedeniyle JWT token kullanıyoruz
         const jwtSecret = process.env.JWT_SECRET || process.env.SESSION_SECRET || "haxarena-v6-secret-key";
@@ -306,13 +288,19 @@ export function setupAuth(app: Express) {
         console.log("✅ LOGIN SUCCESS - JWT token created for user:", user.username);
         
         // CORS headers'ı set et
-        const origin = req.headers.origin;
         if (origin) {
           const normalizedOrigin = origin.replace(/\/$/, '');
           res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
           res.setHeader('Access-Control-Allow-Credentials', 'true');
           res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
           res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+          
+          // Debug: Log CORS headers for www.haxarena.web.tr
+          if (normalizedOrigin.includes('haxarena.web.tr')) {
+            console.log("🌐 LOGIN CORS - Origin:", normalizedOrigin);
+            console.log("🌐 LOGIN CORS - Allow-Origin set to:", normalizedOrigin);
+            console.log("🌐 LOGIN CORS - Allow-Credentials: true");
+          }
         }
         
         // Response gönder - JWT token ile birlikte
