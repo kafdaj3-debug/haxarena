@@ -70,17 +70,16 @@ export function setupAuth(app: Express) {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         httpOnly: true, // Prevent XSS attacks
         secure: process.env.NODE_ENV === "production", // HTTPS only in production
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Cross-domain cookies in production (Netlify -> Render)
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Cross-domain cookies in production
         path: "/", // Cookie path - root path
         // Note: domain is not set - browser will automatically send cookie to the domain that set it
         // For cross-domain cookies, domain should NOT be set
         // IMPORTANT: For SameSite=None, Secure must be true (already set above)
+        // This is required for cross-domain cookies (www.haxarena.web.tr -> backend.onrender.com)
       },
       // Force session to be saved even if it wasn't modified
       // This ensures cookie is set after req.login()
       rolling: false, // Don't reset expiration on every request
-      // Ensure session is saved on every request to maintain cookie
-      saveUninitialized: false,
     })
   );
 
@@ -282,58 +281,33 @@ export function setupAuth(app: Express) {
         }
         
         // Session'ı manuel olarak kaydet - cookie'nin set edilmesini garantile
+        // IMPORTANT: req.session.save() callback'inde response gönderilmeli
         req.session.save((saveErr) => {
           if (saveErr) {
             console.error("❌ SESSION SAVE ERROR:", saveErr);
             return res.status(500).json({ error: "Session kaydedilemedi" });
           }
           
-          // Response gönderildikten sonra cookie'nin set edilip edilmediğini logla
-          res.on('finish', () => {
-            const setCookieHeader = res.getHeader('Set-Cookie');
-            console.log("✅ LOGIN RESPONSE SENT - Set-Cookie header:", setCookieHeader ? "present" : "missing");
-            console.log("✅ LOGIN RESPONSE SENT - CORS Allow-Origin:", res.getHeader('Access-Control-Allow-Origin'));
-            console.log("✅ LOGIN RESPONSE SENT - CORS Allow-Credentials:", res.getHeader('Access-Control-Allow-Credentials'));
-            if (setCookieHeader) {
-              const cookieValue = Array.isArray(setCookieHeader) ? setCookieHeader[0] : setCookieHeader;
-              console.log("✅ LOGIN RESPONSE - Full cookie value:", cookieValue);
-              // Cookie ayarlarını kontrol et
-              if (cookieValue.includes('SameSite=None')) {
-                console.log("✅ LOGIN RESPONSE - SameSite=None: OK");
-              } else {
-                console.log("⚠️  LOGIN RESPONSE - SameSite=None: MISSING");
-              }
-              if (cookieValue.includes('Secure')) {
-                console.log("✅ LOGIN RESPONSE - Secure: OK");
-              } else {
-                console.log("⚠️  LOGIN RESPONSE - Secure: MISSING");
-              }
-              if (cookieValue.includes('HttpOnly')) {
-                console.log("✅ LOGIN RESPONSE - HttpOnly: OK");
-              } else {
-                console.log("⚠️  LOGIN RESPONSE - HttpOnly: MISSING");
-              }
-              // Check domain attribute
-              if (cookieValue.includes('Domain=')) {
-                console.log("⚠️  LOGIN RESPONSE - Domain attribute found (should NOT be set for cross-domain)");
-                const domainMatch = cookieValue.match(/Domain=([^;]+)/);
-                if (domainMatch) {
-                  console.log("  - Domain value:", domainMatch[1]);
-                }
-              } else {
-                console.log("✅ LOGIN RESPONSE - Domain attribute NOT set (correct for cross-domain)");
-              }
-            } else {
-              console.log("❌ LOGIN RESPONSE - NO COOKIE SET! This is the problem!");
-              console.log("  - Session ID:", req.sessionID);
-              console.log("  - Session exists:", !!req.session);
-              console.log("  - Origin:", req.headers.origin);
-              console.log("  - CORS Allow-Credentials:", res.getHeader('Access-Control-Allow-Credentials'));
-              console.log("  - CORS Allow-Origin:", res.getHeader('Access-Control-Allow-Origin'));
+          // Cookie'nin set edildiğini kontrol et
+          const setCookieHeader = res.getHeader('Set-Cookie');
+          if (setCookieHeader) {
+            const cookieValue = Array.isArray(setCookieHeader) ? setCookieHeader[0] : setCookieHeader;
+            console.log("✅ LOGIN - Cookie will be set:", cookieValue.substring(0, 100) + "...");
+            
+            // www.haxarena.web.tr için özel log
+            if (origin && origin.includes('haxarena.web.tr')) {
+              console.log("🌐 www.haxarena.web.tr LOGIN - Cookie details:");
+              console.log("  - SameSite:", cookieValue.includes('SameSite=None') ? 'None' : 'Missing');
+              console.log("  - Secure:", cookieValue.includes('Secure') ? 'Yes' : 'No');
+              console.log("  - HttpOnly:", cookieValue.includes('HttpOnly') ? 'Yes' : 'No');
+              console.log("  - Domain:", cookieValue.includes('Domain=') ? 'Set (WRONG!)' : 'Not set (CORRECT)');
             }
-          });
+          } else {
+            console.log("⚠️  LOGIN - Cookie header not set yet (will be set by express-session)");
+          }
           
           // Response gönder - cookie artık set edilmiş olmalı
+          // express-session middleware cookie'yi otomatik olarak set edecek
           return res.json(user);
         });
       });
