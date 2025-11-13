@@ -65,9 +65,10 @@ async function getUserFromToken(req: any): Promise<any | null> {
   return null;
 }
 
-function isAuthenticated(req: any, res: any, next: any) {
-  // Önce JWT token kontrolü yap
-  getUserFromToken(req).then((user) => {
+async function isAuthenticated(req: any, res: any, next: any) {
+  try {
+    // Önce JWT token kontrolü yap
+    const user = await getUserFromToken(req);
     if (user) {
       req.user = {
         id: user.id,
@@ -88,13 +89,13 @@ function isAuthenticated(req: any, res: any, next: any) {
       return next();
     }
     return res.status(401).json({ error: "Giriş yapmalısınız" });
-  }).catch(() => {
+  } catch (error) {
     // JWT token hatası varsa, session kontrolü yap
     if (req.isAuthenticated()) {
       return next();
     }
     return res.status(401).json({ error: "Giriş yapmalısınız" });
-  });
+  }
 }
 
 function isAdmin(req: any, res: any, next: any) {
