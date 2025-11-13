@@ -27,12 +27,13 @@ export default function VIPPage() {
   ];
 
   const diamondFeatures = [
+    "Oyun içi mevki değiştirme !mevkideğiştir",
     "'!avatar' ile hareketli avatar + hız ayarı",
     "Dizilim başlamadan '!değiş' komutu",
     "'!afk' ile spec'e geçme hakkı",
     "'!adminvip' ile admin olabilir (admin yokken)",
     "'!p' komutu ile 10 saniye oyunu durdurabilir",
-    "Tüm VIP özelliklerine erişim hakkı"
+    "✅ Tüm VIP özelliklerine erişim hakkı"
   ];
 
   return (
