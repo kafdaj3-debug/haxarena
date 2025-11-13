@@ -22,7 +22,9 @@ const allowedOrigins = [
   'https://haxarena.netlify.app', // Current Netlify domain
   'https://voluble-kleicha-433797.netlify.app', // Old Netlify domain (backup)
   'https://haxarena.net.tr', // Custom domain (Anksoft)
+  'https://haxarena.web.tr', // Custom domain (Vercel)
   'http://haxarena.net.tr', // Custom domain HTTP (fallback)
+  'http://haxarena.web.tr', // Custom domain HTTP (fallback)
   'http://localhost:5173', // Vite dev server
   'http://localhost:5000', // Local development
 ].filter(Boolean); // Remove undefined values
