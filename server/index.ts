@@ -67,8 +67,13 @@ app.use((req, res, next) => {
     if (req.method === 'OPTIONS') {
       if (normalizedOrigin) {
         // Always allow preflight requests from any origin (browser requirement)
-        res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        // Check if origin is allowed for credentials
+        if (isAllowedOrigin || isBackendOrigin) {
+          res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
+          res.setHeader('Access-Control-Allow-Credentials', 'true');
+        } else {
+          res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
+        }
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
         res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours

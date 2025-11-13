@@ -124,3 +124,4 @@ Deploy başarılı olduğunda:
 - SSL sertifikası otomatik aktif
 - Her GitHub push'unda otomatik deploy yapılacak
 
+

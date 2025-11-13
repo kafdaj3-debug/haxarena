@@ -32,21 +32,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         // 401 is expected when not logged in, silently return null
         if (response.status === 401) {
+          if (import.meta.env.DEV) {
+            console.log("🔍 /api/auth/me - 401: Not authenticated");
+          }
           return null;
         }
         
         if (!response.ok) {
+          if (import.meta.env.DEV) {
+            console.error("❌ /api/auth/me - Error:", response.status, response.statusText);
+          }
           return null; // Silently fail for other errors too
         }
         
-        return response.json();
+        const userData = await response.json();
+        if (import.meta.env.DEV) {
+          console.log("✅ /api/auth/me - User loaded:", userData.username);
+        }
+        return userData;
       } catch (error) {
+        if (import.meta.env.DEV) {
+          console.error("❌ /api/auth/me - Fetch error:", error);
+        }
         // Silently catch all errors and return null
         return null;
       }
     },
     retry: false,
     refetchOnWindowFocus: false,
+    staleTime: 0, // Always refetch on mount
   });
 
   const logoutMutation = useMutation({

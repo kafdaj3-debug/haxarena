@@ -86,3 +86,4 @@ CORS fix deploy edildikten sonra:
 Good luck! 🚀
 
 
+

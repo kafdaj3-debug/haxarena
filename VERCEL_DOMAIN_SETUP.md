@@ -134,3 +134,4 @@ Domain başarıyla bağlandığında:
 - Backend'e bağlanabilecek
 - Her GitHub push'unda otomatik deploy yapılacak
 
+

@@ -196,3 +196,4 @@ Deploy başarılı olduğunda:
 - SSL sertifikası aktif
 - Backend'e bağlanabilecek
 
+

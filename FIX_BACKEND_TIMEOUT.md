@@ -130,3 +130,4 @@ Backend çalışıyorsa ve database bağlantısı varsa:
 Good luck! 🚀
 
 
+

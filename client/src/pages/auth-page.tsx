@@ -3,11 +3,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { buildApiUrl } from "@/lib/queryClient";
+import { buildApiUrl, queryClient } from "@/lib/queryClient";
 
 export default function AuthPage() {
   const [loginData, setLoginData] = useState({ username: "", password: "" });
@@ -15,6 +15,7 @@ export default function AuthPage() {
   const [registerSuccess, setRegisterSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const [, navigate] = useLocation();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,12 +49,22 @@ export default function AuthPage() {
         return;
       }
 
-      await response.json();
+      const userData = await response.json();
+      
       toast({
         title: "Giriş Başarılı",
         description: "Hoş geldiniz!",
       });
-      window.location.href = "/";
+      
+      // Cookie'nin set edilmesini bekle (100ms)
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // React Query cache'ini invalidate et ve /api/auth/me query'sini refetch et
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      
+      // Sayfa yenilemeden navigate et (React Router ile)
+      // Navigate sonrası query otomatik refetch edilecek
+      navigate("/");
     } catch (error: any) {
       console.error("Login error:", error);
       

@@ -44,3 +44,4 @@ Backend URL'ini aldıktan sonra bana gönderin, Netlify'a ekleyeceğim!
 Good luck! 🚀
 
 
+

@@ -74,3 +74,4 @@ CORS düzeltildikten sonra:
 Good luck! 🚀
 
 
+
