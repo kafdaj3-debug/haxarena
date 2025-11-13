@@ -47,13 +47,16 @@ export default function LoginPage() {
 
       const userData = await response.json();
       
+      // JWT token'ı localStorage'a kaydet
+      if (userData.token) {
+        localStorage.setItem('auth_token', userData.token);
+        console.log("✅ Login - JWT token saved to localStorage");
+      }
+      
       toast({
         title: "Giriş Başarılı",
         description: "Hoş geldiniz!",
       });
-      
-      // Cookie'nin set edilmesini bekle (100ms)
-      await new Promise(resolve => setTimeout(resolve, 100));
       
       // React Query cache'ini invalidate et ve /api/auth/me query'sini refetch et
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
