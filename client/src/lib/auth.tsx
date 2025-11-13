@@ -26,7 +26,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["/api/auth/me"],
     queryFn: async () => {
       try {
+        const token = localStorage.getItem('auth_token');
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        
         const response = await fetch(buildApiUrl("/api/auth/me"), {
+          headers,
           credentials: "include",
         });
         
@@ -78,12 +85,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     },
     onSuccess: () => {
+      // JWT token'ı localStorage'dan temizle
+      localStorage.removeItem('auth_token');
       // Clear all queries and reset the cache
       queryClient.clear();
       // Force a full page reload to reset all state
       window.location.replace("/");
     },
     onError: () => {
+      // JWT token'ı localStorage'dan temizle
+      localStorage.removeItem('auth_token');
       // Even on error, clear cache and redirect
       queryClient.clear();
       window.location.replace("/");

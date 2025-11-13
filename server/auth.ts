@@ -6,6 +6,7 @@ import connectPgSimple from "connect-pg-simple";
 import MemoryStore from "memorystore";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 import { storage } from "./storage";
 import type { User } from "@shared/schema";
 import { db, pool } from "./db";
@@ -285,47 +286,39 @@ export function setupAuth(app: Express) {
           }
         }
         
-        // Session'ı manuel olarak kaydet - cookie'nin set edilmesini garantile
-        // IMPORTANT: req.session.save() callback'inde response gönderilmeli
-        // Express-session cookie'yi otomatik olarak set edecek
-        req.session.save((saveErr) => {
-          if (saveErr) {
-            console.error("❌ SESSION SAVE ERROR:", saveErr);
-            return res.status(500).json({ error: "Session kaydedilemedi" });
-          }
-          
-          // Express-session cookie'yi otomatik olarak set edecek
-          // Ama browser cookie'yi göndermiyor, bu yüzden cookie'yi manuel olarak da kontrol ediyoruz
-          console.log("✅ LOGIN - Session saved, cookie will be set by express-session middleware");
-          console.log("✅ LOGIN - Session ID:", req.sessionID);
-          
-          // Response gönder - express-session middleware cookie'yi otomatik olarak set edecek
-          return res.json(user);
-        });
+        // JWT token oluştur - cookie sorunu nedeniyle JWT token kullanıyoruz
+        const jwtSecret = process.env.JWT_SECRET || process.env.SESSION_SECRET || "haxarena-v6-secret-key";
+        const token = jwt.sign(
+          {
+            id: user.id,
+            username: user.username,
+            isAdmin: user.isAdmin,
+            isSuperAdmin: user.isSuperAdmin,
+            isApproved: user.isApproved,
+            role: user.role,
+            isBanned: user.isBanned,
+            isChatMuted: user.isChatMuted,
+          },
+          jwtSecret,
+          { expiresIn: '30d' } // 30 gün geçerli
+        );
         
-        // Response gönderildikten sonra cookie'nin set edilip edilmediğini kontrol et
-        res.on('finish', () => {
-          const setCookieHeader = res.getHeader('Set-Cookie');
-          if (setCookieHeader) {
-            const cookieValue = Array.isArray(setCookieHeader) ? setCookieHeader[0] : setCookieHeader;
-            console.log("✅ LOGIN RESPONSE SENT - Cookie was set:", cookieValue.substring(0, 100) + "...");
-            
-            // www.haxarena.web.tr için özel log
-            if (origin && origin.includes('haxarena.web.tr')) {
-              console.log("🌐 www.haxarena.web.tr LOGIN - Cookie details:");
-              console.log("  - SameSite:", cookieValue.includes('SameSite=None') ? 'None' : 'Missing');
-              console.log("  - Secure:", cookieValue.includes('Secure') ? 'Yes' : 'No');
-              console.log("  - HttpOnly:", cookieValue.includes('HttpOnly') ? 'Yes' : 'No');
-              console.log("  - Domain:", cookieValue.includes('Domain=') ? 'Set (WRONG!)' : 'Not set (CORRECT)');
-            }
-          } else {
-            console.log("❌ LOGIN RESPONSE SENT - Cookie was NOT set! This is the problem!");
-            console.log("  - Session ID:", req.sessionID);
-            console.log("  - Session exists:", !!req.session);
-            console.log("  - Origin:", origin);
-            console.log("  - CORS Allow-Credentials:", res.getHeader('Access-Control-Allow-Credentials'));
-            console.log("  - CORS Allow-Origin:", res.getHeader('Access-Control-Allow-Origin'));
-          }
+        console.log("✅ LOGIN SUCCESS - JWT token created for user:", user.username);
+        
+        // CORS headers'ı set et
+        const origin = req.headers.origin;
+        if (origin) {
+          const normalizedOrigin = origin.replace(/\/$/, '');
+          res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
+          res.setHeader('Access-Control-Allow-Credentials', 'true');
+          res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        }
+        
+        // Response gönder - JWT token ile birlikte
+        return res.json({
+          ...user,
+          token, // JWT token'ı response'da döndür
         });
       });
     })(req, res, next);
@@ -355,7 +348,7 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/auth/me", async (req, res) => {
-    // CORS headers'ı set et - cookie göndermek için kritik
+    // CORS headers'ı set et
     const origin = req.headers.origin;
     if (origin) {
       const normalizedOrigin = origin.replace(/\/$/, '');
@@ -365,79 +358,33 @@ export function setupAuth(app: Express) {
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     }
     
-    // Debug: Session ve authentication durumunu logla (her zaman)
-    console.log("🔍 /api/auth/me - isAuthenticated:", req.isAuthenticated());
-    console.log("🔍 /api/auth/me - req.user:", req.user ? { id: req.user.id, username: req.user.username } : null);
-    console.log("🔍 /api/auth/me - session ID:", req.sessionID);
-    console.log("🔍 /api/auth/me - cookies:", req.headers.cookie ? "present" : "missing");
+    // JWT token kontrolü - Authorization header'ından token'ı al
+    const authHeader = req.headers.authorization;
+    let token: string | null = null;
     
-    // Cookie header'ını detaylı kontrol et
-    if (req.headers.cookie) {
-      console.log("🔍 /api/auth/me - cookie header:", req.headers.cookie);
-      // Check if connect.sid cookie is present
-      if (req.headers.cookie.includes('connect.sid')) {
-        console.log("✅ /api/auth/me - connect.sid cookie found in request");
-        // Extract session ID from cookie
-        const cookieMatch = req.headers.cookie.match(/connect\.sid=([^;]+)/);
-        if (cookieMatch) {
-          console.log("🔍 /api/auth/me - cookie session ID:", cookieMatch[1].substring(0, 50) + "...");
-        }
-      } else {
-        console.log("⚠️  /api/auth/me - connect.sid cookie NOT found in request");
-        console.log("⚠️  /api/auth/me - Available cookies:", req.headers.cookie);
-      }
-    } else {
-      console.log("❌ /api/auth/me - NO COOKIES IN REQUEST!");
-      console.log("❌ /api/auth/me - This means browser is NOT sending cookies!");
-      console.log("❌ /api/auth/me - Possible reasons:");
-      console.log("  1. Cookie was not set (check login response)");
-      console.log("  2. Browser rejected cookie (SameSite/Secure policy)");
-      console.log("  3. Cookie domain mismatch");
-      console.log("  4. Browser cookie settings");
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
     }
     
-    console.log("🔍 /api/auth/me - origin:", req.headers.origin);
-    console.log("🔍 /api/auth/me - referer:", req.headers.referer);
-    console.log("🔍 /api/auth/me - host:", req.get('host'));
-    
-    // Session store'dan session'ı kontrol et
-    if (req.sessionID) {
+    // JWT token varsa, token'ı doğrula
+    if (token) {
       try {
-        const sessionStore = (req.session as any).store;
-        if (sessionStore && typeof sessionStore.get === 'function') {
-          sessionStore.get(req.sessionID, (err: any, session: any) => {
-            if (err) {
-              console.log("⚠️  /api/auth/me - Session store get error:", err.message);
-            } else if (session) {
-              console.log("✅ /api/auth/me - Session found in store:", !!session);
-              console.log("🔍 /api/auth/me - Session passport user:", session.passport?.user || "not set");
-            } else {
-              console.log("⚠️  /api/auth/me - Session NOT found in store!");
-              console.log("⚠️  /api/auth/me - Session ID:", req.sessionID);
-            }
-          });
-        }
-      } catch (e) {
-        console.log("⚠️  /api/auth/me - Could not check session store:", e);
-      }
-    }
-    
-    if (req.isAuthenticated() && req.user) {
-      try {
+        const jwtSecret = process.env.JWT_SECRET || process.env.SESSION_SECRET || "haxarena-v6-secret-key";
+        const decoded = jwt.verify(token, jwtSecret) as any;
+        
+        console.log("✅ /api/auth/me - JWT token verified for user:", decoded.username);
+        
         // Kullanıcıyı veritabanından tekrar yükle (güncel bilgiler için)
-        const user = await storage.getUser(req.user.id);
+        const user = await storage.getUser(decoded.id);
         if (!user) {
-          // Kullanıcı silinmişse session'ı temizle
-          console.log("⚠️  /api/auth/me - User not found in database:", req.user.id);
-          req.logout(() => {});
+          console.log("⚠️  /api/auth/me - User not found in database:", decoded.id);
           return res.status(401).json({ error: "Kullanıcı bulunamadı" });
         }
         
         // Kullanıcının custom rollerini getir
         const customRoles = await storage.getUserCustomRoles(user.id);
         
-        // Güncel kullanıcı bilgilerini döndür (isApproved dahil)
-        // Frontend'de isApproved kontrolü yapılabilir
+        // Güncel kullanıcı bilgilerini döndür
         const userInfo = {
           id: user.id,
           username: user.username,
@@ -451,22 +398,42 @@ export function setupAuth(app: Express) {
           customRoles: customRoles.map(cr => cr.role),
         };
         
-        // req.user'ı da güncelle (session için)
-        req.user = userInfo;
-        
-        if (process.env.NODE_ENV === 'production') {
-          console.log("✅ /api/auth/me - User found:", { id: userInfo.id, username: userInfo.username, isApproved: userInfo.isApproved });
+        return res.json(userInfo);
+      } catch (error) {
+        console.log("⚠️  /api/auth/me - JWT token invalid:", error instanceof Error ? error.message : String(error));
+        return res.status(401).json({ error: "Geçersiz token" });
+      }
+    }
+    
+    // Eğer token yoksa, cookie'den session kontrolü yap (geriye dönük uyumluluk)
+    if (req.isAuthenticated() && req.user) {
+      try {
+        const user = await storage.getUser(req.user.id);
+        if (!user) {
+          console.log("⚠️  /api/auth/me - User not found in database:", req.user.id);
+          req.logout(() => {});
+          return res.status(401).json({ error: "Kullanıcı bulunamadı" });
         }
+        
+        const customRoles = await storage.getUserCustomRoles(user.id);
+        const userInfo = {
+          id: user.id,
+          username: user.username,
+          profilePicture: user.profilePicture,
+          isAdmin: user.isAdmin,
+          isSuperAdmin: user.isSuperAdmin,
+          isApproved: user.isApproved,
+          role: user.role,
+          isBanned: user.isBanned,
+          isChatMuted: user.isChatMuted,
+          customRoles: customRoles.map(cr => cr.role),
+        };
         
         return res.json(userInfo);
       } catch (error) {
         console.error("❌ /api/auth/me ERROR:", error);
         return res.status(500).json({ error: "Kullanıcı bilgileri alınamadı" });
       }
-    }
-    
-    if (process.env.NODE_ENV === 'production') {
-      console.log("⚠️  /api/auth/me - Not authenticated");
     }
     
     // CORS headers'ı set et (401 response için de gerekli)
