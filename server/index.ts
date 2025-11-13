@@ -28,7 +28,7 @@ const allowedOrigins = [
   'http://haxarena.web.tr', // Custom domain HTTP (fallback)
   'http://localhost:5173', // Vite dev server
   'http://localhost:5000', // Local development
-].filter(Boolean); // Remove undefined values
+].filter((origin): origin is string => Boolean(origin)); // Remove undefined values
 
 // Normalize origins (remove trailing slashes)
 const normalizedOrigins = allowedOrigins.map(origin => origin.replace(/\/$/, ''));
@@ -82,8 +82,8 @@ app.use((req, res, next) => {
     }
     
     // Set CORS headers for actual requests
-    if (isAllowedOrigin || isBackendOrigin) {
-      res.setHeader('Access-Control-Allow-Origin', normalizedOrigin!);
+    if ((isAllowedOrigin || isBackendOrigin) && normalizedOrigin) {
+      res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
       res.setHeader('Access-Control-Allow-Credentials', 'true');
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');

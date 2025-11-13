@@ -124,12 +124,10 @@ export function setupAuth(app: Express) {
         return done(null, false);
       }
       
-      // Kullanıcı onaylanmamışsa session'ı geçersiz kıl
-      // Not: Bu kontrol, kullanıcı onaylandıktan sonra giriş yaptığında 
-      // session'ın güncel bilgilerle oluşturulmasını sağlar
-      if (!user.isApproved) {
-        return done(null, false);
-      }
+      // Not: isApproved kontrolü burada yapılmıyor çünkü:
+      // 1. Login sırasında zaten isApproved kontrolü yapılıyor
+      // 2. /api/auth/me endpoint'inde isApproved kontrolü yapılıyor ve onaylanmamışsa session temizleniyor
+      // 3. deserializeUser sadece session'dan kullanıcıyı yüklemeli
       
       done(null, {
         id: user.id,
@@ -273,26 +271,29 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/auth/me", async (req, res) => {
-    if (req.isAuthenticated()) {
+    // Debug: Session ve authentication durumunu logla
+    if (process.env.NODE_ENV === 'production') {
+      console.log("🔍 /api/auth/me - isAuthenticated:", req.isAuthenticated());
+      console.log("🔍 /api/auth/me - req.user:", req.user ? { id: req.user.id, username: req.user.username } : null);
+      console.log("🔍 /api/auth/me - session ID:", req.sessionID);
+    }
+    
+    if (req.isAuthenticated() && req.user) {
       try {
         // Kullanıcıyı veritabanından tekrar yükle (güncel bilgiler için)
-        const user = await storage.getUser(req.user!.id);
+        const user = await storage.getUser(req.user.id);
         if (!user) {
           // Kullanıcı silinmişse session'ı temizle
+          console.log("⚠️  /api/auth/me - User not found in database:", req.user.id);
           req.logout(() => {});
           return res.status(401).json({ error: "Kullanıcı bulunamadı" });
-        }
-        
-        // Approval durumunu kontrol et - eğer kullanıcı henüz onaylanmamışsa session'ı temizle
-        if (!user.isApproved) {
-          req.logout(() => {});
-          return res.status(401).json({ error: "Hesabınız henüz onaylanmadı" });
         }
         
         // Kullanıcının custom rollerini getir
         const customRoles = await storage.getUserCustomRoles(user.id);
         
-        // Güncel kullanıcı bilgilerini döndür
+        // Güncel kullanıcı bilgilerini döndür (isApproved dahil)
+        // Frontend'de isApproved kontrolü yapılabilir
         const userInfo = {
           id: user.id,
           username: user.username,
@@ -309,12 +310,21 @@ export function setupAuth(app: Express) {
         // req.user'ı da güncelle (session için)
         req.user = userInfo;
         
+        if (process.env.NODE_ENV === 'production') {
+          console.log("✅ /api/auth/me - User found:", { id: userInfo.id, username: userInfo.username, isApproved: userInfo.isApproved });
+        }
+        
         return res.json(userInfo);
       } catch (error) {
         console.error("❌ /api/auth/me ERROR:", error);
         return res.status(500).json({ error: "Kullanıcı bilgileri alınamadı" });
       }
     }
+    
+    if (process.env.NODE_ENV === 'production') {
+      console.log("⚠️  /api/auth/me - Not authenticated");
+    }
+    
     res.status(401).json({ error: "Giriş yapılmamış" });
   });
 }
