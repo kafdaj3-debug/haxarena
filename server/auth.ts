@@ -123,6 +123,14 @@ export function setupAuth(app: Express) {
       if (!user) {
         return done(null, false);
       }
+      
+      // Kullanıcı onaylanmamışsa session'ı geçersiz kıl
+      // Not: Bu kontrol, kullanıcı onaylandıktan sonra giriş yaptığında 
+      // session'ın güncel bilgilerle oluşturulmasını sağlar
+      if (!user.isApproved) {
+        return done(null, false);
+      }
+      
       done(null, {
         id: user.id,
         username: user.username,
@@ -266,12 +274,46 @@ export function setupAuth(app: Express) {
 
   app.get("/api/auth/me", async (req, res) => {
     if (req.isAuthenticated()) {
-      // Kullanıcının custom rollerini getir
-      const customRoles = await storage.getUserCustomRoles(req.user!.id);
-      return res.json({
-        ...req.user,
-        customRoles: customRoles.map(cr => cr.role),
-      });
+      try {
+        // Kullanıcıyı veritabanından tekrar yükle (güncel bilgiler için)
+        const user = await storage.getUser(req.user!.id);
+        if (!user) {
+          // Kullanıcı silinmişse session'ı temizle
+          req.logout(() => {});
+          return res.status(401).json({ error: "Kullanıcı bulunamadı" });
+        }
+        
+        // Approval durumunu kontrol et - eğer kullanıcı henüz onaylanmamışsa session'ı temizle
+        if (!user.isApproved) {
+          req.logout(() => {});
+          return res.status(401).json({ error: "Hesabınız henüz onaylanmadı" });
+        }
+        
+        // Kullanıcının custom rollerini getir
+        const customRoles = await storage.getUserCustomRoles(user.id);
+        
+        // Güncel kullanıcı bilgilerini döndür
+        const userInfo = {
+          id: user.id,
+          username: user.username,
+          profilePicture: user.profilePicture,
+          isAdmin: user.isAdmin,
+          isSuperAdmin: user.isSuperAdmin,
+          isApproved: user.isApproved,
+          role: user.role,
+          isBanned: user.isBanned,
+          isChatMuted: user.isChatMuted,
+          customRoles: customRoles.map(cr => cr.role),
+        };
+        
+        // req.user'ı da güncelle (session için)
+        req.user = userInfo;
+        
+        return res.json(userInfo);
+      } catch (error) {
+        console.error("❌ /api/auth/me ERROR:", error);
+        return res.status(500).json({ error: "Kullanıcı bilgileri alınamadı" });
+      }
     }
     res.status(401).json({ error: "Giriş yapılmamış" });
   });
