@@ -18,7 +18,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/lib/auth";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient, buildApiUrl } from "@/lib/queryClient";
 import type { ForumPost, User } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
@@ -75,7 +75,17 @@ export default function ForumPage() {
       const url = selectedCategory 
         ? `/api/forum-posts?category=${encodeURIComponent(selectedCategory)}`
         : "/api/forum-posts";
-      const response = await fetch(url);
+      
+      const token = localStorage.getItem('auth_token');
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(buildApiUrl(url), {
+        headers,
+        credentials: "include",
+      });
       if (!response.ok) throw new Error("Konular yüklenemedi");
       return response.json();
     },

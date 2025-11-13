@@ -9,7 +9,7 @@ import { ArrowLeft, Calendar, Archive, Lock as LockIcon, MessageSquare, Trash2, 
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient, buildApiUrl } from "@/lib/queryClient";
 import type { ForumPost, ForumReply, User } from "@shared/schema";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
@@ -49,7 +49,16 @@ export default function ForumPostDetailPage() {
   const { data: post, isLoading: postLoading } = useQuery<PostWithUser>({
     queryKey: ["/api/forum-posts", id],
     queryFn: async () => {
-      const response = await fetch(`/api/forum-posts/${id}`);
+      const token = localStorage.getItem('auth_token');
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(buildApiUrl(`/api/forum-posts/${id}`), {
+        headers,
+        credentials: "include",
+      });
       if (!response.ok) throw new Error("Konu yüklenemedi");
       return response.json();
     },
@@ -58,7 +67,16 @@ export default function ForumPostDetailPage() {
   const { data: replies, isLoading: repliesLoading } = useQuery<ReplyWithUser[]>({
     queryKey: ["/api/forum-posts", id, "replies"],
     queryFn: async () => {
-      const response = await fetch(`/api/forum-posts/${id}/replies`);
+      const token = localStorage.getItem('auth_token');
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(buildApiUrl(`/api/forum-posts/${id}/replies`), {
+        headers,
+        credentials: "include",
+      });
       if (!response.ok) throw new Error("Cevaplar yüklenemedi");
       return response.json();
     },
