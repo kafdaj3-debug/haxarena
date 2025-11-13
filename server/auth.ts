@@ -294,29 +294,13 @@ export function setupAuth(app: Express) {
             return res.status(500).json({ error: "Session kaydedilemedi" });
           }
           
-          // Cookie'yi manuel olarak set et - express-session bazen cookie'yi set etmiyor
-          // Cross-origin cookie için SameSite=None ve Secure=true gerekli
-          const cookieOptions: any = {
-            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-            path: "/",
-            // Domain set edilmemeli - cross-origin cookie için
-          };
+          // Express-session cookie'yi otomatik olarak set edecek
+          // Cookie format: s:sessionID.signature (express-session otomatik imzalar)
+          // Manuel olarak set etmeye gerek yok, express-session middleware bunu yapıyor
+          // Sadece session'ın kaydedildiğinden emin oluyoruz
           
-          // Cookie'yi manuel olarak set et
-          res.cookie('connect.sid', req.sessionID, cookieOptions);
-          
-          console.log("✅ LOGIN - Cookie manually set:", req.sessionID.substring(0, 20) + "...");
-          console.log("✅ LOGIN - Cookie options:", {
-            maxAge: cookieOptions.maxAge,
-            httpOnly: cookieOptions.httpOnly,
-            secure: cookieOptions.secure,
-            sameSite: cookieOptions.sameSite,
-            path: cookieOptions.path,
-            domain: cookieOptions.domain || "not set (correct)"
-          });
+          console.log("✅ LOGIN - Session saved, cookie will be set by express-session middleware");
+          console.log("✅ LOGIN - Session ID:", req.sessionID);
           
           // Response gönder
           return res.json(user);
