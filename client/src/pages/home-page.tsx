@@ -6,7 +6,7 @@ import LiveChat from "@/components/LiveChat";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Trophy, MessageSquare, Shield } from "lucide-react";
+import { Trophy, MessageSquare, Shield, Sparkles, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
@@ -68,6 +68,51 @@ export default function HomePage() {
               </a>
             </div>
           </div>
+        </section>
+
+        {/* Duyuru Banner */}
+        <section className="relative overflow-hidden bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-y border-primary/20">
+          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] animate-[shimmer_3s_infinite]"></div>
+          <div className="container mx-auto px-4 py-6 md:py-8 relative z-10">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
+              <div className="flex items-center gap-3 md:gap-4 flex-1">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
+                    <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-primary" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg md:text-xl font-bold text-foreground mb-1">
+                    35.000 TL Ödüllü Lig Başvuruları Devam Ediyor!
+                  </h3>
+                  <p className="text-sm md:text-base text-muted-foreground">
+                    Lige katılmak ve detayları öğrenmek için Discord sunucumuza hemen katıl!
+                  </p>
+                </div>
+              </div>
+              <a 
+                href="https://discord.gg/haxarena" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex-shrink-0"
+              >
+                <Button 
+                  size="lg" 
+                  className="hover-elevate active-elevate-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 group"
+                  data-testid="button-announcement-discord"
+                >
+                  Discord'a Katıl
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </a>
+            </div>
+          </div>
+          <style>{`
+            @keyframes shimmer {
+              0% { background-position: -1000px 0; }
+              100% { background-position: 1000px 0; }
+            }
+          `}</style>
         </section>
 
         <section className="py-8 md:py-16 bg-background">
