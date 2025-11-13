@@ -61,6 +61,64 @@ function getAuthToken(): string | null {
   return null;
 }
 
+// Retry helper function with exponential backoff
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries: number = 3,
+  retryDelay: number = 1000
+): Promise<Response> {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      // Timeout ekle (30 saniye - Render free tier yavaş olabilir)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      // Başarılı response veya 4xx/5xx hataları (retry etme)
+      if (response.ok || (response.status >= 400 && response.status < 500)) {
+        return response;
+      }
+      
+      // 5xx server errors için retry yap
+      if (response.status >= 500 && attempt < maxRetries) {
+        lastError = new Error(`Server error: ${response.status}`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay * Math.pow(2, attempt)));
+        continue;
+      }
+      
+      return response;
+    } catch (error: any) {
+      lastError = error;
+      
+      // Network errors için retry yap (son deneme değilse)
+      if (attempt < maxRetries && (
+        error.name === "AbortError" ||
+        error.message?.includes("Failed to fetch") ||
+        error.message?.includes("NetworkError") ||
+        error.message?.includes("ECONNREFUSED")
+      )) {
+        // Exponential backoff: 1s, 2s, 4s
+        await new Promise(resolve => setTimeout(resolve, retryDelay * Math.pow(2, attempt)));
+        continue;
+      }
+      
+      // Son deneme veya retry edilemeyen hata
+      throw error;
+    }
+  }
+  
+  throw lastError || new Error("Request failed after retries");
+}
+
 export async function apiRequest(
   method: string,
   url: string,
@@ -77,7 +135,7 @@ export async function apiRequest(
     headers["Authorization"] = `Bearer ${token}`;
   }
   
-  const res = await fetch(fullUrl, {
+  const res = await fetchWithRetry(fullUrl, {
     method,
     headers,
     body: data ? JSON.stringify(data) : undefined,
@@ -104,7 +162,7 @@ export const getQueryFn: <T>(options: {
       headers["Authorization"] = `Bearer ${token}`;
     }
     
-    const res = await fetch(fullUrl, {
+    const res = await fetchWithRetry(fullUrl, {
       headers,
       credentials: "include",
     });
@@ -128,10 +186,39 @@ export const queryClient = new QueryClient({
       refetchInterval: false,
       refetchOnWindowFocus: false,
       staleTime: 0, // Changed from Infinity to 0 - allows refetch after login
-      retry: false,
+      retry: (failureCount, error: any) => {
+        // Network errors için retry yap (max 2 kez)
+        if (failureCount < 2 && (
+          error?.message?.includes("Failed to fetch") ||
+          error?.message?.includes("NetworkError") ||
+          error?.message?.includes("ECONNREFUSED") ||
+          error?.name === "AbortError"
+        )) {
+          return true;
+        }
+        // 4xx hataları için retry yapma
+        if (error?.message?.includes('40')) {
+          return false;
+        }
+        // Diğer hatalar için 1 kez retry
+        return failureCount < 1;
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000), // Exponential backoff: 1s, 2s, max 5s
     },
     mutations: {
-      retry: false,
+      retry: (failureCount, error: any) => {
+        // Network errors için retry yap (max 2 kez)
+        if (failureCount < 2 && (
+          error?.message?.includes("Failed to fetch") ||
+          error?.message?.includes("NetworkError") ||
+          error?.message?.includes("ECONNREFUSED") ||
+          error?.name === "AbortError"
+        )) {
+          return true;
+        }
+        return false;
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
       onError: (error: any) => {
         // Silently handle 401 errors - they're expected when not logged in
         if (error?.message?.includes('401')) {
