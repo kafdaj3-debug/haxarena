@@ -83,8 +83,13 @@ async function fetchWithRetry(
       
       clearTimeout(timeoutId);
       
-      // Başarılı response veya 4xx/5xx hataları (retry etme)
-      if (response.ok || (response.status >= 400 && response.status < 500)) {
+      // Başarılı response - direkt döndür
+      if (response.ok) {
+        return response;
+      }
+      
+      // 4xx client errors - retry yapma, direkt döndür
+      if (response.status >= 400 && response.status < 500) {
         return response;
       }
       
