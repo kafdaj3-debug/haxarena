@@ -51,7 +51,7 @@ app.use((req, res, next) => {
     const backendUrl = process.env.RENDER_EXTERNAL_URL || req.get('host');
     const isBackendOrigin = normalizedOrigin && backendUrl && normalizedOrigin.includes(backendUrl);
     
-    // Check if origin is allowed
+    // Check if origin is allowed - more permissive for Vercel/Netlify
     const isAllowedOrigin = normalizedOrigin && (
       normalizedOrigins.includes(normalizedOrigin) ||
       normalizedOrigin.endsWith('.netlify.app') ||
@@ -59,23 +59,19 @@ app.use((req, res, next) => {
       normalizedOrigin.includes('netlify') ||
       normalizedOrigin.endsWith('.vercel.app') ||
       normalizedOrigin.endsWith('.vercel.sh') ||
-      normalizedOrigin.includes('vercel')
+      normalizedOrigin.includes('vercel') ||
+      normalizedOrigin.startsWith('http://localhost')
     );
     
-    // Handle preflight requests FIRST - always respond to OPTIONS with CORS headers
+    // Handle preflight requests FIRST - ALWAYS respond to OPTIONS with CORS headers
     if (req.method === 'OPTIONS') {
-      if (isAllowedOrigin || isBackendOrigin) {
-        res.setHeader('Access-Control-Allow-Origin', normalizedOrigin!);
+      if (normalizedOrigin) {
+        // Always allow preflight requests from any origin (browser requirement)
+        res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
         res.setHeader('Access-Control-Allow-Credentials', 'true');
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-        return res.sendStatus(200);
-      } else if (normalizedOrigin) {
-        // Even for potentially blocked origins, respond to preflight (browser requirement)
-        // But only if we have an origin header
-        res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
         return res.sendStatus(200);
       } else {
         // No origin header for OPTIONS - respond anyway
@@ -91,17 +87,15 @@ app.use((req, res, next) => {
       res.setHeader('Access-Control-Allow-Credentials', 'true');
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    } else if (normalizedOrigin && normalizedOrigin.startsWith('http://localhost')) {
-      // Allow localhost in development
-      res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     } else if (normalizedOrigin) {
       // Log blocked origin for debugging (but not for backend's own domain)
       if (process.env.NODE_ENV === 'production' && !isBackendOrigin) {
         log(`⚠️ CORS blocked origin: ${normalizedOrigin} (not in allowed list)`);
       }
+      // Still set CORS headers but don't allow credentials for unknown origins
+      res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     } else {
       // No origin header (same-origin or direct request) - allow
       res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -111,7 +105,7 @@ app.use((req, res, next) => {
     
     // Debug logging in production (but not for backend's own domain)
     if (process.env.NODE_ENV === 'production' && normalizedOrigin && !isBackendOrigin) {
-      log(`CORS: ${req.method} ${req.path} from origin: ${normalizedOrigin}`);
+      log(`CORS: ${req.method} ${req.path} from origin: ${normalizedOrigin} (allowed: ${isAllowedOrigin || isBackendOrigin})`);
     }
   }
   
