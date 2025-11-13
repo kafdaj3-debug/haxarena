@@ -89,13 +89,6 @@ export async function apiRequest(
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
-// JWT token'ı localStorage'dan al
-function getAuthToken(): string | null {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('auth_token');
-  }
-  return null;
-}
 
 export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
