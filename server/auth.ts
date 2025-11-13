@@ -370,18 +370,57 @@ export function setupAuth(app: Express) {
     console.log("🔍 /api/auth/me - req.user:", req.user ? { id: req.user.id, username: req.user.username } : null);
     console.log("🔍 /api/auth/me - session ID:", req.sessionID);
     console.log("🔍 /api/auth/me - cookies:", req.headers.cookie ? "present" : "missing");
+    
+    // Cookie header'ını detaylı kontrol et
     if (req.headers.cookie) {
       console.log("🔍 /api/auth/me - cookie header:", req.headers.cookie);
       // Check if connect.sid cookie is present
       if (req.headers.cookie.includes('connect.sid')) {
         console.log("✅ /api/auth/me - connect.sid cookie found in request");
+        // Extract session ID from cookie
+        const cookieMatch = req.headers.cookie.match(/connect\.sid=([^;]+)/);
+        if (cookieMatch) {
+          console.log("🔍 /api/auth/me - cookie session ID:", cookieMatch[1].substring(0, 50) + "...");
+        }
       } else {
         console.log("⚠️  /api/auth/me - connect.sid cookie NOT found in request");
+        console.log("⚠️  /api/auth/me - Available cookies:", req.headers.cookie);
       }
+    } else {
+      console.log("❌ /api/auth/me - NO COOKIES IN REQUEST!");
+      console.log("❌ /api/auth/me - This means browser is NOT sending cookies!");
+      console.log("❌ /api/auth/me - Possible reasons:");
+      console.log("  1. Cookie was not set (check login response)");
+      console.log("  2. Browser rejected cookie (SameSite/Secure policy)");
+      console.log("  3. Cookie domain mismatch");
+      console.log("  4. Browser cookie settings");
     }
+    
     console.log("🔍 /api/auth/me - origin:", req.headers.origin);
     console.log("🔍 /api/auth/me - referer:", req.headers.referer);
     console.log("🔍 /api/auth/me - host:", req.get('host'));
+    
+    // Session store'dan session'ı kontrol et
+    if (req.sessionID) {
+      try {
+        const sessionStore = (req.session as any).store;
+        if (sessionStore && typeof sessionStore.get === 'function') {
+          sessionStore.get(req.sessionID, (err: any, session: any) => {
+            if (err) {
+              console.log("⚠️  /api/auth/me - Session store get error:", err.message);
+            } else if (session) {
+              console.log("✅ /api/auth/me - Session found in store:", !!session);
+              console.log("🔍 /api/auth/me - Session passport user:", session.passport?.user || "not set");
+            } else {
+              console.log("⚠️  /api/auth/me - Session NOT found in store!");
+              console.log("⚠️  /api/auth/me - Session ID:", req.sessionID);
+            }
+          });
+        }
+      } catch (e) {
+        console.log("⚠️  /api/auth/me - Could not check session store:", e);
+      }
+    }
     
     if (req.isAuthenticated() && req.user) {
       try {
