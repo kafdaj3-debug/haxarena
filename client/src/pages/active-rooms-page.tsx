@@ -22,7 +22,7 @@ export default function ActiveRoomsPage() {
     {
       id: 3,
       matchName: "Kocaelispor vs Gaziantepspor",
-      link: "https://www.haxball.com/play?c=XtjDImqNvwI",
+      link: "https://www.haxball.com/play?c=cRIFZeVynxA",
       isActive: true
     }
   ]);

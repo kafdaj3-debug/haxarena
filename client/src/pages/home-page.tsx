@@ -25,7 +25,7 @@ export default function HomePage() {
     },
     {
       matchName: "Kocaelispor vs Gaziantepspor",
-      link: "https://www.haxball.com/play?c=XtjDImqNvwI"
+      link: "https://www.haxball.com/play?c=cRIFZeVynxA"
     }
   ];
 
