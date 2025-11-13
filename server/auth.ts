@@ -64,7 +64,8 @@ export function setupAuth(app: Express) {
       store: sessionStore,
       secret: process.env.SESSION_SECRET || "haxarena-v6-secret-key",
       resave: false,
-      saveUninitialized: false,
+      saveUninitialized: false, // Don't save uninitialized sessions (empty sessions)
+      name: 'connect.sid', // Session cookie name
       cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         httpOnly: true, // Prevent XSS attacks
@@ -72,7 +73,11 @@ export function setupAuth(app: Express) {
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Cross-domain cookies in production (Netlify -> Render)
         path: "/", // Cookie path - root path
         // Note: domain is not set - browser will automatically send cookie to the domain that set it
+        // For cross-domain cookies, domain should NOT be set
       },
+      // Force session to be saved even if it wasn't modified
+      // This ensures cookie is set after req.login()
+      rolling: false, // Don't reset expiration on every request
     })
   );
 
@@ -233,8 +238,10 @@ export function setupAuth(app: Express) {
         console.log("✅ LOGIN SUCCESS - Session created:", req.sessionID);
         console.log("✅ LOGIN SUCCESS - User:", { id: user.id, username: user.username });
         console.log("✅ LOGIN SUCCESS - Origin:", req.headers.origin);
-        console.log("✅ LOGIN SUCCESS - Cookie header:", res.getHeader('Set-Cookie') ? "set" : "not set");
+        console.log("✅ LOGIN SUCCESS - Session exists:", !!req.session);
+        console.log("✅ LOGIN SUCCESS - Session regenerated:", req.session.regenerate ? "yes" : "no");
         
+        // IP adresini güncelle
         let ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         if (Array.isArray(ip)) {
           ip = ip[0];
@@ -250,7 +257,49 @@ export function setupAuth(app: Express) {
           await storage.updateUser(user.id, { lastIpAddress: ip });
         }
         
-        return res.json(user);
+        // Session'ı manuel olarak kaydet - cookie'nin set edilmesini garantile
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("❌ SESSION SAVE ERROR:", saveErr);
+            return res.status(500).json({ error: "Session kaydedilemedi" });
+          }
+          
+          // Response gönderildikten sonra cookie'nin set edilip edilmediğini logla
+          res.on('finish', () => {
+            const setCookieHeader = res.getHeader('Set-Cookie');
+            console.log("✅ LOGIN RESPONSE SENT - Set-Cookie header:", setCookieHeader ? "present" : "missing");
+            if (setCookieHeader) {
+              const cookieValue = Array.isArray(setCookieHeader) ? setCookieHeader[0] : setCookieHeader;
+              console.log("✅ LOGIN RESPONSE - Cookie value:", cookieValue.substring(0, 150));
+              // Cookie ayarlarını kontrol et
+              if (cookieValue.includes('SameSite=None')) {
+                console.log("✅ LOGIN RESPONSE - SameSite=None: OK");
+              } else {
+                console.log("⚠️  LOGIN RESPONSE - SameSite=None: MISSING");
+              }
+              if (cookieValue.includes('Secure')) {
+                console.log("✅ LOGIN RESPONSE - Secure: OK");
+              } else {
+                console.log("⚠️  LOGIN RESPONSE - Secure: MISSING");
+              }
+              if (cookieValue.includes('HttpOnly')) {
+                console.log("✅ LOGIN RESPONSE - HttpOnly: OK");
+              } else {
+                console.log("⚠️  LOGIN RESPONSE - HttpOnly: MISSING");
+              }
+            } else {
+              console.log("❌ LOGIN RESPONSE - NO COOKIE SET! This is the problem!");
+              console.log("  - Session ID:", req.sessionID);
+              console.log("  - Session exists:", !!req.session);
+              console.log("  - Origin:", req.headers.origin);
+              console.log("  - CORS Allow-Credentials:", res.getHeader('Access-Control-Allow-Credentials'));
+              console.log("  - CORS Allow-Origin:", res.getHeader('Access-Control-Allow-Origin'));
+            }
+          });
+          
+          // Response gönder - cookie artık set edilmiş olmalı
+          return res.json(user);
+        });
       });
     })(req, res, next);
   });
