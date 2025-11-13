@@ -70,6 +70,8 @@ export function setupAuth(app: Express) {
         httpOnly: true, // Prevent XSS attacks
         secure: process.env.NODE_ENV === "production", // HTTPS only in production
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Cross-domain cookies in production (Netlify -> Render)
+        path: "/", // Cookie path - root path
+        // Note: domain is not set - browser will automatically send cookie to the domain that set it
       },
     })
   );
@@ -227,6 +229,12 @@ export function setupAuth(app: Express) {
           return res.status(500).json({ error: "Giriş yapılamadı" });
         }
         
+        // Session cookie'sinin set edildiğini logla
+        console.log("✅ LOGIN SUCCESS - Session created:", req.sessionID);
+        console.log("✅ LOGIN SUCCESS - User:", { id: user.id, username: user.username });
+        console.log("✅ LOGIN SUCCESS - Origin:", req.headers.origin);
+        console.log("✅ LOGIN SUCCESS - Cookie header:", res.getHeader('Set-Cookie') ? "set" : "not set");
+        
         let ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         if (Array.isArray(ip)) {
           ip = ip[0];
@@ -271,12 +279,12 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/auth/me", async (req, res) => {
-    // Debug: Session ve authentication durumunu logla
-    if (process.env.NODE_ENV === 'production') {
-      console.log("🔍 /api/auth/me - isAuthenticated:", req.isAuthenticated());
-      console.log("🔍 /api/auth/me - req.user:", req.user ? { id: req.user.id, username: req.user.username } : null);
-      console.log("🔍 /api/auth/me - session ID:", req.sessionID);
-    }
+    // Debug: Session ve authentication durumunu logla (her zaman)
+    console.log("🔍 /api/auth/me - isAuthenticated:", req.isAuthenticated());
+    console.log("🔍 /api/auth/me - req.user:", req.user ? { id: req.user.id, username: req.user.username } : null);
+    console.log("🔍 /api/auth/me - session ID:", req.sessionID);
+    console.log("🔍 /api/auth/me - cookies:", req.headers.cookie ? "present" : "missing");
+    console.log("🔍 /api/auth/me - origin:", req.headers.origin);
     
     if (req.isAuthenticated() && req.user) {
       try {

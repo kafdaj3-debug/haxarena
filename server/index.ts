@@ -41,6 +41,9 @@ const normalizedOrigins = allowedOrigins.map(origin => origin.replace(/\/$/, '')
 if (process.env.NODE_ENV === 'production') {
   log(`CORS Allowed Origins: ${normalizedOrigins.join(', ')}`);
   log(`FRONTEND_URL: ${process.env.FRONTEND_URL || 'not set'}`);
+} else {
+  console.log(`CORS Allowed Origins (DEV): ${normalizedOrigins.join(', ')}`);
+  console.log(`FRONTEND_URL (DEV): ${process.env.FRONTEND_URL || 'not set'}`);
 }
 
 app.use((req, res, next) => {
