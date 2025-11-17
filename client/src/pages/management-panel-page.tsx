@@ -807,6 +807,22 @@ export default function ManagementPanelPage() {
     reader.readAsDataURL(file);
   };
 
+  // Show loading state while checking auth
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="text-lg text-muted-foreground">Yetki kontrol ediliyor...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Block render if not super admin
+  if (!user || !user.isSuperAdmin) {
+    return null;
+  }
+
   const pendingUsers = users?.filter(u => !u.isApproved) || [];
   const approvedUsers = users?.filter(u => u.isApproved) || [];
   const pendingApplications = adminApplications?.filter(a => a.status === "pending") || [];
