@@ -527,20 +527,18 @@ export default function ManagementPanelPage() {
   });
 
   const updateFixtureScoreMutation = useMutation({
-    mutationFn: async ({ id, homeScore, awayScore, goals, matchRecordingUrl, isPostponed }: { 
+    mutationFn: async ({ id, homeScore, awayScore, goals, matchRecordingUrl }: { 
       id: string; 
       homeScore: number; 
       awayScore: number;
-      goals?: Array<{ playerId: string; minute: number; assistPlayerId?: string; isHomeTeam: boolean }>;
+      goals?: Array<{ playerName: string; minute: number; assistPlayerName?: string; isHomeTeam: boolean }>;
       matchRecordingUrl?: string;
-      isPostponed?: boolean;
     }) => {
       return await apiRequest("PATCH", `/api/league/fixtures/${id}`, { 
         homeScore, 
         awayScore,
         goals: goals || [],
-        matchRecordingUrl: matchRecordingUrl || undefined,
-        isPostponed: isPostponed || false
+        matchRecordingUrl: matchRecordingUrl || undefined
       });
     },
     onSuccess: () => {
@@ -552,7 +550,6 @@ export default function ManagementPanelPage() {
       setAwayScore("");
       setMatchGoals([]);
       setMatchRecordingUrl("");
-      setIsPostponed(false);
     },
     onError: () => {
       toast({ title: "Hata", description: "Maç sonucu güncellenemedi", variant: "destructive" });
@@ -2145,16 +2142,6 @@ export default function ManagementPanelPage() {
                               />
                             </div>
 
-                            {/* Ertelenme Checkbox */}
-                            <div className="flex items-center space-x-2">
-                              <Checkbox 
-                                id={`postponed-${fixture.id}`}
-                                checked={isPostponed} 
-                                onCheckedChange={(checked) => setIsPostponed(checked as boolean)}
-                              />
-                              <Label htmlFor={`postponed-${fixture.id}`} className="cursor-pointer">Ertelendi</Label>
-                            </div>
-
                             {/* Maç Kaydı Linki */}
                             <div className="space-y-2">
                               <Label>Maç Kaydı Linki (Rec)</Label>
@@ -2307,7 +2294,6 @@ export default function ManagementPanelPage() {
                                         awayScore: parseInt(awayScore),
                                         goals: validGoals,
                                         matchRecordingUrl: matchRecordingUrl || undefined,
-                                        isPostponed: isPostponed,
                                       });
                                     }
                                   } catch (error) {
@@ -2329,7 +2315,6 @@ export default function ManagementPanelPage() {
                                     setAwayScore("");
                                     setMatchGoals([]);
                                     setMatchRecordingUrl("");
-                                    setIsPostponed(false);
                                   } catch (error) {
                                     console.error("Error canceling:", error);
                                   }
@@ -2364,7 +2349,6 @@ export default function ManagementPanelPage() {
                                   }
                                   setMatchGoals(loadedGoals);
                                   setMatchRecordingUrl(fixture?.matchRecordingUrl || "");
-                                  setIsPostponed(fixture?.isPostponed || false);
                                 } catch (error) {
                                   console.error("Error loading fixture:", error);
                                   toast({ title: "Hata", description: "Maç bilgileri yüklenirken bir hata oluştu", variant: "destructive" });
