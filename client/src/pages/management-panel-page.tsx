@@ -1975,7 +1975,7 @@ export default function ManagementPanelPage() {
                 <div className="space-y-4">
                   <h3 className="font-semibold">Fikstür ve Skor Girişi</h3>
                   <div className="space-y-3">
-                    {leagueFixtures?.map((fixture: any) => {
+                    {leagueFixtures && Array.isArray(leagueFixtures) ? leagueFixtures.map((fixture: any) => {
                       const isBye = fixture.isBye;
                       return (
                       <div key={fixture.id} className={`p-4 border rounded-lg space-y-3 ${isBye ? "border-blue-500/30 bg-blue-500/10" : ""}`}>
@@ -2100,7 +2100,7 @@ export default function ManagementPanelPage() {
                             <span className="text-blue-600 font-medium">BAY Geçme - Hafta {fixture.week}</span>
                           </div>
                         )}
-                        {selectedFixture?.id === fixture.id && !isBye ? (
+                        {selectedFixture && selectedFixture.id === fixture.id && !isBye ? (
                           <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
                             <div className="flex items-center gap-2">
                               <Input
@@ -2138,7 +2138,7 @@ export default function ManagementPanelPage() {
                               <Input
                                 type="url"
                                 placeholder="https://..."
-                                value={matchRecordingUrl}
+                                value={matchRecordingUrl || ""}
                                 onChange={(e) => setMatchRecordingUrl(e.target.value)}
                               />
                             </div>
@@ -2146,12 +2146,12 @@ export default function ManagementPanelPage() {
                             {/* Gol/Asist Bilgileri */}
                             <div className="space-y-2">
                               <Label>Gol/Asist Bilgileri</Label>
-                              {matchGoals.map((goal, index) => (
+                              {matchGoals && Array.isArray(matchGoals) && matchGoals.map((goal, index) => (
                                 <div key={index} className="flex items-center gap-2 p-2 border rounded bg-background">
                                   <Select
                                     value={goal.playerId}
                                     onValueChange={(value) => {
-                                      const newGoals = [...matchGoals];
+                                      const newGoals = [...(matchGoals || [])];
                                       newGoals[index].playerId = value;
                                       setMatchGoals(newGoals);
                                     }}
@@ -2160,9 +2160,13 @@ export default function ManagementPanelPage() {
                                       <SelectValue placeholder="Oyuncu" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      {users?.map((u: any) => (
-                                        <SelectItem key={u.id} value={u.id}>{u.username}</SelectItem>
-                                      ))}
+                                      {users && Array.isArray(users) && users.length > 0 ? (
+                                        users.map((u: any) => (
+                                          <SelectItem key={u.id} value={u.id}>{u.username}</SelectItem>
+                                        ))
+                                      ) : (
+                                        <SelectItem value="" disabled>Oyuncular yükleniyor...</SelectItem>
+                                      )}
                                     </SelectContent>
                                   </Select>
                                   <Input
@@ -2172,7 +2176,7 @@ export default function ManagementPanelPage() {
                                     placeholder="Dakika"
                                     value={goal.minute}
                                     onChange={(e) => {
-                                      const newGoals = [...matchGoals];
+                                      const newGoals = [...(matchGoals || [])];
                                       newGoals[index].minute = parseInt(e.target.value) || 0;
                                       setMatchGoals(newGoals);
                                     }}
@@ -2181,7 +2185,7 @@ export default function ManagementPanelPage() {
                                   <Select
                                     value={goal.isHomeTeam ? "home" : "away"}
                                     onValueChange={(value) => {
-                                      const newGoals = [...matchGoals];
+                                      const newGoals = [...(matchGoals || [])];
                                       newGoals[index].isHomeTeam = value === "home";
                                       setMatchGoals(newGoals);
                                     }}
@@ -2197,7 +2201,7 @@ export default function ManagementPanelPage() {
                                   <Select
                                     value={goal.assistPlayerId || ""}
                                     onValueChange={(value) => {
-                                      const newGoals = [...matchGoals];
+                                      const newGoals = [...(matchGoals || [])];
                                       newGoals[index].assistPlayerId = value || undefined;
                                       setMatchGoals(newGoals);
                                     }}
@@ -2207,9 +2211,13 @@ export default function ManagementPanelPage() {
                                     </SelectTrigger>
                                     <SelectContent>
                                       <SelectItem value="">Asist Yok</SelectItem>
-                                      {users?.map((u: any) => (
-                                        <SelectItem key={u.id} value={u.id}>{u.username}</SelectItem>
-                                      ))}
+                                      {users && Array.isArray(users) && users.length > 0 ? (
+                                        users.map((u: any) => (
+                                          <SelectItem key={u.id} value={u.id}>{u.username}</SelectItem>
+                                        ))
+                                      ) : (
+                                        <SelectItem value="" disabled>Oyuncular yükleniyor...</SelectItem>
+                                      )}
                                     </SelectContent>
                                   </Select>
                                   <Button
@@ -2227,7 +2235,7 @@ export default function ManagementPanelPage() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  setMatchGoals([...matchGoals, { playerId: "", minute: 0, isHomeTeam: true }]);
+                                  setMatchGoals([...(matchGoals || []), { playerId: "", minute: 0, isHomeTeam: true }]);
                                 }}
                               >
                                 <Plus className="w-4 h-4 mr-1" />
@@ -2244,7 +2252,12 @@ export default function ManagementPanelPage() {
                                       id: fixture.id,
                                       homeScore: parseInt(homeScore),
                                       awayScore: parseInt(awayScore),
-                                      goals: matchGoals.filter(g => g.playerId && g.minute > 0),
+                                      goals: (matchGoals || []).filter((g: any) => g.playerId && g.minute > 0).map((g: any) => ({
+                                        playerId: g.playerId,
+                                        minute: g.minute,
+                                        assistPlayerId: g.assistPlayerId || undefined,
+                                        isHomeTeam: g.isHomeTeam,
+                                      })),
                                       matchRecordingUrl: matchRecordingUrl || undefined,
                                       isPostponed: isPostponed,
                                     });
@@ -2279,12 +2292,16 @@ export default function ManagementPanelPage() {
                                 setSelectedFixture(fixture);
                                 setHomeScore(fixture.homeScore?.toString() || "");
                                 setAwayScore(fixture.awayScore?.toString() || "");
-                                setMatchGoals(fixture.goals?.map((g: any) => ({
-                                  playerId: g.playerId,
-                                  minute: g.minute,
-                                  assistPlayerId: g.assistPlayerId,
-                                  isHomeTeam: g.isHomeTeam,
-                                })) || []);
+                                setMatchGoals(
+                                  fixture.goals && Array.isArray(fixture.goals) 
+                                    ? fixture.goals.map((g: any) => ({
+                                        playerId: g.playerId || g.player?.id || "",
+                                        minute: g.minute || 0,
+                                        assistPlayerId: g.assistPlayerId || g.assistPlayer?.id || undefined,
+                                        isHomeTeam: g.isHomeTeam || false,
+                                      }))
+                                    : []
+                                );
                                 setMatchRecordingUrl(fixture.matchRecordingUrl || "");
                                 setIsPostponed(fixture.isPostponed || false);
                               }}
@@ -2322,8 +2339,10 @@ export default function ManagementPanelPage() {
                         )}
                       </div>
                       );
-                    })}
-                    {!leagueFixtures?.length && (
+                    }) : (
+                      <p className="text-center text-muted-foreground py-4">Yükleniyor...</p>
+                    )}
+                    {leagueFixtures && Array.isArray(leagueFixtures) && leagueFixtures.length === 0 && (
                       <p className="text-center text-muted-foreground py-4">Henüz maç eklenmedi</p>
                     )}
                   </div>
