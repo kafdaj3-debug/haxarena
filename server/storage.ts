@@ -160,7 +160,7 @@ export interface IStorage {
   deleteLeagueFixture(id: string): Promise<void>;
   
   // Match goals operations
-  getMatchGoals(fixtureId: string): Promise<(MatchGoal & { player: User; assistPlayer: User | null })[]>;
+  getMatchGoals(fixtureId: string): Promise<(MatchGoal & { player: User | null; playerName: string | null; assistPlayer: User | null; assistPlayerName: string | null })[]>;
   createMatchGoal(goal: InsertMatchGoal): Promise<MatchGoal>;
   deleteMatchGoalsByFixture(fixtureId: string): Promise<void>;
   
@@ -1358,9 +1358,13 @@ export class DBStorage implements IStorage {
     // Delete existing goals for this fixture
     await this.deleteMatchGoalsByFixture(id);
 
-    // Insert new goals
+    // Insert new goals with fixtureId
     if (goals.length > 0) {
-      await db.insert(matchGoals).values(goals);
+      const goalsWithFixtureId = goals.map(goal => ({
+        ...goal,
+        fixtureId: id,
+      }));
+      await db.insert(matchGoals).values(goalsWithFixtureId);
     }
 
     // Update fixture
@@ -1394,17 +1398,19 @@ export class DBStorage implements IStorage {
   }
 
   // Match goals operations
-  async getMatchGoals(fixtureId: string): Promise<(MatchGoal & { player: User; assistPlayer: User | null })[]> {
+  async getMatchGoals(fixtureId: string): Promise<(MatchGoal & { player: User | null; playerName: string | null; assistPlayer: User | null; assistPlayerName: string | null })[]> {
     const goals = await db.select().from(matchGoals).where(eq(matchGoals.fixtureId, fixtureId));
     
     const goalsWithPlayers = await Promise.all(
       goals.map(async (goal) => {
-        const player = await this.getUser(goal.playerId);
+        const player = goal.playerId ? await this.getUser(goal.playerId) : null;
         const assistPlayer = goal.assistPlayerId ? await this.getUser(goal.assistPlayerId) : null;
         return {
           ...goal,
-          player: player!,
+          player: player || null,
+          playerName: goal.playerName || null,
           assistPlayer: assistPlayer || null,
+          assistPlayerName: goal.assistPlayerName || null,
         };
       })
     );

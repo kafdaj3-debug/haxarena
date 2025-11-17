@@ -68,7 +68,7 @@ export default function ManagementPanelPage() {
   const [selectedFixture, setSelectedFixture] = useState<any>(null);
   const [homeScore, setHomeScore] = useState("");
   const [awayScore, setAwayScore] = useState("");
-  const [matchGoals, setMatchGoals] = useState<Array<{ playerId: string; minute: number; assistPlayerId?: string; isHomeTeam: boolean }>>([]);
+  const [matchGoals, setMatchGoals] = useState<Array<{ playerName: string; minute: number; assistPlayerName?: string; isHomeTeam: boolean }>>([]);
   const [matchRecordingUrl, setMatchRecordingUrl] = useState("");
   const [isPostponed, setIsPostponed] = useState(false);
   const [editingDateFixtureId, setEditingDateFixtureId] = useState<string | null>(null);
@@ -2163,33 +2163,23 @@ export default function ManagementPanelPage() {
                                   }
                                   return (
                                     <div key={index} className="flex items-center gap-2 p-2 border rounded bg-background">
-                                      <Select
-                                        value={goal?.playerId || "none"}
-                                        onValueChange={(value) => {
+                                      <Input
+                                        type="text"
+                                        placeholder="Gol atan oyuncu ismi"
+                                        value={goal?.playerName || ""}
+                                        onChange={(e) => {
                                           try {
                                             const newGoals = [...(matchGoals || [])];
-                                            if (newGoals[index] && value !== "none" && value !== "loading") {
-                                              newGoals[index] = { ...newGoals[index], playerId: value };
+                                            if (newGoals[index]) {
+                                              newGoals[index] = { ...newGoals[index], playerName: e.target.value };
                                               setMatchGoals(newGoals);
                                             }
                                           } catch (error) {
-                                            console.error("Error updating goal playerId:", error);
+                                            console.error("Error updating goal playerName:", error);
                                           }
                                         }}
-                                      >
-                                        <SelectTrigger className="w-40">
-                                          <SelectValue placeholder="Oyuncu" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {users && Array.isArray(users) && users.length > 0 ? (
-                                            users.map((u: any) => (
-                                              <SelectItem key={u?.id || `user-${index}`} value={u?.id || `no-id-${index}`}>{u?.username || "Bilinmeyen"}</SelectItem>
-                                            ))
-                                          ) : (
-                                            <SelectItem value="loading" disabled>Oyuncular yükleniyor...</SelectItem>
-                                          )}
-                                        </SelectContent>
-                                      </Select>
+                                        className="w-40"
+                                      />
                                       <Input
                                         type="number"
                                         min="1"
@@ -2231,34 +2221,23 @@ export default function ManagementPanelPage() {
                                           <SelectItem value="away">Deplasman</SelectItem>
                                         </SelectContent>
                                       </Select>
-                                      <Select
-                                        value={goal?.assistPlayerId || "none"}
-                                        onValueChange={(value) => {
+                                      <Input
+                                        type="text"
+                                        placeholder="Asist yapan oyuncu ismi (opsiyonel)"
+                                        value={goal?.assistPlayerName || ""}
+                                        onChange={(e) => {
                                           try {
                                             const newGoals = [...(matchGoals || [])];
                                             if (newGoals[index]) {
-                                              newGoals[index] = { ...newGoals[index], assistPlayerId: value === "none" || value === "loading-assist" ? undefined : value };
+                                              newGoals[index] = { ...newGoals[index], assistPlayerName: e.target.value || undefined };
                                               setMatchGoals(newGoals);
                                             }
                                           } catch (error) {
-                                            console.error("Error updating goal assistPlayerId:", error);
+                                            console.error("Error updating goal assistPlayerName:", error);
                                           }
                                         }}
-                                      >
-                                        <SelectTrigger className="w-40">
-                                          <SelectValue placeholder="Asist (Opsiyonel)" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="none">Asist Yok</SelectItem>
-                                          {users && Array.isArray(users) && users.length > 0 ? (
-                                            users.map((u: any) => (
-                                              <SelectItem key={u?.id || `assist-${index}`} value={u?.id || `no-id-assist-${index}`}>{u?.username || "Bilinmeyen"}</SelectItem>
-                                            ))
-                                          ) : (
-                                            <SelectItem value="loading-assist" disabled>Oyuncular yükleniyor...</SelectItem>
-                                          )}
-                                        </SelectContent>
-                                      </Select>
+                                        className="w-40"
+                                      />
                                       <Button
                                         size="sm"
                                         variant="ghost"
@@ -2288,10 +2267,9 @@ export default function ManagementPanelPage() {
                                     toast({ title: "Hata", description: "Gol eklenirken bir hata oluştu", variant: "destructive" });
                                   }
                                 }}
-                                disabled={usersLoading || !users || !Array.isArray(users) || users.length === 0}
                               >
                                 <Plus className="w-4 h-4 mr-1" />
-                                Gol Ekle {usersLoading && "(Yükleniyor...)"}
+                                Gol Ekle
                               </Button>
                             </div>
 
@@ -2302,11 +2280,11 @@ export default function ManagementPanelPage() {
                                   try {
                                     if (homeScore !== "" && awayScore !== "") {
                                       const validGoals = (matchGoals || [])
-                                        .filter((g: any) => g && typeof g === 'object' && g.playerId && g.minute > 0)
+                                        .filter((g: any) => g && typeof g === 'object' && g.playerName && g.playerName.trim() && g.minute > 0)
                                         .map((g: any) => ({
-                                          playerId: g.playerId,
+                                          playerName: g.playerName.trim(),
                                           minute: g.minute,
-                                          assistPlayerId: g.assistPlayerId || undefined,
+                                          assistPlayerName: g.assistPlayerName?.trim() || undefined,
                                           isHomeTeam: g.isHomeTeam || false,
                                         }));
                                       
@@ -2360,14 +2338,14 @@ export default function ManagementPanelPage() {
                                   setAwayScore(fixture?.awayScore?.toString() || "");
                                   
                                   // Goals'i güvenli şekilde yükle
-                                  let loadedGoals: Array<{ playerId: string; minute: number; assistPlayerId?: string; isHomeTeam: boolean }> = [];
+                                  let loadedGoals: Array<{ playerName: string; minute: number; assistPlayerName?: string; isHomeTeam: boolean }> = [];
                                   if (fixture?.goals && Array.isArray(fixture.goals)) {
                                     loadedGoals = fixture.goals
                                       .filter((g: any) => g && typeof g === 'object')
                                       .map((g: any) => ({
-                                        playerId: g.playerId || g.player?.id || "",
+                                        playerName: g.playerName || g.player?.username || "",
                                         minute: g.minute || 0,
-                                        assistPlayerId: g.assistPlayerId || g.assistPlayer?.id || undefined,
+                                        assistPlayerName: g.assistPlayerName || g.assistPlayer?.username || undefined,
                                         isHomeTeam: g.isHomeTeam !== undefined ? g.isHomeTeam : false,
                                       }));
                                   }

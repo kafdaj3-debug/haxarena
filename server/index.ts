@@ -580,9 +580,11 @@ app.use((req, res, next) => {
         CREATE TABLE IF NOT EXISTS match_goals (
           id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
           fixture_id VARCHAR NOT NULL REFERENCES league_fixtures(id) ON DELETE CASCADE,
-          player_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          player_id VARCHAR REFERENCES users(id) ON DELETE CASCADE,
+          player_name VARCHAR,
           minute INTEGER NOT NULL,
           assist_player_id VARCHAR REFERENCES users(id) ON DELETE SET NULL,
+          assist_player_name VARCHAR,
           is_home_team BOOLEAN NOT NULL,
           created_at TIMESTAMP NOT NULL DEFAULT NOW()
         )
@@ -600,6 +602,15 @@ app.use((req, res, next) => {
       } catch (error) {
         // Column might already exist, ignore error
         console.log("Fixture columns migration:", error instanceof Error ? error.message : String(error));
+      }
+
+      // Match goals columns migration - add player_name and assist_player_name, make player_id nullable
+      try {
+        await db.execute(sql`ALTER TABLE match_goals ADD COLUMN IF NOT EXISTS player_name VARCHAR`);
+        await db.execute(sql`ALTER TABLE match_goals ADD COLUMN IF NOT EXISTS assist_player_name VARCHAR`);
+        await db.execute(sql`ALTER TABLE match_goals ALTER COLUMN player_id DROP NOT NULL`);
+      } catch (error) {
+        console.log("Match goals columns migration:", error instanceof Error ? error.message : String(error));
       }
       
       await db.execute(sql`

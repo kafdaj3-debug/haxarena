@@ -376,10 +376,10 @@ export default function LeaguePage() {
                                       .map((goal: any, idx: number) => (
                                         <div key={idx} className="text-xs flex items-center gap-2">
                                           <span className="font-medium">{goal.minute}'</span>
-                                          <span>{goal.player?.username || "Bilinmeyen"}</span>
-                                          {goal.assistPlayer && (
+                                          <span>{goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
+                                          {(goal.assistPlayerName || goal.assistPlayer) && (
                                             <span className="text-muted-foreground">
-                                              (Asist: {goal.assistPlayer.username})
+                                              (Asist: {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"})
                                             </span>
                                           )}
                                           <span className={`text-xs px-1.5 py-0.5 rounded ${goal.isHomeTeam ? "bg-blue-100 text-blue-700" : "bg-red-100 text-red-700"}`}>
@@ -557,10 +557,10 @@ export default function LeaguePage() {
                                         .map((goal: any, idx: number) => (
                                           <div key={idx} className="text-xs text-center">
                                             <span className="font-medium">{goal.minute}'</span>
-                                            <span> {goal.player?.username || "Bilinmeyen"}</span>
-                                            {goal.assistPlayer && (
+                                            <span> {goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
+                                            {(goal.assistPlayerName || goal.assistPlayer) && (
                                               <span className="text-muted-foreground">
-                                                {" "}(Asist: {goal.assistPlayer.username})
+                                                {" "}(Asist: {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"})
                                               </span>
                                             )}
                                           </div>

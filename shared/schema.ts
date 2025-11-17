@@ -196,9 +196,11 @@ export const leagueFixtures = pgTable("league_fixtures", {
 export const matchGoals = pgTable("match_goals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   fixtureId: varchar("fixture_id").notNull().references(() => leagueFixtures.id, { onDelete: "cascade" }),
-  playerId: varchar("player_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  playerId: varchar("player_id").references(() => users.id, { onDelete: "cascade" }), // Nullable - artık isim yazılacak
+  playerName: varchar("player_name"), // Oyuncu ismi (serbest metin)
   minute: integer("minute").notNull(), // Kaçıncı dakikada
   assistPlayerId: varchar("assist_player_id").references(() => users.id, { onDelete: "set null" }), // Asist yapan oyuncu (nullable)
+  assistPlayerName: varchar("assist_player_name"), // Asist yapan oyuncu ismi (serbest metin)
   isHomeTeam: boolean("is_home_team").notNull(), // Ev sahibi takımın golü mü
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
