@@ -2164,11 +2164,11 @@ export default function ManagementPanelPage() {
                                   return (
                                     <div key={index} className="flex items-center gap-2 p-2 border rounded bg-background">
                                       <Select
-                                        value={goal?.playerId || ""}
+                                        value={goal?.playerId || "none"}
                                         onValueChange={(value) => {
                                           try {
                                             const newGoals = [...(matchGoals || [])];
-                                            if (newGoals[index]) {
+                                            if (newGoals[index] && value !== "none" && value !== "loading") {
                                               newGoals[index] = { ...newGoals[index], playerId: value };
                                               setMatchGoals(newGoals);
                                             }
@@ -2232,12 +2232,12 @@ export default function ManagementPanelPage() {
                                         </SelectContent>
                                       </Select>
                                       <Select
-                                        value={goal?.assistPlayerId || ""}
+                                        value={goal?.assistPlayerId || "none"}
                                         onValueChange={(value) => {
                                           try {
                                             const newGoals = [...(matchGoals || [])];
                                             if (newGoals[index]) {
-                                              newGoals[index] = { ...newGoals[index], assistPlayerId: value || undefined };
+                                              newGoals[index] = { ...newGoals[index], assistPlayerId: value === "none" || value === "loading-assist" ? undefined : value };
                                               setMatchGoals(newGoals);
                                             }
                                           } catch (error) {
