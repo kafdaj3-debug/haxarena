@@ -178,13 +178,15 @@ export const leagueTeams = pgTable("league_teams", {
 
 export const leagueFixtures = pgTable("league_fixtures", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  homeTeamId: varchar("home_team_id").notNull().references(() => leagueTeams.id, { onDelete: "cascade" }),
-  awayTeamId: varchar("away_team_id").notNull().references(() => leagueTeams.id, { onDelete: "cascade" }),
+  homeTeamId: varchar("home_team_id").references(() => leagueTeams.id, { onDelete: "cascade" }), // Nullable for BAY
+  awayTeamId: varchar("away_team_id").references(() => leagueTeams.id, { onDelete: "cascade" }), // Nullable for BAY
   homeScore: integer("home_score"),
   awayScore: integer("away_score"),
   matchDate: timestamp("match_date").notNull(),
   isPlayed: boolean("is_played").notNull().default(false),
   week: integer("week").notNull(),
+  isBye: boolean("is_bye").notNull().default(false),
+  byeSide: varchar("bye_side"), // "home" or "away" - which team gets the bye
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

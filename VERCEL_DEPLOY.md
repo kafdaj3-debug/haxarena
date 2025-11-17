@@ -125,3 +125,5 @@ Deploy başarılı olduğunda:
 - Her GitHub push'unda otomatik deploy yapılacak
 
 
+
+

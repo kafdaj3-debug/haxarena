@@ -242,3 +242,5 @@ Kurulum tamamlandığında:
 Good luck! 🚀
 
 
+
+

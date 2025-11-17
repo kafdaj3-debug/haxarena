@@ -96,3 +96,5 @@ Domain'iniz başka bir yerden alındıysa (Anksoft'tan değilse):
 5. DNS yayıldıktan sonra site çalışacak
 
 
+
+

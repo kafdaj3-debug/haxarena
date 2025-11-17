@@ -274,12 +274,15 @@ export default function LeaguePage() {
                           const matchDate = fixture.matchDate ? new Date(fixture.matchDate) : new Date();
                           const isToday = matchDate.toDateString() === new Date().toDateString();
                           const isPast = matchDate < new Date();
+                          const isBye = fixture.isBye;
                           
                           return (
                             <div 
                               key={fixture.id} 
                               className={`p-5 border-2 rounded-xl transition-all hover:shadow-lg ${
-                                isToday 
+                                isBye
+                                  ? "border-blue-500/30 bg-blue-500/10"
+                                  : isToday 
                                   ? "border-primary bg-primary/10 shadow-md" 
                                   : isPast
                                   ? "border-muted bg-muted/30"
@@ -289,22 +292,34 @@ export default function LeaguePage() {
                             >
                               <div className="flex items-center justify-between gap-4 mb-3">
                                 <div className="flex items-center gap-4 flex-1">
-                                  {fixture.homeTeam.logo && (
+                                  {isBye && fixture.byeSide === "home" ? (
+                                    <div className="w-14 h-14 flex items-center justify-center bg-blue-500/20 rounded-lg border-2 border-blue-500/50">
+                                      <span className="font-bold text-blue-600 text-lg">BAY</span>
+                                    </div>
+                                  ) : fixture.homeTeam?.logo ? (
                                     <img 
                                       src={fixture.homeTeam.logo} 
                                       alt={fixture.homeTeam.name} 
                                       className="w-14 h-14 object-contain"
                                     />
-                                  )}
+                                  ) : null}
                                   <div className="flex-1 text-right">
-                                    <span className={`font-bold text-lg ${fixture.isPlayed && fixture.homeScore > fixture.awayScore ? "text-green-600" : ""}`}>
-                                      {fixture.homeTeam.name}
-                                    </span>
+                                    {isBye && fixture.byeSide === "home" ? (
+                                      <span className="font-bold text-lg text-blue-600">BAY</span>
+                                    ) : (
+                                      <span className={`font-bold text-lg ${fixture.isPlayed && fixture.homeScore > fixture.awayScore ? "text-green-600" : ""}`}>
+                                        {fixture.homeTeam?.name || "BAY"}
+                                      </span>
+                                    )}
                                   </div>
                                 </div>
                                 
                                 <div className="flex flex-col items-center justify-center min-w-[120px]">
-                                  {fixture.isPlayed ? (
+                                  {isBye ? (
+                                    <div className="text-2xl font-bold text-blue-600 bg-blue-500/20 px-4 py-2 rounded-lg border-2 border-blue-500/50">
+                                      BAY GEÇME
+                                    </div>
+                                  ) : fixture.isPlayed ? (
                                     <div className="text-3xl font-bold flex items-center gap-2">
                                       <span className={fixture.homeScore > fixture.awayScore ? "text-green-600" : fixture.homeScore < fixture.awayScore ? "text-muted-foreground" : "text-blue-600"}>
                                         {fixture.homeScore}
@@ -317,7 +332,7 @@ export default function LeaguePage() {
                                   ) : (
                                     <span className="text-xl font-bold text-muted-foreground">VS</span>
                                   )}
-                                  {isToday && !fixture.isPlayed && (
+                                  {isToday && !fixture.isPlayed && !isBye && (
                                     <span className="text-xs font-semibold text-primary mt-1 bg-primary/20 px-2 py-1 rounded-full">
                                       BUGÜN
                                     </span>
@@ -326,17 +341,25 @@ export default function LeaguePage() {
                                 
                                 <div className="flex items-center gap-4 flex-1">
                                   <div className="flex-1">
-                                    <span className={`font-bold text-lg ${fixture.isPlayed && fixture.awayScore > fixture.homeScore ? "text-green-600" : ""}`}>
-                                      {fixture.awayTeam.name}
-                                    </span>
+                                    {isBye && fixture.byeSide === "away" ? (
+                                      <span className="font-bold text-lg text-blue-600">BAY</span>
+                                    ) : (
+                                      <span className={`font-bold text-lg ${fixture.isPlayed && fixture.awayScore > fixture.homeScore ? "text-green-600" : ""}`}>
+                                        {fixture.awayTeam?.name || "BAY"}
+                                      </span>
+                                    )}
                                   </div>
-                                  {fixture.awayTeam.logo && (
+                                  {isBye && fixture.byeSide === "away" ? (
+                                    <div className="w-14 h-14 flex items-center justify-center bg-blue-500/20 rounded-lg border-2 border-blue-500/50">
+                                      <span className="font-bold text-blue-600 text-lg">BAY</span>
+                                    </div>
+                                  ) : fixture.awayTeam?.logo ? (
                                     <img 
                                       src={fixture.awayTeam.logo} 
                                       alt={fixture.awayTeam.name} 
                                       className="w-14 h-14 object-contain"
                                     />
-                                  )}
+                                  ) : null}
                                 </div>
                               </div>
                               
@@ -378,26 +401,40 @@ export default function LeaguePage() {
                       <CardTitle>{week}. Hafta</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {fixturesByWeek[parseInt(week)].map((fixture: any) => (
+                      {fixturesByWeek[parseInt(week)].map((fixture: any) => {
+                        const isBye = fixture.isBye;
+                        return (
                         <div 
                           key={fixture.id} 
-                          className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                          className={`p-4 border rounded-lg hover:bg-muted/50 transition-colors ${isBye ? "border-blue-500/30 bg-blue-500/10" : ""}`}
                           data-testid={`fixture-${fixture.id}`}
                         >
                           <div className="flex items-center justify-between gap-4">
                             <div className="flex items-center gap-3 flex-1">
-                              {fixture.homeTeam.logo && (
+                              {isBye && fixture.byeSide === "home" ? (
+                                <div className="w-10 h-10 flex items-center justify-center bg-blue-500/20 rounded border border-blue-500/50">
+                                  <span className="font-bold text-blue-600 text-xs">BAY</span>
+                                </div>
+                              ) : fixture.homeTeam?.logo ? (
                                 <img 
                                   src={fixture.homeTeam.logo} 
                                   alt={fixture.homeTeam.name} 
                                   className="w-10 h-10 object-contain"
                                 />
-                              )}
-                              <span className="font-medium text-right flex-1">{fixture.homeTeam.name}</span>
+                              ) : null}
+                              <span className="font-medium text-right flex-1">
+                                {isBye && fixture.byeSide === "home" ? (
+                                  <span className="text-blue-600 font-bold">BAY</span>
+                                ) : (
+                                  fixture.homeTeam?.name || "BAY"
+                                )}
+                              </span>
                             </div>
                             
                             <div className="flex items-center justify-center min-w-[100px]">
-                              {fixture.isPlayed ? (
+                              {isBye ? (
+                                <span className="text-blue-600 font-bold text-sm bg-blue-500/20 px-3 py-1 rounded border border-blue-500/50">BAY GEÇME</span>
+                              ) : fixture.isPlayed ? (
                                 <div className="text-2xl font-bold flex items-center gap-2">
                                   <span className={fixture.homeScore > fixture.awayScore ? "text-green-600" : fixture.homeScore < fixture.awayScore ? "text-muted-foreground" : ""}>
                                     {fixture.homeScore}
@@ -413,30 +450,42 @@ export default function LeaguePage() {
                             </div>
                             
                             <div className="flex items-center gap-3 flex-1">
-                              <span className="font-medium flex-1">{fixture.awayTeam.name}</span>
-                              {fixture.awayTeam.logo && (
+                              <span className="font-medium flex-1">
+                                {isBye && fixture.byeSide === "away" ? (
+                                  <span className="text-blue-600 font-bold">BAY</span>
+                                ) : (
+                                  fixture.awayTeam?.name || "BAY"
+                                )}
+                              </span>
+                              {isBye && fixture.byeSide === "away" ? (
+                                <div className="w-10 h-10 flex items-center justify-center bg-blue-500/20 rounded border border-blue-500/50">
+                                  <span className="font-bold text-blue-600 text-xs">BAY</span>
+                                </div>
+                              ) : fixture.awayTeam?.logo ? (
                                 <img 
                                   src={fixture.awayTeam.logo} 
                                   alt={fixture.awayTeam.name} 
                                   className="w-10 h-10 object-contain"
                                 />
-                              )}
+                              ) : null}
                             </div>
-                          </div>
-                          
-                          <div className="mt-3 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                            <Calendar className="w-4 h-4" />
-                            <span>{new Date(fixture.matchDate).toLocaleString('tr-TR', {
-                              day: 'numeric',
-                              month: 'long',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                              timeZone: 'Europe/Istanbul'
-                            })}</span>
+                            {!isBye && (
+                              <div className="mt-3 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                                <Calendar className="w-4 h-4" />
+                                <span>{new Date(fixture.matchDate).toLocaleString('tr-TR', {
+                                  day: 'numeric',
+                                  month: 'long',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                  timeZone: 'Europe/Istanbul'
+                                })}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </CardContent>
                   </Card>
                 ))}

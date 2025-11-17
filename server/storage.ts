@@ -148,8 +148,8 @@ export interface IStorage {
   updateLeagueTeam(id: string, updates: Partial<LeagueTeam>): Promise<LeagueTeam | undefined>;
   deleteLeagueTeam(id: string): Promise<void>;
   
-  getLeagueFixtures(): Promise<(LeagueFixture & { homeTeam: LeagueTeam; awayTeam: LeagueTeam })[]>;
-  getLeagueFixture(id: string): Promise<(LeagueFixture & { homeTeam: LeagueTeam; awayTeam: LeagueTeam }) | undefined>;
+  getLeagueFixtures(): Promise<(LeagueFixture & { homeTeam: LeagueTeam | null; awayTeam: LeagueTeam | null })[]>;
+  getLeagueFixture(id: string): Promise<(LeagueFixture & { homeTeam: LeagueTeam | null; awayTeam: LeagueTeam | null }) | undefined>;
   createLeagueFixture(fixture: InsertLeagueFixture): Promise<LeagueFixture>;
   updateLeagueFixtureScore(id: string, homeScore: number, awayScore: number): Promise<LeagueFixture | undefined>;
   deleteLeagueFixture(id: string): Promise<void>;
@@ -1157,18 +1157,18 @@ export class DBStorage implements IStorage {
     await db.delete(leagueTeams).where(eq(leagueTeams.id, id));
   }
 
-  async getLeagueFixtures(): Promise<(LeagueFixture & { homeTeam: LeagueTeam; awayTeam: LeagueTeam })[]> {
+  async getLeagueFixtures(): Promise<(LeagueFixture & { homeTeam: LeagueTeam | null; awayTeam: LeagueTeam | null })[]> {
     const { asc } = await import("drizzle-orm");
     const fixtures = await db.select().from(leagueFixtures).orderBy(asc(leagueFixtures.week), asc(leagueFixtures.matchDate));
     
     const fixturesWithTeams = await Promise.all(
       fixtures.map(async (fixture) => {
-        const homeTeam = await this.getLeagueTeam(fixture.homeTeamId);
-        const awayTeam = await this.getLeagueTeam(fixture.awayTeamId);
+        const homeTeam = fixture.homeTeamId ? await this.getLeagueTeam(fixture.homeTeamId) : null;
+        const awayTeam = fixture.awayTeamId ? await this.getLeagueTeam(fixture.awayTeamId) : null;
         return {
           ...fixture,
-          homeTeam: homeTeam!,
-          awayTeam: awayTeam!,
+          homeTeam: homeTeam || null,
+          awayTeam: awayTeam || null,
         };
       })
     );
@@ -1176,17 +1176,17 @@ export class DBStorage implements IStorage {
     return fixturesWithTeams;
   }
 
-  async getLeagueFixture(id: string): Promise<(LeagueFixture & { homeTeam: LeagueTeam; awayTeam: LeagueTeam }) | undefined> {
+  async getLeagueFixture(id: string): Promise<(LeagueFixture & { homeTeam: LeagueTeam | null; awayTeam: LeagueTeam | null }) | undefined> {
     const [fixture] = await db.select().from(leagueFixtures).where(eq(leagueFixtures.id, id)).limit(1);
     if (!fixture) return undefined;
     
-    const homeTeam = await this.getLeagueTeam(fixture.homeTeamId);
-    const awayTeam = await this.getLeagueTeam(fixture.awayTeamId);
+    const homeTeam = fixture.homeTeamId ? await this.getLeagueTeam(fixture.homeTeamId) : null;
+    const awayTeam = fixture.awayTeamId ? await this.getLeagueTeam(fixture.awayTeamId) : null;
     
     return {
       ...fixture,
-      homeTeam: homeTeam!,
-      awayTeam: awayTeam!,
+      homeTeam: homeTeam || null,
+      awayTeam: awayTeam || null,
     };
   }
 
@@ -1199,8 +1199,13 @@ export class DBStorage implements IStorage {
     const fixture = await this.getLeagueFixture(id);
     if (!fixture) return undefined;
 
+    // BAY geçme durumunda skor güncellemesi yapılamaz
+    if (fixture.isBye) {
+      throw new Error("BAY geçme durumunda skor güncellenemez");
+    }
+
     // If match was already played, revert the previous score effects
-    if (fixture.isPlayed && fixture.homeScore !== null && fixture.awayScore !== null) {
+    if (fixture.isPlayed && fixture.homeScore !== null && fixture.awayScore !== null && fixture.homeTeamId && fixture.awayTeamId) {
       await this.revertMatchResult(fixture.homeTeamId, fixture.awayTeamId, fixture.homeScore, fixture.awayScore);
     }
 
@@ -1214,8 +1219,10 @@ export class DBStorage implements IStorage {
       week: fixture.week,
     }).where(eq(leagueFixtures.id, id));
 
-    // Update team standings
-    await this.updateTeamStandings(fixture.homeTeamId, fixture.awayTeamId, homeScore, awayScore);
+    // Update team standings (only if both teams exist)
+    if (fixture.homeTeamId && fixture.awayTeamId) {
+      await this.updateTeamStandings(fixture.homeTeamId, fixture.awayTeamId, homeScore, awayScore);
+    }
 
     const [updated] = await db.select().from(leagueFixtures).where(eq(leagueFixtures.id, id)).limit(1);
     return updated;

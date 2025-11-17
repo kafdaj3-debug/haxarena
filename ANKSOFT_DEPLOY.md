@@ -197,3 +197,5 @@ Deploy başarılı olduğunda:
 - Backend'e bağlanabilecek
 
 
+
+

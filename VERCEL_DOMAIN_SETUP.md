@@ -135,3 +135,5 @@ Domain başarıyla bağlandığında:
 - Her GitHub push'unda otomatik deploy yapılacak
 
 
+
+

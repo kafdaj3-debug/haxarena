@@ -1574,26 +1574,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create fixture (super admin only)
   app.post("/api/league/fixtures", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
     try {
-      const { homeTeamId, awayTeamId, matchDate, week } = req.body;
-      if (!homeTeamId || !awayTeamId || !matchDate || !week) {
-        return res.status(400).json({ error: "Tüm alanlar gereklidir" });
+      const { homeTeamId, awayTeamId, matchDate, week, isBye, byeSide } = req.body;
+      
+      // BAY geçme durumu kontrolü
+      if (isBye) {
+        // BAY geçme için byeSide gereklidir
+        if (!byeSide || (byeSide !== "home" && byeSide !== "away")) {
+          return res.status(400).json({ error: "BAY geçme tarafı belirtilmelidir (home veya away)" });
+        }
+        // BAY geçen tarafın takımı null olmalı, diğer taraf seçilmeli
+        if (byeSide === "home") {
+          if (!awayTeamId) {
+            return res.status(400).json({ error: "Deplasman takımı seçilmelidir" });
+          }
+          if (homeTeamId) {
+            return res.status(400).json({ error: "BAY geçen takım (ev sahibi) seçilmemelidir" });
+          }
+        } else {
+          if (!homeTeamId) {
+            return res.status(400).json({ error: "Ev sahibi takım seçilmelidir" });
+          }
+          if (awayTeamId) {
+            return res.status(400).json({ error: "BAY geçen takım (deplasman) seçilmemelidir" });
+          }
+        }
+      } else {
+        // Normal maç için her iki takım da gereklidir
+        if (!homeTeamId || !awayTeamId || !matchDate || !week) {
+          return res.status(400).json({ error: "Tüm alanlar gereklidir" });
+        }
       }
       
       // Parse matchDate as Turkey local time (GMT+3)
       // Input format: "2025-01-30T20:00"
       // We need to convert this to UTC for database storage
-      const [datePart, timePart] = matchDate.split('T');
-      const [year, month, day] = datePart.split('-').map(Number);
-      const [hour, minute] = timePart.split(':').map(Number);
-      
-      // Create date in UTC, then subtract 3 hours to convert Turkey time to UTC
-      const turkeyDate = new Date(Date.UTC(year, month - 1, day, hour - 3, minute, 0));
+      let turkeyDate: Date;
+      if (matchDate) {
+        const [datePart, timePart] = matchDate.split('T');
+        const [year, month, day] = datePart.split('-').map(Number);
+        const [hour, minute] = timePart.split(':').map(Number);
+        
+        // Create date in UTC, then subtract 3 hours to convert Turkey time to UTC
+        turkeyDate = new Date(Date.UTC(year, month - 1, day, hour - 3, minute, 0));
+      } else {
+        // BAY geçme için tarih yoksa bugünü kullan
+        turkeyDate = new Date();
+      }
       
       const fixture = await storage.createLeagueFixture({ 
-        homeTeamId, 
-        awayTeamId, 
+        homeTeamId: isBye && byeSide === "home" ? null : (homeTeamId || undefined), // BAY geçme için null
+        awayTeamId: isBye && byeSide === "away" ? null : (awayTeamId || undefined), // BAY geçme için null
         matchDate: turkeyDate, 
-        week 
+        week,
+        isBye: isBye || false,
+        byeSide: byeSide || null
       });
       return res.json(fixture);
     } catch (error) {

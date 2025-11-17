@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -62,6 +63,8 @@ export default function ManagementPanelPage() {
     return getLocalDateTimeString(now);
   });
   const [week, setWeek] = useState("");
+  const [isBye, setIsBye] = useState(false);
+  const [byeSide, setByeSide] = useState<"home" | "away" | "">("");
   const [selectedFixture, setSelectedFixture] = useState<any>(null);
   const [homeScore, setHomeScore] = useState("");
   const [awayScore, setAwayScore] = useState("");
@@ -503,11 +506,11 @@ export default function ManagementPanelPage() {
   });
 
   const createFixtureMutation = useMutation({
-    mutationFn: async (data: { homeTeamId: string; awayTeamId: string; matchDate: string; week: number }) => {
+    mutationFn: async (data: { homeTeamId?: string; awayTeamId?: string; matchDate?: string; week: number; isBye?: boolean; byeSide?: string }) => {
       return await apiRequest("POST", "/api/league/fixtures", data);
     },
     onSuccess: () => {
-      toast({ title: "Başarılı", description: "Maç oluşturuldu" });
+      toast({ title: "Başarılı", description: isBye ? "BAY geçme oluşturuldu" : "Maç oluşturuldu" });
       queryClient.invalidateQueries({ queryKey: ["/api/league/fixtures"] });
       setHomeTeamId("");
       setAwayTeamId("");
@@ -516,9 +519,11 @@ export default function ManagementPanelPage() {
       now.setHours(20, 0, 0, 0);
       setMatchDate(getLocalDateTimeString(now));
       setWeek("");
+      setIsBye(false);
+      setByeSide("");
     },
     onError: () => {
-      toast({ title: "Hata", description: "Maç oluşturulamadı", variant: "destructive" });
+      toast({ title: "Hata", description: isBye ? "BAY geçme oluşturulamadı" : "Maç oluşturulamadı", variant: "destructive" });
     },
   });
 
@@ -1731,12 +1736,57 @@ export default function ManagementPanelPage() {
                 {/* Maç Oluşturma */}
                 <div className="space-y-4">
                   <h3 className="font-semibold">Maç Oluştur</h3>
+                  
+                  {/* BAY Geçme Checkbox */}
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="isBye" 
+                      checked={isBye} 
+                      onCheckedChange={(checked) => {
+                        setIsBye(checked as boolean);
+                        if (!checked) {
+                          setByeSide("");
+                          setHomeTeamId("");
+                          setAwayTeamId("");
+                        }
+                      }}
+                    />
+                    <Label htmlFor="isBye" className="cursor-pointer">BAY Geçme</Label>
+                  </div>
+
+                  {isBye && (
+                    <div className="space-y-2 p-4 border rounded-lg bg-muted/30">
+                      <Label>BAY Geçen Taraf</Label>
+                      <Select value={byeSide} onValueChange={(value) => {
+                        setByeSide(value as "home" | "away");
+                        // BAY geçen tarafı temizle
+                        if (value === "home") {
+                          setHomeTeamId("");
+                        } else {
+                          setAwayTeamId("");
+                        }
+                      }}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="BAY geçen tarafı seçin" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="home">Ev Sahibi (BAY)</SelectItem>
+                          <SelectItem value="away">Deplasman (BAY)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Ev Sahibi Takım</Label>
-                      <Select value={homeTeamId} onValueChange={setHomeTeamId}>
+                      <Label>Ev Sahibi Takım {isBye && byeSide === "home" && <span className="text-muted-foreground">(BAY)</span>}</Label>
+                      <Select 
+                        value={homeTeamId} 
+                        onValueChange={setHomeTeamId}
+                        disabled={isBye && byeSide === "home"}
+                      >
                         <SelectTrigger>
-                          <SelectValue placeholder="Takım seçin" />
+                          <SelectValue placeholder={isBye && byeSide === "home" ? "BAY geçen takım" : "Takım seçin"} />
                         </SelectTrigger>
                         <SelectContent>
                           {leagueTeams?.map((team: any) => (
@@ -1748,10 +1798,14 @@ export default function ManagementPanelPage() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Deplasman Takımı</Label>
-                      <Select value={awayTeamId} onValueChange={setAwayTeamId}>
+                      <Label>Deplasman Takımı {isBye && byeSide === "away" && <span className="text-muted-foreground">(BAY)</span>}</Label>
+                      <Select 
+                        value={awayTeamId} 
+                        onValueChange={setAwayTeamId}
+                        disabled={isBye && byeSide === "away"}
+                      >
                         <SelectTrigger>
-                          <SelectValue placeholder="Takım seçin" />
+                          <SelectValue placeholder={isBye && byeSide === "away" ? "BAY geçen takım" : "Takım seçin"} />
                         </SelectTrigger>
                         <SelectContent>
                           {leagueTeams?.filter((t: any) => t.id !== homeTeamId).map((team: any) => (
@@ -1763,7 +1817,7 @@ export default function ManagementPanelPage() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Maç Tarihi ve Saati</Label>
+                      <Label>Maç Tarihi ve Saati {isBye && <span className="text-muted-foreground text-xs">(Opsiyonel)</span>}</Label>
                       <div className="grid grid-cols-3 gap-2">
                         <div className="space-y-1">
                           <Input
@@ -1833,19 +1887,51 @@ export default function ManagementPanelPage() {
                   </div>
                   <Button
                     onClick={() => {
-                      if (homeTeamId && awayTeamId && matchDate && week) {
+                      if (isBye) {
+                        // BAY geçme için validasyon
+                        if (!byeSide || !week) {
+                          toast({ title: "Hata", description: "BAY geçme için taraf ve hafta gereklidir", variant: "destructive" });
+                          return;
+                        }
+                        if (byeSide === "home" && !awayTeamId) {
+                          toast({ title: "Hata", description: "Deplasman takımı seçilmelidir", variant: "destructive" });
+                          return;
+                        }
+                        if (byeSide === "away" && !homeTeamId) {
+                          toast({ title: "Hata", description: "Ev sahibi takım seçilmelidir", variant: "destructive" });
+                          return;
+                        }
+                        createFixtureMutation.mutate({
+                          homeTeamId: byeSide === "home" ? undefined : homeTeamId,
+                          awayTeamId: byeSide === "away" ? undefined : awayTeamId,
+                          matchDate: matchDate || undefined,
+                          week: parseInt(week),
+                          isBye: true,
+                          byeSide,
+                        });
+                      } else {
+                        // Normal maç için validasyon
+                        if (!homeTeamId || !awayTeamId || !matchDate || !week) {
+                          toast({ title: "Hata", description: "Tüm alanlar gereklidir", variant: "destructive" });
+                          return;
+                        }
                         createFixtureMutation.mutate({
                           homeTeamId,
                           awayTeamId,
                           matchDate,
                           week: parseInt(week),
+                          isBye: false,
                         });
                       }
                     }}
-                    disabled={!homeTeamId || !awayTeamId || !matchDate || !week || createFixtureMutation.isPending}
+                    disabled={
+                      isBye 
+                        ? (!byeSide || !week || (byeSide === "home" && !awayTeamId) || (byeSide === "away" && !homeTeamId)) || createFixtureMutation.isPending
+                        : (!homeTeamId || !awayTeamId || !matchDate || !week) || createFixtureMutation.isPending
+                    }
                   >
                     <Plus className="w-4 h-4 mr-1" />
-                    Maç Oluştur
+                    {isBye ? "BAY Geçme Oluştur" : "Maç Oluştur"}
                   </Button>
                 </div>
 
@@ -1853,18 +1939,32 @@ export default function ManagementPanelPage() {
                 <div className="space-y-4">
                   <h3 className="font-semibold">Fikstür ve Skor Girişi</h3>
                   <div className="space-y-3">
-                    {leagueFixtures?.map((fixture: any) => (
-                      <div key={fixture.id} className="p-4 border rounded-lg space-y-3">
+                    {leagueFixtures?.map((fixture: any) => {
+                      const isBye = fixture.isBye;
+                      return (
+                      <div key={fixture.id} className={`p-4 border rounded-lg space-y-3 ${isBye ? "border-blue-500/30 bg-blue-500/10" : ""}`}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4 flex-1">
                             <div className="flex items-center gap-2 flex-1">
-                              {fixture.homeTeam.logo && (
+                              {isBye && fixture.byeSide === "home" ? (
+                                <div className="w-8 h-8 flex items-center justify-center bg-blue-500/20 rounded border border-blue-500/50">
+                                  <span className="font-bold text-blue-600 text-xs">BAY</span>
+                                </div>
+                              ) : fixture.homeTeam?.logo ? (
                                 <img src={fixture.homeTeam.logo} alt="" className="w-8 h-8 object-contain" />
-                              )}
-                              <span className="font-medium">{fixture.homeTeam.name}</span>
+                              ) : null}
+                              <span className="font-medium">
+                                {isBye && fixture.byeSide === "home" ? (
+                                  <span className="text-blue-600 font-bold">BAY</span>
+                                ) : (
+                                  fixture.homeTeam?.name || "BAY"
+                                )}
+                              </span>
                             </div>
                             <div className="text-center px-4">
-                              {fixture.isPlayed ? (
+                              {isBye ? (
+                                <span className="text-blue-600 font-bold text-sm bg-blue-500/20 px-2 py-1 rounded border border-blue-500/50">BAY GEÇME</span>
+                              ) : fixture.isPlayed ? (
                                 <span className="text-xl font-bold">
                                   {fixture.homeScore} - {fixture.awayScore}
                                 </span>
@@ -1873,28 +1973,45 @@ export default function ManagementPanelPage() {
                               )}
                             </div>
                             <div className="flex items-center gap-2 flex-1 justify-end">
-                              <span className="font-medium">{fixture.awayTeam.name}</span>
-                              {fixture.awayTeam.logo && (
+                              <span className="font-medium">
+                                {isBye && fixture.byeSide === "away" ? (
+                                  <span className="text-blue-600 font-bold">BAY</span>
+                                ) : (
+                                  fixture.awayTeam?.name || "BAY"
+                                )}
+                              </span>
+                              {isBye && fixture.byeSide === "away" ? (
+                                <div className="w-8 h-8 flex items-center justify-center bg-blue-500/20 rounded border border-blue-500/50">
+                                  <span className="font-bold text-blue-600 text-xs">BAY</span>
+                                </div>
+                              ) : fixture.awayTeam?.logo ? (
                                 <img src={fixture.awayTeam.logo} alt="" className="w-8 h-8 object-contain" />
-                              )}
+                              ) : null}
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            {new Date(fixture.matchDate).toLocaleString('tr-TR', {
-                              day: 'numeric',
-                              month: 'long',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                              timeZone: 'Europe/Istanbul'
-                            })}
-                          </span>
-                          <span>Hafta {fixture.week}</span>
-                        </div>
-                        {selectedFixture?.id === fixture.id ? (
+                        {!isBye && (
+                          <div className="flex items-center justify-between text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-4 h-4" />
+                              {new Date(fixture.matchDate).toLocaleString('tr-TR', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                timeZone: 'Europe/Istanbul'
+                              })}
+                            </span>
+                            <span>Hafta {fixture.week}</span>
+                          </div>
+                        )}
+                        {isBye && (
+                          <div className="flex items-center justify-between text-sm text-muted-foreground">
+                            <span className="text-blue-600 font-medium">BAY Geçme - Hafta {fixture.week}</span>
+                          </div>
+                        )}
+                        {selectedFixture?.id === fixture.id && !isBye ? (
                           <div className="flex items-center gap-2">
                             <Input
                               type="number"
@@ -1940,7 +2057,7 @@ export default function ManagementPanelPage() {
                               İptal
                             </Button>
                           </div>
-                        ) : (
+                        ) : !isBye ? (
                           <div className="flex gap-2">
                             <Button
                               size="sm"
@@ -1966,9 +2083,25 @@ export default function ManagementPanelPage() {
                               <Trash2 className="w-4 h-4 text-destructive" />
                             </Button>
                           </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                if (confirm("Bu BAY geçmeyi silmek istediğinizden emin misiniz?")) {
+                                  deleteFixtureMutation.mutate(fixture.id);
+                                }
+                              }}
+                              disabled={deleteFixtureMutation.isPending}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
                         )}
                       </div>
-                    ))}
+                      );
+                    })}
                     {!leagueFixtures?.length && (
                       <p className="text-center text-muted-foreground py-4">Henüz maç eklenmedi</p>
                     )}

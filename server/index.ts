@@ -560,16 +560,30 @@ app.use((req, res, next) => {
       await db.execute(sql`
         CREATE TABLE IF NOT EXISTS league_fixtures (
           id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
-          home_team_id VARCHAR NOT NULL REFERENCES league_teams(id) ON DELETE CASCADE,
-          away_team_id VARCHAR NOT NULL REFERENCES league_teams(id) ON DELETE CASCADE,
+          home_team_id VARCHAR REFERENCES league_teams(id) ON DELETE CASCADE,
+          away_team_id VARCHAR REFERENCES league_teams(id) ON DELETE CASCADE,
           home_score INTEGER,
           away_score INTEGER,
           match_date TIMESTAMP NOT NULL,
           is_played BOOLEAN NOT NULL DEFAULT false,
           week INTEGER NOT NULL,
+          is_bye BOOLEAN NOT NULL DEFAULT false,
+          bye_side VARCHAR,
           created_at TIMESTAMP NOT NULL DEFAULT NOW()
         )
       `);
+      
+      // Migration: Add BAY columns if they don't exist
+      try {
+        await db.execute(sql`ALTER TABLE league_fixtures ADD COLUMN IF NOT EXISTS is_bye BOOLEAN NOT NULL DEFAULT false`);
+        await db.execute(sql`ALTER TABLE league_fixtures ADD COLUMN IF NOT EXISTS bye_side VARCHAR`);
+        // Make home_team_id and away_team_id nullable for BAY
+        await db.execute(sql`ALTER TABLE league_fixtures ALTER COLUMN home_team_id DROP NOT NULL`);
+        await db.execute(sql`ALTER TABLE league_fixtures ALTER COLUMN away_team_id DROP NOT NULL`);
+      } catch (error) {
+        // Column might already exist, ignore error
+        console.log("BAY columns migration:", error instanceof Error ? error.message : String(error));
+      }
       
       await db.execute(sql`
         CREATE TABLE IF NOT EXISTS player_stats (
