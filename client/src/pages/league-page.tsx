@@ -10,10 +10,17 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 
 export default function LeaguePage() {
-  const { user, logout } = useAuth();
-  const [location] = useLocation();
+  const { user, logout, isLoading } = useAuth();
+  const [location, navigate] = useLocation();
   const [selectedTotwWeek, setSelectedTotwWeek] = useState("");
   const [activeTab, setActiveTab] = useState("standings");
+
+  // Giriş yapmamış kullanıcıları giriş sayfasına yönlendir
+  useEffect(() => {
+    if (!isLoading && !user) {
+      navigate("/giris");
+    }
+  }, [user, isLoading, navigate]);
 
   // URL parametresinden tab değerini oku
   useEffect(() => {
@@ -80,6 +87,22 @@ export default function LeaguePage() {
   };
 
   const currentWeekMatches = getCurrentWeekMatches();
+
+  // Loading state while checking auth
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="text-lg text-muted-foreground">Yükleniyor...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Block render if not authenticated
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
