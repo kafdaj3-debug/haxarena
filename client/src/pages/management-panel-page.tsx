@@ -68,6 +68,11 @@ export default function ManagementPanelPage() {
   const [selectedFixture, setSelectedFixture] = useState<any>(null);
   const [homeScore, setHomeScore] = useState("");
   const [awayScore, setAwayScore] = useState("");
+  const [matchGoals, setMatchGoals] = useState<Array<{ playerId: string; minute: number; assistPlayerId?: string; isHomeTeam: boolean }>>([]);
+  const [matchRecordingUrl, setMatchRecordingUrl] = useState("");
+  const [isPostponed, setIsPostponed] = useState(false);
+  const [editingDateFixtureId, setEditingDateFixtureId] = useState<string | null>(null);
+  const [newMatchDate, setNewMatchDate] = useState("");
   
   // Player stats state
   const [selectedFixtureForStats, setSelectedFixtureForStats] = useState("");
@@ -528,8 +533,21 @@ export default function ManagementPanelPage() {
   });
 
   const updateFixtureScoreMutation = useMutation({
-    mutationFn: async ({ id, homeScore, awayScore }: { id: string; homeScore: number; awayScore: number }) => {
-      return await apiRequest("PATCH", `/api/league/fixtures/${id}`, { homeScore, awayScore });
+    mutationFn: async ({ id, homeScore, awayScore, goals, matchRecordingUrl, isPostponed }: { 
+      id: string; 
+      homeScore: number; 
+      awayScore: number;
+      goals?: Array<{ playerId: string; minute: number; assistPlayerId?: string; isHomeTeam: boolean }>;
+      matchRecordingUrl?: string;
+      isPostponed?: boolean;
+    }) => {
+      return await apiRequest("PATCH", `/api/league/fixtures/${id}`, { 
+        homeScore, 
+        awayScore,
+        goals: goals || [],
+        matchRecordingUrl: matchRecordingUrl || undefined,
+        isPostponed: isPostponed || false
+      });
     },
     onSuccess: () => {
       toast({ title: "Başarılı", description: "Maç sonucu güncellendi" });
@@ -538,9 +556,27 @@ export default function ManagementPanelPage() {
       setSelectedFixture(null);
       setHomeScore("");
       setAwayScore("");
+      setMatchGoals([]);
+      setMatchRecordingUrl("");
+      setIsPostponed(false);
     },
     onError: () => {
       toast({ title: "Hata", description: "Maç sonucu güncellenemedi", variant: "destructive" });
+    },
+  });
+
+  const updateFixtureDateMutation = useMutation({
+    mutationFn: async ({ id, matchDate }: { id: string; matchDate: string }) => {
+      return await apiRequest("PATCH", `/api/league/fixtures/${id}/date`, { matchDate });
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Maç tarihi güncellendi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/fixtures"] });
+      setEditingDateFixtureId(null);
+      setNewMatchDate("");
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Maç tarihi güncellenemedi", variant: "destructive" });
     },
   });
 
@@ -1994,16 +2030,69 @@ export default function ManagementPanelPage() {
                           <div className="flex items-center justify-between text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Calendar className="w-4 h-4" />
-                              {new Date(fixture.matchDate).toLocaleString('tr-TR', {
-                                day: 'numeric',
-                                month: 'long',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                timeZone: 'Europe/Istanbul'
-                              })}
+                              {editingDateFixtureId === fixture.id ? (
+                                <div className="flex items-center gap-2">
+                                  <Input
+                                    type="datetime-local"
+                                    value={newMatchDate}
+                                    onChange={(e) => setNewMatchDate(e.target.value)}
+                                    className="w-48"
+                                  />
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      if (newMatchDate) {
+                                        updateFixtureDateMutation.mutate({
+                                          id: fixture.id,
+                                          matchDate: newMatchDate,
+                                        });
+                                      }
+                                    }}
+                                    disabled={updateFixtureDateMutation.isPending}
+                                  >
+                                    Kaydet
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      setEditingDateFixtureId(null);
+                                      setNewMatchDate("");
+                                    }}
+                                  >
+                                    İptal
+                                  </Button>
+                                </div>
+                              ) : (
+                                <>
+                                  {new Date(fixture.matchDate).toLocaleString('tr-TR', {
+                                    day: 'numeric',
+                                    month: 'long',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    timeZone: 'Europe/Istanbul'
+                                  })}
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="ml-2 h-6 px-2"
+                                    onClick={() => {
+                                      setEditingDateFixtureId(fixture.id);
+                                      setNewMatchDate(getLocalDateTimeString(new Date(fixture.matchDate)));
+                                    }}
+                                  >
+                                    <Edit className="w-3 h-3" />
+                                  </Button>
+                                </>
+                              )}
                             </span>
-                            <span>Hafta {fixture.week}</span>
+                            <div className="flex items-center gap-2">
+                              {fixture.isPostponed && (
+                                <Badge variant="destructive">ERTELENDİ</Badge>
+                              )}
+                              <span>Hafta {fixture.week}</span>
+                            </div>
                           </div>
                         )}
                         {isBye && (
@@ -2012,50 +2101,174 @@ export default function ManagementPanelPage() {
                           </div>
                         )}
                         {selectedFixture?.id === fixture.id && !isBye ? (
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="number"
-                              min="0"
-                              placeholder="Ev Sahibi"
-                              value={homeScore}
-                              onChange={(e) => setHomeScore(e.target.value)}
-                              className="w-20"
-                            />
-                            <span>-</span>
-                            <Input
-                              type="number"
-                              min="0"
-                              placeholder="Deplasman"
-                              value={awayScore}
-                              onChange={(e) => setAwayScore(e.target.value)}
-                              className="w-20"
-                            />
-                            <Button
-                              size="sm"
-                              onClick={() => {
-                                if (homeScore !== "" && awayScore !== "") {
-                                  updateFixtureScoreMutation.mutate({
-                                    id: fixture.id,
-                                    homeScore: parseInt(homeScore),
-                                    awayScore: parseInt(awayScore),
-                                  });
-                                }
-                              }}
-                              disabled={updateFixtureScoreMutation.isPending}
-                            >
-                              Kaydet
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setSelectedFixture(null);
-                                setHomeScore("");
-                                setAwayScore("");
-                              }}
-                            >
-                              İptal
-                            </Button>
+                          <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="number"
+                                min="0"
+                                placeholder="Ev Sahibi"
+                                value={homeScore}
+                                onChange={(e) => setHomeScore(e.target.value)}
+                                className="w-20"
+                              />
+                              <span>-</span>
+                              <Input
+                                type="number"
+                                min="0"
+                                placeholder="Deplasman"
+                                value={awayScore}
+                                onChange={(e) => setAwayScore(e.target.value)}
+                                className="w-20"
+                              />
+                            </div>
+
+                            {/* Ertelenme Checkbox */}
+                            <div className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={`postponed-${fixture.id}`}
+                                checked={isPostponed} 
+                                onCheckedChange={(checked) => setIsPostponed(checked as boolean)}
+                              />
+                              <Label htmlFor={`postponed-${fixture.id}`} className="cursor-pointer">Ertelendi</Label>
+                            </div>
+
+                            {/* Maç Kaydı Linki */}
+                            <div className="space-y-2">
+                              <Label>Maç Kaydı Linki (Rec)</Label>
+                              <Input
+                                type="url"
+                                placeholder="https://..."
+                                value={matchRecordingUrl}
+                                onChange={(e) => setMatchRecordingUrl(e.target.value)}
+                              />
+                            </div>
+
+                            {/* Gol/Asist Bilgileri */}
+                            <div className="space-y-2">
+                              <Label>Gol/Asist Bilgileri</Label>
+                              {matchGoals.map((goal, index) => (
+                                <div key={index} className="flex items-center gap-2 p-2 border rounded bg-background">
+                                  <Select
+                                    value={goal.playerId}
+                                    onValueChange={(value) => {
+                                      const newGoals = [...matchGoals];
+                                      newGoals[index].playerId = value;
+                                      setMatchGoals(newGoals);
+                                    }}
+                                  >
+                                    <SelectTrigger className="w-40">
+                                      <SelectValue placeholder="Oyuncu" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {users?.map((u: any) => (
+                                        <SelectItem key={u.id} value={u.id}>{u.username}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    max="90"
+                                    placeholder="Dakika"
+                                    value={goal.minute}
+                                    onChange={(e) => {
+                                      const newGoals = [...matchGoals];
+                                      newGoals[index].minute = parseInt(e.target.value) || 0;
+                                      setMatchGoals(newGoals);
+                                    }}
+                                    className="w-20"
+                                  />
+                                  <Select
+                                    value={goal.isHomeTeam ? "home" : "away"}
+                                    onValueChange={(value) => {
+                                      const newGoals = [...matchGoals];
+                                      newGoals[index].isHomeTeam = value === "home";
+                                      setMatchGoals(newGoals);
+                                    }}
+                                  >
+                                    <SelectTrigger className="w-32">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="home">Ev Sahibi</SelectItem>
+                                      <SelectItem value="away">Deplasman</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <Select
+                                    value={goal.assistPlayerId || ""}
+                                    onValueChange={(value) => {
+                                      const newGoals = [...matchGoals];
+                                      newGoals[index].assistPlayerId = value || undefined;
+                                      setMatchGoals(newGoals);
+                                    }}
+                                  >
+                                    <SelectTrigger className="w-40">
+                                      <SelectValue placeholder="Asist (Opsiyonel)" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="">Asist Yok</SelectItem>
+                                      {users?.map((u: any) => (
+                                        <SelectItem key={u.id} value={u.id}>{u.username}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => {
+                                      setMatchGoals(matchGoals.filter((_, i) => i !== index));
+                                    }}
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              ))}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setMatchGoals([...matchGoals, { playerId: "", minute: 0, isHomeTeam: true }]);
+                                }}
+                              >
+                                <Plus className="w-4 h-4 mr-1" />
+                                Gol Ekle
+                              </Button>
+                            </div>
+
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  if (homeScore !== "" && awayScore !== "") {
+                                    updateFixtureScoreMutation.mutate({
+                                      id: fixture.id,
+                                      homeScore: parseInt(homeScore),
+                                      awayScore: parseInt(awayScore),
+                                      goals: matchGoals.filter(g => g.playerId && g.minute > 0),
+                                      matchRecordingUrl: matchRecordingUrl || undefined,
+                                      isPostponed: isPostponed,
+                                    });
+                                  }
+                                }}
+                                disabled={updateFixtureScoreMutation.isPending}
+                              >
+                                Kaydet
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedFixture(null);
+                                  setHomeScore("");
+                                  setAwayScore("");
+                                  setMatchGoals([]);
+                                  setMatchRecordingUrl("");
+                                  setIsPostponed(false);
+                                }}
+                              >
+                                İptal
+                              </Button>
+                            </div>
                           </div>
                         ) : !isBye ? (
                           <div className="flex gap-2">
@@ -2066,6 +2279,14 @@ export default function ManagementPanelPage() {
                                 setSelectedFixture(fixture);
                                 setHomeScore(fixture.homeScore?.toString() || "");
                                 setAwayScore(fixture.awayScore?.toString() || "");
+                                setMatchGoals(fixture.goals?.map((g: any) => ({
+                                  playerId: g.playerId,
+                                  minute: g.minute,
+                                  assistPlayerId: g.assistPlayerId,
+                                  isHomeTeam: g.isHomeTeam,
+                                })) || []);
+                                setMatchRecordingUrl(fixture.matchRecordingUrl || "");
+                                setIsPostponed(fixture.isPostponed || false);
                               }}
                             >
                               {fixture.isPlayed ? "Skoru Düzenle" : "Skor Gir"}

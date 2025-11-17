@@ -27,6 +27,8 @@ import {
   type InsertLeagueTeam,
   type LeagueFixture,
   type InsertLeagueFixture,
+  type MatchGoal,
+  type InsertMatchGoal,
   type PlayerStats,
   type InsertPlayerStats,
   type TeamOfWeek,
@@ -49,6 +51,7 @@ import {
   privateMessages,
   leagueTeams,
   leagueFixtures,
+  matchGoals,
   playerStats,
   teamOfWeek,
   customRoles,
@@ -152,7 +155,14 @@ export interface IStorage {
   getLeagueFixture(id: string): Promise<(LeagueFixture & { homeTeam: LeagueTeam | null; awayTeam: LeagueTeam | null }) | undefined>;
   createLeagueFixture(fixture: InsertLeagueFixture): Promise<LeagueFixture>;
   updateLeagueFixtureScore(id: string, homeScore: number, awayScore: number): Promise<LeagueFixture | undefined>;
+  updateLeagueFixtureDate(id: string, matchDate: Date): Promise<LeagueFixture | undefined>;
+  updateLeagueFixtureWithDetails(id: string, homeScore: number, awayScore: number, goals: InsertMatchGoal[], matchRecordingUrl?: string, isPostponed?: boolean): Promise<LeagueFixture | undefined>;
   deleteLeagueFixture(id: string): Promise<void>;
+  
+  // Match goals operations
+  getMatchGoals(fixtureId: string): Promise<(MatchGoal & { player: User; assistPlayer: User | null })[]>;
+  createMatchGoal(goal: InsertMatchGoal): Promise<MatchGoal>;
+  deleteMatchGoalsByFixture(fixtureId: string): Promise<void>;
   
   // Player match stats operations
   createPlayerStats(stats: InsertPlayerStats): Promise<PlayerStats>;
@@ -1318,8 +1328,97 @@ export class DBStorage implements IStorage {
     await this.updateLeagueTeam(awayTeamId, awayUpdates);
   }
 
+  async updateLeagueFixtureDate(id: string, matchDate: Date): Promise<LeagueFixture | undefined> {
+    await db.update(leagueFixtures).set({ matchDate }).where(eq(leagueFixtures.id, id));
+    const [updated] = await db.select().from(leagueFixtures).where(eq(leagueFixtures.id, id)).limit(1);
+    return updated;
+  }
+
+  async updateLeagueFixtureWithDetails(
+    id: string, 
+    homeScore: number, 
+    awayScore: number, 
+    goals: InsertMatchGoal[], 
+    matchRecordingUrl?: string,
+    isPostponed?: boolean
+  ): Promise<LeagueFixture | undefined> {
+    const fixture = await this.getLeagueFixture(id);
+    if (!fixture) return undefined;
+
+    // BAY geçme durumunda skor güncellemesi yapılamaz
+    if (fixture.isBye) {
+      throw new Error("BAY geçme durumunda skor güncellenemez");
+    }
+
+    // If match was already played, revert the previous score effects
+    if (fixture.isPlayed && fixture.homeScore !== null && fixture.awayScore !== null && fixture.homeTeamId && fixture.awayTeamId) {
+      await this.revertMatchResult(fixture.homeTeamId, fixture.awayTeamId, fixture.homeScore, fixture.awayScore);
+    }
+
+    // Delete existing goals for this fixture
+    await this.deleteMatchGoalsByFixture(id);
+
+    // Insert new goals
+    if (goals.length > 0) {
+      await db.insert(matchGoals).values(goals);
+    }
+
+    // Update fixture
+    const updateData: any = {
+      homeScore,
+      awayScore,
+      isPlayed: true,
+      matchDate: fixture.matchDate,
+      week: fixture.week,
+    };
+    if (matchRecordingUrl !== undefined) {
+      updateData.matchRecordingUrl = matchRecordingUrl;
+    }
+    if (isPostponed !== undefined) {
+      updateData.isPostponed = isPostponed;
+    }
+    
+    await db.update(leagueFixtures).set(updateData).where(eq(leagueFixtures.id, id));
+
+    // Update team standings (only if both teams exist)
+    if (fixture.homeTeamId && fixture.awayTeamId) {
+      await this.updateTeamStandings(fixture.homeTeamId, fixture.awayTeamId, homeScore, awayScore);
+    }
+
+    const [updated] = await db.select().from(leagueFixtures).where(eq(leagueFixtures.id, id)).limit(1);
+    return updated;
+  }
+
   async deleteLeagueFixture(id: string): Promise<void> {
     await db.delete(leagueFixtures).where(eq(leagueFixtures.id, id));
+  }
+
+  // Match goals operations
+  async getMatchGoals(fixtureId: string): Promise<(MatchGoal & { player: User; assistPlayer: User | null })[]> {
+    const goals = await db.select().from(matchGoals).where(eq(matchGoals.fixtureId, fixtureId));
+    
+    const goalsWithPlayers = await Promise.all(
+      goals.map(async (goal) => {
+        const player = await this.getUser(goal.playerId);
+        const assistPlayer = goal.assistPlayerId ? await this.getUser(goal.assistPlayerId) : null;
+        return {
+          ...goal,
+          player: player!,
+          assistPlayer: assistPlayer || null,
+        };
+      })
+    );
+    
+    return goalsWithPlayers;
+  }
+
+  async createMatchGoal(goal: InsertMatchGoal): Promise<MatchGoal> {
+    const [newGoal] = await db.insert(matchGoals).values(goal).returning();
+    return newGoal;
+  }
+
+  async deleteMatchGoalsByFixture(fixtureId: string): Promise<void> {
+    await db.delete(matchGoals).where(eq(matchGoals.fixtureId, fixtureId));
   }
 
   // Player match stats operations

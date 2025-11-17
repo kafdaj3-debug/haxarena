@@ -275,6 +275,7 @@ export default function LeaguePage() {
                           const isToday = matchDate.toDateString() === new Date().toDateString();
                           const isPast = matchDate < new Date();
                           const isBye = fixture.isBye;
+                          const isPostponed = fixture.isPostponed;
                           
                           return (
                             <div 
@@ -282,6 +283,8 @@ export default function LeaguePage() {
                               className={`p-5 border-2 rounded-xl transition-all hover:shadow-lg ${
                                 isBye
                                   ? "border-blue-500/30 bg-blue-500/10"
+                                  : isPostponed
+                                  ? "border-orange-500/30 bg-orange-500/10"
                                   : isToday 
                                   ? "border-primary bg-primary/10 shadow-md" 
                                   : isPast
@@ -363,6 +366,31 @@ export default function LeaguePage() {
                                 </div>
                               </div>
                               
+                              {/* Gol/Asist Bilgileri */}
+                              {fixture.goals && fixture.goals.length > 0 && (
+                                <div className="mt-4 pt-3 border-t">
+                                  <h4 className="text-sm font-semibold mb-2">Gol Detayları:</h4>
+                                  <div className="space-y-1">
+                                    {fixture.goals
+                                      .sort((a: any, b: any) => a.minute - b.minute)
+                                      .map((goal: any, idx: number) => (
+                                        <div key={idx} className="text-xs flex items-center gap-2">
+                                          <span className="font-medium">{goal.minute}'</span>
+                                          <span>{goal.player?.username || "Bilinmeyen"}</span>
+                                          {goal.assistPlayer && (
+                                            <span className="text-muted-foreground">
+                                              (Asist: {goal.assistPlayer.username})
+                                            </span>
+                                          )}
+                                          <span className={`text-xs px-1.5 py-0.5 rounded ${goal.isHomeTeam ? "bg-blue-100 text-blue-700" : "bg-red-100 text-red-700"}`}>
+                                            {goal.isHomeTeam ? fixture.homeTeam?.name : fixture.awayTeam?.name}
+                                          </span>
+                                        </div>
+                                      ))}
+                                  </div>
+                                </div>
+                              )}
+                              
                               <div className="flex items-center justify-between pt-3 border-t">
                                 <div className="flex-1"></div>
                                 <div className="flex items-center gap-2 text-sm">
@@ -380,10 +408,25 @@ export default function LeaguePage() {
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  {fixture.isPlayed && (
+                                  {isPostponed && (
+                                    <span className="text-xs font-semibold text-orange-600 bg-orange-600/20 px-2 py-1 rounded-full">
+                                      ERTELENDİ
+                                    </span>
+                                  )}
+                                  {fixture.isPlayed && !isPostponed && (
                                     <span className="text-xs font-semibold text-green-600 bg-green-600/20 px-2 py-1 rounded-full">
                                       OYNANDI
                                     </span>
+                                  )}
+                                  {fixture.matchRecordingUrl && (
+                                    <a
+                                      href={fixture.matchRecordingUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-xs font-semibold text-blue-600 bg-blue-600/20 px-2 py-1 rounded-full hover:bg-blue-600/30 transition-colors"
+                                    >
+                                      📹 Maç Kaydı
+                                    </a>
                                   )}
                                 </div>
                               </div>
@@ -403,10 +446,14 @@ export default function LeaguePage() {
                     <CardContent className="space-y-4">
                       {fixturesByWeek[parseInt(week)].map((fixture: any) => {
                         const isBye = fixture.isBye;
+                        const isPostponed = fixture.isPostponed;
                         return (
                         <div 
                           key={fixture.id} 
-                          className={`p-4 border rounded-lg hover:bg-muted/50 transition-colors ${isBye ? "border-blue-500/30 bg-blue-500/10" : ""}`}
+                          className={`p-4 border rounded-lg hover:bg-muted/50 transition-colors ${
+                            isBye ? "border-blue-500/30 bg-blue-500/10" : 
+                            isPostponed ? "border-orange-500/30 bg-orange-500/10" : ""
+                          }`}
                           data-testid={`fixture-${fixture.id}`}
                         >
                           <div className="flex items-center justify-between gap-4">
@@ -470,16 +517,57 @@ export default function LeaguePage() {
                               ) : null}
                             </div>
                             {!isBye && (
-                              <div className="mt-3 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                                <Calendar className="w-4 h-4" />
-                                <span>{new Date(fixture.matchDate).toLocaleString('tr-TR', {
-                                  day: 'numeric',
-                                  month: 'long',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                  timeZone: 'Europe/Istanbul'
-                                })}</span>
+                              <div className="mt-3 space-y-2">
+                                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                                  <Calendar className="w-4 h-4" />
+                                  <span>{new Date(fixture.matchDate).toLocaleString('tr-TR', {
+                                    day: 'numeric',
+                                    month: 'long',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    timeZone: 'Europe/Istanbul'
+                                  })}</span>
+                                </div>
+                                {isPostponed && (
+                                  <div className="flex justify-center">
+                                    <span className="text-xs font-semibold text-orange-600 bg-orange-600/20 px-2 py-1 rounded-full">
+                                      ERTELENDİ
+                                    </span>
+                                  </div>
+                                )}
+                                {fixture.matchRecordingUrl && (
+                                  <div className="flex justify-center">
+                                    <a
+                                      href={fixture.matchRecordingUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-xs font-semibold text-blue-600 bg-blue-600/20 px-2 py-1 rounded-full hover:bg-blue-600/30 transition-colors"
+                                    >
+                                      📹 Maç Kaydı
+                                    </a>
+                                  </div>
+                                )}
+                                {fixture.goals && fixture.goals.length > 0 && (
+                                  <div className="mt-2 pt-2 border-t">
+                                    <h5 className="text-xs font-semibold mb-1 text-center">Gol Detayları:</h5>
+                                    <div className="space-y-0.5">
+                                      {fixture.goals
+                                        .sort((a: any, b: any) => a.minute - b.minute)
+                                        .map((goal: any, idx: number) => (
+                                          <div key={idx} className="text-xs text-center">
+                                            <span className="font-medium">{goal.minute}'</span>
+                                            <span> {goal.player?.username || "Bilinmeyen"}</span>
+                                            {goal.assistPlayer && (
+                                              <span className="text-muted-foreground">
+                                                {" "}(Asist: {goal.assistPlayer.username})
+                                              </span>
+                                            )}
+                                          </div>
+                                        ))}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>

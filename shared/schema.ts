@@ -187,6 +187,19 @@ export const leagueFixtures = pgTable("league_fixtures", {
   week: integer("week").notNull(),
   isBye: boolean("is_bye").notNull().default(false),
   byeSide: varchar("bye_side"), // "home" or "away" - which team gets the bye
+  isPostponed: boolean("is_postponed").notNull().default(false), // Ertelenme durumu
+  matchRecordingUrl: varchar("match_recording_url"), // Maç kaydı linki (rec)
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Match goals table - gol ve asist bilgileri
+export const matchGoals = pgTable("match_goals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fixtureId: varchar("fixture_id").notNull().references(() => leagueFixtures.id, { onDelete: "cascade" }),
+  playerId: varchar("player_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  minute: integer("minute").notNull(), // Kaçıncı dakikada
+  assistPlayerId: varchar("assist_player_id").references(() => users.id, { onDelete: "set null" }), // Asist yapan oyuncu (nullable)
+  isHomeTeam: boolean("is_home_team").notNull(), // Ev sahibi takımın golü mü
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -306,6 +319,11 @@ export const insertPlayerStatsSchema = createInsertSchema(playerStats).omit({
   createdAt: true,
 });
 
+export const insertMatchGoalSchema = createInsertSchema(matchGoals).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertTeamOfWeekSchema = createInsertSchema(teamOfWeek).omit({
   id: true,
   createdAt: true,
@@ -350,6 +368,8 @@ export type LeagueTeam = typeof leagueTeams.$inferSelect;
 export type InsertLeagueTeam = z.infer<typeof insertLeagueTeamSchema>;
 export type LeagueFixture = typeof leagueFixtures.$inferSelect;
 export type InsertLeagueFixture = z.infer<typeof insertLeagueFixtureSchema>;
+export type MatchGoal = typeof matchGoals.$inferSelect;
+export type InsertMatchGoal = z.infer<typeof insertMatchGoalSchema>;
 export type PlayerStats = typeof playerStats.$inferSelect;
 export type InsertPlayerStats = z.infer<typeof insertPlayerStatsSchema>;
 export type TeamOfWeek = typeof teamOfWeek.$inferSelect;

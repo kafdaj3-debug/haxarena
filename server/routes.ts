@@ -1524,7 +1524,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/league/fixtures", async (req, res) => {
     try {
       const fixtures = await storage.getLeagueFixtures();
-      return res.json(fixtures);
+      // Get goals for each fixture
+      const fixturesWithGoals = await Promise.all(
+        fixtures.map(async (fixture) => {
+          if (fixture.isPlayed && !fixture.isBye) {
+            try {
+              const goals = await storage.getMatchGoals(fixture.id);
+              return { ...fixture, goals };
+            } catch (error) {
+              return { ...fixture, goals: [] };
+            }
+          }
+          return { ...fixture, goals: [] };
+        })
+      );
+      return res.json(fixturesWithGoals);
     } catch (error) {
       console.error("Error getting fixtures:", error);
       return res.status(500).json({ error: "Fikstür yüklenemedi" });
@@ -1636,21 +1650,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update fixture score (super admin only) - this also updates team standings
+  // Update fixture date (super admin only)
+  app.patch("/api/league/fixtures/:id/date", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { matchDate } = req.body;
+      
+      if (!matchDate) {
+        return res.status(400).json({ error: "Maç tarihi gereklidir" });
+      }
+
+      // Parse matchDate as Turkey local time (GMT+3)
+      const [datePart, timePart] = matchDate.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hour, minute] = timePart.split(':').map(Number);
+      
+      // Create date in UTC, then subtract 3 hours to convert Turkey time to UTC
+      const turkeyDate = new Date(Date.UTC(year, month - 1, day, hour - 3, minute, 0));
+
+      const fixture = await storage.updateLeagueFixtureDate(id, turkeyDate);
+      return res.json(fixture);
+    } catch (error) {
+      console.error("Error updating fixture date:", error);
+      return res.status(500).json({ error: "Maç tarihi güncellenemedi" });
+    }
+  });
+
+  // Get match goals (super admin only)
+  app.get("/api/league/fixtures/:id/goals", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const goals = await storage.getMatchGoals(id);
+      return res.json(goals);
+    } catch (error) {
+      console.error("Error getting match goals:", error);
+      return res.status(500).json({ error: "Gol bilgileri yüklenemedi" });
+    }
+  });
+
+  // Update fixture score with details (super admin only) - this also updates team standings
   app.patch("/api/league/fixtures/:id", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
     try {
       const { id } = req.params;
-      const { homeScore, awayScore } = req.body;
+      const { homeScore, awayScore, goals, matchRecordingUrl, isPostponed } = req.body;
       
-      if (homeScore === undefined || awayScore === undefined) {
-        return res.status(400).json({ error: "Maç skorları gereklidir" });
-      }
+      // Eğer detaylı bilgiler varsa (goals, matchRecordingUrl, isPostponed), detaylı güncelleme yap
+      if (goals !== undefined || matchRecordingUrl !== undefined || isPostponed !== undefined) {
+        if (homeScore === undefined || awayScore === undefined) {
+          return res.status(400).json({ error: "Maç skorları gereklidir" });
+        }
 
-      const fixture = await storage.updateLeagueFixtureScore(id, homeScore, awayScore);
-      return res.json(fixture);
+        const fixture = await storage.updateLeagueFixtureWithDetails(
+          id, 
+          homeScore, 
+          awayScore, 
+          goals || [], 
+          matchRecordingUrl,
+          isPostponed
+        );
+        return res.json(fixture);
+      } else {
+        // Eski yöntem - sadece skor güncelleme
+        if (homeScore === undefined || awayScore === undefined) {
+          return res.status(400).json({ error: "Maç skorları gereklidir" });
+        }
+
+        const fixture = await storage.updateLeagueFixtureScore(id, homeScore, awayScore);
+        return res.json(fixture);
+      }
     } catch (error) {
       console.error("Error updating fixture:", error);
-      return res.status(500).json({ error: "Maç sonucu güncellenemedi" });
+      return res.status(500).json({ error: error instanceof Error ? error.message : "Maç sonucu güncellenemedi" });
     }
   });
 

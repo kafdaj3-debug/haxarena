@@ -569,20 +569,37 @@ app.use((req, res, next) => {
           week INTEGER NOT NULL,
           is_bye BOOLEAN NOT NULL DEFAULT false,
           bye_side VARCHAR,
+          is_postponed BOOLEAN NOT NULL DEFAULT false,
+          match_recording_url VARCHAR,
           created_at TIMESTAMP NOT NULL DEFAULT NOW()
         )
       `);
       
-      // Migration: Add BAY columns if they don't exist
+      // Match goals table
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS match_goals (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          fixture_id VARCHAR NOT NULL REFERENCES league_fixtures(id) ON DELETE CASCADE,
+          player_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          minute INTEGER NOT NULL,
+          assist_player_id VARCHAR REFERENCES users(id) ON DELETE SET NULL,
+          is_home_team BOOLEAN NOT NULL,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      
+      // Migration: Add new columns if they don't exist
       try {
         await db.execute(sql`ALTER TABLE league_fixtures ADD COLUMN IF NOT EXISTS is_bye BOOLEAN NOT NULL DEFAULT false`);
         await db.execute(sql`ALTER TABLE league_fixtures ADD COLUMN IF NOT EXISTS bye_side VARCHAR`);
+        await db.execute(sql`ALTER TABLE league_fixtures ADD COLUMN IF NOT EXISTS is_postponed BOOLEAN NOT NULL DEFAULT false`);
+        await db.execute(sql`ALTER TABLE league_fixtures ADD COLUMN IF NOT EXISTS match_recording_url VARCHAR`);
         // Make home_team_id and away_team_id nullable for BAY
         await db.execute(sql`ALTER TABLE league_fixtures ALTER COLUMN home_team_id DROP NOT NULL`);
         await db.execute(sql`ALTER TABLE league_fixtures ALTER COLUMN away_team_id DROP NOT NULL`);
       } catch (error) {
         // Column might already exist, ignore error
-        console.log("BAY columns migration:", error instanceof Error ? error.message : String(error));
+        console.log("Fixture columns migration:", error instanceof Error ? error.message : String(error));
       }
       
       await db.execute(sql`
