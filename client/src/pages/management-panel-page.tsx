@@ -2183,10 +2183,10 @@ export default function ManagementPanelPage() {
                                         <SelectContent>
                                           {users && Array.isArray(users) && users.length > 0 ? (
                                             users.map((u: any) => (
-                                              <SelectItem key={u?.id || `user-${index}`} value={u?.id || ""}>{u?.username || "Bilinmeyen"}</SelectItem>
+                                              <SelectItem key={u?.id || `user-${index}`} value={u?.id || `no-id-${index}`}>{u?.username || "Bilinmeyen"}</SelectItem>
                                             ))
                                           ) : (
-                                            <SelectItem value="" disabled>Oyuncular yükleniyor...</SelectItem>
+                                            <SelectItem value="loading" disabled>Oyuncular yükleniyor...</SelectItem>
                                           )}
                                         </SelectContent>
                                       </Select>
@@ -2249,13 +2249,13 @@ export default function ManagementPanelPage() {
                                           <SelectValue placeholder="Asist (Opsiyonel)" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                          <SelectItem value="">Asist Yok</SelectItem>
+                                          <SelectItem value="none">Asist Yok</SelectItem>
                                           {users && Array.isArray(users) && users.length > 0 ? (
                                             users.map((u: any) => (
-                                              <SelectItem key={u?.id || `assist-${index}`} value={u?.id || ""}>{u?.username || "Bilinmeyen"}</SelectItem>
+                                              <SelectItem key={u?.id || `assist-${index}`} value={u?.id || `no-id-assist-${index}`}>{u?.username || "Bilinmeyen"}</SelectItem>
                                             ))
                                           ) : (
-                                            <SelectItem value="" disabled>Oyuncular yükleniyor...</SelectItem>
+                                            <SelectItem value="loading-assist" disabled>Oyuncular yükleniyor...</SelectItem>
                                           )}
                                         </SelectContent>
                                       </Select>
