@@ -110,28 +110,14 @@ export default function ManagementPanelPage() {
   const [selectedUserForRole, setSelectedUserForRole] = useState("");
   const [selectedRoleToAssign, setSelectedRoleToAssign] = useState("");
 
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
+  // This is a React rule - hooks must be called unconditionally
   // Redirect to management login if not super admin (using useEffect)
   useEffect(() => {
     if (!isLoading && (!user || !user.isSuperAdmin)) {
       navigate("/yonetim-giris");
     }
   }, [user, isLoading, navigate]);
-
-  // Show loading state while checking auth
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="text-lg text-muted-foreground">Yetki kontrol ediliyor...</div>
-        </div>
-      </div>
-    );
-  }
-
-  // Block render if not super admin
-  if (!user || !user.isSuperAdmin) {
-    return null;
-  }
 
   const { data: users, error: usersError, isLoading: usersLoading } = useQuery<any[]>({
     queryKey: ["/api/management/users"],
