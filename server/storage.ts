@@ -156,6 +156,7 @@ export interface IStorage {
   createLeagueFixture(fixture: InsertLeagueFixture): Promise<LeagueFixture>;
   updateLeagueFixtureScore(id: string, homeScore: number, awayScore: number): Promise<LeagueFixture | undefined>;
   updateLeagueFixtureDate(id: string, matchDate: Date): Promise<LeagueFixture | undefined>;
+  updateLeagueFixturePostponed(id: string, isPostponed: boolean): Promise<LeagueFixture | undefined>;
   updateLeagueFixtureWithDetails(id: string, homeScore: number, awayScore: number, goals: InsertMatchGoal[], matchRecordingUrl?: string, isPostponed?: boolean): Promise<LeagueFixture | undefined>;
   deleteLeagueFixture(id: string): Promise<void>;
   
@@ -1330,6 +1331,12 @@ export class DBStorage implements IStorage {
 
   async updateLeagueFixtureDate(id: string, matchDate: Date): Promise<LeagueFixture | undefined> {
     await db.update(leagueFixtures).set({ matchDate }).where(eq(leagueFixtures.id, id));
+    const [updated] = await db.select().from(leagueFixtures).where(eq(leagueFixtures.id, id)).limit(1);
+    return updated;
+  }
+
+  async updateLeagueFixturePostponed(id: string, isPostponed: boolean): Promise<LeagueFixture | undefined> {
+    await db.update(leagueFixtures).set({ isPostponed }).where(eq(leagueFixtures.id, id));
     const [updated] = await db.select().from(leagueFixtures).where(eq(leagueFixtures.id, id)).limit(1);
     return updated;
   }

@@ -1688,6 +1688,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update fixture postponed status (super admin only)
+  app.patch("/api/league/fixtures/:id/postpone", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { isPostponed } = req.body;
+      
+      if (typeof isPostponed !== "boolean") {
+        return res.status(400).json({ error: "isPostponed boolean olmalıdır" });
+      }
+
+      const fixture = await storage.updateLeagueFixturePostponed(id, isPostponed);
+      return res.json(fixture);
+    } catch (error) {
+      console.error("Error updating fixture postponed status:", error);
+      return res.status(500).json({ error: "Maç ertelenme durumu güncellenemedi" });
+    }
+  });
+
   // Update fixture score with details (super admin only) - this also updates team standings
   app.patch("/api/league/fixtures/:id", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
     try {

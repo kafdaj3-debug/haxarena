@@ -559,6 +559,19 @@ export default function ManagementPanelPage() {
     },
   });
 
+  const updateFixturePostponedMutation = useMutation({
+    mutationFn: async ({ id, isPostponed }: { id: string; isPostponed: boolean }) => {
+      return await apiRequest("PATCH", `/api/league/fixtures/${id}/postpone`, { isPostponed });
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Maç ertelenme durumu güncellendi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/fixtures"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Maç ertelenme durumu güncellenemedi", variant: "destructive" });
+    },
+  });
+
   const updateFixtureDateMutation = useMutation({
     mutationFn: async ({ id, matchDate }: { id: string; matchDate: string }) => {
       return await apiRequest("PATCH", `/api/league/fixtures/${id}/date`, { matchDate });
@@ -2359,6 +2372,19 @@ export default function ManagementPanelPage() {
                               }}
                             >
                               {fixture?.isPlayed ? "Skoru Düzenle" : "Skor Gir"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant={fixture?.isPostponed ? "default" : "outline"}
+                              onClick={() => {
+                                updateFixturePostponedMutation.mutate({ 
+                                  id: fixture.id, 
+                                  isPostponed: !fixture?.isPostponed 
+                                });
+                              }}
+                              disabled={updateFixturePostponedMutation.isPending}
+                            >
+                              {fixture?.isPostponed ? "Ertelenme Kaldır" : "Ertelendi"}
                             </Button>
                             <Button
                               size="sm"
