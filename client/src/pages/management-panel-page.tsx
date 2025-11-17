@@ -2154,91 +2154,126 @@ export default function ManagementPanelPage() {
                             {/* Gol/Asist Bilgileri */}
                             <div className="space-y-2">
                               <Label>Gol/Asist Bilgileri</Label>
-                              {matchGoals && Array.isArray(matchGoals) && matchGoals.map((goal, index) => (
-                                <div key={index} className="flex items-center gap-2 p-2 border rounded bg-background">
-                                  <Select
-                                    value={goal.playerId}
-                                    onValueChange={(value) => {
-                                      const newGoals = [...(matchGoals || [])];
-                                      newGoals[index].playerId = value;
-                                      setMatchGoals(newGoals);
-                                    }}
-                                  >
-                                    <SelectTrigger className="w-40">
-                                      <SelectValue placeholder="Oyuncu" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {users && Array.isArray(users) && users.length > 0 ? (
-                                        users.map((u: any) => (
-                                          <SelectItem key={u.id} value={u.id}>{u.username}</SelectItem>
-                                        ))
-                                      ) : (
-                                        <SelectItem value="" disabled>Oyuncular yükleniyor...</SelectItem>
-                                      )}
-                                    </SelectContent>
-                                  </Select>
-                                  <Input
-                                    type="number"
-                                    min="1"
-                                    max="90"
-                                    placeholder="Dakika"
-                                    value={goal.minute}
-                                    onChange={(e) => {
-                                      const newGoals = [...(matchGoals || [])];
-                                      newGoals[index].minute = parseInt(e.target.value) || 0;
-                                      setMatchGoals(newGoals);
-                                    }}
-                                    className="w-20"
-                                  />
-                                  <Select
-                                    value={goal.isHomeTeam ? "home" : "away"}
-                                    onValueChange={(value) => {
-                                      const newGoals = [...(matchGoals || [])];
-                                      newGoals[index].isHomeTeam = value === "home";
-                                      setMatchGoals(newGoals);
-                                    }}
-                                  >
-                                    <SelectTrigger className="w-32">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="home">Ev Sahibi</SelectItem>
-                                      <SelectItem value="away">Deplasman</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                  <Select
-                                    value={goal.assistPlayerId || ""}
-                                    onValueChange={(value) => {
-                                      const newGoals = [...(matchGoals || [])];
-                                      newGoals[index].assistPlayerId = value || undefined;
-                                      setMatchGoals(newGoals);
-                                    }}
-                                  >
-                                    <SelectTrigger className="w-40">
-                                      <SelectValue placeholder="Asist (Opsiyonel)" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="">Asist Yok</SelectItem>
-                                      {users && Array.isArray(users) && users.length > 0 ? (
-                                        users.map((u: any) => (
-                                          <SelectItem key={u.id} value={u.id}>{u.username}</SelectItem>
-                                        ))
-                                      ) : (
-                                        <SelectItem value="" disabled>Oyuncular yükleniyor...</SelectItem>
-                                      )}
-                                    </SelectContent>
-                                  </Select>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => {
-                                      setMatchGoals(matchGoals.filter((_, i) => i !== index));
-                                    }}
-                                  >
-                                    <X className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              ))}
+                              {matchGoals && Array.isArray(matchGoals) && matchGoals.length > 0 ? (
+                                matchGoals.map((goal, index) => {
+                                  if (!goal || typeof goal !== 'object') {
+                                    return null;
+                                  }
+                                  return (
+                                    <div key={index} className="flex items-center gap-2 p-2 border rounded bg-background">
+                                      <Select
+                                        value={goal?.playerId || ""}
+                                        onValueChange={(value) => {
+                                          try {
+                                            const newGoals = [...(matchGoals || [])];
+                                            if (newGoals[index]) {
+                                              newGoals[index] = { ...newGoals[index], playerId: value };
+                                              setMatchGoals(newGoals);
+                                            }
+                                          } catch (error) {
+                                            console.error("Error updating goal playerId:", error);
+                                          }
+                                        }}
+                                      >
+                                        <SelectTrigger className="w-40">
+                                          <SelectValue placeholder="Oyuncu" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {users && Array.isArray(users) && users.length > 0 ? (
+                                            users.map((u: any) => (
+                                              <SelectItem key={u?.id || `user-${index}`} value={u?.id || ""}>{u?.username || "Bilinmeyen"}</SelectItem>
+                                            ))
+                                          ) : (
+                                            <SelectItem value="" disabled>Oyuncular yükleniyor...</SelectItem>
+                                          )}
+                                        </SelectContent>
+                                      </Select>
+                                      <Input
+                                        type="number"
+                                        min="1"
+                                        max="90"
+                                        placeholder="Dakika"
+                                        value={goal?.minute || ""}
+                                        onChange={(e) => {
+                                          try {
+                                            const newGoals = [...(matchGoals || [])];
+                                            if (newGoals[index]) {
+                                              newGoals[index] = { ...newGoals[index], minute: parseInt(e.target.value) || 0 };
+                                              setMatchGoals(newGoals);
+                                            }
+                                          } catch (error) {
+                                            console.error("Error updating goal minute:", error);
+                                          }
+                                        }}
+                                        className="w-20"
+                                      />
+                                      <Select
+                                        value={goal?.isHomeTeam ? "home" : "away"}
+                                        onValueChange={(value) => {
+                                          try {
+                                            const newGoals = [...(matchGoals || [])];
+                                            if (newGoals[index]) {
+                                              newGoals[index] = { ...newGoals[index], isHomeTeam: value === "home" };
+                                              setMatchGoals(newGoals);
+                                            }
+                                          } catch (error) {
+                                            console.error("Error updating goal isHomeTeam:", error);
+                                          }
+                                        }}
+                                      >
+                                        <SelectTrigger className="w-32">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="home">Ev Sahibi</SelectItem>
+                                          <SelectItem value="away">Deplasman</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      <Select
+                                        value={goal?.assistPlayerId || ""}
+                                        onValueChange={(value) => {
+                                          try {
+                                            const newGoals = [...(matchGoals || [])];
+                                            if (newGoals[index]) {
+                                              newGoals[index] = { ...newGoals[index], assistPlayerId: value || undefined };
+                                              setMatchGoals(newGoals);
+                                            }
+                                          } catch (error) {
+                                            console.error("Error updating goal assistPlayerId:", error);
+                                          }
+                                        }}
+                                      >
+                                        <SelectTrigger className="w-40">
+                                          <SelectValue placeholder="Asist (Opsiyonel)" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="">Asist Yok</SelectItem>
+                                          {users && Array.isArray(users) && users.length > 0 ? (
+                                            users.map((u: any) => (
+                                              <SelectItem key={u?.id || `assist-${index}`} value={u?.id || ""}>{u?.username || "Bilinmeyen"}</SelectItem>
+                                            ))
+                                          ) : (
+                                            <SelectItem value="" disabled>Oyuncular yükleniyor...</SelectItem>
+                                          )}
+                                        </SelectContent>
+                                      </Select>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => {
+                                          try {
+                                            setMatchGoals((matchGoals || []).filter((_, i) => i !== index));
+                                          } catch (error) {
+                                            console.error("Error removing goal:", error);
+                                          }
+                                        }}
+                                      >
+                                        <X className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                  );
+                                })
+                              ) : null}
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -2286,12 +2321,16 @@ export default function ManagementPanelPage() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  setSelectedFixture(null);
-                                  setHomeScore("");
-                                  setAwayScore("");
-                                  setMatchGoals([]);
-                                  setMatchRecordingUrl("");
-                                  setIsPostponed(false);
+                                  try {
+                                    setSelectedFixture(null);
+                                    setHomeScore("");
+                                    setAwayScore("");
+                                    setMatchGoals([]);
+                                    setMatchRecordingUrl("");
+                                    setIsPostponed(false);
+                                  } catch (error) {
+                                    console.error("Error canceling:", error);
+                                  }
                                 }}
                               >
                                 İptal
