@@ -2297,20 +2297,29 @@ export default function ManagementPanelPage() {
                               <Button
                                 size="sm"
                                 onClick={() => {
-                                  if (homeScore !== "" && awayScore !== "") {
-                                    updateFixtureScoreMutation.mutate({
-                                      id: fixture.id,
-                                      homeScore: parseInt(homeScore),
-                                      awayScore: parseInt(awayScore),
-                                      goals: (matchGoals || []).filter((g: any) => g.playerId && g.minute > 0).map((g: any) => ({
-                                        playerId: g.playerId,
-                                        minute: g.minute,
-                                        assistPlayerId: g.assistPlayerId || undefined,
-                                        isHomeTeam: g.isHomeTeam,
-                                      })),
-                                      matchRecordingUrl: matchRecordingUrl || undefined,
-                                      isPostponed: isPostponed,
-                                    });
+                                  try {
+                                    if (homeScore !== "" && awayScore !== "") {
+                                      const validGoals = (matchGoals || [])
+                                        .filter((g: any) => g && typeof g === 'object' && g.playerId && g.minute > 0)
+                                        .map((g: any) => ({
+                                          playerId: g.playerId,
+                                          minute: g.minute,
+                                          assistPlayerId: g.assistPlayerId || undefined,
+                                          isHomeTeam: g.isHomeTeam || false,
+                                        }));
+                                      
+                                      updateFixtureScoreMutation.mutate({
+                                        id: fixture.id,
+                                        homeScore: parseInt(homeScore),
+                                        awayScore: parseInt(awayScore),
+                                        goals: validGoals,
+                                        matchRecordingUrl: matchRecordingUrl || undefined,
+                                        isPostponed: isPostponed,
+                                      });
+                                    }
+                                  } catch (error) {
+                                    console.error("Error saving fixture:", error);
+                                    toast({ title: "Hata", description: "Maç kaydedilirken bir hata oluştu", variant: "destructive" });
                                   }
                                 }}
                                 disabled={updateFixtureScoreMutation.isPending}
