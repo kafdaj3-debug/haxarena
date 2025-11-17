@@ -133,9 +133,13 @@ export default function ManagementPanelPage() {
     return null;
   }
 
-  const { data: users } = useQuery<any[]>({
+  const { data: users, error: usersError, isLoading: usersLoading } = useQuery<any[]>({
     queryKey: ["/api/management/users"],
     enabled: !!user?.isSuperAdmin,
+    retry: 2,
+    onError: (error) => {
+      console.error("❌ Users query error:", error);
+    },
   });
 
   const { data: settings } = useQuery<any>({
@@ -168,9 +172,13 @@ export default function ManagementPanelPage() {
     enabled: !!user?.isSuperAdmin,
   });
 
-  const { data: leagueFixtures } = useQuery<any[]>({
+  const { data: leagueFixtures, error: fixturesError, isLoading: fixturesLoading } = useQuery<any[]>({
     queryKey: ["/api/league/fixtures"],
     enabled: !!user?.isSuperAdmin,
+    retry: 2,
+    onError: (error) => {
+      console.error("❌ Fixtures query error:", error);
+    },
   });
 
   const { data: customRoles } = useQuery<any[]>({
@@ -2235,11 +2243,18 @@ export default function ManagementPanelPage() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  setMatchGoals([...(matchGoals || []), { playerId: "", minute: 0, isHomeTeam: true }]);
+                                  try {
+                                    const currentGoals = matchGoals && Array.isArray(matchGoals) ? matchGoals : [];
+                                    setMatchGoals([...currentGoals, { playerId: "", minute: 0, isHomeTeam: true }]);
+                                  } catch (error) {
+                                    console.error("Error adding goal:", error);
+                                    toast({ title: "Hata", description: "Gol eklenirken bir hata oluştu", variant: "destructive" });
+                                  }
                                 }}
+                                disabled={usersLoading || !users || !Array.isArray(users) || users.length === 0}
                               >
                                 <Plus className="w-4 h-4 mr-1" />
-                                Gol Ekle
+                                Gol Ekle {usersLoading && "(Yükleniyor...)"}
                               </Button>
                             </div>
 
@@ -2289,24 +2304,33 @@ export default function ManagementPanelPage() {
                               size="sm"
                               variant="outline"
                               onClick={() => {
-                                setSelectedFixture(fixture);
-                                setHomeScore(fixture.homeScore?.toString() || "");
-                                setAwayScore(fixture.awayScore?.toString() || "");
-                                setMatchGoals(
-                                  fixture.goals && Array.isArray(fixture.goals) 
-                                    ? fixture.goals.map((g: any) => ({
+                                try {
+                                  setSelectedFixture(fixture);
+                                  setHomeScore(fixture?.homeScore?.toString() || "");
+                                  setAwayScore(fixture?.awayScore?.toString() || "");
+                                  
+                                  // Goals'i güvenli şekilde yükle
+                                  let loadedGoals: Array<{ playerId: string; minute: number; assistPlayerId?: string; isHomeTeam: boolean }> = [];
+                                  if (fixture?.goals && Array.isArray(fixture.goals)) {
+                                    loadedGoals = fixture.goals
+                                      .filter((g: any) => g && typeof g === 'object')
+                                      .map((g: any) => ({
                                         playerId: g.playerId || g.player?.id || "",
                                         minute: g.minute || 0,
                                         assistPlayerId: g.assistPlayerId || g.assistPlayer?.id || undefined,
-                                        isHomeTeam: g.isHomeTeam || false,
-                                      }))
-                                    : []
-                                );
-                                setMatchRecordingUrl(fixture.matchRecordingUrl || "");
-                                setIsPostponed(fixture.isPostponed || false);
+                                        isHomeTeam: g.isHomeTeam !== undefined ? g.isHomeTeam : false,
+                                      }));
+                                  }
+                                  setMatchGoals(loadedGoals);
+                                  setMatchRecordingUrl(fixture?.matchRecordingUrl || "");
+                                  setIsPostponed(fixture?.isPostponed || false);
+                                } catch (error) {
+                                  console.error("Error loading fixture:", error);
+                                  toast({ title: "Hata", description: "Maç bilgileri yüklenirken bir hata oluştu", variant: "destructive" });
+                                }
                               }}
                             >
-                              {fixture.isPlayed ? "Skoru Düzenle" : "Skor Gir"}
+                              {fixture?.isPlayed ? "Skoru Düzenle" : "Skor Gir"}
                             </Button>
                             <Button
                               size="sm"
