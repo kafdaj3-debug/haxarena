@@ -67,7 +67,7 @@ export default function LeaguePage() {
     return acc;
   }, {} as Record<number, any[]>) || {};
 
-  // Sort fixtures within each week by match date (earliest first)
+  // Sort fixtures within each week by match date and time (earliest first)
   Object.keys(fixturesByWeek).forEach(week => {
     fixturesByWeek[parseInt(week)].sort((a: any, b: any) => {
       const dateA = new Date(a.matchDate).getTime();
@@ -76,17 +76,9 @@ export default function LeaguePage() {
     });
   });
 
-  // Sort weeks by the earliest match date in each week (most recent first)
+  // Sort weeks by week number (ascending: 1, 2, 3... 11)
   const weeks = Object.keys(fixturesByWeek).sort((a, b) => {
-    const weekAFixtures = fixturesByWeek[parseInt(a)];
-    const weekBFixtures = fixturesByWeek[parseInt(b)];
-    if (weekAFixtures.length === 0 && weekBFixtures.length === 0) return parseInt(a) - parseInt(b);
-    if (weekAFixtures.length === 0) return 1;
-    if (weekBFixtures.length === 0) return -1;
-    
-    const earliestA = Math.min(...weekAFixtures.map((f: any) => new Date(f.matchDate).getTime()));
-    const earliestB = Math.min(...weekBFixtures.map((f: any) => new Date(f.matchDate).getTime()));
-    return earliestB - earliestA; // Most recent first
+    return parseInt(a) - parseInt(b);
   });
 
   // Get current week's matches (this week)
