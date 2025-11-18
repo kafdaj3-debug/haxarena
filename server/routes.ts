@@ -1657,6 +1657,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { matchDate } = req.body;
       
       if (!matchDate) {
+        // Ensure CORS headers are set even on error
+        const origin = req.headers.origin;
+        if (origin) {
+          res.setHeader('Access-Control-Allow-Origin', origin);
+          res.setHeader('Access-Control-Allow-Credentials', 'true');
+          res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        }
         return res.status(400).json({ error: "Maç tarihi gereklidir" });
       }
 
@@ -1669,9 +1677,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const turkeyDate = new Date(Date.UTC(year, month - 1, day, hour - 3, minute, 0));
 
       const fixture = await storage.updateLeagueFixtureDate(id, turkeyDate);
+      
+      // Ensure CORS headers are set on success
+      const origin = req.headers.origin;
+      if (origin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      }
+      
       return res.json(fixture);
     } catch (error) {
       console.error("Error updating fixture date:", error);
+      
+      // Ensure CORS headers are set even on error
+      const origin = req.headers.origin;
+      if (origin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      }
+      
       return res.status(500).json({ error: "Maç tarihi güncellenemedi" });
     }
   });

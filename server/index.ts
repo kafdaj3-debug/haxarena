@@ -695,15 +695,25 @@ app.use((req, res, next) => {
     const origin = _req.headers.origin;
     if (origin && _req.path.startsWith('/api')) {
       const normalizedOrigin = origin.replace(/\/$/, '');
+      // More permissive CORS for error responses
       if (normalizedOrigin.includes('netlify') || 
           normalizedOrigin.endsWith('.netlify.app') || 
           normalizedOrigin.endsWith('.netlify.com') ||
           normalizedOrigin.endsWith('.vercel.app') ||
           normalizedOrigin.endsWith('.vercel.sh') ||
           normalizedOrigin.includes('vercel') ||
+          normalizedOrigin.includes('haxarena.net.tr') ||
+          normalizedOrigin.includes('haxarena.web.tr') ||
           normalizedOrigins.includes(normalizedOrigin)) {
         res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
         res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      } else {
+        // Still set CORS headers for unknown origins in error cases
+        res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
       }
     }
 
