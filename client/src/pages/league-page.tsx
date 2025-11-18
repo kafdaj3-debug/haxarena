@@ -591,13 +591,28 @@ export default function LeaguePage() {
                                   className="w-10 h-10 object-contain flex-shrink-0"
                                 />
                               ) : null}
-                              <span className="font-medium text-left truncate">
-                                {isBye && fixture.byeSide === "home" ? (
-                                  <span className="text-blue-600 font-bold">BAY</span>
-                                ) : (
-                                  fixture.homeTeam?.name || "BAY"
-                                )}
-                              </span>
+                              <div className="flex flex-col gap-1">
+                                <span className="font-medium text-left truncate">
+                                  {isBye && fixture.byeSide === "home" ? (
+                                    <span className="text-blue-600 font-bold">BAY</span>
+                                  ) : (
+                                    fixture.homeTeam?.name || "BAY"
+                                  )}
+                                </span>
+                                {!isBye && fixture.homeTeam?.id && (() => {
+                                  const category = getTeamCategory(fixture.homeTeam.id);
+                                  if (!category) return null;
+                                  return (
+                                    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-semibold w-fit ${
+                                      category.color === 'blue' ? 'bg-blue-600/20 text-blue-700 border border-blue-600/50' :
+                                      category.color === 'orange' ? 'bg-orange-500/20 text-orange-700 border border-orange-500/50' :
+                                      'bg-green-600/20 text-green-700 border border-green-600/50'
+                                    }`}>
+                                      <span>{category.emoji}</span>
+                                    </span>
+                                  );
+                                })()}
+                              </div>
                             </div>
                             
                             <div className="flex items-center justify-center min-w-[100px] flex-shrink-0">
