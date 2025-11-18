@@ -32,19 +32,19 @@ export default function HomePage() {
   const preparationRooms = [
     {
       matchName: "HaxArena Hazırlık Odası 1",
-      link: "https://www.haxball.com/play?c=NcuC9QTqbRs"
+      link: "https://www.haxball.com/play?c=IXp9dLF-m0o"
     },
     {
       matchName: "HaxArena Hazırlık Odası 2",
-      link: "https://www.haxball.com/play?c=S4LRFStEi_U"
+      link: "https://www.haxball.com/play?c=94nirpwTKkA"
     },
     {
       matchName: "HaxArena Hazırlık Odası 3",
-      link: "https://www.haxball.com/play?c=8URxRfc_Z94"
+      link: "https://www.haxball.com/play?c=GCroge8q61E"
     },
     {
       matchName: "HaxArena Hazırlık Odası 4",
-      link: "https://www.haxball.com/play?c=xCmch3e6pSQ"
+      link: "https://www.haxball.com/play?c=7Us9j3crRMc"
     }
   ];
 

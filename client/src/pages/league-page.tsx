@@ -229,8 +229,8 @@ export default function LeaguePage() {
                               // Açık mavi (1-4'ün daha açığı)
                               rowClass = "bg-gradient-to-r from-blue-400/15 to-blue-500/8 border-l-4 border-blue-400 hover:opacity-90";
                               badgeElement = (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-500/20 text-orange-700 border border-orange-500/50">
-                                  <span className="text-orange-600 font-bold">⚔️</span>
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-400/20 text-blue-700 border border-blue-400/50">
+                                  <span className="text-blue-500 font-bold">⚔️</span>
                                   <span>Play-Off</span>
                                 </span>
                               );
@@ -322,8 +322,8 @@ export default function LeaguePage() {
                         <span className="text-muted-foreground">1-4. sıradaki takımlar doğrudan çeyrek finale yükselir</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-500/20 text-orange-700 border border-orange-500/50">
-                          <span className="text-orange-600 font-bold">⚔️</span>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-400/20 text-blue-700 border border-blue-400/50">
+                          <span className="text-blue-500 font-bold">⚔️</span>
                           <span>Play-Off</span>
                         </span>
                         <span className="text-muted-foreground">5-12. sıradaki takımlar Play-Off oynar; kazananlar çeyrek finale çıkar</span>
