@@ -111,6 +111,19 @@ export default function LeaguePage() {
 
   const currentWeekMatches = getCurrentWeekMatches();
 
+  // Helper function to get team position and category
+  const getTeamCategory = (teamId: string | null) => {
+    if (!teamId || !teams) return null;
+    const teamIndex = teams.findIndex((t: any) => t.id === teamId);
+    if (teamIndex === -1) return null;
+    const position = teamIndex + 1;
+    
+    if (position <= 4) return { type: 'champions-league', label: 'Şampiyonlar Ligi', emoji: '🏆', color: 'blue' };
+    if (position >= 5 && position <= 12) return { type: 'playoff', label: 'Play-Off', emoji: '⚔️', color: 'orange' };
+    if (position >= 13 && position <= 16) return { type: 'europa-league', label: 'Avrupa Ligi', emoji: '🌍', color: 'green' };
+    return null;
+  };
+
   // Loading state while checking auth
   if (isLoading) {
     return (
@@ -202,27 +215,52 @@ export default function LeaguePage() {
                         </thead>
                         <tbody>
                           {teams?.map((team, index) => {
-                            const isTopThree = index < 3;
-                            const rankClass = index === 0 
-                              ? "bg-gradient-to-r from-yellow-500/20 to-yellow-600/10 border-yellow-500/30" 
-                              : index === 1 
-                              ? "bg-gradient-to-r from-gray-400/20 to-gray-500/10 border-gray-400/30" 
-                              : index === 2 
-                              ? "bg-gradient-to-r from-orange-600/20 to-orange-700/10 border-orange-600/30" 
-                              : "";
+                            const position = index + 1;
+                            // Şampiyonlar Ligi: 1-4 (doğrudan çeyrek final)
+                            const isChampionsLeague = position <= 4;
+                            // Play-Off: 5-12 (kazananlar çeyrek finale çıkar)
+                            const isPlayOff = position >= 5 && position <= 12;
+                            // Avrupa Ligi: 13-16 (doğrudan Avrupa Ligi çeyrek final)
+                            const isEuropaLeague = position >= 13 && position <= 16;
+                            
+                            // Renklendirme
+                            let rowClass = "hover:bg-muted/50";
+                            let badgeElement = null;
+                            
+                            if (isChampionsLeague) {
+                              rowClass = "bg-gradient-to-r from-blue-600/20 to-blue-700/10 border-l-4 border-blue-600 hover:opacity-90";
+                              badgeElement = (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-600/20 text-blue-700 border border-blue-600/50">
+                                  <span className="text-blue-600 font-bold">🏆</span>
+                                  <span>Şampiyonlar Ligi</span>
+                                </span>
+                              );
+                            } else if (isPlayOff) {
+                              rowClass = "bg-gradient-to-r from-orange-500/20 to-orange-600/10 border-l-4 border-orange-500 hover:opacity-90";
+                              badgeElement = (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-500/20 text-orange-700 border border-orange-500/50">
+                                  <span className="text-orange-600 font-bold">⚔️</span>
+                                  <span>Play-Off</span>
+                                </span>
+                              );
+                            } else if (isEuropaLeague) {
+                              rowClass = "bg-gradient-to-r from-green-600/20 to-green-700/10 border-l-4 border-green-600 hover:opacity-90";
+                              badgeElement = (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-600/20 text-green-700 border border-green-600/50">
+                                  <span className="text-green-600 font-bold">🌍</span>
+                                  <span>Avrupa Ligi</span>
+                                </span>
+                              );
+                            }
                             
                             return (
                             <tr 
                               key={team.id} 
-                              className={`border-b transition-colors ${isTopThree ? `${rankClass} hover:opacity-90` : "hover:bg-muted/50"}`}
+                              className={`border-b transition-colors ${rowClass}`}
                               data-testid={`row-team-${team.id}`}
                             >
                               <td className="p-3 font-bold text-center">
-                                {isTopThree ? (
-                                  <span className={index === 0 ? "text-yellow-600" : index === 1 ? "text-gray-500" : "text-orange-600"}>{index + 1}</span>
-                                ) : (
-                                  index + 1
-                                )}
+                                {position}
                               </td>
                               <td className="p-3">
                                 <div className="flex items-center gap-3">
@@ -230,10 +268,13 @@ export default function LeaguePage() {
                                     <img 
                                       src={team.logo} 
                                       alt={team.name} 
-                                      className={`object-contain ${isTopThree ? "w-10 h-10" : "w-8 h-8"}`}
+                                      className="w-10 h-10 object-contain"
                                     />
                                   )}
-                                  <span className={`font-medium ${isTopThree ? "text-lg" : ""}`}>{team.name}</span>
+                                  <div className="flex flex-col gap-1">
+                                    <span className="font-medium">{team.name}</span>
+                                    {badgeElement}
+                                  </div>
                                 </div>
                               </td>
                               <td className="p-3 text-center">{team.played}</td>
@@ -262,9 +303,37 @@ export default function LeaguePage() {
                       </table>
                     </div>
                   )}
-                  <div className="mt-4 text-xs text-muted-foreground space-y-1">
-                    <p><strong>O:</strong> Oynanan, <strong>G:</strong> Galibiyet, <strong>B:</strong> Beraberlik, <strong>M:</strong> Mağlubiyet</p>
-                    <p><strong>A:</strong> Atılan Gol, <strong>Y:</strong> Yenilen Gol, <strong>AV:</strong> Averaj, <strong>İA:</strong> İkili Averaj, <strong>P:</strong> Puan</p>
+                  <div className="mt-6 p-4 bg-muted/30 rounded-lg space-y-3">
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      <p><strong>O:</strong> Oynanan, <strong>G:</strong> Galibiyet, <strong>B:</strong> Beraberlik, <strong>M:</strong> Mağlubiyet</p>
+                      <p><strong>A:</strong> Atılan Gol, <strong>Y:</strong> Yenilen Gol, <strong>AV:</strong> Averaj, <strong>İA:</strong> İkili Averaj, <strong>P:</strong> Puan</p>
+                    </div>
+                    <div className="pt-3 border-t space-y-2">
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-600/20 text-blue-700 border border-blue-600/50">
+                          <span className="text-blue-600 font-bold">🏆</span>
+                          <span>Şampiyonlar Ligi</span>
+                        </span>
+                        <span className="text-muted-foreground">1-4. sıradaki takımlar doğrudan çeyrek finale yükselir</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-500/20 text-orange-700 border border-orange-500/50">
+                          <span className="text-orange-600 font-bold">⚔️</span>
+                          <span>Play-Off</span>
+                        </span>
+                        <span className="text-muted-foreground">5-12. sıradaki takımlar Play-Off oynar; kazananlar çeyrek finale çıkar</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-600/20 text-green-700 border border-green-600/50">
+                          <span className="text-green-600 font-bold">🌍</span>
+                          <span>Avrupa Ligi</span>
+                        </span>
+                        <span className="text-muted-foreground">13-16. sıradaki takımlar doğrudan Avrupa Ligi Çeyrek Finaline katılır</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-2 italic">
+                        Not: Play-Off'ta elenen 4 takım Avrupa Ligi Çeyrek Finalisti olur
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -333,9 +402,24 @@ export default function LeaguePage() {
                                     {isBye && fixture.byeSide === "home" ? (
                                       <span className="font-bold text-lg text-blue-600">BAY</span>
                                     ) : (
-                                      <span className={`font-bold text-lg ${fixture.isPlayed && fixture.homeScore > fixture.awayScore ? "text-green-600" : ""}`}>
-                                        {fixture.homeTeam?.name || "BAY"}
-                                      </span>
+                                      <div className="flex flex-col items-end gap-1">
+                                        <span className={`font-bold text-lg ${fixture.isPlayed && fixture.homeScore > fixture.awayScore ? "text-green-600" : ""}`}>
+                                          {fixture.homeTeam?.name || "BAY"}
+                                        </span>
+                                        {fixture.homeTeam?.id && (() => {
+                                          const category = getTeamCategory(fixture.homeTeam.id);
+                                          if (!category) return null;
+                                          return (
+                                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-semibold ${
+                                              category.color === 'blue' ? 'bg-blue-600/20 text-blue-700 border border-blue-600/50' :
+                                              category.color === 'orange' ? 'bg-orange-500/20 text-orange-700 border border-orange-500/50' :
+                                              'bg-green-600/20 text-green-700 border border-green-600/50'
+                                            }`}>
+                                              <span>{category.emoji}</span>
+                                            </span>
+                                          );
+                                        })()}
+                                      </div>
                                     )}
                                   </div>
                                 </div>
@@ -370,9 +454,24 @@ export default function LeaguePage() {
                                     {isBye && fixture.byeSide === "away" ? (
                                       <span className="font-bold text-lg text-blue-600">BAY</span>
                                     ) : (
-                                      <span className={`font-bold text-lg ${fixture.isPlayed && fixture.awayScore > fixture.homeScore ? "text-green-600" : ""}`}>
-                                        {fixture.awayTeam?.name || "BAY"}
-                                      </span>
+                                      <div className="flex flex-col gap-1">
+                                        <span className={`font-bold text-lg ${fixture.isPlayed && fixture.awayScore > fixture.homeScore ? "text-green-600" : ""}`}>
+                                          {fixture.awayTeam?.name || "BAY"}
+                                        </span>
+                                        {fixture.awayTeam?.id && (() => {
+                                          const category = getTeamCategory(fixture.awayTeam.id);
+                                          if (!category) return null;
+                                          return (
+                                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-semibold ${
+                                              category.color === 'blue' ? 'bg-blue-600/20 text-blue-700 border border-blue-600/50' :
+                                              category.color === 'orange' ? 'bg-orange-500/20 text-orange-700 border border-orange-500/50' :
+                                              'bg-green-600/20 text-green-700 border border-green-600/50'
+                                            }`}>
+                                              <span>{category.emoji}</span>
+                                            </span>
+                                          );
+                                        })()}
+                                      </div>
                                     )}
                                   </div>
                                   {isBye && fixture.byeSide === "away" ? (
@@ -520,13 +619,28 @@ export default function LeaguePage() {
                             </div>
                             
                             <div className="flex items-center gap-3 flex-1 min-w-0 justify-end">
-                              <span className="font-medium text-right truncate">
-                                {isBye && fixture.byeSide === "away" ? (
-                                  <span className="text-blue-600 font-bold">BAY</span>
-                                ) : (
-                                  fixture.awayTeam?.name || "BAY"
-                                )}
-                              </span>
+                              <div className="flex flex-col items-end gap-1">
+                                <span className="font-medium text-right truncate">
+                                  {isBye && fixture.byeSide === "away" ? (
+                                    <span className="text-blue-600 font-bold">BAY</span>
+                                  ) : (
+                                    fixture.awayTeam?.name || "BAY"
+                                  )}
+                                </span>
+                                {!isBye && fixture.awayTeam?.id && (() => {
+                                  const category = getTeamCategory(fixture.awayTeam.id);
+                                  if (!category) return null;
+                                  return (
+                                    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-semibold ${
+                                      category.color === 'blue' ? 'bg-blue-600/20 text-blue-700 border border-blue-600/50' :
+                                      category.color === 'orange' ? 'bg-orange-500/20 text-orange-700 border border-orange-500/50' :
+                                      'bg-green-600/20 text-green-700 border border-green-600/50'
+                                    }`}>
+                                      <span>{category.emoji}</span>
+                                    </span>
+                                  );
+                                })()}
+                              </div>
                               {isBye && fixture.byeSide === "away" ? (
                                 <div className="w-10 h-10 flex items-center justify-center bg-blue-500/20 rounded border border-blue-500/50 flex-shrink-0">
                                   <span className="font-bold text-blue-600 text-xs">BAY</span>
