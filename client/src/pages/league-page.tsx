@@ -67,13 +67,13 @@ export default function LeaguePage() {
     return acc;
   }, {} as Record<number, any[]>) || {};
 
-  // Sort fixtures within each week by match date and time (most recent first, then oldest at bottom)
+  // Sort fixtures within each week by match date and time (earliest first - ascending order)
   Object.keys(fixturesByWeek).forEach(week => {
     fixturesByWeek[parseInt(week)].sort((a: any, b: any) => {
       const dateA = new Date(a.matchDate).getTime();
       const dateB = new Date(b.matchDate).getTime();
-      // Most recent first (descending order)
-      return dateB - dateA;
+      // Earliest date first (ascending order: 4 Ocak before 5 Ocak)
+      return dateA - dateB;
     });
   });
 
