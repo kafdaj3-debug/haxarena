@@ -329,11 +329,18 @@ export default function LeaguePage() {
                         <span className="text-muted-foreground">5-12. sıradaki takımlar Play-Off oynar; kazananlar çeyrek finale çıkar</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-600/20 text-green-700 border border-green-600/50">
-                          <span className="text-green-600 font-bold">🌍</span>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-500/20 text-orange-700 border border-orange-500/50">
+                          <span className="text-orange-600 font-bold">🌍</span>
                           <span>Avrupa Ligi</span>
                         </span>
                         <span className="text-muted-foreground">13-16. sıradaki takımlar doğrudan Avrupa Ligi Çeyrek Finaline katılır</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-700/20 text-red-800 border border-red-700/50">
+                          <span className="text-red-700 font-bold">⬇️</span>
+                          <span>Küme</span>
+                        </span>
+                        <span className="text-muted-foreground">17-21. sıradaki takımlar küme düşer</span>
                       </div>
                       <div className="text-xs text-muted-foreground mt-2 italic">
                         Not: Play-Off'ta elenen 4 takım Avrupa Ligi Çeyrek Finalisti olur
