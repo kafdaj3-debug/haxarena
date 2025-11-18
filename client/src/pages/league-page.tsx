@@ -70,8 +70,18 @@ export default function LeaguePage() {
   // Sort fixtures within each week by match date and time (earliest first - ascending order)
   Object.keys(fixturesByWeek).forEach(week => {
     fixturesByWeek[parseInt(week)].sort((a: any, b: any) => {
-      const dateA = new Date(a.matchDate).getTime();
-      const dateB = new Date(b.matchDate).getTime();
+      // Parse dates properly, handling timezone
+      const dateA = a.matchDate ? new Date(a.matchDate).getTime() : 0;
+      const dateB = b.matchDate ? new Date(b.matchDate).getTime() : 0;
+      
+      // If dates are equal, maintain original order or sort by team name
+      if (dateA === dateB) {
+        // If same date, sort by home team name for consistency
+        const nameA = a.homeTeam?.name || '';
+        const nameB = b.homeTeam?.name || '';
+        return nameA.localeCompare(nameB, 'tr');
+      }
+      
       // Earliest date first (ascending order: 4 Ocak before 5 Ocak)
       return dateA - dateB;
     });
