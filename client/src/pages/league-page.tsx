@@ -293,7 +293,12 @@ export default function LeaguePage() {
                                   {team.headToHead > 0 ? "+" : ""}{team.headToHead || 0}
                                 </span>
                               </td>
-                              <td className={`p-3 text-center font-bold ${isTopThree ? index === 0 ? "text-yellow-600 text-lg" : index === 1 ? "text-gray-500 text-lg" : "text-orange-600 text-lg" : "text-primary"}`}>
+                              <td className={`p-3 text-center font-bold ${
+                                isChampionsLeague ? "text-blue-600 text-lg" : 
+                                isPlayOff ? "text-orange-600" : 
+                                isEuropaLeague ? "text-green-600" : 
+                                "text-primary"
+                              }`}>
                                 {team.points}
                               </td>
                             </tr>
