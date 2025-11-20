@@ -474,38 +474,69 @@ export default function LeaguePage() {
                               {fixture.goals && fixture.goals.length > 0 && (
                                 <div className="mt-4 pt-3 border-t">
                                   <h4 className="text-sm font-semibold mb-2">Gol Detayları:</h4>
-                                  <div className="space-y-1">
-                                    {fixture.goals
-                                      .sort((a: any, b: any) => a.minute - b.minute)
-                                      .map((goal: any, idx: number) => {
-                                        // Format minute: saniye -> dakika.saniye veya sadece saniye
-                                        const formatMinute = (seconds: number): string => {
-                                          if (seconds === 0) return "0";
-                                          const minutes = Math.floor(seconds / 60);
-                                          const secs = seconds % 60;
-                                          if (minutes > 0 && secs > 0) {
-                                            return `${minutes}.${String(secs).padStart(2, '0')}'`;
-                                          } else if (minutes > 0) {
-                                            return `${minutes}'`;
-                                          } else {
-                                            return `${secs}''`;
-                                          }
-                                        };
-                                        return (
-                                          <div key={idx} className="text-xs flex items-center gap-2">
-                                            <span className="font-medium">{formatMinute(goal.minute)}</span>
-                                            <span>{goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
-                                            {(goal.assistPlayerName || goal.assistPlayer) && (
-                                              <span className="text-muted-foreground">
-                                                (Asist: {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"})
-                                              </span>
-                                            )}
-                                            <span className={`text-xs px-1.5 py-0.5 rounded ${goal.isHomeTeam ? "bg-blue-100 text-blue-700" : "bg-red-100 text-red-700"}`}>
-                                              {goal.isHomeTeam ? fixture.homeTeam?.name : fixture.awayTeam?.name}
-                                            </span>
-                                          </div>
-                                        );
-                                      })}
+                                  <div className="grid grid-cols-2 gap-4">
+                                    {/* Ev Sahibi Takım Golleri - Sol Taraf */}
+                                    <div className="space-y-1">
+                                      {fixture.goals
+                                        .filter((goal: any) => goal.isHomeTeam)
+                                        .sort((a: any, b: any) => a.minute - b.minute)
+                                        .map((goal: any, idx: number) => {
+                                          const formatMinute = (seconds: number): string => {
+                                            if (seconds === 0) return "0";
+                                            const minutes = Math.floor(seconds / 60);
+                                            const secs = seconds % 60;
+                                            if (minutes > 0 && secs > 0) {
+                                              return `${minutes}.${String(secs).padStart(2, '0')}'`;
+                                            } else if (minutes > 0) {
+                                              return `${minutes}'`;
+                                            } else {
+                                              return `${secs}''`;
+                                            }
+                                          };
+                                          return (
+                                            <div key={idx} className="text-xs flex items-center gap-2">
+                                              <span className="font-medium">{formatMinute(goal.minute)}</span>
+                                              <span>{goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
+                                              {(goal.assistPlayerName || goal.assistPlayer) && (
+                                                <span className="text-muted-foreground">
+                                                  (Asist: {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"})
+                                                </span>
+                                              )}
+                                            </div>
+                                          );
+                                        })}
+                                    </div>
+                                    {/* Deplasman Takımı Golleri - Sağ Taraf */}
+                                    <div className="space-y-1">
+                                      {fixture.goals
+                                        .filter((goal: any) => !goal.isHomeTeam)
+                                        .sort((a: any, b: any) => a.minute - b.minute)
+                                        .map((goal: any, idx: number) => {
+                                          const formatMinute = (seconds: number): string => {
+                                            if (seconds === 0) return "0";
+                                            const minutes = Math.floor(seconds / 60);
+                                            const secs = seconds % 60;
+                                            if (minutes > 0 && secs > 0) {
+                                              return `${minutes}.${String(secs).padStart(2, '0')}'`;
+                                            } else if (minutes > 0) {
+                                              return `${minutes}'`;
+                                            } else {
+                                              return `${secs}''`;
+                                            }
+                                          };
+                                          return (
+                                            <div key={idx} className="text-xs flex items-center gap-2 justify-end">
+                                              <span>{goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
+                                              {(goal.assistPlayerName || goal.assistPlayer) && (
+                                                <span className="text-muted-foreground">
+                                                  (Asist: {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"})
+                                                </span>
+                                              )}
+                                              <span className="font-medium">{formatMinute(goal.minute)}</span>
+                                            </div>
+                                          );
+                                        })}
+                                    </div>
                                   </div>
                                 </div>
                               )}
@@ -671,35 +702,69 @@ export default function LeaguePage() {
                               {fixture.goals && fixture.goals.length > 0 && (
                                 <div className="mt-2 pt-2 border-t">
                                   <h5 className="text-xs font-semibold mb-1 text-center">Gol Detayları:</h5>
-                                  <div className="space-y-0.5">
-                                    {fixture.goals
-                                      .sort((a: any, b: any) => a.minute - b.minute)
-                                      .map((goal: any, idx: number) => {
-                                        // Format minute: saniye -> dakika.saniye veya sadece saniye
-                                        const formatMinute = (seconds: number): string => {
-                                          if (seconds === 0) return "0";
-                                          const minutes = Math.floor(seconds / 60);
-                                          const secs = seconds % 60;
-                                          if (minutes > 0 && secs > 0) {
-                                            return `${minutes}.${String(secs).padStart(2, '0')}'`;
-                                          } else if (minutes > 0) {
-                                            return `${minutes}'`;
-                                          } else {
-                                            return `${secs}''`;
-                                          }
-                                        };
-                                        return (
-                                          <div key={idx} className="text-xs text-center">
-                                            <span className="font-medium">{formatMinute(goal.minute)}</span>
-                                            <span> {goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
-                                            {(goal.assistPlayerName || goal.assistPlayer) && (
-                                              <span className="text-muted-foreground">
-                                                {" "}(Asist: {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"})
-                                              </span>
-                                            )}
-                                          </div>
-                                        );
-                                      })}
+                                  <div className="grid grid-cols-2 gap-2">
+                                    {/* Ev Sahibi Takım Golleri - Sol Taraf */}
+                                    <div className="space-y-0.5">
+                                      {fixture.goals
+                                        .filter((goal: any) => goal.isHomeTeam)
+                                        .sort((a: any, b: any) => a.minute - b.minute)
+                                        .map((goal: any, idx: number) => {
+                                          const formatMinute = (seconds: number): string => {
+                                            if (seconds === 0) return "0";
+                                            const minutes = Math.floor(seconds / 60);
+                                            const secs = seconds % 60;
+                                            if (minutes > 0 && secs > 0) {
+                                              return `${minutes}.${String(secs).padStart(2, '0')}'`;
+                                            } else if (minutes > 0) {
+                                              return `${minutes}'`;
+                                            } else {
+                                              return `${secs}''`;
+                                            }
+                                          };
+                                          return (
+                                            <div key={idx} className="text-xs">
+                                              <span className="font-medium">{formatMinute(goal.minute)}</span>
+                                              <span> {goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
+                                              {(goal.assistPlayerName || goal.assistPlayer) && (
+                                                <span className="text-muted-foreground">
+                                                  {" "}(Asist: {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"})
+                                                </span>
+                                              )}
+                                            </div>
+                                          );
+                                        })}
+                                    </div>
+                                    {/* Deplasman Takımı Golleri - Sağ Taraf */}
+                                    <div className="space-y-0.5">
+                                      {fixture.goals
+                                        .filter((goal: any) => !goal.isHomeTeam)
+                                        .sort((a: any, b: any) => a.minute - b.minute)
+                                        .map((goal: any, idx: number) => {
+                                          const formatMinute = (seconds: number): string => {
+                                            if (seconds === 0) return "0";
+                                            const minutes = Math.floor(seconds / 60);
+                                            const secs = seconds % 60;
+                                            if (minutes > 0 && secs > 0) {
+                                              return `${minutes}.${String(secs).padStart(2, '0')}'`;
+                                            } else if (minutes > 0) {
+                                              return `${minutes}'`;
+                                            } else {
+                                              return `${secs}''`;
+                                            }
+                                          };
+                                          return (
+                                            <div key={idx} className="text-xs text-right">
+                                              <span>{goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
+                                              {(goal.assistPlayerName || goal.assistPlayer) && (
+                                                <span className="text-muted-foreground">
+                                                  {" "}(Asist: {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"})
+                                                </span>
+                                              )}
+                                              <span className="font-medium"> {formatMinute(goal.minute)}</span>
+                                            </div>
+                                          );
+                                        })}
+                                    </div>
                                   </div>
                                 </div>
                               )}
