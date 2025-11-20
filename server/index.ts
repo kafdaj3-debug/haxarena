@@ -617,7 +617,8 @@ app.use((req, res, next) => {
         CREATE TABLE IF NOT EXISTS player_stats (
           id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
           fixture_id VARCHAR NOT NULL REFERENCES league_fixtures(id) ON DELETE CASCADE,
-          user_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          user_id VARCHAR REFERENCES users(id) ON DELETE CASCADE,
+          player_name VARCHAR,
           team_id VARCHAR NOT NULL REFERENCES league_teams(id) ON DELETE CASCADE,
           goals INTEGER NOT NULL DEFAULT 0,
           assists INTEGER NOT NULL DEFAULT 0,
@@ -627,6 +628,14 @@ app.use((req, res, next) => {
           created_at TIMESTAMP NOT NULL DEFAULT NOW()
         )
       `);
+      
+      // Player stats columns migration - add player_name, make user_id nullable
+      try {
+        await db.execute(sql`ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS player_name VARCHAR`);
+        await db.execute(sql`ALTER TABLE player_stats ALTER COLUMN user_id DROP NOT NULL`);
+      } catch (error) {
+        console.log("Player stats columns migration:", error instanceof Error ? error.message : String(error));
+      }
       
       await db.execute(sql`
         CREATE TABLE IF NOT EXISTS team_of_week (

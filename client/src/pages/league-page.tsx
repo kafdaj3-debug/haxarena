@@ -3,11 +3,11 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Trophy, Award, Users } from "lucide-react";
+import { Calendar, Trophy, Award, Users, Crown, Medal, Sparkles, Star } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 
 export default function LeaguePage() {
   const { user, logout, isLoading } = useAuth();
@@ -477,20 +477,35 @@ export default function LeaguePage() {
                                   <div className="space-y-1">
                                     {fixture.goals
                                       .sort((a: any, b: any) => a.minute - b.minute)
-                                      .map((goal: any, idx: number) => (
-                                        <div key={idx} className="text-xs flex items-center gap-2">
-                                          <span className="font-medium">{goal.minute}'</span>
-                                          <span>{goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
-                                          {(goal.assistPlayerName || goal.assistPlayer) && (
-                                            <span className="text-muted-foreground">
-                                              (Asist: {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"})
+                                      .map((goal: any, idx: number) => {
+                                        // Format minute: saniye -> dakika.saniye veya sadece saniye
+                                        const formatMinute = (seconds: number): string => {
+                                          if (seconds === 0) return "0";
+                                          const minutes = Math.floor(seconds / 60);
+                                          const secs = seconds % 60;
+                                          if (minutes > 0 && secs > 0) {
+                                            return `${minutes}.${String(secs).padStart(2, '0')}'`;
+                                          } else if (minutes > 0) {
+                                            return `${minutes}'`;
+                                          } else {
+                                            return `${secs}''`;
+                                          }
+                                        };
+                                        return (
+                                          <div key={idx} className="text-xs flex items-center gap-2">
+                                            <span className="font-medium">{formatMinute(goal.minute)}</span>
+                                            <span>{goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
+                                            {(goal.assistPlayerName || goal.assistPlayer) && (
+                                              <span className="text-muted-foreground">
+                                                (Asist: {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"})
+                                              </span>
+                                            )}
+                                            <span className={`text-xs px-1.5 py-0.5 rounded ${goal.isHomeTeam ? "bg-blue-100 text-blue-700" : "bg-red-100 text-red-700"}`}>
+                                              {goal.isHomeTeam ? fixture.homeTeam?.name : fixture.awayTeam?.name}
                                             </span>
-                                          )}
-                                          <span className={`text-xs px-1.5 py-0.5 rounded ${goal.isHomeTeam ? "bg-blue-100 text-blue-700" : "bg-red-100 text-red-700"}`}>
-                                            {goal.isHomeTeam ? fixture.homeTeam?.name : fixture.awayTeam?.name}
-                                          </span>
-                                        </div>
-                                      ))}
+                                          </div>
+                                        );
+                                      })}
                                   </div>
                                 </div>
                               )}
@@ -687,222 +702,817 @@ export default function LeaguePage() {
 
             {/* ⚽ Gol Krallığı */}
             <TabsContent value="goals" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <span>⚽</span> Gol Krallığı
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {leaderboardLoading ? (
-                    <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
-                  ) : !leaderboard?.length ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Henüz gol atan yok
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {leaderboard
-                        .filter((p: any) => p.totalGoals > 0)
-                        .sort((a: any, b: any) => b.totalGoals - a.totalGoals)
-                        .slice(0, 10)
-                        .map((player: any, index: number) => (
-                          <div 
-                            key={player.userId} 
-                            className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className={`font-bold ${index === 0 ? "text-yellow-600 text-lg" : "text-muted-foreground"}`}>
-                                {index + 1}
-                              </span>
-                              <span className="font-medium">{player.username}</span>
+              {leaderboardLoading ? (
+                <Card>
+                  <CardContent className="py-8">
+                    <div className="text-center text-muted-foreground">Yükleniyor...</div>
+                  </CardContent>
+                </Card>
+              ) : !leaderboard?.length ? (
+                <Card>
+                  <CardContent className="py-8">
+                    <div className="text-center text-muted-foreground">Henüz gol atan yok</div>
+                  </CardContent>
+                </Card>
+              ) : (() => {
+                const sortedPlayers = leaderboard
+                  .filter((p: any) => p.totalGoals > 0)
+                  .sort((a: any, b: any) => b.totalGoals - a.totalGoals)
+                  .slice(0, 10);
+                
+                if (sortedPlayers.length === 0) {
+                  return (
+                    <Card>
+                      <CardContent className="py-8">
+                        <p className="text-center text-muted-foreground">Henüz gol atan yok</p>
+                      </CardContent>
+                    </Card>
+                  );
+                }
+
+                return (
+                  <div className="space-y-6">
+                    {/* 1st Place - Special Card */}
+                    {sortedPlayers[0] && (
+                      <Card className="overflow-hidden border-2 border-yellow-400/50 bg-gradient-to-br from-yellow-50 via-amber-50 to-yellow-100 dark:from-yellow-950/20 dark:via-amber-950/20 dark:to-yellow-900/20 shadow-xl">
+                        <div className="relative p-6 md:p-8">
+                          <Sparkles className="absolute top-4 right-4 w-8 h-8 text-yellow-500/30 animate-pulse" />
+                          <Star className="absolute top-6 right-8 w-4 h-4 text-yellow-400/40 animate-pulse" style={{ animationDelay: '0.5s' }} />
+                          
+                          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                            <div className="relative flex-shrink-0">
+                              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center shadow-lg ring-4 ring-yellow-300/50">
+                                <Crown className="w-12 h-12 md:w-16 md:h-16 text-yellow-900" />
+                              </div>
+                              <div className="absolute -top-2 -right-2 bg-yellow-500 text-yellow-900 rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm shadow-md">
+                                1
+                              </div>
                             </div>
-                            <span className="font-bold text-primary">{player.totalGoals} Gol</span>
+                            
+                            <div className="flex-1 text-center md:text-left">
+                              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                                <Trophy className="w-6 h-6 text-yellow-600" />
+                                <h3 className="text-2xl md:text-3xl font-bold text-yellow-900 dark:text-yellow-400">
+                                  Gol Kralı
+                                </h3>
+                              </div>
+                              <Link 
+                                href={`/oyuncu/${sortedPlayers[0].username}`}
+                                className="block group"
+                              >
+                                <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2 group-hover:text-yellow-600 transition-colors">
+                                  {sortedPlayers[0].username}
+                                </h2>
+                              </Link>
+                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
+                                <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
+                                  <div className="text-xs text-muted-foreground mb-1">Gol</div>
+                                  <div className="text-2xl font-bold text-yellow-700 dark:text-yellow-400">
+                                    {sortedPlayers[0].totalGoals}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        ))}
-                      {leaderboard.filter((p: any) => p.totalGoals > 0).length === 0 && (
-                        <p className="text-center text-muted-foreground py-4">Henüz gol atan yok</p>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                        </div>
+                      </Card>
+                    )}
+
+                    {/* 2nd and 3rd Place */}
+                    {(sortedPlayers[1] || sortedPlayers[2]) && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {sortedPlayers[1] && (
+                          <Card className="overflow-hidden border-2 border-gray-300/50 bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 dark:from-gray-900/30 dark:via-slate-900/30 dark:to-gray-800/30 shadow-lg">
+                            <div className="relative p-5">
+                              <Medal className="absolute top-3 right-3 w-6 h-6 text-gray-400/30" />
+                              <div className="flex items-center gap-4">
+                                <div className="relative flex-shrink-0">
+                                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-300 to-slate-400 flex items-center justify-center shadow-md ring-2 ring-gray-200/50">
+                                    <Medal className="w-8 h-8 text-gray-700" />
+                                  </div>
+                                  <div className="absolute -top-1 -right-1 bg-gray-400 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                    2
+                                  </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <Link 
+                                    href={`/oyuncu/${sortedPlayers[1].username}`}
+                                    className="block group"
+                                  >
+                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-gray-600 transition-colors truncate">
+                                      {sortedPlayers[1].username}
+                                    </h3>
+                                  </Link>
+                                  <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
+                                    {sortedPlayers[1].totalGoals} Gol
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        )}
+
+                        {sortedPlayers[2] && (
+                          <Card className="overflow-hidden border-2 border-amber-700/50 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-amber-900/20 shadow-lg">
+                            <div className="relative p-5">
+                              <Medal className="absolute top-3 right-3 w-6 h-6 text-amber-600/30" />
+                              <div className="flex items-center gap-4">
+                                <div className="relative flex-shrink-0">
+                                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center shadow-md ring-2 ring-amber-500/50">
+                                    <Medal className="w-8 h-8 text-amber-100" />
+                                  </div>
+                                  <div className="absolute -top-1 -right-1 bg-amber-700 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                    3
+                                  </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <Link 
+                                    href={`/oyuncu/${sortedPlayers[2].username}`}
+                                    className="block group"
+                                  >
+                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-amber-700 transition-colors truncate">
+                                      {sortedPlayers[2].username}
+                                    </h3>
+                                  </Link>
+                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
+                                    {sortedPlayers[2].totalGoals} Gol
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Rest of the players */}
+                    {sortedPlayers.length > 3 && (
+                      <Card className="overflow-hidden">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <span>⚽</span> Diğer Sıralamalar
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            {sortedPlayers.slice(3).map((player: any, index: number) => (
+                              <div 
+                                key={player.userId} 
+                                className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <span className="font-bold text-muted-foreground w-6">
+                                    {index + 4}
+                                  </span>
+                                  <Link 
+                                    href={`/oyuncu/${player.username}`}
+                                    className="font-medium hover:text-primary transition-colors"
+                                  >
+                                    {player.username}
+                                  </Link>
+                                </div>
+                                <span className="font-bold text-primary">{player.totalGoals} Gol</span>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                );
+              })()}
             </TabsContent>
 
             {/* 🎯 Asist Krallığı */}
             <TabsContent value="assists" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <span>🎯</span> Asist Krallığı
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {leaderboardLoading ? (
-                    <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
-                  ) : !leaderboard?.length ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Henüz asist yapan yok
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {leaderboard
-                        .filter((p: any) => p.totalAssists > 0)
-                        .sort((a: any, b: any) => b.totalAssists - a.totalAssists)
-                        .slice(0, 10)
-                        .map((player: any, index: number) => (
-                          <div 
-                            key={player.userId} 
-                            className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className={`font-bold ${index === 0 ? "text-blue-600 text-lg" : "text-muted-foreground"}`}>
-                                {index + 1}
-                              </span>
-                              <span className="font-medium">{player.username}</span>
+              {leaderboardLoading ? (
+                <Card>
+                  <CardContent className="py-8">
+                    <div className="text-center text-muted-foreground">Yükleniyor...</div>
+                  </CardContent>
+                </Card>
+              ) : !leaderboard?.length ? (
+                <Card>
+                  <CardContent className="py-8">
+                    <div className="text-center text-muted-foreground">Henüz asist yapan yok</div>
+                  </CardContent>
+                </Card>
+              ) : (() => {
+                const sortedPlayers = leaderboard
+                  .filter((p: any) => p.totalAssists > 0)
+                  .sort((a: any, b: any) => b.totalAssists - a.totalAssists)
+                  .slice(0, 10);
+                
+                if (sortedPlayers.length === 0) {
+                  return (
+                    <Card>
+                      <CardContent className="py-8">
+                        <p className="text-center text-muted-foreground">Henüz asist yapan yok</p>
+                      </CardContent>
+                    </Card>
+                  );
+                }
+
+                return (
+                  <div className="space-y-6">
+                    {sortedPlayers[0] && (
+                      <Card className="overflow-hidden border-2 border-blue-400/50 bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100 dark:from-blue-950/20 dark:via-cyan-950/20 dark:to-blue-900/20 shadow-xl">
+                        <div className="relative p-6 md:p-8">
+                          <Sparkles className="absolute top-4 right-4 w-8 h-8 text-blue-500/30 animate-pulse" />
+                          <Star className="absolute top-6 right-8 w-4 h-4 text-blue-400/40 animate-pulse" style={{ animationDelay: '0.5s' }} />
+                          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                            <div className="relative flex-shrink-0">
+                              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center shadow-lg ring-4 ring-blue-300/50">
+                                <Crown className="w-12 h-12 md:w-16 md:h-16 text-blue-900" />
+                              </div>
+                              <div className="absolute -top-2 -right-2 bg-blue-500 text-blue-900 rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm shadow-md">
+                                1
+                              </div>
                             </div>
-                            <span className="font-bold text-blue-600">{player.totalAssists} Asist</span>
+                            <div className="flex-1 text-center md:text-left">
+                              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                                <Trophy className="w-6 h-6 text-blue-600" />
+                                <h3 className="text-2xl md:text-3xl font-bold text-blue-900 dark:text-blue-400">
+                                  Asist Kralı
+                                </h3>
+                              </div>
+                              <Link href={`/oyuncu/${sortedPlayers[0].username}`} className="block group">
+                                <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2 group-hover:text-blue-600 transition-colors">
+                                  {sortedPlayers[0].username}
+                                </h2>
+                              </Link>
+                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
+                                <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
+                                  <div className="text-xs text-muted-foreground mb-1">Asist</div>
+                                  <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">
+                                    {sortedPlayers[0].totalAssists}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        ))}
-                      {leaderboard.filter((p: any) => p.totalAssists > 0).length === 0 && (
-                        <p className="text-center text-muted-foreground py-4">Henüz asist yapan yok</p>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                        </div>
+                      </Card>
+                    )}
+                    {(sortedPlayers[1] || sortedPlayers[2]) && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {sortedPlayers[1] && (
+                          <Card className="overflow-hidden border-2 border-gray-300/50 bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 dark:from-gray-900/30 dark:via-slate-900/30 dark:to-gray-800/30 shadow-lg">
+                            <div className="relative p-5">
+                              <Medal className="absolute top-3 right-3 w-6 h-6 text-gray-400/30" />
+                              <div className="flex items-center gap-4">
+                                <div className="relative flex-shrink-0">
+                                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-300 to-slate-400 flex items-center justify-center shadow-md ring-2 ring-gray-200/50">
+                                    <Medal className="w-8 h-8 text-gray-700" />
+                                  </div>
+                                  <div className="absolute -top-1 -right-1 bg-gray-400 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                    2
+                                  </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <Link href={`/oyuncu/${sortedPlayers[1].username}`} className="block group">
+                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-gray-600 transition-colors truncate">
+                                      {sortedPlayers[1].username}
+                                    </h3>
+                                  </Link>
+                                  <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
+                                    {sortedPlayers[1].totalAssists} Asist
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        )}
+                        {sortedPlayers[2] && (
+                          <Card className="overflow-hidden border-2 border-amber-700/50 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-amber-900/20 shadow-lg">
+                            <div className="relative p-5">
+                              <Medal className="absolute top-3 right-3 w-6 h-6 text-amber-600/30" />
+                              <div className="flex items-center gap-4">
+                                <div className="relative flex-shrink-0">
+                                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center shadow-md ring-2 ring-amber-500/50">
+                                    <Medal className="w-8 h-8 text-amber-100" />
+                                  </div>
+                                  <div className="absolute -top-1 -right-1 bg-amber-700 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                    3
+                                  </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <Link href={`/oyuncu/${sortedPlayers[2].username}`} className="block group">
+                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-amber-700 transition-colors truncate">
+                                      {sortedPlayers[2].username}
+                                    </h3>
+                                  </Link>
+                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
+                                    {sortedPlayers[2].totalAssists} Asist
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        )}
+                      </div>
+                    )}
+                    {sortedPlayers.length > 3 && (
+                      <Card className="overflow-hidden">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <span>🎯</span> Diğer Sıralamalar
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            {sortedPlayers.slice(3).map((player: any, index: number) => (
+                              <div key={player.userId} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors">
+                                <div className="flex items-center gap-3">
+                                  <span className="font-bold text-muted-foreground w-6">{index + 4}</span>
+                                  <Link href={`/oyuncu/${player.username}`} className="font-medium hover:text-primary transition-colors">
+                                    {player.username}
+                                  </Link>
+                                </div>
+                                <span className="font-bold text-blue-600">{player.totalAssists} Asist</span>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                );
+              })()}
             </TabsContent>
 
             {/* 🧤 En Çok Kurtarış */}
             <TabsContent value="saves" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <span>🧤</span> En Çok Kurtarış
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {leaderboardLoading ? (
-                    <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
-                  ) : !leaderboard?.length ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Henüz kurtarış yapan yok
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {leaderboard
-                        .filter((p: any) => p.totalSaves > 0)
-                        .sort((a: any, b: any) => b.totalSaves - a.totalSaves)
-                        .slice(0, 10)
-                        .map((player: any, index: number) => (
-                          <div 
-                            key={player.userId} 
-                            className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className={`font-bold ${index === 0 ? "text-green-600 text-lg" : "text-muted-foreground"}`}>
-                                {index + 1}
-                              </span>
-                              <span className="font-medium">{player.username}</span>
+              {leaderboardLoading ? (
+                <Card>
+                  <CardContent className="py-8">
+                    <div className="text-center text-muted-foreground">Yükleniyor...</div>
+                  </CardContent>
+                </Card>
+              ) : !leaderboard?.length ? (
+                <Card>
+                  <CardContent className="py-8">
+                    <div className="text-center text-muted-foreground">Henüz kurtarış yapan yok</div>
+                  </CardContent>
+                </Card>
+              ) : (() => {
+                const sortedPlayers = leaderboard
+                  .filter((p: any) => p.totalSaves > 0)
+                  .sort((a: any, b: any) => b.totalSaves - a.totalSaves)
+                  .slice(0, 10);
+                
+                if (sortedPlayers.length === 0) {
+                  return (
+                    <Card>
+                      <CardContent className="py-8">
+                        <p className="text-center text-muted-foreground">Henüz kurtarış yapan yok</p>
+                      </CardContent>
+                    </Card>
+                  );
+                }
+
+                return (
+                  <div className="space-y-6">
+                    {sortedPlayers[0] && (
+                      <Card className="overflow-hidden border-2 border-green-400/50 bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 dark:from-green-950/20 dark:via-emerald-950/20 dark:to-green-900/20 shadow-xl">
+                        <div className="relative p-6 md:p-8">
+                          <Sparkles className="absolute top-4 right-4 w-8 h-8 text-green-500/30 animate-pulse" />
+                          <Star className="absolute top-6 right-8 w-4 h-4 text-green-400/40 animate-pulse" style={{ animationDelay: '0.5s' }} />
+                          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                            <div className="relative flex-shrink-0">
+                              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg ring-4 ring-green-300/50">
+                                <Crown className="w-12 h-12 md:w-16 md:h-16 text-green-900" />
+                              </div>
+                              <div className="absolute -top-2 -right-2 bg-green-500 text-green-900 rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm shadow-md">
+                                1
+                              </div>
                             </div>
-                            <span className="font-bold text-green-600">{player.totalSaves} Kurtarış</span>
+                            <div className="flex-1 text-center md:text-left">
+                              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                                <Trophy className="w-6 h-6 text-green-600" />
+                                <h3 className="text-2xl md:text-3xl font-bold text-green-900 dark:text-green-400">
+                                  Kurtarış Kralı
+                                </h3>
+                              </div>
+                              <Link href={`/oyuncu/${sortedPlayers[0].username}`} className="block group">
+                                <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2 group-hover:text-green-600 transition-colors">
+                                  {sortedPlayers[0].username}
+                                </h2>
+                              </Link>
+                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
+                                <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
+                                  <div className="text-xs text-muted-foreground mb-1">Kurtarış</div>
+                                  <div className="text-2xl font-bold text-green-700 dark:text-green-400">
+                                    {sortedPlayers[0].totalSaves}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        ))}
-                      {leaderboard.filter((p: any) => p.totalSaves > 0).length === 0 && (
-                        <p className="text-center text-muted-foreground py-4">Henüz kurtarış yapan yok</p>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                        </div>
+                      </Card>
+                    )}
+                    {(sortedPlayers[1] || sortedPlayers[2]) && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {sortedPlayers[1] && (
+                          <Card className="overflow-hidden border-2 border-gray-300/50 bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 dark:from-gray-900/30 dark:via-slate-900/30 dark:to-gray-800/30 shadow-lg">
+                            <div className="relative p-5">
+                              <Medal className="absolute top-3 right-3 w-6 h-6 text-gray-400/30" />
+                              <div className="flex items-center gap-4">
+                                <div className="relative flex-shrink-0">
+                                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-300 to-slate-400 flex items-center justify-center shadow-md ring-2 ring-gray-200/50">
+                                    <Medal className="w-8 h-8 text-gray-700" />
+                                  </div>
+                                  <div className="absolute -top-1 -right-1 bg-gray-400 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                    2
+                                  </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <Link href={`/oyuncu/${sortedPlayers[1].username}`} className="block group">
+                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-gray-600 transition-colors truncate">
+                                      {sortedPlayers[1].username}
+                                    </h3>
+                                  </Link>
+                                  <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
+                                    {sortedPlayers[1].totalSaves} Kurtarış
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        )}
+                        {sortedPlayers[2] && (
+                          <Card className="overflow-hidden border-2 border-amber-700/50 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-amber-900/20 shadow-lg">
+                            <div className="relative p-5">
+                              <Medal className="absolute top-3 right-3 w-6 h-6 text-amber-600/30" />
+                              <div className="flex items-center gap-4">
+                                <div className="relative flex-shrink-0">
+                                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center shadow-md ring-2 ring-amber-500/50">
+                                    <Medal className="w-8 h-8 text-amber-100" />
+                                  </div>
+                                  <div className="absolute -top-1 -right-1 bg-amber-700 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                    3
+                                  </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <Link href={`/oyuncu/${sortedPlayers[2].username}`} className="block group">
+                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-amber-700 transition-colors truncate">
+                                      {sortedPlayers[2].username}
+                                    </h3>
+                                  </Link>
+                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
+                                    {sortedPlayers[2].totalSaves} Kurtarış
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        )}
+                      </div>
+                    )}
+                    {sortedPlayers.length > 3 && (
+                      <Card className="overflow-hidden">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <span>🧤</span> Diğer Sıralamalar
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            {sortedPlayers.slice(3).map((player: any, index: number) => (
+                              <div key={player.userId} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors">
+                                <div className="flex items-center gap-3">
+                                  <span className="font-bold text-muted-foreground w-6">{index + 4}</span>
+                                  <Link href={`/oyuncu/${player.username}`} className="font-medium hover:text-primary transition-colors">
+                                    {player.username}
+                                  </Link>
+                                </div>
+                                <span className="font-bold text-green-600">{player.totalSaves} Kurtarış</span>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                );
+              })()}
             </TabsContent>
 
             {/* 🛡️ DM */}
             <TabsContent value="dm" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <span>🛡️</span> DM
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {leaderboardLoading ? (
-                    <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
-                  ) : !leaderboard?.length ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Henüz DM yok
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {leaderboard
-                        .filter((p: any) => p.totalDm > 0)
-                        .sort((a: any, b: any) => b.totalDm - a.totalDm)
-                        .slice(0, 10)
-                        .map((player: any, index: number) => (
-                          <div 
-                            key={player.userId} 
-                            className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className={`font-bold ${index === 0 ? "text-red-600 text-lg" : "text-muted-foreground"}`}>
-                                {index + 1}
-                              </span>
-                              <span className="font-medium">{player.username}</span>
+              {leaderboardLoading ? (
+                <Card>
+                  <CardContent className="py-8">
+                    <div className="text-center text-muted-foreground">Yükleniyor...</div>
+                  </CardContent>
+                </Card>
+              ) : !leaderboard?.length ? (
+                <Card>
+                  <CardContent className="py-8">
+                    <div className="text-center text-muted-foreground">Henüz DM yok</div>
+                  </CardContent>
+                </Card>
+              ) : (() => {
+                const sortedPlayers = leaderboard
+                  .filter((p: any) => p.totalDm > 0)
+                  .sort((a: any, b: any) => b.totalDm - a.totalDm)
+                  .slice(0, 10);
+                
+                if (sortedPlayers.length === 0) {
+                  return (
+                    <Card>
+                      <CardContent className="py-8">
+                        <p className="text-center text-muted-foreground">Henüz DM yok</p>
+                      </CardContent>
+                    </Card>
+                  );
+                }
+
+                return (
+                  <div className="space-y-6">
+                    {sortedPlayers[0] && (
+                      <Card className="overflow-hidden border-2 border-red-400/50 bg-gradient-to-br from-red-50 via-rose-50 to-red-100 dark:from-red-950/20 dark:via-rose-950/20 dark:to-red-900/20 shadow-xl">
+                        <div className="relative p-6 md:p-8">
+                          <Sparkles className="absolute top-4 right-4 w-8 h-8 text-red-500/30 animate-pulse" />
+                          <Star className="absolute top-6 right-8 w-4 h-4 text-red-400/40 animate-pulse" style={{ animationDelay: '0.5s' }} />
+                          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                            <div className="relative flex-shrink-0">
+                              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center shadow-lg ring-4 ring-red-300/50">
+                                <Crown className="w-12 h-12 md:w-16 md:h-16 text-red-900" />
+                              </div>
+                              <div className="absolute -top-2 -right-2 bg-red-500 text-red-900 rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm shadow-md">
+                                1
+                              </div>
                             </div>
-                            <span className="font-bold text-red-600">{player.totalDm} DM</span>
+                            <div className="flex-1 text-center md:text-left">
+                              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                                <Trophy className="w-6 h-6 text-red-600" />
+                                <h3 className="text-2xl md:text-3xl font-bold text-red-900 dark:text-red-400">
+                                  DM Kralı
+                                </h3>
+                              </div>
+                              <Link href={`/oyuncu/${sortedPlayers[0].username}`} className="block group">
+                                <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2 group-hover:text-red-600 transition-colors">
+                                  {sortedPlayers[0].username}
+                                </h2>
+                              </Link>
+                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
+                                <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
+                                  <div className="text-xs text-muted-foreground mb-1">DM</div>
+                                  <div className="text-2xl font-bold text-red-700 dark:text-red-400">
+                                    {sortedPlayers[0].totalDm}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        ))}
-                      {leaderboard.filter((p: any) => p.totalDm > 0).length === 0 && (
-                        <p className="text-center text-muted-foreground py-4">Henüz DM yok</p>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                        </div>
+                      </Card>
+                    )}
+                    {(sortedPlayers[1] || sortedPlayers[2]) && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {sortedPlayers[1] && (
+                          <Card className="overflow-hidden border-2 border-gray-300/50 bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 dark:from-gray-900/30 dark:via-slate-900/30 dark:to-gray-800/30 shadow-lg">
+                            <div className="relative p-5">
+                              <Medal className="absolute top-3 right-3 w-6 h-6 text-gray-400/30" />
+                              <div className="flex items-center gap-4">
+                                <div className="relative flex-shrink-0">
+                                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-300 to-slate-400 flex items-center justify-center shadow-md ring-2 ring-gray-200/50">
+                                    <Medal className="w-8 h-8 text-gray-700" />
+                                  </div>
+                                  <div className="absolute -top-1 -right-1 bg-gray-400 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                    2
+                                  </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <Link href={`/oyuncu/${sortedPlayers[1].username}`} className="block group">
+                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-gray-600 transition-colors truncate">
+                                      {sortedPlayers[1].username}
+                                    </h3>
+                                  </Link>
+                                  <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
+                                    {sortedPlayers[1].totalDm} DM
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        )}
+                        {sortedPlayers[2] && (
+                          <Card className="overflow-hidden border-2 border-amber-700/50 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-amber-900/20 shadow-lg">
+                            <div className="relative p-5">
+                              <Medal className="absolute top-3 right-3 w-6 h-6 text-amber-600/30" />
+                              <div className="flex items-center gap-4">
+                                <div className="relative flex-shrink-0">
+                                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center shadow-md ring-2 ring-amber-500/50">
+                                    <Medal className="w-8 h-8 text-amber-100" />
+                                  </div>
+                                  <div className="absolute -top-1 -right-1 bg-amber-700 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                    3
+                                  </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <Link href={`/oyuncu/${sortedPlayers[2].username}`} className="block group">
+                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-amber-700 transition-colors truncate">
+                                      {sortedPlayers[2].username}
+                                    </h3>
+                                  </Link>
+                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
+                                    {sortedPlayers[2].totalDm} DM
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        )}
+                      </div>
+                    )}
+                    {sortedPlayers.length > 3 && (
+                      <Card className="overflow-hidden">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <span>🛡️</span> Diğer Sıralamalar
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            {sortedPlayers.slice(3).map((player: any, index: number) => (
+                              <div key={player.userId} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors">
+                                <div className="flex items-center gap-3">
+                                  <span className="font-bold text-muted-foreground w-6">{index + 4}</span>
+                                  <Link href={`/oyuncu/${player.username}`} className="font-medium hover:text-primary transition-colors">
+                                    {player.username}
+                                  </Link>
+                                </div>
+                                <span className="font-bold text-red-600">{player.totalDm} DM</span>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                );
+              })()}
             </TabsContent>
 
             {/* 🥅 CS */}
             <TabsContent value="cs" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <span>🥅</span> CS
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {leaderboardLoading ? (
-                    <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
-                  ) : !leaderboard?.length ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Henüz CS yok
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {leaderboard
-                        .filter((p: any) => p.totalCleanSheets > 0)
-                        .sort((a: any, b: any) => b.totalCleanSheets - a.totalCleanSheets)
-                        .slice(0, 10)
-                        .map((player: any, index: number) => (
-                          <div 
-                            key={player.userId} 
-                            className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className={`font-bold ${index === 0 ? "text-purple-600 text-lg" : "text-muted-foreground"}`}>
-                                {index + 1}
-                              </span>
-                              <span className="font-medium">{player.username}</span>
+              {leaderboardLoading ? (
+                <Card>
+                  <CardContent className="py-8">
+                    <div className="text-center text-muted-foreground">Yükleniyor...</div>
+                  </CardContent>
+                </Card>
+              ) : !leaderboard?.length ? (
+                <Card>
+                  <CardContent className="py-8">
+                    <div className="text-center text-muted-foreground">Henüz CS yok</div>
+                  </CardContent>
+                </Card>
+              ) : (() => {
+                const sortedPlayers = leaderboard
+                  .filter((p: any) => p.totalCleanSheets > 0)
+                  .sort((a: any, b: any) => b.totalCleanSheets - a.totalCleanSheets)
+                  .slice(0, 10);
+                
+                if (sortedPlayers.length === 0) {
+                  return (
+                    <Card>
+                      <CardContent className="py-8">
+                        <p className="text-center text-muted-foreground">Henüz CS yok</p>
+                      </CardContent>
+                    </Card>
+                  );
+                }
+
+                return (
+                  <div className="space-y-6">
+                    {sortedPlayers[0] && (
+                      <Card className="overflow-hidden border-2 border-purple-400/50 bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100 dark:from-purple-950/20 dark:via-violet-950/20 dark:to-purple-900/20 shadow-xl">
+                        <div className="relative p-6 md:p-8">
+                          <Sparkles className="absolute top-4 right-4 w-8 h-8 text-purple-500/30 animate-pulse" />
+                          <Star className="absolute top-6 right-8 w-4 h-4 text-purple-400/40 animate-pulse" style={{ animationDelay: '0.5s' }} />
+                          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                            <div className="relative flex-shrink-0">
+                              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-purple-400 to-violet-500 flex items-center justify-center shadow-lg ring-4 ring-purple-300/50">
+                                <Crown className="w-12 h-12 md:w-16 md:h-16 text-purple-900" />
+                              </div>
+                              <div className="absolute -top-2 -right-2 bg-purple-500 text-purple-900 rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm shadow-md">
+                                1
+                              </div>
                             </div>
-                            <span className="font-bold text-purple-600">{player.totalCleanSheets} CS</span>
+                            <div className="flex-1 text-center md:text-left">
+                              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                                <Trophy className="w-6 h-6 text-purple-600" />
+                                <h3 className="text-2xl md:text-3xl font-bold text-purple-900 dark:text-purple-400">
+                                  CS Kralı
+                                </h3>
+                              </div>
+                              <Link href={`/oyuncu/${sortedPlayers[0].username}`} className="block group">
+                                <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2 group-hover:text-purple-600 transition-colors">
+                                  {sortedPlayers[0].username}
+                                </h2>
+                              </Link>
+                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
+                                <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
+                                  <div className="text-xs text-muted-foreground mb-1">CS</div>
+                                  <div className="text-2xl font-bold text-purple-700 dark:text-purple-400">
+                                    {sortedPlayers[0].totalCleanSheets}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        ))}
-                      {leaderboard.filter((p: any) => p.totalCleanSheets > 0).length === 0 && (
-                        <p className="text-center text-muted-foreground py-4">Henüz CS yok</p>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                        </div>
+                      </Card>
+                    )}
+                    {(sortedPlayers[1] || sortedPlayers[2]) && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {sortedPlayers[1] && (
+                          <Card className="overflow-hidden border-2 border-gray-300/50 bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 dark:from-gray-900/30 dark:via-slate-900/30 dark:to-gray-800/30 shadow-lg">
+                            <div className="relative p-5">
+                              <Medal className="absolute top-3 right-3 w-6 h-6 text-gray-400/30" />
+                              <div className="flex items-center gap-4">
+                                <div className="relative flex-shrink-0">
+                                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-300 to-slate-400 flex items-center justify-center shadow-md ring-2 ring-gray-200/50">
+                                    <Medal className="w-8 h-8 text-gray-700" />
+                                  </div>
+                                  <div className="absolute -top-1 -right-1 bg-gray-400 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                    2
+                                  </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <Link href={`/oyuncu/${sortedPlayers[1].username}`} className="block group">
+                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-gray-600 transition-colors truncate">
+                                      {sortedPlayers[1].username}
+                                    </h3>
+                                  </Link>
+                                  <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
+                                    {sortedPlayers[1].totalCleanSheets} CS
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        )}
+                        {sortedPlayers[2] && (
+                          <Card className="overflow-hidden border-2 border-amber-700/50 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-amber-900/20 shadow-lg">
+                            <div className="relative p-5">
+                              <Medal className="absolute top-3 right-3 w-6 h-6 text-amber-600/30" />
+                              <div className="flex items-center gap-4">
+                                <div className="relative flex-shrink-0">
+                                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center shadow-md ring-2 ring-amber-500/50">
+                                    <Medal className="w-8 h-8 text-amber-100" />
+                                  </div>
+                                  <div className="absolute -top-1 -right-1 bg-amber-700 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                    3
+                                  </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <Link href={`/oyuncu/${sortedPlayers[2].username}`} className="block group">
+                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-amber-700 transition-colors truncate">
+                                      {sortedPlayers[2].username}
+                                    </h3>
+                                  </Link>
+                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
+                                    {sortedPlayers[2].totalCleanSheets} CS
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        )}
+                      </div>
+                    )}
+                    {sortedPlayers.length > 3 && (
+                      <Card className="overflow-hidden">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <span>🥅</span> Diğer Sıralamalar
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            {sortedPlayers.slice(3).map((player: any, index: number) => (
+                              <div key={player.userId} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors">
+                                <div className="flex items-center gap-3">
+                                  <span className="font-bold text-muted-foreground w-6">{index + 4}</span>
+                                  <Link href={`/oyuncu/${player.username}`} className="font-medium hover:text-primary transition-colors">
+                                    {player.username}
+                                  </Link>
+                                </div>
+                                <span className="font-bold text-purple-600">{player.totalCleanSheets} CS</span>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                );
+              })()}
             </TabsContent>
 
             <TabsContent value="totw" className="space-y-4">

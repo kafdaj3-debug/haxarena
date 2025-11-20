@@ -209,7 +209,8 @@ export const matchGoals = pgTable("match_goals", {
 export const playerStats = pgTable("player_stats", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   fixtureId: varchar("fixture_id").notNull().references(() => leagueFixtures.id, { onDelete: "cascade" }),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }), // Nullable - artık isim yazılacak
+  playerName: varchar("player_name"), // Oyuncu ismi (serbest metin)
   teamId: varchar("team_id").notNull().references(() => leagueTeams.id, { onDelete: "cascade" }),
   goals: integer("goals").notNull().default(0),
   assists: integer("assists").notNull().default(0),

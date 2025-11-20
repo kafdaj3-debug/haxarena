@@ -1834,15 +1834,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create player stats (super admin only)
   app.post("/api/league/stats", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
     try {
-      const { fixtureId, userId, teamId, goals, assists, dm, cleanSheets, saves } = req.body;
+      const { fixtureId, userId, playerName, teamId, goals, assists, dm, cleanSheets, saves } = req.body;
       
-      if (!fixtureId || !userId || !teamId) {
-        return res.status(400).json({ error: "Fikstür ID, kullanıcı ID ve takım ID gereklidir" });
+      if (!fixtureId || !teamId) {
+        return res.status(400).json({ error: "Fikstür ID ve takım ID gereklidir" });
+      }
+      
+      if (!userId && !playerName) {
+        return res.status(400).json({ error: "Kullanıcı ID veya oyuncu ismi gereklidir" });
       }
       
       const stats = await storage.createPlayerStats({
         fixtureId,
-        userId,
+        userId: userId || null,
+        playerName: playerName || null,
         teamId,
         goals: goals || 0,
         assists: assists || 0,

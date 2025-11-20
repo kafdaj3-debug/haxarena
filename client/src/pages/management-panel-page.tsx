@@ -38,6 +38,38 @@ const getLocalDateTimeString = (date: Date): string => {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
+// Helper function: Parse minute input (2.27 formatı veya sadece saniye) -> saniye cinsinden
+const parseMinuteInput = (input: string): number => {
+  if (!input || input.trim() === "") return 0;
+  const trimmed = input.trim();
+  
+  // Eğer nokta varsa dakika.saniye formatı (2.27 = 2 dakika 27 saniye)
+  if (trimmed.includes('.')) {
+    const parts = trimmed.split('.');
+    const minutes = parseInt(parts[0]) || 0;
+    const seconds = parseInt(parts[1]) || 0;
+    return minutes * 60 + seconds;
+  }
+  
+  // Yoksa sadece saniye
+  return parseInt(trimmed) || 0;
+};
+
+// Helper function: Format saniye -> dakika.saniye veya sadece saniye
+const formatMinuteOutput = (seconds: number): string => {
+  if (seconds === 0) return "";
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  
+  if (minutes > 0 && secs > 0) {
+    return `${minutes}.${String(secs).padStart(2, '0')}`;
+  } else if (minutes > 0) {
+    return `${minutes}.00`;
+  } else {
+    return `${secs}`;
+  }
+};
+
 export default function ManagementPanelPage() {
   const { user, logout, isLoading } = useAuth();
   const [, navigate] = useLocation();
@@ -76,7 +108,7 @@ export default function ManagementPanelPage() {
   
   // Player stats state
   const [selectedFixtureForStats, setSelectedFixtureForStats] = useState("");
-  const [selectedUserId, setSelectedUserId] = useState("");
+  const [playerName, setPlayerName] = useState("");
   const [selectedTeamIdForStats, setSelectedTeamIdForStats] = useState("");
   const [statsGoals, setStatsGoals] = useState("");
   const [statsAssists, setStatsAssists] = useState("");
@@ -84,6 +116,7 @@ export default function ManagementPanelPage() {
   const [statsCleanSheets, setStatsCleanSheets] = useState("");
   const [statsSaves, setStatsSaves] = useState("");
   const [editingStatsId, setEditingStatsId] = useState<string | null>(null);
+  const [editingPlayerName, setEditingPlayerName] = useState("");
   
   // Team of week state
   const [totwWeek, setTotwWeek] = useState("");
@@ -645,7 +678,7 @@ export default function ManagementPanelPage() {
       toast({ title: "Başarılı", description: "Oyuncu istatistiği eklendi" });
       queryClient.invalidateQueries({ queryKey: ["/api/league/fixtures", selectedFixtureForStats, "stats"] });
       queryClient.invalidateQueries({ queryKey: ["/api/league/stats/leaderboard"] });
-      setSelectedUserId("");
+      setPlayerName("");
       setSelectedTeamIdForStats("");
       setStatsGoals("");
       setStatsAssists("");
@@ -667,6 +700,7 @@ export default function ManagementPanelPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/league/fixtures", selectedFixtureForStats, "stats"] });
       queryClient.invalidateQueries({ queryKey: ["/api/league/stats/leaderboard"] });
       setEditingStatsId(null);
+      setEditingPlayerName("");
       setStatsGoals("");
       setStatsAssists("");
       setStatsDm("");
@@ -2181,23 +2215,22 @@ export default function ManagementPanelPage() {
                                         className="w-40"
                                       />
                                       <Input
-                                        type="number"
-                                        min="1"
-                                        max="90"
-                                        placeholder="Dakika"
-                                        value={goal?.minute || ""}
+                                        type="text"
+                                        placeholder="2.27 veya 45 (saniye)"
+                                        value={goal?.minute ? formatMinuteOutput(goal.minute) : ""}
                                         onChange={(e) => {
                                           try {
                                             const newGoals = [...(matchGoals || [])];
                                             if (newGoals[index]) {
-                                              newGoals[index] = { ...newGoals[index], minute: parseInt(e.target.value) || 0 };
+                                              const seconds = parseMinuteInput(e.target.value);
+                                              newGoals[index] = { ...newGoals[index], minute: seconds };
                                               setMatchGoals(newGoals);
                                             }
                                           } catch (error) {
                                             console.error("Error updating goal minute:", error);
                                           }
                                         }}
-                                        className="w-20"
+                                        className="w-32"
                                       />
                                       <Select
                                         value={goal?.isHomeTeam ? "home" : "away"}
@@ -2442,19 +2475,13 @@ export default function ManagementPanelPage() {
                       <h3 className="font-semibold">İstatistik Ekle</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Oyuncu</Label>
-                          <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Oyuncu seçin" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {allUsers?.map((user: any) => (
-                                <SelectItem key={user.id} value={user.id}>
-                                  {user.username}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <Label>Oyuncu İsmi</Label>
+                          <Input
+                            type="text"
+                            placeholder="Oyuncu ismini girin"
+                            value={playerName}
+                            onChange={(e) => setPlayerName(e.target.value)}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Takım</Label>
@@ -2509,10 +2536,10 @@ export default function ManagementPanelPage() {
                       </div>
                       <Button
                         onClick={() => {
-                          if (selectedUserId && selectedTeamIdForStats) {
+                          if (playerName && selectedTeamIdForStats) {
                             createPlayerStatsMutation.mutate({
                               fixtureId: selectedFixtureForStats,
-                              userId: selectedUserId,
+                              playerName: playerName,
                               teamId: selectedTeamIdForStats,
                               goals: parseInt(statsGoals) || 0,
                               assists: parseInt(statsAssists) || 0,
@@ -2520,9 +2547,16 @@ export default function ManagementPanelPage() {
                               cleanSheets: parseInt(statsCleanSheets) || 0,
                               saves: parseInt(statsSaves) || 0,
                             });
+                            // Formu temizle
+                            setPlayerName("");
+                            setStatsGoals("");
+                            setStatsAssists("");
+                            setStatsDm("");
+                            setStatsCleanSheets("");
+                            setStatsSaves("");
                           }
                         }}
-                        disabled={!selectedUserId || !selectedTeamIdForStats || createPlayerStatsMutation.isPending}
+                        disabled={!playerName || !selectedTeamIdForStats || createPlayerStatsMutation.isPending}
                       >
                         <Plus className="w-4 h-4 mr-1" />
                         İstatistik Ekle
@@ -2538,7 +2572,7 @@ export default function ManagementPanelPage() {
                             <div className="p-3 border rounded-lg">
                               <div className="flex items-center justify-between mb-2">
                                 <div>
-                                  <p className="font-medium">{stat.user.username}</p>
+                                  <p className="font-medium">{stat.playerName || stat.user?.username || "Bilinmeyen Oyuncu"}</p>
                                   <p className="text-xs text-muted-foreground">{stat.team.name}</p>
                                 </div>
                                 <div className="flex gap-2">
@@ -2547,6 +2581,7 @@ export default function ManagementPanelPage() {
                                     size="sm"
                                     onClick={() => {
                                       setEditingStatsId(stat.id);
+                                      setEditingPlayerName(stat.playerName || stat.user?.username || "");
                                       setStatsGoals(stat.goals.toString());
                                       setStatsAssists(stat.assists.toString());
                                       setStatsDm(stat.dm.toString());
@@ -2598,6 +2633,16 @@ export default function ManagementPanelPage() {
                             {editingStatsId === stat.id && (
                               <div className="p-4 border rounded-lg bg-muted/20 space-y-3">
                                 <h4 className="font-medium text-sm">İstatistik Düzenleme</h4>
+                                <div className="space-y-2">
+                                  <Label className="text-xs">Oyuncu İsmi</Label>
+                                  <Input
+                                    type="text"
+                                    value={editingPlayerName}
+                                    onChange={(e) => setEditingPlayerName(e.target.value)}
+                                    className="h-8 text-sm"
+                                    placeholder="Oyuncu ismi"
+                                  />
+                                </div>
                                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                                   <div className="space-y-1">
                                     <Label className="text-xs">Gol</Label>
@@ -2655,6 +2700,7 @@ export default function ManagementPanelPage() {
                                     size="sm"
                                     onClick={() => {
                                       const data: any = {};
+                                      if (editingPlayerName) data.playerName = editingPlayerName;
                                       if (statsGoals) data.goals = parseInt(statsGoals);
                                       if (statsAssists) data.assists = parseInt(statsAssists);
                                       if (statsDm) data.dm = parseInt(statsDm);
@@ -2672,6 +2718,7 @@ export default function ManagementPanelPage() {
                                     variant="outline"
                                     onClick={() => {
                                       setEditingStatsId(null);
+                                      setEditingPlayerName("");
                                       setStatsGoals("");
                                       setStatsAssists("");
                                       setStatsDm("");

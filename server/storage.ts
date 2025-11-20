@@ -1440,17 +1440,17 @@ export class DBStorage implements IStorage {
     return newStats;
   }
 
-  async getPlayerStatsByFixture(fixtureId: string): Promise<(PlayerStats & { user: User; team: LeagueTeam })[]> {
+  async getPlayerStatsByFixture(fixtureId: string): Promise<(PlayerStats & { user: User | null; team: LeagueTeam; playerName: string | null })[]> {
     const stats = await db.select()
       .from(playerStats)
       .where(eq(playerStats.fixtureId, fixtureId));
     
     const result = [];
     for (const stat of stats) {
-      const [user] = await db.select().from(users).where(eq(users.id, stat.userId)).limit(1);
+      const user = stat.userId ? await this.getUser(stat.userId) : null;
       const [team] = await db.select().from(leagueTeams).where(eq(leagueTeams.id, stat.teamId)).limit(1);
-      if (user && team) {
-        result.push({ ...stat, user, team });
+      if (team) {
+        result.push({ ...stat, user: user || null, team, playerName: stat.playerName || null });
       }
     }
     return result;
