@@ -58,7 +58,7 @@ import {
   userCustomRoles
 } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -1170,21 +1170,22 @@ export class DBStorage implements IStorage {
 
   async getLeagueFixtures(): Promise<(LeagueFixture & { homeTeam: LeagueTeam | null; awayTeam: LeagueTeam | null })[]> {
     const { asc } = await import("drizzle-orm");
-    const fixtures = await db.select().from(leagueFixtures).orderBy(asc(leagueFixtures.week), asc(leagueFixtures.matchDate));
     
-    const fixturesWithTeams = await Promise.all(
-      fixtures.map(async (fixture) => {
-        const homeTeam = fixture.homeTeamId ? await this.getLeagueTeam(fixture.homeTeamId) : null;
-        const awayTeam = fixture.awayTeamId ? await this.getLeagueTeam(fixture.awayTeamId) : null;
-        return {
-          ...fixture,
-          homeTeam: homeTeam || null,
-          awayTeam: awayTeam || null,
-        };
-      })
-    );
+    // Get all fixtures and teams in parallel (2 queries instead of N+1)
+    const [fixtures, allTeams] = await Promise.all([
+      db.select().from(leagueFixtures).orderBy(asc(leagueFixtures.week), asc(leagueFixtures.matchDate)),
+      db.select().from(leagueTeams)
+    ]);
     
-    return fixturesWithTeams;
+    // Create a map of teams for O(1) lookup
+    const teamMap = new Map(allTeams.map(team => [team.id, team]));
+    
+    // Map fixtures with teams (O(n) instead of O(n*2) queries)
+    return fixtures.map(fixture => ({
+      ...fixture,
+      homeTeam: fixture.homeTeamId ? (teamMap.get(fixture.homeTeamId) || null) : null,
+      awayTeam: fixture.awayTeamId ? (teamMap.get(fixture.awayTeamId) || null) : null,
+    }));
   }
 
   async getLeagueFixture(id: string): Promise<(LeagueFixture & { homeTeam: LeagueTeam | null; awayTeam: LeagueTeam | null }) | undefined> {
@@ -1408,21 +1409,33 @@ export class DBStorage implements IStorage {
   async getMatchGoals(fixtureId: string): Promise<(MatchGoal & { player: User | null; playerName: string | null; assistPlayer: User | null; assistPlayerName: string | null })[]> {
     const goals = await db.select().from(matchGoals).where(eq(matchGoals.fixtureId, fixtureId));
     
-    const goalsWithPlayers = await Promise.all(
-      goals.map(async (goal) => {
-        const player = goal.playerId ? await this.getUser(goal.playerId) : null;
-        const assistPlayer = goal.assistPlayerId ? await this.getUser(goal.assistPlayerId) : null;
-        return {
-          ...goal,
-          player: player || null,
-          playerName: goal.playerName || null,
-          assistPlayer: assistPlayer || null,
-          assistPlayerName: goal.assistPlayerName || null,
-        };
-      })
-    );
+    if (goals.length === 0) {
+      return [];
+    }
     
-    return goalsWithPlayers;
+    // Get all unique user IDs
+    const userIds = new Set<string>();
+    goals.forEach(goal => {
+      if (goal.playerId) userIds.add(goal.playerId);
+      if (goal.assistPlayerId) userIds.add(goal.assistPlayerId);
+    });
+    
+    // Fetch all users in a single query instead of N queries
+    const users = userIds.size > 0 
+      ? await db.select().from(users).where(inArray(users.id, Array.from(userIds)))
+      : [];
+    
+    // Create a map for O(1) lookup
+    const userMap = new Map(users.map(user => [user.id, user]));
+    
+    // Map goals with users
+    return goals.map(goal => ({
+      ...goal,
+      player: goal.playerId ? (userMap.get(goal.playerId) || null) : null,
+      playerName: goal.playerName || null,
+      assistPlayer: goal.assistPlayerId ? (userMap.get(goal.assistPlayerId) || null) : null,
+      assistPlayerName: goal.assistPlayerName || null,
+    }));
   }
 
   async createMatchGoal(goal: InsertMatchGoal): Promise<MatchGoal> {

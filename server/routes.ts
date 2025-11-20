@@ -1524,20 +1524,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/league/fixtures", async (req, res) => {
     try {
       const fixtures = await storage.getLeagueFixtures();
-      // Get goals for each fixture
-      const fixturesWithGoals = await Promise.all(
-        fixtures.map(async (fixture) => {
-          if (fixture.isPlayed && !fixture.isBye) {
-            try {
-              const goals = await storage.getMatchGoals(fixture.id);
-              return { ...fixture, goals };
-            } catch (error) {
-              return { ...fixture, goals: [] };
-            }
-          }
-          return { ...fixture, goals: [] };
-        })
-      );
+      
+      // Get all goals for played fixtures in a single batch query
+      const playedFixtureIds = fixtures
+        .filter(f => f.isPlayed && !f.isBye)
+        .map(f => f.id);
+      
+      let allGoals: any[] = [];
+      if (playedFixtureIds.length > 0) {
+        // Fetch all goals for all fixtures in one query
+        const { inArray } = await import("drizzle-orm");
+        const { matchGoals, users } = await import("../shared/schema");
+        const { db } = await import("./db");
+        
+        const goals = await db
+          .select()
+          .from(matchGoals)
+          .where(inArray(matchGoals.fixtureId, playedFixtureIds));
+        
+        if (goals.length > 0) {
+          // Get all unique user IDs
+          const userIds = new Set<string>();
+          goals.forEach(goal => {
+            if (goal.playerId) userIds.add(goal.playerId);
+            if (goal.assistPlayerId) userIds.add(goal.assistPlayerId);
+          });
+          
+          // Fetch all users in one query
+          const usersList = userIds.size > 0
+            ? await db.select().from(users).where(inArray(users.id, Array.from(userIds)))
+            : [];
+          
+          const userMap = new Map(usersList.map(user => [user.id, user]));
+          
+          // Map goals with users
+          allGoals = goals.map(goal => ({
+            ...goal,
+            player: goal.playerId ? (userMap.get(goal.playerId) || null) : null,
+            playerName: goal.playerName || null,
+            assistPlayer: goal.assistPlayerId ? (userMap.get(goal.assistPlayerId) || null) : null,
+            assistPlayerName: goal.assistPlayerName || null,
+          }));
+        }
+      }
+      
+      // Group goals by fixture ID
+      const goalsByFixture = new Map<string, any[]>();
+      allGoals.forEach(goal => {
+        if (!goalsByFixture.has(goal.fixtureId)) {
+          goalsByFixture.set(goal.fixtureId, []);
+        }
+        goalsByFixture.get(goal.fixtureId)!.push(goal);
+      });
+      
+      // Map fixtures with their goals
+      const fixturesWithGoals = fixtures.map(fixture => ({
+        ...fixture,
+        goals: goalsByFixture.get(fixture.id) || [],
+      }));
+      
       return res.json(fixturesWithGoals);
     } catch (error) {
       console.error("Error getting fixtures:", error);

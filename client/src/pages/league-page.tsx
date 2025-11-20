@@ -674,17 +674,32 @@ export default function LeaguePage() {
                                   <div className="space-y-0.5">
                                     {fixture.goals
                                       .sort((a: any, b: any) => a.minute - b.minute)
-                                      .map((goal: any, idx: number) => (
-                                        <div key={idx} className="text-xs text-center">
-                                          <span className="font-medium">{goal.minute}'</span>
-                                          <span> {goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
-                                          {(goal.assistPlayerName || goal.assistPlayer) && (
-                                            <span className="text-muted-foreground">
-                                              {" "}(Asist: {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"})
-                                            </span>
-                                          )}
-                                        </div>
-                                      ))}
+                                      .map((goal: any, idx: number) => {
+                                        // Format minute: saniye -> dakika.saniye veya sadece saniye
+                                        const formatMinute = (seconds: number): string => {
+                                          if (seconds === 0) return "0";
+                                          const minutes = Math.floor(seconds / 60);
+                                          const secs = seconds % 60;
+                                          if (minutes > 0 && secs > 0) {
+                                            return `${minutes}.${String(secs).padStart(2, '0')}'`;
+                                          } else if (minutes > 0) {
+                                            return `${minutes}'`;
+                                          } else {
+                                            return `${secs}''`;
+                                          }
+                                        };
+                                        return (
+                                          <div key={idx} className="text-xs text-center">
+                                            <span className="font-medium">{formatMinute(goal.minute)}</span>
+                                            <span> {goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
+                                            {(goal.assistPlayerName || goal.assistPlayer) && (
+                                              <span className="text-muted-foreground">
+                                                {" "}(Asist: {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"})
+                                              </span>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
                                   </div>
                                 </div>
                               )}
