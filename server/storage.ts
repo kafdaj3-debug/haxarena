@@ -1545,9 +1545,12 @@ export class DBStorage implements IStorage {
       .orderBy(desc(sum(playerStats.goals)));
     
     // Get latest team for each user (most recent stat's team)
+    // We need to handle both userId-based and playerName-based stats
     const userIds = leaderboard.map(row => row.userId).filter((id): id is string => id !== null);
+    const usernames = leaderboard.map(row => row.username).filter((name): name is string => name !== null && name !== '');
     
-    const latestTeams = userIds.length > 0
+    // Get latest teams for users by userId
+    const latestTeamsByUserId = userIds.length > 0
       ? await db
           .select({
             userId: playerStats.userId,
@@ -1558,8 +1561,24 @@ export class DBStorage implements IStorage {
           .orderBy(desc(playerStats.createdAt))
       : [];
     
+    // Get latest teams for users by playerName (for stats without userId)
+    const latestTeamsByPlayerName = usernames.length > 0
+      ? await db
+          .select({
+            userId: playerStats.userId,
+            teamId: playerStats.teamId,
+            playerName: playerStats.playerName,
+          })
+          .from(playerStats)
+          .where(inArray(playerStats.playerName, usernames))
+          .orderBy(desc(playerStats.createdAt))
+      : [];
+    
+    // Combine both approaches
+    const allLatestTeams = [...latestTeamsByUserId, ...latestTeamsByPlayerName];
+    
     // Get unique team IDs
-    const teamIds = [...new Set(latestTeams.map(t => t.teamId).filter((id): id is string => id !== null))];
+    const teamIds = [...new Set(allLatestTeams.map(t => t.teamId).filter((id): id is string => id !== null))];
     
     const teams = teamIds.length > 0
       ? await db.select().from(leagueTeams).where(inArray(leagueTeams.id, teamIds))
@@ -1569,14 +1588,50 @@ export class DBStorage implements IStorage {
     
     // Create a map of userId -> latest teamId
     const userTeamMap = new Map<string, string | null>();
-    latestTeams.forEach(stat => {
-      if (!userTeamMap.has(stat.userId)) {
+    latestTeamsByUserId.forEach(stat => {
+      if (stat.userId && !userTeamMap.has(stat.userId)) {
         userTeamMap.set(stat.userId, stat.teamId);
       }
     });
     
+    // Create a map of username -> latest teamId (for playerName-based stats)
+    const usernameTeamMap = new Map<string, string | null>();
+    latestTeamsByPlayerName.forEach(stat => {
+      if (stat.playerName && !usernameTeamMap.has(stat.playerName)) {
+        usernameTeamMap.set(stat.playerName, stat.teamId);
+      }
+    });
+    
+    // Also map by username from userId-based stats - we need to get usernames from users table
+    if (userIds.length > 0) {
+      const usersWithTeams = await db
+        .select({
+          userId: playerStats.userId,
+          teamId: playerStats.teamId,
+          username: users.username,
+        })
+        .from(playerStats)
+        .leftJoin(users, eq(playerStats.userId, users.id))
+        .where(inArray(playerStats.userId, userIds))
+        .orderBy(desc(playerStats.createdAt));
+      
+      usersWithTeams.forEach(stat => {
+        if (stat.username && stat.teamId && !usernameTeamMap.has(stat.username)) {
+          usernameTeamMap.set(stat.username, stat.teamId);
+        }
+      });
+    }
+    
     return leaderboard.map(row => {
-      const teamId = userTeamMap.get(row.userId || '') || null;
+      // Try to get team by userId first, then by username
+      let teamId: string | null = null;
+      if (row.userId) {
+        teamId = userTeamMap.get(row.userId) || null;
+      }
+      if (!teamId && row.username) {
+        teamId = usernameTeamMap.get(row.username) || null;
+      }
+      
       const team = teamId ? teamMap.get(teamId) : null;
       return {
         userId: row.userId,

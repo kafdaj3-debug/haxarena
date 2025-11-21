@@ -2731,11 +2731,11 @@ export default function ManagementPanelPage() {
                                     onClick={() => {
                                       const data: any = {};
                                       if (editingPlayerName) data.playerName = editingPlayerName;
-                                      if (statsGoals) data.goals = parseInt(statsGoals);
-                                      if (statsAssists) data.assists = parseInt(statsAssists);
-                                      if (statsDm) data.dm = parseInt(statsDm);
-                                      if (statsCleanSheets) data.cleanSheets = parseInt(statsCleanSheets);
-                                      if (statsSaves) data.saves = parseInt(statsSaves);
+                                      if (statsGoals && statsGoals.trim() !== "") data.goals = parseInt(statsGoals) || 0;
+                                      if (statsAssists && statsAssists.trim() !== "") data.assists = parseInt(statsAssists) || 0;
+                                      if (statsDm && statsDm.trim() !== "") data.dm = parseInt(statsDm) || 0;
+                                      if (statsCleanSheets && statsCleanSheets.trim() !== "") data.cleanSheets = parseInt(statsCleanSheets) || 0;
+                                      if (statsSaves && statsSaves.trim() !== "") data.saves = parseInt(statsSaves) || 0;
                                       
                                       updatePlayerStatsMutation.mutate({ id: stat.id, data });
                                     }}
