@@ -678,10 +678,19 @@ export default function ManagementPanelPage() {
     queryKey: ["/api/league/fixtures", selectedFixtureForStats, "stats"],
     queryFn: async () => {
       if (!selectedFixtureForStats) return [];
-      const res = await fetch(`/api/league/fixtures/${selectedFixtureForStats}/stats`);
+      const res = await fetch(buildApiUrl(`/api/league/fixtures/${selectedFixtureForStats}/stats`), {
+        credentials: "include",
+      });
+      
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await res.text();
+        throw new Error(`API yanıtı JSON değil. Status: ${res.status}`);
+      }
+      
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to fetch stats");
+        throw new Error(errorData.error || `HTTP ${res.status}: İstatistikler yüklenemedi`);
       }
       return res.json();
     },
