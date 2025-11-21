@@ -982,14 +982,11 @@ export default function LeaguePage() {
                                     />
                                   )}
                                   <div className="flex-1 min-w-0">
-                                    <Link 
-                                      href={`/oyuncu/${player.username}`}
-                                      className="font-medium hover:text-primary transition-colors block truncate"
-                                    >
+                                    <span className="font-extrabold text-base block truncate mb-0.5">
                                       {player.username}
-                                    </Link>
+                                    </span>
                                     {player.teamName && (
-                                      <p className="text-xs text-muted-foreground truncate">{player.teamName}</p>
+                                      <p className="text-xs font-semibold text-muted-foreground truncate">{player.teamName}</p>
                                     )}
                                   </div>
                                 </div>
