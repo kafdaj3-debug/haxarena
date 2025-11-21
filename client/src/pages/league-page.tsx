@@ -7,7 +7,7 @@ import { Calendar, Trophy, Award, Users, Crown, Medal, Sparkles, Star } from "lu
 import { useAuth } from "@/lib/auth";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect } from "react";
-import { useLocation, Link } from "wouter";
+import { useLocation } from "wouter";
 
 export default function LeaguePage() {
   const { user, logout, isLoading } = useAuth();
