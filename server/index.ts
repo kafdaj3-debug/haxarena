@@ -613,6 +613,13 @@ app.use((req, res, next) => {
         console.log("Match goals columns migration:", error instanceof Error ? error.message : String(error));
       }
       
+      // League fixtures columns migration - add is_forfeit
+      try {
+        await db.execute(sql`ALTER TABLE league_fixtures ADD COLUMN IF NOT EXISTS is_forfeit BOOLEAN NOT NULL DEFAULT false`);
+      } catch (error) {
+        console.log("League fixtures is_forfeit migration:", error instanceof Error ? error.message : String(error));
+      }
+      
       await db.execute(sql`
         CREATE TABLE IF NOT EXISTS player_stats (
           id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -188,6 +188,7 @@ export const leagueFixtures = pgTable("league_fixtures", {
   isBye: boolean("is_bye").notNull().default(false),
   byeSide: varchar("bye_side"), // "home" or "away" - which team gets the bye
   isPostponed: boolean("is_postponed").notNull().default(false), // Ertelenme durumu
+  isForfeit: boolean("is_forfeit").notNull().default(false), // Hükmen durumu
   matchRecordingUrl: varchar("match_recording_url"), // Maç kaydı linki (rec)
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

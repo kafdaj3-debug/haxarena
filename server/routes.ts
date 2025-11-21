@@ -1523,67 +1523,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all fixtures
   app.get("/api/league/fixtures", async (req, res) => {
     try {
+      // getLeagueFixtures now includes goals, so we can directly return it
       const fixtures = await storage.getLeagueFixtures();
-      
-      // Get all goals for played fixtures in a single batch query
-      const playedFixtureIds = fixtures
-        .filter(f => f.isPlayed && !f.isBye)
-        .map(f => f.id);
-      
-      let allGoals: any[] = [];
-      if (playedFixtureIds.length > 0) {
-        // Fetch all goals for all fixtures in one query
-        const { inArray } = await import("drizzle-orm");
-        const { matchGoals, users } = await import("../shared/schema");
-        const { db } = await import("./db");
-        
-        const goals = await db
-          .select()
-          .from(matchGoals)
-          .where(inArray(matchGoals.fixtureId, playedFixtureIds));
-        
-        if (goals.length > 0) {
-          // Get all unique user IDs
-          const userIds = new Set<string>();
-          goals.forEach(goal => {
-            if (goal.playerId) userIds.add(goal.playerId);
-            if (goal.assistPlayerId) userIds.add(goal.assistPlayerId);
-          });
-          
-          // Fetch all users in one query
-          const usersList = userIds.size > 0
-            ? await db.select().from(users).where(inArray(users.id, Array.from(userIds)))
-            : [];
-          
-          const userMap = new Map(usersList.map(user => [user.id, user]));
-          
-          // Map goals with users
-          allGoals = goals.map(goal => ({
-            ...goal,
-            player: goal.playerId ? (userMap.get(goal.playerId) || null) : null,
-            playerName: goal.playerName || null,
-            assistPlayer: goal.assistPlayerId ? (userMap.get(goal.assistPlayerId) || null) : null,
-            assistPlayerName: goal.assistPlayerName || null,
-          }));
-        }
-      }
-      
-      // Group goals by fixture ID
-      const goalsByFixture = new Map<string, any[]>();
-      allGoals.forEach(goal => {
-        if (!goalsByFixture.has(goal.fixtureId)) {
-          goalsByFixture.set(goal.fixtureId, []);
-        }
-        goalsByFixture.get(goal.fixtureId)!.push(goal);
-      });
-      
-      // Map fixtures with their goals
-      const fixturesWithGoals = fixtures.map(fixture => ({
-        ...fixture,
-        goals: goalsByFixture.get(fixture.id) || [],
-      }));
-      
-      return res.json(fixturesWithGoals);
+      return res.json(fixtures);
     } catch (error) {
       console.error("Error getting fixtures:", error);
       return res.status(500).json({ error: "Fikstür yüklenemedi" });
@@ -1776,6 +1718,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating fixture postponed status:", error);
       return res.status(500).json({ error: "Maç ertelenme durumu güncellenemedi" });
+    }
+  });
+
+  // Update fixture forfeit status (super admin only)
+  app.patch("/api/league/fixtures/:id/forfeit", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { isForfeit } = req.body;
+      
+      if (typeof isForfeit !== "boolean") {
+        return res.status(400).json({ error: "isForfeit boolean olmalıdır" });
+      }
+
+      const fixture = await storage.updateLeagueFixtureForfeit(id, isForfeit);
+      return res.json(fixture);
+    } catch (error) {
+      console.error("Error updating fixture forfeit status:", error);
+      return res.status(500).json({ error: "Maç hükmen durumu güncellenemedi" });
     }
   });
 

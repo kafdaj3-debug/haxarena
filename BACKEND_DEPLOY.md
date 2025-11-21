@@ -233,3 +233,6 @@ Backend'in çalışması için aşağıdaki environment variables'lar gereklidir
 
 
 
+
+
+

@@ -602,6 +602,20 @@ export default function ManagementPanelPage() {
     },
   });
 
+  const updateFixtureForfeitMutation = useMutation({
+    mutationFn: async ({ id, isForfeit }: { id: string; isForfeit: boolean }) => {
+      return await apiRequest("PATCH", `/api/league/fixtures/${id}/forfeit`, { isForfeit });
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Maç hükmen durumu güncellendi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/fixtures"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/teams"] });
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Maç hükmen durumu güncellenemedi", variant: "destructive" });
+    },
+  });
+
   const updateFixtureDateMutation = useMutation({
     mutationFn: async ({ id, matchDate }: { id: string; matchDate: string }) => {
       return await apiRequest("PATCH", `/api/league/fixtures/${id}/date`, { matchDate });
@@ -2142,7 +2156,10 @@ export default function ManagementPanelPage() {
                               )}
                             </span>
                             <div className="flex items-center gap-2">
-                              {fixture.isPostponed && (
+                              {fixture.isForfeit && (
+                                <Badge variant="secondary" className="bg-purple-600 text-white">HÜKMEN</Badge>
+                              )}
+                              {fixture.isPostponed && !fixture.isForfeit && (
                                 <Badge variant="destructive">ERTELENDİ</Badge>
                               )}
                               <span>Hafta {fixture.week}</span>
@@ -2402,6 +2419,19 @@ export default function ManagementPanelPage() {
                               disabled={updateFixturePostponedMutation.isPending}
                             >
                               {fixture?.isPostponed ? "Ertelenme Kaldır" : "Ertelendi"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant={fixture?.isForfeit ? "default" : "outline"}
+                              onClick={() => {
+                                updateFixtureForfeitMutation.mutate({ 
+                                  id: fixture.id, 
+                                  isForfeit: !fixture?.isForfeit 
+                                });
+                              }}
+                              disabled={updateFixtureForfeitMutation.isPending}
+                            >
+                              {fixture?.isForfeit ? "Hükmen Kaldır" : "Hükmen"}
                             </Button>
                             <Button
                               size="sm"

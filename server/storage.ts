@@ -151,12 +151,13 @@ export interface IStorage {
   updateLeagueTeam(id: string, updates: Partial<LeagueTeam>): Promise<LeagueTeam | undefined>;
   deleteLeagueTeam(id: string): Promise<void>;
   
-  getLeagueFixtures(): Promise<(LeagueFixture & { homeTeam: LeagueTeam | null; awayTeam: LeagueTeam | null })[]>;
+  getLeagueFixtures(): Promise<(LeagueFixture & { homeTeam: LeagueTeam | null; awayTeam: LeagueTeam | null; goals: (MatchGoal & { player: User | null; playerName: string | null; assistPlayer: User | null; assistPlayerName: string | null })[] })[]>;
   getLeagueFixture(id: string): Promise<(LeagueFixture & { homeTeam: LeagueTeam | null; awayTeam: LeagueTeam | null }) | undefined>;
   createLeagueFixture(fixture: InsertLeagueFixture): Promise<LeagueFixture>;
   updateLeagueFixtureScore(id: string, homeScore: number, awayScore: number): Promise<LeagueFixture | undefined>;
   updateLeagueFixtureDate(id: string, matchDate: Date): Promise<LeagueFixture | undefined>;
   updateLeagueFixturePostponed(id: string, isPostponed: boolean): Promise<LeagueFixture | undefined>;
+  updateLeagueFixtureForfeit(id: string, isForfeit: boolean): Promise<LeagueFixture | undefined>;
   updateLeagueFixtureWithDetails(id: string, homeScore: number, awayScore: number, goals: InsertMatchGoal[], matchRecordingUrl?: string, isPostponed?: boolean): Promise<LeagueFixture | undefined>;
   deleteLeagueFixture(id: string): Promise<void>;
   
@@ -168,7 +169,7 @@ export interface IStorage {
   // Player match stats operations
   createPlayerStats(stats: InsertPlayerStats): Promise<PlayerStats>;
   getPlayerStatsByFixture(fixtureId: string): Promise<(PlayerStats & { user: User; team: LeagueTeam })[]>;
-  getPlayerStatsLeaderboard(): Promise<Array<{ userId: string; username: string; totalGoals: number; totalAssists: number; totalDm: number; totalCleanSheets: number; totalSaves: number }>>;
+  getPlayerStatsLeaderboard(): Promise<Array<{ userId: string; username: string; teamId: string | null; teamName: string | null; teamLogo: string | null; totalGoals: number; totalAssists: number; totalDm: number; totalCleanSheets: number; totalSaves: number }>>;
   updatePlayerMatchStats(id: string, updates: Partial<PlayerStats>): Promise<PlayerStats | undefined>;
   deletePlayerStats(id: string): Promise<void>;
   deletePlayerStatsByFixture(fixtureId: string): Promise<void>;
@@ -1168,8 +1169,8 @@ export class DBStorage implements IStorage {
     await db.delete(leagueTeams).where(eq(leagueTeams.id, id));
   }
 
-  async getLeagueFixtures(): Promise<(LeagueFixture & { homeTeam: LeagueTeam | null; awayTeam: LeagueTeam | null })[]> {
-    const { asc } = await import("drizzle-orm");
+  async getLeagueFixtures(): Promise<(LeagueFixture & { homeTeam: LeagueTeam | null; awayTeam: LeagueTeam | null; goals: (MatchGoal & { player: User | null; playerName: string | null; assistPlayer: User | null; assistPlayerName: string | null })[] })[]> {
+    const { asc, inArray } = await import("drizzle-orm");
     
     // Get all fixtures and teams in parallel (2 queries instead of N+1)
     const [fixtures, allTeams] = await Promise.all([
@@ -1180,11 +1181,60 @@ export class DBStorage implements IStorage {
     // Create a map of teams for O(1) lookup
     const teamMap = new Map(allTeams.map(team => [team.id, team]));
     
-    // Map fixtures with teams (O(n) instead of O(n*2) queries)
+    // Get all goals for played fixtures in a single batch query
+    const playedFixtureIds = fixtures
+      .filter(f => f.isPlayed && !f.isBye)
+      .map(f => f.id);
+    
+    let allGoals: any[] = [];
+    if (playedFixtureIds.length > 0) {
+      // Fetch all goals for all fixtures in one query
+      const goals = await db
+        .select()
+        .from(matchGoals)
+        .where(inArray(matchGoals.fixtureId, playedFixtureIds));
+      
+      if (goals.length > 0) {
+        // Get all unique user IDs
+        const userIds = new Set<string>();
+        goals.forEach(goal => {
+          if (goal.playerId) userIds.add(goal.playerId);
+          if (goal.assistPlayerId) userIds.add(goal.assistPlayerId);
+        });
+        
+        // Fetch all users in one query
+        const usersList = userIds.size > 0
+          ? await db.select().from(users).where(inArray(users.id, Array.from(userIds)))
+          : [];
+        
+        const userMap = new Map(usersList.map(user => [user.id, user]));
+        
+        // Map goals with users
+        allGoals = goals.map(goal => ({
+          ...goal,
+          player: goal.playerId ? (userMap.get(goal.playerId) || null) : null,
+          playerName: goal.playerName || null,
+          assistPlayer: goal.assistPlayerId ? (userMap.get(goal.assistPlayerId) || null) : null,
+          assistPlayerName: goal.assistPlayerName || null,
+        }));
+      }
+    }
+    
+    // Group goals by fixture ID
+    const goalsByFixture = new Map<string, any[]>();
+    allGoals.forEach(goal => {
+      if (!goalsByFixture.has(goal.fixtureId)) {
+        goalsByFixture.set(goal.fixtureId, []);
+      }
+      goalsByFixture.get(goal.fixtureId)!.push(goal);
+    });
+    
+    // Map fixtures with teams and goals (O(n) instead of O(n*2) queries)
     return fixtures.map(fixture => ({
       ...fixture,
       homeTeam: fixture.homeTeamId ? (teamMap.get(fixture.homeTeamId) || null) : null,
       awayTeam: fixture.awayTeamId ? (teamMap.get(fixture.awayTeamId) || null) : null,
+      goals: goalsByFixture.get(fixture.id) || [],
     }));
   }
 
@@ -1342,6 +1392,12 @@ export class DBStorage implements IStorage {
     return updated;
   }
 
+  async updateLeagueFixtureForfeit(id: string, isForfeit: boolean): Promise<LeagueFixture | undefined> {
+    await db.update(leagueFixtures).set({ isForfeit }).where(eq(leagueFixtures.id, id));
+    const [updated] = await db.select().from(leagueFixtures).where(eq(leagueFixtures.id, id)).limit(1);
+    return updated;
+  }
+
   async updateLeagueFixtureWithDetails(
     id: string, 
     homeScore: number, 
@@ -1469,9 +1525,10 @@ export class DBStorage implements IStorage {
     return result;
   }
 
-  async getPlayerStatsLeaderboard(): Promise<Array<{ userId: string; username: string; totalGoals: number; totalAssists: number; totalDm: number; totalCleanSheets: number; totalSaves: number }>> {
+  async getPlayerStatsLeaderboard(): Promise<Array<{ userId: string; username: string; teamId: string | null; teamName: string | null; teamLogo: string | null; totalGoals: number; totalAssists: number; totalDm: number; totalCleanSheets: number; totalSaves: number }>> {
     const { sql, sum } = await import("drizzle-orm");
     
+    // Get aggregated stats per user
     const leaderboard = await db
       .select({
         userId: playerStats.userId,
@@ -1487,15 +1544,53 @@ export class DBStorage implements IStorage {
       .groupBy(playerStats.userId, users.username)
       .orderBy(desc(sum(playerStats.goals)));
     
-    return leaderboard.map(row => ({
-      userId: row.userId,
-      username: row.username || '',
-      totalGoals: Number(row.totalGoals) || 0,
-      totalAssists: Number(row.totalAssists) || 0,
-      totalDm: Number(row.totalDm) || 0,
-      totalCleanSheets: Number(row.totalCleanSheets) || 0,
-      totalSaves: Number(row.totalSaves) || 0,
-    }));
+    // Get latest team for each user (most recent stat's team)
+    const userIds = leaderboard.map(row => row.userId).filter((id): id is string => id !== null);
+    
+    const latestTeams = userIds.length > 0
+      ? await db
+          .select({
+            userId: playerStats.userId,
+            teamId: playerStats.teamId,
+          })
+          .from(playerStats)
+          .where(inArray(playerStats.userId, userIds))
+          .orderBy(desc(playerStats.createdAt))
+      : [];
+    
+    // Get unique team IDs
+    const teamIds = [...new Set(latestTeams.map(t => t.teamId).filter((id): id is string => id !== null))];
+    
+    const teams = teamIds.length > 0
+      ? await db.select().from(leagueTeams).where(inArray(leagueTeams.id, teamIds))
+      : [];
+    
+    const teamMap = new Map(teams.map(team => [team.id, team]));
+    
+    // Create a map of userId -> latest teamId
+    const userTeamMap = new Map<string, string | null>();
+    latestTeams.forEach(stat => {
+      if (!userTeamMap.has(stat.userId)) {
+        userTeamMap.set(stat.userId, stat.teamId);
+      }
+    });
+    
+    return leaderboard.map(row => {
+      const teamId = userTeamMap.get(row.userId || '') || null;
+      const team = teamId ? teamMap.get(teamId) : null;
+      return {
+        userId: row.userId,
+        username: row.username || '',
+        teamId: team?.id || null,
+        teamName: team?.name || null,
+        teamLogo: team?.logo || null,
+        totalGoals: Number(row.totalGoals) || 0,
+        totalAssists: Number(row.totalAssists) || 0,
+        totalDm: Number(row.totalDm) || 0,
+        totalCleanSheets: Number(row.totalCleanSheets) || 0,
+        totalSaves: Number(row.totalSaves) || 0,
+      };
+    });
   }
 
   async updatePlayerMatchStats(id: string, updates: Partial<PlayerStats>): Promise<PlayerStats | undefined> {

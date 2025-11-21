@@ -380,6 +380,7 @@ export default function LeaguePage() {
                           const isPast = matchDate < new Date();
                           const isBye = fixture.isBye;
                           const isPostponed = fixture.isPostponed;
+                          const isForfeit = fixture.isForfeit;
                           
                           return (
                             <div 
@@ -387,6 +388,8 @@ export default function LeaguePage() {
                               className={`p-5 border-2 rounded-xl transition-all hover:shadow-lg ${
                                 isBye
                                   ? "border-blue-500/30 bg-blue-500/10"
+                                  : isForfeit
+                                  ? "border-purple-500/30 bg-purple-500/10"
                                   : isPostponed
                                   ? "border-orange-500/30 bg-orange-500/10"
                                   : isToday 
@@ -558,12 +561,17 @@ export default function LeaguePage() {
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  {isPostponed && (
+                                  {isForfeit && (
+                                    <span className="text-xs font-semibold text-purple-600 bg-purple-600/20 px-2 py-1 rounded-full">
+                                      HÜKMEN
+                                    </span>
+                                  )}
+                                  {isPostponed && !isForfeit && (
                                     <span className="text-xs font-semibold text-orange-600 bg-orange-600/20 px-2 py-1 rounded-full">
                                       ERTELENDİ
                                     </span>
                                   )}
-                                  {fixture.isPlayed && !isPostponed && (
+                                  {fixture.isPlayed && !isPostponed && !isForfeit && (
                                     <span className="text-xs font-semibold text-green-600 bg-green-600/20 px-2 py-1 rounded-full">
                                       OYNANDI
                                     </span>
@@ -597,11 +605,13 @@ export default function LeaguePage() {
                       {fixturesByWeek[parseInt(week)].map((fixture: any) => {
                         const isBye = fixture.isBye;
                         const isPostponed = fixture.isPostponed;
+                        const isForfeit = fixture.isForfeit;
                         return (
                         <div 
                           key={fixture.id} 
                           className={`p-4 border rounded-lg hover:bg-muted/50 transition-colors ${
                             isBye ? "border-blue-500/30 bg-blue-500/10" : 
+                            isForfeit ? "border-purple-500/30 bg-purple-500/10" :
                             isPostponed ? "border-orange-500/30 bg-orange-500/10" : ""
                           }`}
                           data-testid={`fixture-${fixture.id}`}
@@ -680,7 +690,14 @@ export default function LeaguePage() {
                                   timeZone: 'Europe/Istanbul'
                                 })}</span>
                               </div>
-                              {isPostponed && (
+                              {isForfeit && (
+                                <div className="flex justify-center">
+                                  <span className="text-xs font-semibold text-purple-600 bg-purple-600/20 px-2 py-1 rounded-full">
+                                    HÜKMEN
+                                  </span>
+                                </div>
+                              )}
+                              {isPostponed && !isForfeit && (
                                 <div className="flex justify-center">
                                   <span className="text-xs font-semibold text-orange-600 bg-orange-600/20 px-2 py-1 rounded-full">
                                     ERTELENDİ
@@ -836,14 +853,26 @@ export default function LeaguePage() {
                                   Gol Kralı
                                 </h3>
                               </div>
-                              <Link 
-                                href={`/oyuncu/${sortedPlayers[0].username}`}
-                                className="block group"
-                              >
-                                <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2 group-hover:text-yellow-600 transition-colors">
-                                  {sortedPlayers[0].username}
-                                </h2>
-                              </Link>
+                              <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+                                {sortedPlayers[0].teamLogo && (
+                                  <img 
+                                    src={sortedPlayers[0].teamLogo} 
+                                    alt={sortedPlayers[0].teamName || ""} 
+                                    className="w-12 h-12 object-contain"
+                                  />
+                                )}
+                                <Link 
+                                  href={`/oyuncu/${sortedPlayers[0].username}`}
+                                  className="block group"
+                                >
+                                  <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2 group-hover:text-yellow-600 transition-colors">
+                                    {sortedPlayers[0].username}
+                                  </h2>
+                                </Link>
+                              </div>
+                              {sortedPlayers[0].teamName && (
+                                <p className="text-sm text-muted-foreground mb-2 text-center md:text-left">{sortedPlayers[0].teamName}</p>
+                              )}
                               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
                                 <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
                                   <div className="text-xs text-muted-foreground mb-1">Gol</div>
@@ -875,14 +904,26 @@ export default function LeaguePage() {
                                   </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <Link 
-                                    href={`/oyuncu/${sortedPlayers[1].username}`}
-                                    className="block group"
-                                  >
-                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-gray-600 transition-colors truncate">
-                                      {sortedPlayers[1].username}
-                                    </h3>
-                                  </Link>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {sortedPlayers[1].teamLogo && (
+                                      <img 
+                                        src={sortedPlayers[1].teamLogo} 
+                                        alt={sortedPlayers[1].teamName || ""} 
+                                        className="w-6 h-6 object-contain flex-shrink-0"
+                                      />
+                                    )}
+                                    <Link 
+                                      href={`/oyuncu/${sortedPlayers[1].username}`}
+                                      className="block group flex-1 min-w-0"
+                                    >
+                                      <h3 className="text-xl font-bold text-foreground group-hover:text-gray-600 transition-colors truncate">
+                                        {sortedPlayers[1].username}
+                                      </h3>
+                                    </Link>
+                                  </div>
+                                  {sortedPlayers[1].teamName && (
+                                    <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[1].teamName}</p>
+                                  )}
                                   <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
                                     {sortedPlayers[1].totalGoals} Gol
                                   </div>
@@ -906,14 +947,26 @@ export default function LeaguePage() {
                                   </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <Link 
-                                    href={`/oyuncu/${sortedPlayers[2].username}`}
-                                    className="block group"
-                                  >
-                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-amber-700 transition-colors truncate">
-                                      {sortedPlayers[2].username}
-                                    </h3>
-                                  </Link>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {sortedPlayers[2].teamLogo && (
+                                      <img 
+                                        src={sortedPlayers[2].teamLogo} 
+                                        alt={sortedPlayers[2].teamName || ""} 
+                                        className="w-6 h-6 object-contain flex-shrink-0"
+                                      />
+                                    )}
+                                    <Link 
+                                      href={`/oyuncu/${sortedPlayers[2].username}`}
+                                      className="block group flex-1 min-w-0"
+                                    >
+                                      <h3 className="text-xl font-bold text-foreground group-hover:text-amber-700 transition-colors truncate">
+                                        {sortedPlayers[2].username}
+                                      </h3>
+                                    </Link>
+                                  </div>
+                                  {sortedPlayers[2].teamName && (
+                                    <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
+                                  )}
                                   <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
                                     {sortedPlayers[2].totalGoals} Gol
                                   </div>
@@ -940,18 +993,30 @@ export default function LeaguePage() {
                                 key={player.userId} 
                                 className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors"
                               >
-                                <div className="flex items-center gap-3">
-                                  <span className="font-bold text-muted-foreground w-6">
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                  <span className="font-bold text-muted-foreground w-6 flex-shrink-0">
                                     {index + 4}
                                   </span>
-                                  <Link 
-                                    href={`/oyuncu/${player.username}`}
-                                    className="font-medium hover:text-primary transition-colors"
-                                  >
-                                    {player.username}
-                                  </Link>
+                                  {player.teamLogo && (
+                                    <img 
+                                      src={player.teamLogo} 
+                                      alt={player.teamName || ""} 
+                                      className="w-8 h-8 object-contain flex-shrink-0"
+                                    />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <Link 
+                                      href={`/oyuncu/${player.username}`}
+                                      className="font-medium hover:text-primary transition-colors block truncate"
+                                    >
+                                      {player.username}
+                                    </Link>
+                                    {player.teamName && (
+                                      <p className="text-xs text-muted-foreground truncate">{player.teamName}</p>
+                                    )}
+                                  </div>
                                 </div>
-                                <span className="font-bold text-primary">{player.totalGoals} Gol</span>
+                                <span className="font-bold text-primary flex-shrink-0 ml-2">{player.totalGoals} Gol</span>
                               </div>
                             ))}
                           </div>
@@ -1016,11 +1081,23 @@ export default function LeaguePage() {
                                   Asist Kralı
                                 </h3>
                               </div>
-                              <Link href={`/oyuncu/${sortedPlayers[0].username}`} className="block group">
-                                <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2 group-hover:text-blue-600 transition-colors">
-                                  {sortedPlayers[0].username}
-                                </h2>
-                              </Link>
+                              <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+                                {sortedPlayers[0].teamLogo && (
+                                  <img 
+                                    src={sortedPlayers[0].teamLogo} 
+                                    alt={sortedPlayers[0].teamName || ""} 
+                                    className="w-12 h-12 object-contain"
+                                  />
+                                )}
+                                <Link href={`/oyuncu/${sortedPlayers[0].username}`} className="block group">
+                                  <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2 group-hover:text-blue-600 transition-colors">
+                                    {sortedPlayers[0].username}
+                                  </h2>
+                                </Link>
+                              </div>
+                              {sortedPlayers[0].teamName && (
+                                <p className="text-sm text-muted-foreground mb-2 text-center md:text-left">{sortedPlayers[0].teamName}</p>
+                              )}
                               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
                                 <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
                                   <div className="text-xs text-muted-foreground mb-1">Asist</div>
@@ -1050,11 +1127,23 @@ export default function LeaguePage() {
                                   </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <Link href={`/oyuncu/${sortedPlayers[1].username}`} className="block group">
-                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-gray-600 transition-colors truncate">
-                                      {sortedPlayers[1].username}
-                                    </h3>
-                                  </Link>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {sortedPlayers[1].teamLogo && (
+                                      <img 
+                                        src={sortedPlayers[1].teamLogo} 
+                                        alt={sortedPlayers[1].teamName || ""} 
+                                        className="w-6 h-6 object-contain flex-shrink-0"
+                                      />
+                                    )}
+                                    <Link href={`/oyuncu/${sortedPlayers[1].username}`} className="block group flex-1 min-w-0">
+                                      <h3 className="text-xl font-bold text-foreground group-hover:text-gray-600 transition-colors truncate">
+                                        {sortedPlayers[1].username}
+                                      </h3>
+                                    </Link>
+                                  </div>
+                                  {sortedPlayers[1].teamName && (
+                                    <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[1].teamName}</p>
+                                  )}
                                   <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
                                     {sortedPlayers[1].totalAssists} Asist
                                   </div>
@@ -1077,11 +1166,23 @@ export default function LeaguePage() {
                                   </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <Link href={`/oyuncu/${sortedPlayers[2].username}`} className="block group">
-                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-amber-700 transition-colors truncate">
-                                      {sortedPlayers[2].username}
-                                    </h3>
-                                  </Link>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {sortedPlayers[2].teamLogo && (
+                                      <img 
+                                        src={sortedPlayers[2].teamLogo} 
+                                        alt={sortedPlayers[2].teamName || ""} 
+                                        className="w-6 h-6 object-contain flex-shrink-0"
+                                      />
+                                    )}
+                                    <Link href={`/oyuncu/${sortedPlayers[2].username}`} className="block group flex-1 min-w-0">
+                                      <h3 className="text-xl font-bold text-foreground group-hover:text-amber-700 transition-colors truncate">
+                                        {sortedPlayers[2].username}
+                                      </h3>
+                                    </Link>
+                                  </div>
+                                  {sortedPlayers[2].teamName && (
+                                    <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
+                                  )}
                                   <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
                                     {sortedPlayers[2].totalAssists} Asist
                                   </div>
@@ -1103,13 +1204,25 @@ export default function LeaguePage() {
                           <div className="space-y-2">
                             {sortedPlayers.slice(3).map((player: any, index: number) => (
                               <div key={player.userId} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors">
-                                <div className="flex items-center gap-3">
-                                  <span className="font-bold text-muted-foreground w-6">{index + 4}</span>
-                                  <Link href={`/oyuncu/${player.username}`} className="font-medium hover:text-primary transition-colors">
-                                    {player.username}
-                                  </Link>
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                  <span className="font-bold text-muted-foreground w-6 flex-shrink-0">{index + 4}</span>
+                                  {player.teamLogo && (
+                                    <img 
+                                      src={player.teamLogo} 
+                                      alt={player.teamName || ""} 
+                                      className="w-8 h-8 object-contain flex-shrink-0"
+                                    />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <Link href={`/oyuncu/${player.username}`} className="font-medium hover:text-primary transition-colors block truncate">
+                                      {player.username}
+                                    </Link>
+                                    {player.teamName && (
+                                      <p className="text-xs text-muted-foreground truncate">{player.teamName}</p>
+                                    )}
+                                  </div>
                                 </div>
-                                <span className="font-bold text-blue-600">{player.totalAssists} Asist</span>
+                                <span className="font-bold text-blue-600 flex-shrink-0 ml-2">{player.totalAssists} Asist</span>
                               </div>
                             ))}
                           </div>
@@ -1174,11 +1287,23 @@ export default function LeaguePage() {
                                   Kurtarış Kralı
                                 </h3>
                               </div>
-                              <Link href={`/oyuncu/${sortedPlayers[0].username}`} className="block group">
-                                <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2 group-hover:text-green-600 transition-colors">
-                                  {sortedPlayers[0].username}
-                                </h2>
-                              </Link>
+                              <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+                                {sortedPlayers[0].teamLogo && (
+                                  <img 
+                                    src={sortedPlayers[0].teamLogo} 
+                                    alt={sortedPlayers[0].teamName || ""} 
+                                    className="w-12 h-12 object-contain"
+                                  />
+                                )}
+                                <Link href={`/oyuncu/${sortedPlayers[0].username}`} className="block group">
+                                  <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2 group-hover:text-green-600 transition-colors">
+                                    {sortedPlayers[0].username}
+                                  </h2>
+                                </Link>
+                              </div>
+                              {sortedPlayers[0].teamName && (
+                                <p className="text-sm text-muted-foreground mb-2 text-center md:text-left">{sortedPlayers[0].teamName}</p>
+                              )}
                               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
                                 <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
                                   <div className="text-xs text-muted-foreground mb-1">Kurtarış</div>
@@ -1208,11 +1333,23 @@ export default function LeaguePage() {
                                   </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <Link href={`/oyuncu/${sortedPlayers[1].username}`} className="block group">
-                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-gray-600 transition-colors truncate">
-                                      {sortedPlayers[1].username}
-                                    </h3>
-                                  </Link>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {sortedPlayers[1].teamLogo && (
+                                      <img 
+                                        src={sortedPlayers[1].teamLogo} 
+                                        alt={sortedPlayers[1].teamName || ""} 
+                                        className="w-6 h-6 object-contain flex-shrink-0"
+                                      />
+                                    )}
+                                    <Link href={`/oyuncu/${sortedPlayers[1].username}`} className="block group flex-1 min-w-0">
+                                      <h3 className="text-xl font-bold text-foreground group-hover:text-gray-600 transition-colors truncate">
+                                        {sortedPlayers[1].username}
+                                      </h3>
+                                    </Link>
+                                  </div>
+                                  {sortedPlayers[1].teamName && (
+                                    <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[1].teamName}</p>
+                                  )}
                                   <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
                                     {sortedPlayers[1].totalSaves} Kurtarış
                                   </div>
@@ -1235,11 +1372,23 @@ export default function LeaguePage() {
                                   </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <Link href={`/oyuncu/${sortedPlayers[2].username}`} className="block group">
-                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-amber-700 transition-colors truncate">
-                                      {sortedPlayers[2].username}
-                                    </h3>
-                                  </Link>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {sortedPlayers[2].teamLogo && (
+                                      <img 
+                                        src={sortedPlayers[2].teamLogo} 
+                                        alt={sortedPlayers[2].teamName || ""} 
+                                        className="w-6 h-6 object-contain flex-shrink-0"
+                                      />
+                                    )}
+                                    <Link href={`/oyuncu/${sortedPlayers[2].username}`} className="block group flex-1 min-w-0">
+                                      <h3 className="text-xl font-bold text-foreground group-hover:text-amber-700 transition-colors truncate">
+                                        {sortedPlayers[2].username}
+                                      </h3>
+                                    </Link>
+                                  </div>
+                                  {sortedPlayers[2].teamName && (
+                                    <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
+                                  )}
                                   <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
                                     {sortedPlayers[2].totalSaves} Kurtarış
                                   </div>
@@ -1261,13 +1410,25 @@ export default function LeaguePage() {
                           <div className="space-y-2">
                             {sortedPlayers.slice(3).map((player: any, index: number) => (
                               <div key={player.userId} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors">
-                                <div className="flex items-center gap-3">
-                                  <span className="font-bold text-muted-foreground w-6">{index + 4}</span>
-                                  <Link href={`/oyuncu/${player.username}`} className="font-medium hover:text-primary transition-colors">
-                                    {player.username}
-                                  </Link>
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                  <span className="font-bold text-muted-foreground w-6 flex-shrink-0">{index + 4}</span>
+                                  {player.teamLogo && (
+                                    <img 
+                                      src={player.teamLogo} 
+                                      alt={player.teamName || ""} 
+                                      className="w-8 h-8 object-contain flex-shrink-0"
+                                    />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <Link href={`/oyuncu/${player.username}`} className="font-medium hover:text-primary transition-colors block truncate">
+                                      {player.username}
+                                    </Link>
+                                    {player.teamName && (
+                                      <p className="text-xs text-muted-foreground truncate">{player.teamName}</p>
+                                    )}
+                                  </div>
                                 </div>
-                                <span className="font-bold text-green-600">{player.totalSaves} Kurtarış</span>
+                                <span className="font-bold text-green-600 flex-shrink-0 ml-2">{player.totalSaves} Kurtarış</span>
                               </div>
                             ))}
                           </div>
@@ -1332,11 +1493,23 @@ export default function LeaguePage() {
                                   DM Kralı
                                 </h3>
                               </div>
-                              <Link href={`/oyuncu/${sortedPlayers[0].username}`} className="block group">
-                                <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2 group-hover:text-red-600 transition-colors">
-                                  {sortedPlayers[0].username}
-                                </h2>
-                              </Link>
+                              <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+                                {sortedPlayers[0].teamLogo && (
+                                  <img 
+                                    src={sortedPlayers[0].teamLogo} 
+                                    alt={sortedPlayers[0].teamName || ""} 
+                                    className="w-12 h-12 object-contain"
+                                  />
+                                )}
+                                <Link href={`/oyuncu/${sortedPlayers[0].username}`} className="block group">
+                                  <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2 group-hover:text-red-600 transition-colors">
+                                    {sortedPlayers[0].username}
+                                  </h2>
+                                </Link>
+                              </div>
+                              {sortedPlayers[0].teamName && (
+                                <p className="text-sm text-muted-foreground mb-2 text-center md:text-left">{sortedPlayers[0].teamName}</p>
+                              )}
                               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
                                 <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
                                   <div className="text-xs text-muted-foreground mb-1">DM</div>
@@ -1366,11 +1539,23 @@ export default function LeaguePage() {
                                   </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <Link href={`/oyuncu/${sortedPlayers[1].username}`} className="block group">
-                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-gray-600 transition-colors truncate">
-                                      {sortedPlayers[1].username}
-                                    </h3>
-                                  </Link>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {sortedPlayers[1].teamLogo && (
+                                      <img 
+                                        src={sortedPlayers[1].teamLogo} 
+                                        alt={sortedPlayers[1].teamName || ""} 
+                                        className="w-6 h-6 object-contain flex-shrink-0"
+                                      />
+                                    )}
+                                    <Link href={`/oyuncu/${sortedPlayers[1].username}`} className="block group flex-1 min-w-0">
+                                      <h3 className="text-xl font-bold text-foreground group-hover:text-gray-600 transition-colors truncate">
+                                        {sortedPlayers[1].username}
+                                      </h3>
+                                    </Link>
+                                  </div>
+                                  {sortedPlayers[1].teamName && (
+                                    <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[1].teamName}</p>
+                                  )}
                                   <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
                                     {sortedPlayers[1].totalDm} DM
                                   </div>
@@ -1393,11 +1578,23 @@ export default function LeaguePage() {
                                   </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <Link href={`/oyuncu/${sortedPlayers[2].username}`} className="block group">
-                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-amber-700 transition-colors truncate">
-                                      {sortedPlayers[2].username}
-                                    </h3>
-                                  </Link>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {sortedPlayers[2].teamLogo && (
+                                      <img 
+                                        src={sortedPlayers[2].teamLogo} 
+                                        alt={sortedPlayers[2].teamName || ""} 
+                                        className="w-6 h-6 object-contain flex-shrink-0"
+                                      />
+                                    )}
+                                    <Link href={`/oyuncu/${sortedPlayers[2].username}`} className="block group flex-1 min-w-0">
+                                      <h3 className="text-xl font-bold text-foreground group-hover:text-amber-700 transition-colors truncate">
+                                        {sortedPlayers[2].username}
+                                      </h3>
+                                    </Link>
+                                  </div>
+                                  {sortedPlayers[2].teamName && (
+                                    <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
+                                  )}
                                   <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
                                     {sortedPlayers[2].totalDm} DM
                                   </div>
@@ -1419,13 +1616,25 @@ export default function LeaguePage() {
                           <div className="space-y-2">
                             {sortedPlayers.slice(3).map((player: any, index: number) => (
                               <div key={player.userId} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors">
-                                <div className="flex items-center gap-3">
-                                  <span className="font-bold text-muted-foreground w-6">{index + 4}</span>
-                                  <Link href={`/oyuncu/${player.username}`} className="font-medium hover:text-primary transition-colors">
-                                    {player.username}
-                                  </Link>
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                  <span className="font-bold text-muted-foreground w-6 flex-shrink-0">{index + 4}</span>
+                                  {player.teamLogo && (
+                                    <img 
+                                      src={player.teamLogo} 
+                                      alt={player.teamName || ""} 
+                                      className="w-8 h-8 object-contain flex-shrink-0"
+                                    />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <Link href={`/oyuncu/${player.username}`} className="font-medium hover:text-primary transition-colors block truncate">
+                                      {player.username}
+                                    </Link>
+                                    {player.teamName && (
+                                      <p className="text-xs text-muted-foreground truncate">{player.teamName}</p>
+                                    )}
+                                  </div>
                                 </div>
-                                <span className="font-bold text-red-600">{player.totalDm} DM</span>
+                                <span className="font-bold text-red-600 flex-shrink-0 ml-2">{player.totalDm} DM</span>
                               </div>
                             ))}
                           </div>
@@ -1490,11 +1699,23 @@ export default function LeaguePage() {
                                   CS Kralı
                                 </h3>
                               </div>
-                              <Link href={`/oyuncu/${sortedPlayers[0].username}`} className="block group">
-                                <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2 group-hover:text-purple-600 transition-colors">
-                                  {sortedPlayers[0].username}
-                                </h2>
-                              </Link>
+                              <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+                                {sortedPlayers[0].teamLogo && (
+                                  <img 
+                                    src={sortedPlayers[0].teamLogo} 
+                                    alt={sortedPlayers[0].teamName || ""} 
+                                    className="w-12 h-12 object-contain"
+                                  />
+                                )}
+                                <Link href={`/oyuncu/${sortedPlayers[0].username}`} className="block group">
+                                  <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2 group-hover:text-purple-600 transition-colors">
+                                    {sortedPlayers[0].username}
+                                  </h2>
+                                </Link>
+                              </div>
+                              {sortedPlayers[0].teamName && (
+                                <p className="text-sm text-muted-foreground mb-2 text-center md:text-left">{sortedPlayers[0].teamName}</p>
+                              )}
                               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
                                 <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
                                   <div className="text-xs text-muted-foreground mb-1">CS</div>
@@ -1524,11 +1745,23 @@ export default function LeaguePage() {
                                   </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <Link href={`/oyuncu/${sortedPlayers[1].username}`} className="block group">
-                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-gray-600 transition-colors truncate">
-                                      {sortedPlayers[1].username}
-                                    </h3>
-                                  </Link>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {sortedPlayers[1].teamLogo && (
+                                      <img 
+                                        src={sortedPlayers[1].teamLogo} 
+                                        alt={sortedPlayers[1].teamName || ""} 
+                                        className="w-6 h-6 object-contain flex-shrink-0"
+                                      />
+                                    )}
+                                    <Link href={`/oyuncu/${sortedPlayers[1].username}`} className="block group flex-1 min-w-0">
+                                      <h3 className="text-xl font-bold text-foreground group-hover:text-gray-600 transition-colors truncate">
+                                        {sortedPlayers[1].username}
+                                      </h3>
+                                    </Link>
+                                  </div>
+                                  {sortedPlayers[1].teamName && (
+                                    <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[1].teamName}</p>
+                                  )}
                                   <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
                                     {sortedPlayers[1].totalCleanSheets} CS
                                   </div>
@@ -1551,11 +1784,23 @@ export default function LeaguePage() {
                                   </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <Link href={`/oyuncu/${sortedPlayers[2].username}`} className="block group">
-                                    <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-amber-700 transition-colors truncate">
-                                      {sortedPlayers[2].username}
-                                    </h3>
-                                  </Link>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {sortedPlayers[2].teamLogo && (
+                                      <img 
+                                        src={sortedPlayers[2].teamLogo} 
+                                        alt={sortedPlayers[2].teamName || ""} 
+                                        className="w-6 h-6 object-contain flex-shrink-0"
+                                      />
+                                    )}
+                                    <Link href={`/oyuncu/${sortedPlayers[2].username}`} className="block group flex-1 min-w-0">
+                                      <h3 className="text-xl font-bold text-foreground group-hover:text-amber-700 transition-colors truncate">
+                                        {sortedPlayers[2].username}
+                                      </h3>
+                                    </Link>
+                                  </div>
+                                  {sortedPlayers[2].teamName && (
+                                    <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
+                                  )}
                                   <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
                                     {sortedPlayers[2].totalCleanSheets} CS
                                   </div>
@@ -1577,13 +1822,25 @@ export default function LeaguePage() {
                           <div className="space-y-2">
                             {sortedPlayers.slice(3).map((player: any, index: number) => (
                               <div key={player.userId} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors">
-                                <div className="flex items-center gap-3">
-                                  <span className="font-bold text-muted-foreground w-6">{index + 4}</span>
-                                  <Link href={`/oyuncu/${player.username}`} className="font-medium hover:text-primary transition-colors">
-                                    {player.username}
-                                  </Link>
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                  <span className="font-bold text-muted-foreground w-6 flex-shrink-0">{index + 4}</span>
+                                  {player.teamLogo && (
+                                    <img 
+                                      src={player.teamLogo} 
+                                      alt={player.teamName || ""} 
+                                      className="w-8 h-8 object-contain flex-shrink-0"
+                                    />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <Link href={`/oyuncu/${player.username}`} className="font-medium hover:text-primary transition-colors block truncate">
+                                      {player.username}
+                                    </Link>
+                                    {player.teamName && (
+                                      <p className="text-xs text-muted-foreground truncate">{player.teamName}</p>
+                                    )}
+                                  </div>
                                 </div>
-                                <span className="font-bold text-purple-600">{player.totalCleanSheets} CS</span>
+                                <span className="font-bold text-purple-600 flex-shrink-0 ml-2">{player.totalCleanSheets} CS</span>
                               </div>
                             ))}
                           </div>
