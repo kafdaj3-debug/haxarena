@@ -848,6 +848,7 @@ export default function LeaguePage() {
                             
                             <div className="flex-1 text-center md:text-left">
                               <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                                <span className="text-3xl md:text-4xl">⚽</span>
                                 <Trophy className="w-6 h-6 text-yellow-600" />
                                 <h3 className="text-2xl md:text-3xl font-bold text-yellow-900 dark:text-yellow-400">
                                   Gol Kralı
@@ -875,7 +876,9 @@ export default function LeaguePage() {
                               )}
                               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
                                 <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
-                                  <div className="text-xs text-muted-foreground mb-1">Gol</div>
+                                  <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                    <span>⚽</span> Gol
+                                  </div>
                                   <div className="text-2xl font-bold text-yellow-700 dark:text-yellow-400">
                                     {sortedPlayers[0].totalGoals}
                                   </div>
@@ -924,8 +927,8 @@ export default function LeaguePage() {
                                   {sortedPlayers[1].teamName && (
                                     <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[1].teamName}</p>
                                   )}
-                                  <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
-                                    {sortedPlayers[1].totalGoals} Gol
+                                  <div className="text-2xl font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                                    <span>⚽</span> {sortedPlayers[1].totalGoals} Gol
                                   </div>
                                 </div>
                               </div>
@@ -967,8 +970,8 @@ export default function LeaguePage() {
                                   {sortedPlayers[2].teamName && (
                                     <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
                                   )}
-                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
-                                    {sortedPlayers[2].totalGoals} Gol
+                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                                    <span>⚽</span> {sortedPlayers[2].totalGoals} Gol
                                   </div>
                                 </div>
                               </div>
@@ -1016,7 +1019,9 @@ export default function LeaguePage() {
                                     )}
                                   </div>
                                 </div>
-                                <span className="font-bold text-primary flex-shrink-0 ml-2">{player.totalGoals} Gol</span>
+                                <span className="font-bold text-primary flex-shrink-0 ml-2 flex items-center gap-1">
+                                  <span>⚽</span> {player.totalGoals} Gol
+                                </span>
                               </div>
                             ))}
                           </div>
@@ -1076,6 +1081,7 @@ export default function LeaguePage() {
                             </div>
                             <div className="flex-1 text-center md:text-left">
                               <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                                <span className="text-3xl md:text-4xl">🎯</span>
                                 <Trophy className="w-6 h-6 text-blue-600" />
                                 <h3 className="text-2xl md:text-3xl font-bold text-blue-900 dark:text-blue-400">
                                   Asist Kralı
@@ -1100,7 +1106,9 @@ export default function LeaguePage() {
                               )}
                               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
                                 <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
-                                  <div className="text-xs text-muted-foreground mb-1">Asist</div>
+                                  <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                    <span>🎯</span> Asist
+                                  </div>
                                   <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">
                                     {sortedPlayers[0].totalAssists}
                                   </div>
@@ -1144,8 +1152,8 @@ export default function LeaguePage() {
                                   {sortedPlayers[1].teamName && (
                                     <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[1].teamName}</p>
                                   )}
-                                  <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
-                                    {sortedPlayers[1].totalAssists} Asist
+                                  <div className="text-2xl font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                                    <span>🎯</span> {sortedPlayers[1].totalAssists} Asist
                                   </div>
                                 </div>
                               </div>
@@ -1183,8 +1191,8 @@ export default function LeaguePage() {
                                   {sortedPlayers[2].teamName && (
                                     <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
                                   )}
-                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
-                                    {sortedPlayers[2].totalAssists} Asist
+                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                                    <span>🎯</span> {sortedPlayers[2].totalAssists} Asist
                                   </div>
                                 </div>
                               </div>
@@ -1222,7 +1230,9 @@ export default function LeaguePage() {
                                     )}
                                   </div>
                                 </div>
-                                <span className="font-bold text-blue-600 flex-shrink-0 ml-2">{player.totalAssists} Asist</span>
+                                <span className="font-bold text-blue-600 flex-shrink-0 ml-2 flex items-center gap-1">
+                                  <span>🎯</span> {player.totalAssists} Asist
+                                </span>
                               </div>
                             ))}
                           </div>
@@ -1282,6 +1292,7 @@ export default function LeaguePage() {
                             </div>
                             <div className="flex-1 text-center md:text-left">
                               <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                                <span className="text-3xl md:text-4xl">🥅</span>
                                 <Trophy className="w-6 h-6 text-green-600" />
                                 <h3 className="text-2xl md:text-3xl font-bold text-green-900 dark:text-green-400">
                                   Kurtarış Kralı
@@ -1306,7 +1317,9 @@ export default function LeaguePage() {
                               )}
                               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
                                 <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
-                                  <div className="text-xs text-muted-foreground mb-1">Kurtarış</div>
+                                  <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                    <span>🥅</span> Kurtarış
+                                  </div>
                                   <div className="text-2xl font-bold text-green-700 dark:text-green-400">
                                     {sortedPlayers[0].totalSaves}
                                   </div>
@@ -1350,8 +1363,8 @@ export default function LeaguePage() {
                                   {sortedPlayers[1].teamName && (
                                     <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[1].teamName}</p>
                                   )}
-                                  <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
-                                    {sortedPlayers[1].totalSaves} Kurtarış
+                                  <div className="text-2xl font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                                    <span>🥅</span> {sortedPlayers[1].totalSaves} Kurtarış
                                   </div>
                                 </div>
                               </div>
@@ -1390,7 +1403,9 @@ export default function LeaguePage() {
                                     <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
                                   )}
                                   <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
-                                    {sortedPlayers[2].totalSaves} Kurtarış
+                                    <span className="flex items-center gap-1">
+                                      <span>🥅</span> {sortedPlayers[2].totalSaves} Kurtarış
+                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -1428,7 +1443,9 @@ export default function LeaguePage() {
                                     )}
                                   </div>
                                 </div>
-                                <span className="font-bold text-green-600 flex-shrink-0 ml-2">{player.totalSaves} Kurtarış</span>
+                                <span className="font-bold text-green-600 flex-shrink-0 ml-2 flex items-center gap-1">
+                                  <span>🥅</span> {player.totalSaves} Kurtarış
+                                </span>
                               </div>
                             ))}
                           </div>
@@ -1488,6 +1505,7 @@ export default function LeaguePage() {
                             </div>
                             <div className="flex-1 text-center md:text-left">
                               <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                                <span className="text-3xl md:text-4xl">🛡️</span>
                                 <Trophy className="w-6 h-6 text-red-600" />
                                 <h3 className="text-2xl md:text-3xl font-bold text-red-900 dark:text-red-400">
                                   DM Kralı
@@ -1512,7 +1530,9 @@ export default function LeaguePage() {
                               )}
                               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
                                 <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
-                                  <div className="text-xs text-muted-foreground mb-1">DM</div>
+                                  <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                    <span>🛡️</span> DM
+                                  </div>
                                   <div className="text-2xl font-bold text-red-700 dark:text-red-400">
                                     {sortedPlayers[0].totalDm}
                                   </div>
@@ -1556,8 +1576,8 @@ export default function LeaguePage() {
                                   {sortedPlayers[1].teamName && (
                                     <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[1].teamName}</p>
                                   )}
-                                  <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
-                                    {sortedPlayers[1].totalDm} DM
+                                  <div className="text-2xl font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                                    <span>🛡️</span> {sortedPlayers[1].totalDm} DM
                                   </div>
                                 </div>
                               </div>
@@ -1595,8 +1615,8 @@ export default function LeaguePage() {
                                   {sortedPlayers[2].teamName && (
                                     <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
                                   )}
-                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
-                                    {sortedPlayers[2].totalDm} DM
+                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                                    <span>🛡️</span> {sortedPlayers[2].totalDm} DM
                                   </div>
                                 </div>
                               </div>
@@ -1634,7 +1654,9 @@ export default function LeaguePage() {
                                     )}
                                   </div>
                                 </div>
-                                <span className="font-bold text-red-600 flex-shrink-0 ml-2">{player.totalDm} DM</span>
+                                <span className="font-bold text-red-600 flex-shrink-0 ml-2 flex items-center gap-1">
+                                  <span>🛡️</span> {player.totalDm} DM
+                                </span>
                               </div>
                             ))}
                           </div>
@@ -1694,6 +1716,7 @@ export default function LeaguePage() {
                             </div>
                             <div className="flex-1 text-center md:text-left">
                               <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                                <span className="text-3xl md:text-4xl">🧤</span>
                                 <Trophy className="w-6 h-6 text-purple-600" />
                                 <h3 className="text-2xl md:text-3xl font-bold text-purple-900 dark:text-purple-400">
                                   CS Kralı
@@ -1718,7 +1741,9 @@ export default function LeaguePage() {
                               )}
                               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
                                 <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
-                                  <div className="text-xs text-muted-foreground mb-1">CS</div>
+                                  <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                    <span>🧤</span> CS
+                                  </div>
                                   <div className="text-2xl font-bold text-purple-700 dark:text-purple-400">
                                     {sortedPlayers[0].totalCleanSheets}
                                   </div>
@@ -1762,8 +1787,8 @@ export default function LeaguePage() {
                                   {sortedPlayers[1].teamName && (
                                     <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[1].teamName}</p>
                                   )}
-                                  <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
-                                    {sortedPlayers[1].totalCleanSheets} CS
+                                  <div className="text-2xl font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                                    <span>🧤</span> {sortedPlayers[1].totalCleanSheets} CS
                                   </div>
                                 </div>
                               </div>
@@ -1801,8 +1826,8 @@ export default function LeaguePage() {
                                   {sortedPlayers[2].teamName && (
                                     <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
                                   )}
-                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
-                                    {sortedPlayers[2].totalCleanSheets} CS
+                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                                    <span>🧤</span> {sortedPlayers[2].totalCleanSheets} CS
                                   </div>
                                 </div>
                               </div>
@@ -1840,7 +1865,9 @@ export default function LeaguePage() {
                                     )}
                                   </div>
                                 </div>
-                                <span className="font-bold text-purple-600 flex-shrink-0 ml-2">{player.totalCleanSheets} CS</span>
+                                <span className="font-bold text-purple-600 flex-shrink-0 ml-2 flex items-center gap-1">
+                                  <span>🧤</span> {player.totalCleanSheets} CS
+                                </span>
                               </div>
                             ))}
                           </div>

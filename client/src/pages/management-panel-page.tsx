@@ -2752,11 +2752,11 @@ export default function ManagementPanelPage() {
                                       const data: any = {};
                                       if (editingPlayerName) data.playerName = editingPlayerName;
                                       if (editingTeamIdForStats) data.teamId = editingTeamIdForStats;
-                                      if (statsGoals && statsGoals.trim() !== "") data.goals = parseInt(statsGoals) || 0;
-                                      if (statsAssists && statsAssists.trim() !== "") data.assists = parseInt(statsAssists) || 0;
-                                      if (statsDm && statsDm.trim() !== "") data.dm = parseInt(statsDm) || 0;
-                                      if (statsCleanSheets && statsCleanSheets.trim() !== "") data.cleanSheets = parseInt(statsCleanSheets) || 0;
-                                      if (statsSaves && statsSaves.trim() !== "") data.saves = parseInt(statsSaves) || 0;
+                                      data.goals = parseInt(statsGoals) || 0;
+                                      data.assists = parseInt(statsAssists) || 0;
+                                      data.dm = parseInt(statsDm) || 0;
+                                      data.cleanSheets = parseInt(statsCleanSheets) || 0;
+                                      data.saves = parseInt(statsSaves) || 0;
                                       
                                       updatePlayerStatsMutation.mutate({ id: stat.id, data });
                                     }}
