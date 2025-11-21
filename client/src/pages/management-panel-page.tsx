@@ -117,6 +117,7 @@ export default function ManagementPanelPage() {
   const [statsSaves, setStatsSaves] = useState("");
   const [editingStatsId, setEditingStatsId] = useState<string | null>(null);
   const [editingPlayerName, setEditingPlayerName] = useState("");
+  const [editingTeamIdForStats, setEditingTeamIdForStats] = useState("");
   
   // Team of week state
   const [totwWeek, setTotwWeek] = useState("");
@@ -715,6 +716,7 @@ export default function ManagementPanelPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/league/stats/leaderboard"] });
       setEditingStatsId(null);
       setEditingPlayerName("");
+      setEditingTeamIdForStats("");
       setStatsGoals("");
       setStatsAssists("");
       setStatsDm("");
@@ -2612,6 +2614,7 @@ export default function ManagementPanelPage() {
                                     onClick={() => {
                                       setEditingStatsId(stat.id);
                                       setEditingPlayerName(stat.playerName || stat.user?.username || "");
+                                      setEditingTeamIdForStats(stat.teamId || "");
                                       setStatsGoals(stat.goals.toString());
                                       setStatsAssists(stat.assists.toString());
                                       setStatsDm(stat.dm.toString());
@@ -2663,15 +2666,32 @@ export default function ManagementPanelPage() {
                             {editingStatsId === stat.id && (
                               <div className="p-4 border rounded-lg bg-muted/20 space-y-3">
                                 <h4 className="font-medium text-sm">İstatistik Düzenleme</h4>
-                                <div className="space-y-2">
-                                  <Label className="text-xs">Oyuncu İsmi</Label>
-                                  <Input
-                                    type="text"
-                                    value={editingPlayerName}
-                                    onChange={(e) => setEditingPlayerName(e.target.value)}
-                                    className="h-8 text-sm"
-                                    placeholder="Oyuncu ismi"
-                                  />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                  <div className="space-y-2">
+                                    <Label className="text-xs">Oyuncu İsmi</Label>
+                                    <Input
+                                      type="text"
+                                      value={editingPlayerName}
+                                      onChange={(e) => setEditingPlayerName(e.target.value)}
+                                      className="h-8 text-sm"
+                                      placeholder="Oyuncu ismi"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label className="text-xs">Takım</Label>
+                                    <Select value={editingTeamIdForStats} onValueChange={setEditingTeamIdForStats}>
+                                      <SelectTrigger className="h-8 text-sm">
+                                        <SelectValue placeholder="Takım seçin" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {leagueTeams?.map((team: any) => (
+                                          <SelectItem key={team.id} value={team.id}>
+                                            {team.name}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
                                 </div>
                                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                                   <div className="space-y-1">
@@ -2731,6 +2751,7 @@ export default function ManagementPanelPage() {
                                     onClick={() => {
                                       const data: any = {};
                                       if (editingPlayerName) data.playerName = editingPlayerName;
+                                      if (editingTeamIdForStats) data.teamId = editingTeamIdForStats;
                                       if (statsGoals && statsGoals.trim() !== "") data.goals = parseInt(statsGoals) || 0;
                                       if (statsAssists && statsAssists.trim() !== "") data.assists = parseInt(statsAssists) || 0;
                                       if (statsDm && statsDm.trim() !== "") data.dm = parseInt(statsDm) || 0;
@@ -2749,6 +2770,7 @@ export default function ManagementPanelPage() {
                                     onClick={() => {
                                       setEditingStatsId(null);
                                       setEditingPlayerName("");
+                                      setEditingTeamIdForStats("");
                                       setStatsGoals("");
                                       setStatsAssists("");
                                       setStatsDm("");

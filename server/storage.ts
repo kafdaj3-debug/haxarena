@@ -169,7 +169,7 @@ export interface IStorage {
   // Player match stats operations
   createPlayerStats(stats: InsertPlayerStats): Promise<PlayerStats>;
   getPlayerStatsByFixture(fixtureId: string): Promise<(PlayerStats & { user: User; team: LeagueTeam })[]>;
-  getPlayerStatsLeaderboard(): Promise<Array<{ userId: string; username: string; teamId: string | null; teamName: string | null; teamLogo: string | null; totalGoals: number; totalAssists: number; totalDm: number; totalCleanSheets: number; totalSaves: number }>>;
+  getPlayerStatsLeaderboard(): Promise<Array<{ userId: string | null; username: string; teamId: string | null; teamName: string | null; teamLogo: string | null; totalGoals: number; totalAssists: number; totalDm: number; totalCleanSheets: number; totalSaves: number }>>;
   updatePlayerMatchStats(id: string, updates: Partial<PlayerStats>): Promise<PlayerStats | undefined>;
   deletePlayerStats(id: string): Promise<void>;
   deletePlayerStatsByFixture(fixtureId: string): Promise<void>;
@@ -1525,11 +1525,11 @@ export class DBStorage implements IStorage {
     return result;
   }
 
-  async getPlayerStatsLeaderboard(): Promise<Array<{ userId: string; username: string; teamId: string | null; teamName: string | null; teamLogo: string | null; totalGoals: number; totalAssists: number; totalDm: number; totalCleanSheets: number; totalSaves: number }>> {
+  async getPlayerStatsLeaderboard(): Promise<Array<{ userId: string | null; username: string; teamId: string | null; teamName: string | null; teamLogo: string | null; totalGoals: number; totalAssists: number; totalDm: number; totalCleanSheets: number; totalSaves: number }>> {
     const { sql, sum } = await import("drizzle-orm");
     
-    // Get aggregated stats per user
-    const leaderboard = await db
+    // Get aggregated stats per user (by userId)
+    const leaderboardByUserId = await db
       .select({
         userId: playerStats.userId,
         username: users.username,
@@ -1541,44 +1541,33 @@ export class DBStorage implements IStorage {
       })
       .from(playerStats)
       .leftJoin(users, eq(playerStats.userId, users.id))
+      .where(sql`${playerStats.userId} IS NOT NULL`)
       .groupBy(playerStats.userId, users.username)
       .orderBy(desc(sum(playerStats.goals)));
     
-    // Get latest team for each user (most recent stat's team)
-    // We need to handle both userId-based and playerName-based stats
-    const userIds = leaderboard.map(row => row.userId).filter((id): id is string => id !== null);
-    const usernames = leaderboard.map(row => row.username).filter((name): name is string => name !== null && name !== '');
+    // Get aggregated stats per player (by playerName - for stats without userId)
+    const leaderboardByPlayerName = await db
+      .select({
+        playerName: playerStats.playerName,
+        totalGoals: sum(playerStats.goals),
+        totalAssists: sum(playerStats.assists),
+        totalDm: sum(playerStats.dm),
+        totalCleanSheets: sum(playerStats.cleanSheets),
+        totalSaves: sum(playerStats.saves),
+      })
+      .from(playerStats)
+      .where(sql`${playerStats.playerName} IS NOT NULL AND ${playerStats.userId} IS NULL`)
+      .groupBy(playerStats.playerName)
+      .orderBy(desc(sum(playerStats.goals)));
     
-    // Get latest teams for users by userId
-    const latestTeamsByUserId = userIds.length > 0
-      ? await db
-          .select({
-            userId: playerStats.userId,
-            teamId: playerStats.teamId,
-          })
-          .from(playerStats)
-          .where(inArray(playerStats.userId, userIds))
-          .orderBy(desc(playerStats.createdAt))
-      : [];
+    // Get all unique team IDs from all stats
+    const allTeamIds = await db
+      .select({
+        teamId: playerStats.teamId,
+      })
+      .from(playerStats);
     
-    // Get latest teams for users by playerName (for stats without userId)
-    const latestTeamsByPlayerName = usernames.length > 0
-      ? await db
-          .select({
-            userId: playerStats.userId,
-            teamId: playerStats.teamId,
-            playerName: playerStats.playerName,
-          })
-          .from(playerStats)
-          .where(inArray(playerStats.playerName, usernames))
-          .orderBy(desc(playerStats.createdAt))
-      : [];
-    
-    // Combine both approaches
-    const allLatestTeams = [...latestTeamsByUserId, ...latestTeamsByPlayerName];
-    
-    // Get unique team IDs
-    const teamIds = [...new Set(allLatestTeams.map(t => t.teamId).filter((id): id is string => id !== null))];
+    const teamIds = [...new Set(allTeamIds.map(t => t.teamId).filter((id): id is string => id !== null))];
     
     const teams = teamIds.length > 0
       ? await db.select().from(leagueTeams).where(inArray(leagueTeams.id, teamIds))
@@ -1586,54 +1575,57 @@ export class DBStorage implements IStorage {
     
     const teamMap = new Map(teams.map(team => [team.id, team]));
     
-    // Create a map of userId -> latest teamId
+    // Get latest team for each userId
+    const userIds = leaderboardByUserId.map(row => row.userId).filter((id): id is string => id !== null);
     const userTeamMap = new Map<string, string | null>();
-    latestTeamsByUserId.forEach(stat => {
-      if (stat.userId && !userTeamMap.has(stat.userId)) {
-        userTeamMap.set(stat.userId, stat.teamId);
-      }
-    });
     
-    // Create a map of username -> latest teamId (for playerName-based stats)
-    const usernameTeamMap = new Map<string, string | null>();
-    latestTeamsByPlayerName.forEach(stat => {
-      if (stat.playerName && !usernameTeamMap.has(stat.playerName)) {
-        usernameTeamMap.set(stat.playerName, stat.teamId);
-      }
-    });
-    
-    // Also map by username from userId-based stats - we need to get usernames from users table
     if (userIds.length > 0) {
-      const usersWithTeams = await db
+      const latestTeamsByUserId = await db
         .select({
           userId: playerStats.userId,
           teamId: playerStats.teamId,
-          username: users.username,
         })
         .from(playerStats)
-        .leftJoin(users, eq(playerStats.userId, users.id))
         .where(inArray(playerStats.userId, userIds))
         .orderBy(desc(playerStats.createdAt));
       
-      usersWithTeams.forEach(stat => {
-        if (stat.username && stat.teamId && !usernameTeamMap.has(stat.username)) {
-          usernameTeamMap.set(stat.username, stat.teamId);
+      latestTeamsByUserId.forEach(stat => {
+        if (stat.userId && !userTeamMap.has(stat.userId)) {
+          userTeamMap.set(stat.userId, stat.teamId);
         }
       });
     }
     
-    return leaderboard.map(row => {
-      // Try to get team by userId first, then by username
-      let teamId: string | null = null;
-      if (row.userId) {
-        teamId = userTeamMap.get(row.userId) || null;
-      }
-      if (!teamId && row.username) {
-        teamId = usernameTeamMap.get(row.username) || null;
-      }
+    // Get latest team for each playerName
+    const playerNames = leaderboardByPlayerName.map(row => row.playerName).filter((name): name is string => name !== null && name !== '');
+    const playerNameTeamMap = new Map<string, string | null>();
+    
+    if (playerNames.length > 0) {
+      const latestTeamsByPlayerName = await db
+        .select({
+          playerName: playerStats.playerName,
+          teamId: playerStats.teamId,
+        })
+        .from(playerStats)
+        .where(inArray(playerStats.playerName, playerNames))
+        .orderBy(desc(playerStats.createdAt));
       
+      latestTeamsByPlayerName.forEach(stat => {
+        if (stat.playerName && !playerNameTeamMap.has(stat.playerName)) {
+          playerNameTeamMap.set(stat.playerName, stat.teamId);
+        }
+      });
+    }
+    
+    // Combine both leaderboards
+    const combinedLeaderboard: Array<{ userId: string | null; username: string; teamId: string | null; teamName: string | null; teamLogo: string | null; totalGoals: number; totalAssists: number; totalDm: number; totalCleanSheets: number; totalSaves: number }> = [];
+    
+    // Add userId-based stats
+    leaderboardByUserId.forEach(row => {
+      const teamId = row.userId ? userTeamMap.get(row.userId) || null : null;
       const team = teamId ? teamMap.get(teamId) : null;
-      return {
+      
+      combinedLeaderboard.push({
         userId: row.userId,
         username: row.username || '',
         teamId: team?.id || null,
@@ -1644,8 +1636,56 @@ export class DBStorage implements IStorage {
         totalDm: Number(row.totalDm) || 0,
         totalCleanSheets: Number(row.totalCleanSheets) || 0,
         totalSaves: Number(row.totalSaves) || 0,
-      };
+      });
     });
+    
+    // Add playerName-based stats (only if not already in leaderboard by username)
+    leaderboardByPlayerName.forEach(row => {
+      // Check if this playerName already exists in combinedLeaderboard (by username)
+      const existingIndex = combinedLeaderboard.findIndex(p => p.username === row.playerName);
+      
+      if (existingIndex >= 0) {
+        // Merge stats if player exists
+        combinedLeaderboard[existingIndex].totalGoals += Number(row.totalGoals) || 0;
+        combinedLeaderboard[existingIndex].totalAssists += Number(row.totalAssists) || 0;
+        combinedLeaderboard[existingIndex].totalDm += Number(row.totalDm) || 0;
+        combinedLeaderboard[existingIndex].totalCleanSheets += Number(row.totalCleanSheets) || 0;
+        combinedLeaderboard[existingIndex].totalSaves += Number(row.totalSaves) || 0;
+        
+        // Update team if not set or if this is more recent
+        if (!combinedLeaderboard[existingIndex].teamId) {
+          const teamId = playerNameTeamMap.get(row.playerName || '') || null;
+          const team = teamId ? teamMap.get(teamId) : null;
+          if (team) {
+            combinedLeaderboard[existingIndex].teamId = team.id;
+            combinedLeaderboard[existingIndex].teamName = team.name;
+            combinedLeaderboard[existingIndex].teamLogo = team.logo;
+          }
+        }
+      } else {
+        // Add new player
+        const teamId = playerNameTeamMap.get(row.playerName || '') || null;
+        const team = teamId ? teamMap.get(teamId) : null;
+        
+        combinedLeaderboard.push({
+          userId: null,
+          username: row.playerName || '',
+          teamId: team?.id || null,
+          teamName: team?.name || null,
+          teamLogo: team?.logo || null,
+          totalGoals: Number(row.totalGoals) || 0,
+          totalAssists: Number(row.totalAssists) || 0,
+          totalDm: Number(row.totalDm) || 0,
+          totalCleanSheets: Number(row.totalCleanSheets) || 0,
+          totalSaves: Number(row.totalSaves) || 0,
+        });
+      }
+    });
+    
+    // Sort by totalGoals descending
+    combinedLeaderboard.sort((a, b) => b.totalGoals - a.totalGoals);
+    
+    return combinedLeaderboard;
   }
 
   async updatePlayerMatchStats(id: string, updates: Partial<PlayerStats>): Promise<PlayerStats | undefined> {

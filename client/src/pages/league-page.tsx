@@ -990,7 +990,7 @@ export default function LeaguePage() {
                           <div className="space-y-2">
                             {sortedPlayers.slice(3).map((player: any, index: number) => (
                               <div 
-                                key={player.userId} 
+                                key={player.userId || player.username} 
                                 className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors"
                               >
                                 <div className="flex items-center gap-3 flex-1 min-w-0">
