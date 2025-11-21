@@ -829,151 +829,124 @@ export default function LeaguePage() {
 
                 return (
                   <div className="space-y-6">
-                    {/* 1st Place - Special Card */}
-                    {sortedPlayers[0] && (
-                      <Card className="overflow-hidden border-2 border-yellow-400/50 bg-gradient-to-br from-yellow-50 via-amber-50 to-yellow-100 dark:from-yellow-950/20 dark:via-amber-950/20 dark:to-yellow-900/20 shadow-xl">
-                        <div className="relative p-6 md:p-8">
-                          <Sparkles className="absolute top-4 right-4 w-8 h-8 text-yellow-500/30 animate-pulse" />
-                          <Star className="absolute top-6 right-8 w-4 h-4 text-yellow-400/40 animate-pulse" style={{ animationDelay: '0.5s' }} />
-                          
-                          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                            <div className="relative flex-shrink-0">
-                              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center shadow-lg ring-4 ring-yellow-300/50">
-                                <Crown className="w-12 h-12 md:w-16 md:h-16 text-yellow-900" />
+                    {/* Top 3 Places */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* 1st Place */}
+                      {sortedPlayers[0] && (
+                        <Card className="overflow-hidden border-2 border-yellow-400/50 bg-gradient-to-br from-yellow-50 via-amber-50 to-yellow-100 dark:from-yellow-950/20 dark:via-amber-950/20 dark:to-yellow-900/20 shadow-lg">
+                          <div className="relative p-5">
+                            <Medal className="absolute top-3 right-3 w-6 h-6 text-yellow-400/30" />
+                            <div className="flex items-center gap-4">
+                              <div className="relative flex-shrink-0">
+                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center shadow-md ring-2 ring-yellow-300/50">
+                                  <Crown className="w-8 h-8 text-yellow-900" />
+                                </div>
+                                <div className="absolute -top-1 -right-1 bg-yellow-500 text-yellow-900 rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                  1
+                                </div>
                               </div>
-                              <div className="absolute -top-2 -right-2 bg-yellow-500 text-yellow-900 rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm shadow-md">
-                                1
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  {sortedPlayers[0].teamLogo && (
+                                    <img 
+                                      src={sortedPlayers[0].teamLogo} 
+                                      alt={sortedPlayers[0].teamName || ""} 
+                                      className="w-6 h-6 object-contain flex-shrink-0"
+                                    />
+                                  )}
+                                  <h3 className="text-xl font-bold text-foreground truncate">
+                                    {sortedPlayers[0].username}
+                                  </h3>
+                                </div>
+                                {sortedPlayers[0].teamName && (
+                                  <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[0].teamName}</p>
+                                )}
+                                <div className="text-2xl font-bold text-yellow-700 dark:text-yellow-400 flex items-center gap-1">
+                                  <span>⚽</span> {sortedPlayers[0].totalGoals} Gol
+                                </div>
                               </div>
                             </div>
-                            
-                            <div className="flex-1 text-center md:text-left">
-                              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                                <span className="text-3xl md:text-4xl">⚽</span>
-                                <Trophy className="w-6 h-6 text-yellow-600" />
-                                <h3 className="text-2xl md:text-3xl font-bold text-yellow-900 dark:text-yellow-400">
-                                  Gol Kralı
-                                </h3>
+                          </div>
+                        </Card>
+                      )}
+
+                      {/* 2nd Place */}
+                      {sortedPlayers[1] && (
+                        <Card className="overflow-hidden border-2 border-gray-300/50 bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 dark:from-gray-900/30 dark:via-slate-900/30 dark:to-gray-800/30 shadow-lg">
+                          <div className="relative p-5">
+                            <Medal className="absolute top-3 right-3 w-6 h-6 text-gray-400/30" />
+                            <div className="flex items-center gap-4">
+                              <div className="relative flex-shrink-0">
+                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-300 to-slate-400 flex items-center justify-center shadow-md ring-2 ring-gray-200/50">
+                                  <Medal className="w-8 h-8 text-gray-700" />
+                                </div>
+                                <div className="absolute -top-1 -right-1 bg-gray-400 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                  2
+                                </div>
                               </div>
-                              <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                                {sortedPlayers[0].teamLogo && (
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  {sortedPlayers[1].teamLogo && (
+                                    <img 
+                                      src={sortedPlayers[1].teamLogo} 
+                                      alt={sortedPlayers[1].teamName || ""} 
+                                      className="w-6 h-6 object-contain flex-shrink-0"
+                                    />
+                                  )}
+                                  <h3 className="text-xl font-bold text-foreground truncate">
+                                    {sortedPlayers[1].username}
+                                  </h3>
+                                </div>
+                                {sortedPlayers[1].teamName && (
+                                  <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[1].teamName}</p>
+                                )}
+                                <div className="text-2xl font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                                  <span>⚽</span> {sortedPlayers[1].totalGoals} Gol
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
+                      )}
+                    </div>
+
+                    {/* 3rd Place */}
+                    {sortedPlayers[2] && (
+                      <Card className="overflow-hidden border-2 border-amber-700/50 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-amber-900/20 shadow-lg">
+                        <div className="relative p-5">
+                          <Medal className="absolute top-3 right-3 w-6 h-6 text-amber-600/30" />
+                          <div className="flex items-center gap-4">
+                            <div className="relative flex-shrink-0">
+                              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center shadow-md ring-2 ring-amber-500/50">
+                                <Medal className="w-8 h-8 text-amber-100" />
+                              </div>
+                              <div className="absolute -top-1 -right-1 bg-amber-700 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                3
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                {sortedPlayers[2].teamLogo && (
                                   <img 
-                                    src={sortedPlayers[0].teamLogo} 
-                                    alt={sortedPlayers[0].teamName || ""} 
-                                    className="w-12 h-12 object-contain"
+                                    src={sortedPlayers[2].teamLogo} 
+                                    alt={sortedPlayers[2].teamName || ""} 
+                                    className="w-6 h-6 object-contain flex-shrink-0"
                                   />
                                 )}
-                                <h2 className="text-xl font-bold text-foreground mb-2">
-                                  {sortedPlayers[0].username}
-                                </h2>
+                                <h3 className="text-xl font-bold text-foreground truncate">
+                                  {sortedPlayers[2].username}
+                                </h3>
                               </div>
-                              {sortedPlayers[0].teamName && (
-                                <p className="text-sm text-muted-foreground mb-2 text-center md:text-left">{sortedPlayers[0].teamName}</p>
+                              {sortedPlayers[2].teamName && (
+                                <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
                               )}
-                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
-                                <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
-                                  <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                                    <span>⚽</span> Gol
-                                  </div>
-                                  <div className="text-2xl font-bold text-yellow-700 dark:text-yellow-400">
-                                    {sortedPlayers[0].totalGoals}
-                                  </div>
-                                </div>
+                              <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                                <span>⚽</span> {sortedPlayers[2].totalGoals} Gol
                               </div>
                             </div>
                           </div>
                         </div>
                       </Card>
-                    )}
-
-                    {/* 2nd and 3rd Place */}
-                    {(sortedPlayers[1] || sortedPlayers[2]) && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {sortedPlayers[1] && (
-                          <Card className="overflow-hidden border-2 border-gray-300/50 bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 dark:from-gray-900/30 dark:via-slate-900/30 dark:to-gray-800/30 shadow-lg">
-                            <div className="relative p-5">
-                              <Medal className="absolute top-3 right-3 w-6 h-6 text-gray-400/30" />
-                              <div className="flex items-center gap-4">
-                                <div className="relative flex-shrink-0">
-                                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-300 to-slate-400 flex items-center justify-center shadow-md ring-2 ring-gray-200/50">
-                                    <Medal className="w-8 h-8 text-gray-700" />
-                                  </div>
-                                  <div className="absolute -top-1 -right-1 bg-gray-400 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
-                                    2
-                                  </div>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    {sortedPlayers[1].teamLogo && (
-                                      <img 
-                                        src={sortedPlayers[1].teamLogo} 
-                                        alt={sortedPlayers[1].teamName || ""} 
-                                        className="w-6 h-6 object-contain flex-shrink-0"
-                                      />
-                                    )}
-                                    <Link 
-                                      href={`/oyuncu/${sortedPlayers[1].username}`}
-                                      className="block group flex-1 min-w-0"
-                                    >
-                                      <h3 className="text-xl font-bold text-foreground group-hover:text-gray-600 transition-colors truncate">
-                                        {sortedPlayers[1].username}
-                                      </h3>
-                                    </Link>
-                                  </div>
-                                  {sortedPlayers[1].teamName && (
-                                    <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[1].teamName}</p>
-                                  )}
-                                  <div className="text-2xl font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1">
-                                    <span>⚽</span> {sortedPlayers[1].totalGoals} Gol
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </Card>
-                        )}
-
-                        {sortedPlayers[2] && (
-                          <Card className="overflow-hidden border-2 border-amber-700/50 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-amber-900/20 shadow-lg">
-                            <div className="relative p-5">
-                              <Medal className="absolute top-3 right-3 w-6 h-6 text-amber-600/30" />
-                              <div className="flex items-center gap-4">
-                                <div className="relative flex-shrink-0">
-                                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center shadow-md ring-2 ring-amber-500/50">
-                                    <Medal className="w-8 h-8 text-amber-100" />
-                                  </div>
-                                  <div className="absolute -top-1 -right-1 bg-amber-700 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
-                                    3
-                                  </div>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    {sortedPlayers[2].teamLogo && (
-                                      <img 
-                                        src={sortedPlayers[2].teamLogo} 
-                                        alt={sortedPlayers[2].teamName || ""} 
-                                        className="w-6 h-6 object-contain flex-shrink-0"
-                                      />
-                                    )}
-                                    <Link 
-                                      href={`/oyuncu/${sortedPlayers[2].username}`}
-                                      className="block group flex-1 min-w-0"
-                                    >
-                                      <h3 className="text-xl font-bold text-foreground group-hover:text-amber-700 transition-colors truncate">
-                                        {sortedPlayers[2].username}
-                                      </h3>
-                                    </Link>
-                                  </div>
-                                  {sortedPlayers[2].teamName && (
-                                    <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
-                                  )}
-                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
-                                    <span>⚽</span> {sortedPlayers[2].totalGoals} Gol
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </Card>
-                        )}
-                      </div>
                     )}
 
                     {/* Rest of the players */}
@@ -1060,60 +1033,49 @@ export default function LeaguePage() {
 
                 return (
                   <div className="space-y-6">
-                    {sortedPlayers[0] && (
-                      <Card className="overflow-hidden border-2 border-blue-400/50 bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100 dark:from-blue-950/20 dark:via-cyan-950/20 dark:to-blue-900/20 shadow-xl">
-                        <div className="relative p-6 md:p-8">
-                          <Sparkles className="absolute top-4 right-4 w-8 h-8 text-blue-500/30 animate-pulse" />
-                          <Star className="absolute top-6 right-8 w-4 h-4 text-blue-400/40 animate-pulse" style={{ animationDelay: '0.5s' }} />
-                          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                            <div className="relative flex-shrink-0">
-                              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center shadow-lg ring-4 ring-blue-300/50">
-                                <Crown className="w-12 h-12 md:w-16 md:h-16 text-blue-900" />
+                    {/* Top 3 Places */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* 1st Place */}
+                      {sortedPlayers[0] && (
+                        <Card className="overflow-hidden border-2 border-blue-400/50 bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100 dark:from-blue-950/20 dark:via-cyan-950/20 dark:to-blue-900/20 shadow-lg">
+                          <div className="relative p-5">
+                            <Medal className="absolute top-3 right-3 w-6 h-6 text-blue-400/30" />
+                            <div className="flex items-center gap-4">
+                              <div className="relative flex-shrink-0">
+                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center shadow-md ring-2 ring-blue-300/50">
+                                  <Crown className="w-8 h-8 text-blue-900" />
+                                </div>
+                                <div className="absolute -top-1 -right-1 bg-blue-500 text-blue-900 rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                  1
+                                </div>
                               </div>
-                              <div className="absolute -top-2 -right-2 bg-blue-500 text-blue-900 rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm shadow-md">
-                                1
-                              </div>
-                            </div>
-                            <div className="flex-1 text-center md:text-left">
-                              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                                <span className="text-3xl md:text-4xl">🎯</span>
-                                <Trophy className="w-6 h-6 text-blue-600" />
-                                <h3 className="text-2xl md:text-3xl font-bold text-blue-900 dark:text-blue-400">
-                                  Asist Kralı
-                                </h3>
-                              </div>
-                              <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                                {sortedPlayers[0].teamLogo && (
-                                  <img 
-                                    src={sortedPlayers[0].teamLogo} 
-                                    alt={sortedPlayers[0].teamName || ""} 
-                                    className="w-12 h-12 object-contain"
-                                  />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  {sortedPlayers[0].teamLogo && (
+                                    <img 
+                                      src={sortedPlayers[0].teamLogo} 
+                                      alt={sortedPlayers[0].teamName || ""} 
+                                      className="w-6 h-6 object-contain flex-shrink-0"
+                                    />
+                                  )}
+                                  <h3 className="text-xl font-bold text-foreground truncate">
+                                    {sortedPlayers[0].username}
+                                  </h3>
+                                </div>
+                                {sortedPlayers[0].teamName && (
+                                  <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[0].teamName}</p>
                                 )}
-                                <h2 className="text-xl font-bold text-foreground mb-2">
-                                  {sortedPlayers[0].username}
-                                </h2>
-                              </div>
-                              {sortedPlayers[0].teamName && (
-                                <p className="text-sm text-muted-foreground mb-2 text-center md:text-left">{sortedPlayers[0].teamName}</p>
-                              )}
-                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
-                                <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
-                                  <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                                    <span>🎯</span> Asist
-                                  </div>
-                                  <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">
-                                    {sortedPlayers[0].totalAssists}
-                                  </div>
+                                <div className="text-2xl font-bold text-blue-700 dark:text-blue-400 flex items-center gap-1">
+                                  <span>🎯</span> {sortedPlayers[0].totalAssists} Asist
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </Card>
-                    )}
-                    {(sortedPlayers[1] || sortedPlayers[2]) && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        </Card>
+                      )}
+
+                      {/* 2nd Place */}
+                      {sortedPlayers[1] && (
                         {sortedPlayers[1] && (
                           <Card className="overflow-hidden border-2 border-gray-300/50 bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 dark:from-gray-900/30 dark:via-slate-900/30 dark:to-gray-800/30 shadow-lg">
                             <div className="relative p-5">
@@ -1151,44 +1113,45 @@ export default function LeaguePage() {
                             </div>
                           </Card>
                         )}
-                        {sortedPlayers[2] && (
-                          <Card className="overflow-hidden border-2 border-amber-700/50 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-amber-900/20 shadow-lg">
-                            <div className="relative p-5">
-                              <Medal className="absolute top-3 right-3 w-6 h-6 text-amber-600/30" />
-                              <div className="flex items-center gap-4">
-                                <div className="relative flex-shrink-0">
-                                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center shadow-md ring-2 ring-amber-500/50">
-                                    <Medal className="w-8 h-8 text-amber-100" />
-                                  </div>
-                                  <div className="absolute -top-1 -right-1 bg-amber-700 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
-                                    3
-                                  </div>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    {sortedPlayers[2].teamLogo && (
-                                      <img 
-                                        src={sortedPlayers[2].teamLogo} 
-                                        alt={sortedPlayers[2].teamName || ""} 
-                                        className="w-6 h-6 object-contain flex-shrink-0"
-                                      />
-                                    )}
-                                    <h3 className="text-xl font-bold text-foreground truncate">
-                                      {sortedPlayers[2].username}
-                                    </h3>
-                                  </div>
-                                  {sortedPlayers[2].teamName && (
-                                    <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
-                                  )}
-                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
-                                    <span>🎯</span> {sortedPlayers[2].totalAssists} Asist
-                                  </div>
-                                </div>
+                    </div>
+
+                    {/* 3rd Place */}
+                    {sortedPlayers[2] && (
+                      <Card className="overflow-hidden border-2 border-amber-700/50 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-amber-900/20 shadow-lg">
+                        <div className="relative p-5">
+                          <Medal className="absolute top-3 right-3 w-6 h-6 text-amber-600/30" />
+                          <div className="flex items-center gap-4">
+                            <div className="relative flex-shrink-0">
+                              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center shadow-md ring-2 ring-amber-500/50">
+                                <Medal className="w-8 h-8 text-amber-100" />
+                              </div>
+                              <div className="absolute -top-1 -right-1 bg-amber-700 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                3
                               </div>
                             </div>
-                          </Card>
-                        )}
-                      </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                {sortedPlayers[2].teamLogo && (
+                                  <img 
+                                    src={sortedPlayers[2].teamLogo} 
+                                    alt={sortedPlayers[2].teamName || ""} 
+                                    className="w-6 h-6 object-contain flex-shrink-0"
+                                  />
+                                )}
+                                <h3 className="text-xl font-bold text-foreground truncate">
+                                  {sortedPlayers[2].username}
+                                </h3>
+                              </div>
+                              {sortedPlayers[2].teamName && (
+                                <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
+                              )}
+                              <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                                <span>🎯</span> {sortedPlayers[2].totalAssists} Asist
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
                     )}
                     {sortedPlayers.length > 3 && (
                       <Card className="overflow-hidden">
@@ -1265,60 +1228,49 @@ export default function LeaguePage() {
 
                 return (
                   <div className="space-y-6">
-                    {sortedPlayers[0] && (
-                      <Card className="overflow-hidden border-2 border-green-400/50 bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 dark:from-green-950/20 dark:via-emerald-950/20 dark:to-green-900/20 shadow-xl">
-                        <div className="relative p-6 md:p-8">
-                          <Sparkles className="absolute top-4 right-4 w-8 h-8 text-green-500/30 animate-pulse" />
-                          <Star className="absolute top-6 right-8 w-4 h-4 text-green-400/40 animate-pulse" style={{ animationDelay: '0.5s' }} />
-                          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                            <div className="relative flex-shrink-0">
-                              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg ring-4 ring-green-300/50">
-                                <Crown className="w-12 h-12 md:w-16 md:h-16 text-green-900" />
+                    {/* Top 3 Places */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* 1st Place */}
+                      {sortedPlayers[0] && (
+                        <Card className="overflow-hidden border-2 border-green-400/50 bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 dark:from-green-950/20 dark:via-emerald-950/20 dark:to-green-900/20 shadow-lg">
+                          <div className="relative p-5">
+                            <Medal className="absolute top-3 right-3 w-6 h-6 text-green-400/30" />
+                            <div className="flex items-center gap-4">
+                              <div className="relative flex-shrink-0">
+                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-md ring-2 ring-green-300/50">
+                                  <Crown className="w-8 h-8 text-green-900" />
+                                </div>
+                                <div className="absolute -top-1 -right-1 bg-green-500 text-green-900 rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                  1
+                                </div>
                               </div>
-                              <div className="absolute -top-2 -right-2 bg-green-500 text-green-900 rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm shadow-md">
-                                1
-                              </div>
-                            </div>
-                            <div className="flex-1 text-center md:text-left">
-                              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                                <span className="text-3xl md:text-4xl">🥅</span>
-                                <Trophy className="w-6 h-6 text-green-600" />
-                                <h3 className="text-2xl md:text-3xl font-bold text-green-900 dark:text-green-400">
-                                  Kurtarış Kralı
-                                </h3>
-                              </div>
-                              <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                                {sortedPlayers[0].teamLogo && (
-                                  <img 
-                                    src={sortedPlayers[0].teamLogo} 
-                                    alt={sortedPlayers[0].teamName || ""} 
-                                    className="w-12 h-12 object-contain"
-                                  />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  {sortedPlayers[0].teamLogo && (
+                                    <img 
+                                      src={sortedPlayers[0].teamLogo} 
+                                      alt={sortedPlayers[0].teamName || ""} 
+                                      className="w-6 h-6 object-contain flex-shrink-0"
+                                    />
+                                  )}
+                                  <h3 className="text-xl font-bold text-foreground truncate">
+                                    {sortedPlayers[0].username}
+                                  </h3>
+                                </div>
+                                {sortedPlayers[0].teamName && (
+                                  <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[0].teamName}</p>
                                 )}
-                                <h2 className="text-xl font-bold text-foreground mb-2">
-                                  {sortedPlayers[0].username}
-                                </h2>
-                              </div>
-                              {sortedPlayers[0].teamName && (
-                                <p className="text-sm text-muted-foreground mb-2 text-center md:text-left">{sortedPlayers[0].teamName}</p>
-                              )}
-                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
-                                <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
-                                  <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                                    <span>🥅</span> Kurtarış
-                                  </div>
-                                  <div className="text-2xl font-bold text-green-700 dark:text-green-400">
-                                    {sortedPlayers[0].totalSaves}
-                                  </div>
+                                <div className="text-2xl font-bold text-green-700 dark:text-green-400 flex items-center gap-1">
+                                  <span>🥅</span> {sortedPlayers[0].totalSaves} Kurtarış
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </Card>
-                    )}
-                    {(sortedPlayers[1] || sortedPlayers[2]) && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        </Card>
+                      )}
+
+                      {/* 2nd Place */}
+                      {sortedPlayers[1] && (
                         {sortedPlayers[1] && (
                           <Card className="overflow-hidden border-2 border-gray-300/50 bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 dark:from-gray-900/30 dark:via-slate-900/30 dark:to-gray-800/30 shadow-lg">
                             <div className="relative p-5">
@@ -1385,23 +1337,61 @@ export default function LeaguePage() {
                                   {sortedPlayers[2].teamName && (
                                     <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
                                   )}
-                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
-                                    <span className="flex items-center gap-1">
-                                      <span>🥅</span> {sortedPlayers[2].totalSaves} Kurtarış
-                                    </span>
+                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                                    <span>🥅</span> {sortedPlayers[2].totalSaves} Kurtarış
                                   </div>
                                 </div>
                               </div>
                             </div>
                           </Card>
                         )}
-                      </div>
+                    </div>
+
+                    {/* 3rd Place */}
+                    {sortedPlayers[2] && (
+                      <Card className="overflow-hidden border-2 border-amber-700/50 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-amber-900/20 shadow-lg">
+                        <div className="relative p-5">
+                          <Medal className="absolute top-3 right-3 w-6 h-6 text-amber-600/30" />
+                          <div className="flex items-center gap-4">
+                            <div className="relative flex-shrink-0">
+                              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center shadow-md ring-2 ring-amber-500/50">
+                                <Medal className="w-8 h-8 text-amber-100" />
+                              </div>
+                              <div className="absolute -top-1 -right-1 bg-amber-700 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                3
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                {sortedPlayers[2].teamLogo && (
+                                  <img 
+                                    src={sortedPlayers[2].teamLogo} 
+                                    alt={sortedPlayers[2].teamName || ""} 
+                                    className="w-6 h-6 object-contain flex-shrink-0"
+                                  />
+                                )}
+                                <h3 className="text-xl font-bold text-foreground truncate">
+                                  {sortedPlayers[2].username}
+                                </h3>
+                              </div>
+                              {sortedPlayers[2].teamName && (
+                                <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
+                              )}
+                              <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                                <span>🥅</span> {sortedPlayers[2].totalSaves} Kurtarış
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
                     )}
+
+                    {/* Rest of the players */}
                     {sortedPlayers.length > 3 && (
                       <Card className="overflow-hidden">
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
-                            <span>🧤</span> Diğer Sıralamalar
+                            <span>🥅</span> Diğer Sıralamalar
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -1472,60 +1462,49 @@ export default function LeaguePage() {
 
                 return (
                   <div className="space-y-6">
-                    {sortedPlayers[0] && (
-                      <Card className="overflow-hidden border-2 border-red-400/50 bg-gradient-to-br from-red-50 via-rose-50 to-red-100 dark:from-red-950/20 dark:via-rose-950/20 dark:to-red-900/20 shadow-xl">
-                        <div className="relative p-6 md:p-8">
-                          <Sparkles className="absolute top-4 right-4 w-8 h-8 text-red-500/30 animate-pulse" />
-                          <Star className="absolute top-6 right-8 w-4 h-4 text-red-400/40 animate-pulse" style={{ animationDelay: '0.5s' }} />
-                          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                            <div className="relative flex-shrink-0">
-                              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center shadow-lg ring-4 ring-red-300/50">
-                                <Crown className="w-12 h-12 md:w-16 md:h-16 text-red-900" />
+                    {/* Top 3 Places */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* 1st Place */}
+                      {sortedPlayers[0] && (
+                        <Card className="overflow-hidden border-2 border-red-400/50 bg-gradient-to-br from-red-50 via-rose-50 to-red-100 dark:from-red-950/20 dark:via-rose-950/20 dark:to-red-900/20 shadow-lg">
+                          <div className="relative p-5">
+                            <Medal className="absolute top-3 right-3 w-6 h-6 text-red-400/30" />
+                            <div className="flex items-center gap-4">
+                              <div className="relative flex-shrink-0">
+                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center shadow-md ring-2 ring-red-300/50">
+                                  <Crown className="w-8 h-8 text-red-900" />
+                                </div>
+                                <div className="absolute -top-1 -right-1 bg-red-500 text-red-900 rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                  1
+                                </div>
                               </div>
-                              <div className="absolute -top-2 -right-2 bg-red-500 text-red-900 rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm shadow-md">
-                                1
-                              </div>
-                            </div>
-                            <div className="flex-1 text-center md:text-left">
-                              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                                <span className="text-3xl md:text-4xl">🛡️</span>
-                                <Trophy className="w-6 h-6 text-red-600" />
-                                <h3 className="text-2xl md:text-3xl font-bold text-red-900 dark:text-red-400">
-                                  DM Kralı
-                                </h3>
-                              </div>
-                              <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                                {sortedPlayers[0].teamLogo && (
-                                  <img 
-                                    src={sortedPlayers[0].teamLogo} 
-                                    alt={sortedPlayers[0].teamName || ""} 
-                                    className="w-12 h-12 object-contain"
-                                  />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  {sortedPlayers[0].teamLogo && (
+                                    <img 
+                                      src={sortedPlayers[0].teamLogo} 
+                                      alt={sortedPlayers[0].teamName || ""} 
+                                      className="w-6 h-6 object-contain flex-shrink-0"
+                                    />
+                                  )}
+                                  <h3 className="text-xl font-bold text-foreground truncate">
+                                    {sortedPlayers[0].username}
+                                  </h3>
+                                </div>
+                                {sortedPlayers[0].teamName && (
+                                  <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[0].teamName}</p>
                                 )}
-                                <h2 className="text-xl font-bold text-foreground mb-2">
-                                  {sortedPlayers[0].username}
-                                </h2>
-                              </div>
-                              {sortedPlayers[0].teamName && (
-                                <p className="text-sm text-muted-foreground mb-2 text-center md:text-left">{sortedPlayers[0].teamName}</p>
-                              )}
-                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
-                                <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
-                                  <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                                    <span>🛡️</span> DM
-                                  </div>
-                                  <div className="text-2xl font-bold text-red-700 dark:text-red-400">
-                                    {sortedPlayers[0].totalDm}
-                                  </div>
+                                <div className="text-2xl font-bold text-red-700 dark:text-red-400 flex items-center gap-1">
+                                  <span>🛡️</span> {sortedPlayers[0].totalDm} DM
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </Card>
-                    )}
-                    {(sortedPlayers[1] || sortedPlayers[2]) && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        </Card>
+                      )}
+
+                      {/* 2nd Place */}
+                      {sortedPlayers[1] && (
                         {sortedPlayers[1] && (
                           <Card className="overflow-hidden border-2 border-gray-300/50 bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 dark:from-gray-900/30 dark:via-slate-900/30 dark:to-gray-800/30 shadow-lg">
                             <div className="relative p-5">
@@ -1563,45 +1542,48 @@ export default function LeaguePage() {
                             </div>
                           </Card>
                         )}
-                        {sortedPlayers[2] && (
-                          <Card className="overflow-hidden border-2 border-amber-700/50 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-amber-900/20 shadow-lg">
-                            <div className="relative p-5">
-                              <Medal className="absolute top-3 right-3 w-6 h-6 text-amber-600/30" />
-                              <div className="flex items-center gap-4">
-                                <div className="relative flex-shrink-0">
-                                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center shadow-md ring-2 ring-amber-500/50">
-                                    <Medal className="w-8 h-8 text-amber-100" />
-                                  </div>
-                                  <div className="absolute -top-1 -right-1 bg-amber-700 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
-                                    3
-                                  </div>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    {sortedPlayers[2].teamLogo && (
-                                      <img 
-                                        src={sortedPlayers[2].teamLogo} 
-                                        alt={sortedPlayers[2].teamName || ""} 
-                                        className="w-6 h-6 object-contain flex-shrink-0"
-                                      />
-                                    )}
-                                    <h3 className="text-xl font-bold text-foreground truncate">
-                                      {sortedPlayers[2].username}
-                                    </h3>
-                                  </div>
-                                  {sortedPlayers[2].teamName && (
-                                    <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
-                                  )}
-                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
-                                    <span>🛡️</span> {sortedPlayers[2].totalDm} DM
-                                  </div>
-                                </div>
+                    </div>
+
+                    {/* 3rd Place */}
+                    {sortedPlayers[2] && (
+                      <Card className="overflow-hidden border-2 border-amber-700/50 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-amber-900/20 shadow-lg">
+                        <div className="relative p-5">
+                          <Medal className="absolute top-3 right-3 w-6 h-6 text-amber-600/30" />
+                          <div className="flex items-center gap-4">
+                            <div className="relative flex-shrink-0">
+                              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center shadow-md ring-2 ring-amber-500/50">
+                                <Medal className="w-8 h-8 text-amber-100" />
+                              </div>
+                              <div className="absolute -top-1 -right-1 bg-amber-700 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                3
                               </div>
                             </div>
-                          </Card>
-                        )}
-                      </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                {sortedPlayers[2].teamLogo && (
+                                  <img 
+                                    src={sortedPlayers[2].teamLogo} 
+                                    alt={sortedPlayers[2].teamName || ""} 
+                                    className="w-6 h-6 object-contain flex-shrink-0"
+                                  />
+                                )}
+                                <h3 className="text-xl font-bold text-foreground truncate">
+                                  {sortedPlayers[2].username}
+                                </h3>
+                              </div>
+                              {sortedPlayers[2].teamName && (
+                                <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
+                              )}
+                              <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                                <span>🛡️</span> {sortedPlayers[2].totalDm} DM
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
                     )}
+
+                    {/* Rest of the players */}
                     {sortedPlayers.length > 3 && (
                       <Card className="overflow-hidden">
                         <CardHeader>
@@ -1677,60 +1659,49 @@ export default function LeaguePage() {
 
                 return (
                   <div className="space-y-6">
-                    {sortedPlayers[0] && (
-                      <Card className="overflow-hidden border-2 border-purple-400/50 bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100 dark:from-purple-950/20 dark:via-violet-950/20 dark:to-purple-900/20 shadow-xl">
-                        <div className="relative p-6 md:p-8">
-                          <Sparkles className="absolute top-4 right-4 w-8 h-8 text-purple-500/30 animate-pulse" />
-                          <Star className="absolute top-6 right-8 w-4 h-4 text-purple-400/40 animate-pulse" style={{ animationDelay: '0.5s' }} />
-                          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                            <div className="relative flex-shrink-0">
-                              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-purple-400 to-violet-500 flex items-center justify-center shadow-lg ring-4 ring-purple-300/50">
-                                <Crown className="w-12 h-12 md:w-16 md:h-16 text-purple-900" />
+                    {/* Top 3 Places */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* 1st Place */}
+                      {sortedPlayers[0] && (
+                        <Card className="overflow-hidden border-2 border-purple-400/50 bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100 dark:from-purple-950/20 dark:via-violet-950/20 dark:to-purple-900/20 shadow-lg">
+                          <div className="relative p-5">
+                            <Medal className="absolute top-3 right-3 w-6 h-6 text-purple-400/30" />
+                            <div className="flex items-center gap-4">
+                              <div className="relative flex-shrink-0">
+                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-violet-500 flex items-center justify-center shadow-md ring-2 ring-purple-300/50">
+                                  <Crown className="w-8 h-8 text-purple-900" />
+                                </div>
+                                <div className="absolute -top-1 -right-1 bg-purple-500 text-purple-900 rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                  1
+                                </div>
                               </div>
-                              <div className="absolute -top-2 -right-2 bg-purple-500 text-purple-900 rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm shadow-md">
-                                1
-                              </div>
-                            </div>
-                            <div className="flex-1 text-center md:text-left">
-                              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                                <span className="text-3xl md:text-4xl">🧤</span>
-                                <Trophy className="w-6 h-6 text-purple-600" />
-                                <h3 className="text-2xl md:text-3xl font-bold text-purple-900 dark:text-purple-400">
-                                  CS Kralı
-                                </h3>
-                              </div>
-                              <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                                {sortedPlayers[0].teamLogo && (
-                                  <img 
-                                    src={sortedPlayers[0].teamLogo} 
-                                    alt={sortedPlayers[0].teamName || ""} 
-                                    className="w-12 h-12 object-contain"
-                                  />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  {sortedPlayers[0].teamLogo && (
+                                    <img 
+                                      src={sortedPlayers[0].teamLogo} 
+                                      alt={sortedPlayers[0].teamName || ""} 
+                                      className="w-6 h-6 object-contain flex-shrink-0"
+                                    />
+                                  )}
+                                  <h3 className="text-xl font-bold text-foreground truncate">
+                                    {sortedPlayers[0].username}
+                                  </h3>
+                                </div>
+                                {sortedPlayers[0].teamName && (
+                                  <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[0].teamName}</p>
                                 )}
-                                <h2 className="text-xl font-bold text-foreground mb-2">
-                                  {sortedPlayers[0].username}
-                                </h2>
-                              </div>
-                              {sortedPlayers[0].teamName && (
-                                <p className="text-sm text-muted-foreground mb-2 text-center md:text-left">{sortedPlayers[0].teamName}</p>
-                              )}
-                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-4">
-                                <div className="bg-white/60 dark:bg-black/20 rounded-lg px-4 py-2">
-                                  <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                                    <span>🧤</span> CS
-                                  </div>
-                                  <div className="text-2xl font-bold text-purple-700 dark:text-purple-400">
-                                    {sortedPlayers[0].totalCleanSheets}
-                                  </div>
+                                <div className="text-2xl font-bold text-purple-700 dark:text-purple-400 flex items-center gap-1">
+                                  <span>🧤</span> {sortedPlayers[0].totalCleanSheets} CS
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </Card>
-                    )}
-                    {(sortedPlayers[1] || sortedPlayers[2]) && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        </Card>
+                      )}
+
+                      {/* 2nd Place */}
+                      {sortedPlayers[1] && (
                         {sortedPlayers[1] && (
                           <Card className="overflow-hidden border-2 border-gray-300/50 bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 dark:from-gray-900/30 dark:via-slate-900/30 dark:to-gray-800/30 shadow-lg">
                             <div className="relative p-5">
@@ -1805,13 +1776,53 @@ export default function LeaguePage() {
                             </div>
                           </Card>
                         )}
-                      </div>
+                    </div>
+
+                    {/* 3rd Place */}
+                    {sortedPlayers[2] && (
+                      <Card className="overflow-hidden border-2 border-amber-700/50 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-amber-900/20 shadow-lg">
+                        <div className="relative p-5">
+                          <Medal className="absolute top-3 right-3 w-6 h-6 text-amber-600/30" />
+                          <div className="flex items-center gap-4">
+                            <div className="relative flex-shrink-0">
+                              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center shadow-md ring-2 ring-amber-500/50">
+                                <Medal className="w-8 h-8 text-amber-100" />
+                              </div>
+                              <div className="absolute -top-1 -right-1 bg-amber-700 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                3
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                {sortedPlayers[2].teamLogo && (
+                                  <img 
+                                    src={sortedPlayers[2].teamLogo} 
+                                    alt={sortedPlayers[2].teamName || ""} 
+                                    className="w-6 h-6 object-contain flex-shrink-0"
+                                  />
+                                )}
+                                <h3 className="text-xl font-bold text-foreground truncate">
+                                  {sortedPlayers[2].username}
+                                </h3>
+                              </div>
+                              {sortedPlayers[2].teamName && (
+                                <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
+                              )}
+                              <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                                <span>🧤</span> {sortedPlayers[2].totalCleanSheets} CS
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
                     )}
+
+                    {/* Rest of the players */}
                     {sortedPlayers.length > 3 && (
                       <Card className="overflow-hidden">
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
-                            <span>🥅</span> Diğer Sıralamalar
+                            <span>🧤</span> Diğer Sıralamalar
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
