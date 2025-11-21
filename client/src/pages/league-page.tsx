@@ -830,7 +830,7 @@ export default function LeaguePage() {
                 return (
                   <div className="space-y-6">
                     {/* Top 3 Places */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                       {/* 1st Place */}
                       {sortedPlayers[0] && (
                         <Card className="overflow-hidden border-2 border-yellow-400/50 bg-gradient-to-br from-yellow-50 via-amber-50 to-yellow-100 dark:from-yellow-950/20 dark:via-amber-950/20 dark:to-yellow-900/20 shadow-lg">
@@ -912,48 +912,48 @@ export default function LeaguePage() {
                           </div>
                         </Card>
                       )}
-                    </div>
 
-                    {/* 3rd Place */}
-                    {sortedPlayers[2] && (
-                      <Card className="overflow-hidden border-2 border-amber-700/50 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-amber-900/20 shadow-lg">
-                        <div className="relative p-5">
-                          <Medal className="absolute top-3 right-3 w-6 h-6 text-amber-600/30" />
-                          <div className="flex items-center gap-4">
-                            <div className="relative flex-shrink-0">
-                              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center shadow-md ring-2 ring-amber-500/50">
-                                <Medal className="w-8 h-8 text-amber-100" />
+                      {/* 3rd Place */}
+                      {sortedPlayers[2] && (
+                        <Card className="overflow-hidden border-2 border-amber-700/50 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-amber-900/20 shadow-lg">
+                          <div className="relative p-5">
+                            <Medal className="absolute top-3 right-3 w-6 h-6 text-amber-600/30" />
+                            <div className="flex items-center gap-4">
+                              <div className="relative flex-shrink-0">
+                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center shadow-md ring-2 ring-amber-500/50">
+                                  <Medal className="w-8 h-8 text-amber-100" />
+                                </div>
+                                <div className="absolute -top-1 -right-1 bg-amber-700 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
+                                  3
+                                </div>
                               </div>
-                              <div className="absolute -top-1 -right-1 bg-amber-700 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
-                                3
-                              </div>
-                            </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    {sortedPlayers[2].teamLogo && (
-                                      <img 
-                                        src={sortedPlayers[2].teamLogo} 
-                                        alt={sortedPlayers[2].teamName || ""} 
-                                        className="w-8 h-8 object-contain flex-shrink-0 border border-muted rounded"
-                                      />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-2">
+                                  {sortedPlayers[2].teamLogo && (
+                                    <img 
+                                      src={sortedPlayers[2].teamLogo} 
+                                      alt={sortedPlayers[2].teamName || ""} 
+                                      className="w-8 h-8 object-contain flex-shrink-0 border border-muted rounded"
+                                    />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="text-lg font-extrabold text-foreground truncate mb-0.5">
+                                      {sortedPlayers[2].username}
+                                    </h3>
+                                    {sortedPlayers[2].teamName && (
+                                      <p className="text-xs font-semibold text-muted-foreground truncate">{sortedPlayers[2].teamName}</p>
                                     )}
-                                    <div className="flex-1 min-w-0">
-                                      <h3 className="text-lg font-extrabold text-foreground truncate mb-0.5">
-                                        {sortedPlayers[2].username}
-                                      </h3>
-                                      {sortedPlayers[2].teamName && (
-                                        <p className="text-xs font-semibold text-muted-foreground truncate">{sortedPlayers[2].teamName}</p>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
-                                    <span>⚽</span> {sortedPlayers[2].totalGoals} Gol
                                   </div>
                                 </div>
+                                <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                                  <span>⚽</span> {sortedPlayers[2].totalGoals} Gol
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </Card>
-                    )}
+                        </Card>
+                      )}
+                    </div>
 
                     {/* Rest of the players */}
                     {sortedPlayers.length > 3 && (
@@ -1037,7 +1037,7 @@ export default function LeaguePage() {
                 return (
                   <div className="space-y-6">
                     {/* Top 3 Places */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                       {/* 1st Place */}
                       {sortedPlayers[0] && (
                         <Card className="overflow-hidden border-2 border-blue-400/50 bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100 dark:from-blue-950/20 dark:via-cyan-950/20 dark:to-blue-900/20 shadow-lg">
@@ -1237,7 +1237,7 @@ export default function LeaguePage() {
                 return (
                   <div className="space-y-6">
                     {/* Top 3 Places */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                       {/* 1st Place */}
                       {sortedPlayers[0] && (
                         <Card className="overflow-hidden border-2 border-green-400/50 bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 dark:from-green-950/20 dark:via-emerald-950/20 dark:to-green-900/20 shadow-lg">
@@ -1437,7 +1437,7 @@ export default function LeaguePage() {
                 return (
                   <div className="space-y-6">
                     {/* Top 3 Places */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                       {/* 1st Place */}
                       {sortedPlayers[0] && (
                         <Card className="overflow-hidden border-2 border-red-400/50 bg-gradient-to-br from-red-50 via-rose-50 to-red-100 dark:from-red-950/20 dark:via-rose-950/20 dark:to-red-900/20 shadow-lg">
@@ -1639,7 +1639,7 @@ export default function LeaguePage() {
                 return (
                   <div className="space-y-6">
                     {/* Top 3 Places */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                       {/* 1st Place */}
                       {sortedPlayers[0] && (
                         <Card className="overflow-hidden border-2 border-purple-400/50 bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100 dark:from-purple-950/20 dark:via-violet-950/20 dark:to-purple-900/20 shadow-lg">
