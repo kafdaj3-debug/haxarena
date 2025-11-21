@@ -674,15 +674,19 @@ export default function ManagementPanelPage() {
     enabled: !!user?.isSuperAdmin,
   });
 
-  const { data: playerStats } = useQuery<any[]>({
+  const { data: playerStats, isLoading: playerStatsLoading, error: playerStatsError } = useQuery<any[]>({
     queryKey: ["/api/league/fixtures", selectedFixtureForStats, "stats"],
     queryFn: async () => {
       if (!selectedFixtureForStats) return [];
       const res = await fetch(`/api/league/fixtures/${selectedFixtureForStats}/stats`);
-      if (!res.ok) throw new Error("Failed to fetch stats");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to fetch stats");
+      }
       return res.json();
     },
     enabled: !!selectedFixtureForStats,
+    retry: 1,
   });
 
   const createPlayerStatsMutation = useMutation({
@@ -2598,8 +2602,15 @@ export default function ManagementPanelPage() {
                     {/* İstatistikler Listesi */}
                     <div className="space-y-4 border-t pt-4">
                       <h3 className="font-semibold">Maç İstatistikleri</h3>
+                      {playerStatsLoading ? (
+                        <p className="text-center text-muted-foreground py-4">Yükleniyor...</p>
+                      ) : playerStatsError ? (
+                        <p className="text-center text-destructive py-4">
+                          Hata: {playerStatsError instanceof Error ? playerStatsError.message : "İstatistikler yüklenemedi"}
+                        </p>
+                      ) : (
                       <div className="space-y-2">
-                        {playerStats?.map((stat: any) => (
+                        {playerStats && playerStats.length > 0 ? playerStats.map((stat: any) => (
                           <div key={stat.id} className="space-y-2">
                             <div className="p-3 border rounded-lg">
                               <div className="flex items-center justify-between mb-2">
@@ -2784,11 +2795,11 @@ export default function ManagementPanelPage() {
                               </div>
                             )}
                           </div>
-                        ))}
-                        {!playerStats?.length && (
+                        )) : (
                           <p className="text-center text-muted-foreground py-4">Bu maç için henüz istatistik eklenmedi</p>
                         )}
                       </div>
+                      )}
                     </div>
                   </>
                 )}
