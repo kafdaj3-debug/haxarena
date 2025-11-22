@@ -1561,45 +1561,6 @@ export default function LeaguePage() {
                       </Card>
                     )}
 
-                    {/* 3rd Place */}
-                    {sortedPlayers[2] && (
-                      <Card className="overflow-hidden border-2 border-amber-700/50 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-amber-900/20 shadow-lg">
-                        <div className="relative p-5">
-                          <Medal className="absolute top-3 right-3 w-6 h-6 text-amber-600/30" />
-                          <div className="flex items-center gap-4">
-                            <div className="relative flex-shrink-0">
-                              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center shadow-md ring-2 ring-amber-500/50">
-                                <Medal className="w-8 h-8 text-amber-100" />
-                              </div>
-                              <div className="absolute -top-1 -right-1 bg-amber-700 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shadow">
-                                3
-                              </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                {sortedPlayers[2].teamLogo && (
-                                  <img 
-                                    src={sortedPlayers[2].teamLogo} 
-                                    alt={sortedPlayers[2].teamName || ""} 
-                                    className="w-6 h-6 object-contain flex-shrink-0"
-                                  />
-                                )}
-                                <h3 className="text-xl font-bold text-foreground truncate">
-                                  {sortedPlayers[2].username}
-                                </h3>
-                              </div>
-                              {sortedPlayers[2].teamName && (
-                                <p className="text-xs text-muted-foreground mb-1 truncate">{sortedPlayers[2].teamName}</p>
-                              )}
-                              <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
-                                <span>🧤</span> {sortedPlayers[2].totalCleanSheets} CS
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </Card>
-                    )}
-
                     {/* Rest of the players */}
                     {sortedPlayers.length > 3 && (
                       <Card className="overflow-hidden">
