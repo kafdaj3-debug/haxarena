@@ -17,15 +17,15 @@ export default function HomePage() {
   const allRooms = [
     {
       matchName: "Galatasaray vs Fenerbahçe",
-      link: "https://www.haxball.com/play?c=IYzJzBiJHEs"
+      link: "https://www.haxball.com/play?c=BOJ_dW36Gb0"
     },
     {
       matchName: "Karşıyaka vs Göztepe",
-      link: "https://www.haxball.com/play?c=ypq2XywtUqI"
+      link: "https://www.haxball.com/play?c=sqKvKaQJhJU"
     },
     {
       matchName: "Kocaelispor vs Gaziantepspor",
-      link: "https://www.haxball.com/play?c=cRIFZeVynxA"
+      link: "https://www.haxball.com/play?c=5i3USmPa7eI"
     }
   ];
 

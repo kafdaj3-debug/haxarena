@@ -10,19 +10,19 @@ export default function ActiveRoomsPage() {
     {
       id: 1,
       matchName: "Galatasaray vs Fenerbahçe",
-      link: "https://www.haxball.com/play?c=IYzJzBiJHEs",
+      link: "https://www.haxball.com/play?c=BOJ_dW36Gb0",
       isActive: true
     },
     {
       id: 2,
       matchName: "Karşıyaka vs Göztepe",
-      link: "https://www.haxball.com/play?c=ypq2XywtUqI",
+      link: "https://www.haxball.com/play?c=sqKvKaQJhJU",
       isActive: true
     },
     {
       id: 3,
       matchName: "Kocaelispor vs Gaziantepspor",
-      link: "https://www.haxball.com/play?c=cRIFZeVynxA",
+      link: "https://www.haxball.com/play?c=5i3USmPa7eI",
       isActive: true
     }
   ]);
