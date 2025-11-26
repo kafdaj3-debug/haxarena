@@ -1640,9 +1640,19 @@ export class DBStorage implements IStorage {
     });
     
     // Add playerName-based stats (only if not already in leaderboard by username)
+    // Normalize function for case-insensitive and trimmed comparison
+    const normalizeName = (name: string | null | undefined): string => {
+      return (name || '').trim().toLowerCase();
+    };
+    
     leaderboardByPlayerName.forEach(row => {
+      const normalizedPlayerName = normalizeName(row.playerName);
+      
       // Check if this playerName already exists in combinedLeaderboard (by username)
-      const existingIndex = combinedLeaderboard.findIndex(p => p.username === row.playerName);
+      // Use case-insensitive and trimmed comparison
+      const existingIndex = combinedLeaderboard.findIndex(p => 
+        normalizeName(p.username) === normalizedPlayerName && normalizedPlayerName !== ''
+      );
       
       if (existingIndex >= 0) {
         // Merge stats if player exists
@@ -1663,22 +1673,37 @@ export class DBStorage implements IStorage {
           }
         }
       } else {
-        // Add new player
-        const teamId = playerNameTeamMap.get(row.playerName || '') || null;
-        const team = teamId ? teamMap.get(teamId) : null;
+        // Check if there's a playerName entry with the same normalized name already in the list
+        // (to avoid duplicates when same playerName is added multiple times)
+        const duplicateIndex = combinedLeaderboard.findIndex(p => 
+          !p.userId && normalizeName(p.username) === normalizedPlayerName && normalizedPlayerName !== ''
+        );
         
-        combinedLeaderboard.push({
-          userId: null,
-          username: row.playerName || '',
-          teamId: team?.id || null,
-          teamName: team?.name || null,
-          teamLogo: team?.logo || null,
-          totalGoals: Number(row.totalGoals) || 0,
-          totalAssists: Number(row.totalAssists) || 0,
-          totalDm: Number(row.totalDm) || 0,
-          totalCleanSheets: Number(row.totalCleanSheets) || 0,
-          totalSaves: Number(row.totalSaves) || 0,
-        });
+        if (duplicateIndex >= 0) {
+          // Merge with existing playerName entry
+          combinedLeaderboard[duplicateIndex].totalGoals += Number(row.totalGoals) || 0;
+          combinedLeaderboard[duplicateIndex].totalAssists += Number(row.totalAssists) || 0;
+          combinedLeaderboard[duplicateIndex].totalDm += Number(row.totalDm) || 0;
+          combinedLeaderboard[duplicateIndex].totalCleanSheets += Number(row.totalCleanSheets) || 0;
+          combinedLeaderboard[duplicateIndex].totalSaves += Number(row.totalSaves) || 0;
+        } else {
+          // Add new player
+          const teamId = playerNameTeamMap.get(row.playerName || '') || null;
+          const team = teamId ? teamMap.get(teamId) : null;
+          
+          combinedLeaderboard.push({
+            userId: null,
+            username: row.playerName || '',
+            teamId: team?.id || null,
+            teamName: team?.name || null,
+            teamLogo: team?.logo || null,
+            totalGoals: Number(row.totalGoals) || 0,
+            totalAssists: Number(row.totalAssists) || 0,
+            totalDm: Number(row.totalDm) || 0,
+            totalCleanSheets: Number(row.totalCleanSheets) || 0,
+            totalSaves: Number(row.totalSaves) || 0,
+          });
+        }
       }
     });
     
