@@ -1528,37 +1528,91 @@ export class DBStorage implements IStorage {
   async getPlayerStatsLeaderboard(): Promise<Array<{ userId: string | null; username: string; teamId: string | null; teamName: string | null; teamLogo: string | null; totalGoals: number; totalAssists: number; totalDm: number; totalCleanSheets: number; totalSaves: number }>> {
     const { sql, sum } = await import("drizzle-orm");
     
-    // Get aggregated stats per user (by userId)
-    const leaderboardByUserId = await db
+    // Normalize function for case-insensitive and trimmed comparison
+    const normalizeName = (name: string | null | undefined): string => {
+      return (name || '').trim().toLowerCase();
+    };
+    
+    // Get all player stats with user info - we'll group by normalized name
+    const allStats = await db
       .select({
         userId: playerStats.userId,
         username: users.username,
-        totalGoals: sum(playerStats.goals),
-        totalAssists: sum(playerStats.assists),
-        totalDm: sum(playerStats.dm),
-        totalCleanSheets: sum(playerStats.cleanSheets),
-        totalSaves: sum(playerStats.saves),
-      })
-      .from(playerStats)
-      .leftJoin(users, eq(playerStats.userId, users.id))
-      .where(sql`${playerStats.userId} IS NOT NULL`)
-      .groupBy(playerStats.userId, users.username)
-      .orderBy(desc(sum(playerStats.goals)));
-    
-    // Get aggregated stats per player (by playerName - for stats without userId)
-    const leaderboardByPlayerName = await db
-      .select({
         playerName: playerStats.playerName,
-        totalGoals: sum(playerStats.goals),
-        totalAssists: sum(playerStats.assists),
-        totalDm: sum(playerStats.dm),
-        totalCleanSheets: sum(playerStats.cleanSheets),
-        totalSaves: sum(playerStats.saves),
+        teamId: playerStats.teamId,
+        goals: playerStats.goals,
+        assists: playerStats.assists,
+        dm: playerStats.dm,
+        cleanSheets: playerStats.cleanSheets,
+        saves: playerStats.saves,
+        createdAt: playerStats.createdAt,
       })
       .from(playerStats)
-      .where(sql`${playerStats.playerName} IS NOT NULL AND ${playerStats.userId} IS NULL`)
-      .groupBy(playerStats.playerName)
-      .orderBy(desc(sum(playerStats.goals)));
+      .leftJoin(users, eq(playerStats.userId, users.id));
+    
+    // Group stats by normalized name (username or playerName)
+    const statsByNormalizedName = new Map<string, {
+      userId: string | null;
+      username: string;
+      playerName: string | null;
+      teamId: string | null;
+      totalGoals: number;
+      totalAssists: number;
+      totalDm: number;
+      totalCleanSheets: number;
+      totalSaves: number;
+      latestCreatedAt: Date;
+    }>();
+    
+    allStats.forEach(stat => {
+      // Determine the normalized name to use for grouping
+      const nameToUse = stat.username || stat.playerName || '';
+      const normalizedName = normalizeName(nameToUse);
+      
+      if (!normalizedName) return; // Skip if no name
+      
+      const existing = statsByNormalizedName.get(normalizedName);
+      
+      if (existing) {
+        // Merge stats
+        existing.totalGoals += Number(stat.goals) || 0;
+        existing.totalAssists += Number(stat.assists) || 0;
+        existing.totalDm += Number(stat.dm) || 0;
+        existing.totalCleanSheets += Number(stat.cleanSheets) || 0;
+        existing.totalSaves += Number(stat.saves) || 0;
+        
+        // Prefer userId if available
+        if (stat.userId && !existing.userId) {
+          existing.userId = stat.userId;
+          existing.username = stat.username || stat.playerName || '';
+        }
+        
+        // Prefer username over playerName
+        if (stat.username && !existing.username) {
+          existing.username = stat.username;
+        }
+        
+        // Update latest team
+        if (stat.createdAt && (!existing.latestCreatedAt || stat.createdAt > existing.latestCreatedAt)) {
+          existing.teamId = stat.teamId;
+          existing.latestCreatedAt = stat.createdAt;
+        }
+      } else {
+        // Create new entry
+        statsByNormalizedName.set(normalizedName, {
+          userId: stat.userId,
+          username: stat.username || stat.playerName || '',
+          playerName: stat.playerName,
+          teamId: stat.teamId,
+          totalGoals: Number(stat.goals) || 0,
+          totalAssists: Number(stat.assists) || 0,
+          totalDm: Number(stat.dm) || 0,
+          totalCleanSheets: Number(stat.cleanSheets) || 0,
+          totalSaves: Number(stat.saves) || 0,
+          latestCreatedAt: stat.createdAt || new Date(),
+        });
+      }
+    });
     
     // Get all unique team IDs from all stats
     const allTeamIds = await db
@@ -1575,136 +1629,25 @@ export class DBStorage implements IStorage {
     
     const teamMap = new Map(teams.map(team => [team.id, team]));
     
-    // Get latest team for each userId
-    const userIds = leaderboardByUserId.map(row => row.userId).filter((id): id is string => id !== null);
-    const userTeamMap = new Map<string, string | null>();
-    
-    if (userIds.length > 0) {
-      const latestTeamsByUserId = await db
-        .select({
-          userId: playerStats.userId,
-          teamId: playerStats.teamId,
-        })
-        .from(playerStats)
-        .where(inArray(playerStats.userId, userIds))
-        .orderBy(desc(playerStats.createdAt));
-      
-      latestTeamsByUserId.forEach(stat => {
-        if (stat.userId && !userTeamMap.has(stat.userId)) {
-          userTeamMap.set(stat.userId, stat.teamId);
-        }
-      });
-    }
-    
-    // Get latest team for each playerName
-    const playerNames = leaderboardByPlayerName.map(row => row.playerName).filter((name): name is string => name !== null && name !== '');
-    const playerNameTeamMap = new Map<string, string | null>();
-    
-    if (playerNames.length > 0) {
-      const latestTeamsByPlayerName = await db
-        .select({
-          playerName: playerStats.playerName,
-          teamId: playerStats.teamId,
-        })
-        .from(playerStats)
-        .where(inArray(playerStats.playerName, playerNames))
-        .orderBy(desc(playerStats.createdAt));
-      
-      latestTeamsByPlayerName.forEach(stat => {
-        if (stat.playerName && !playerNameTeamMap.has(stat.playerName)) {
-          playerNameTeamMap.set(stat.playerName, stat.teamId);
-        }
-      });
-    }
-    
-    // Combine both leaderboards
+    // Build combined leaderboard from normalized stats
     const combinedLeaderboard: Array<{ userId: string | null; username: string; teamId: string | null; teamName: string | null; teamLogo: string | null; totalGoals: number; totalAssists: number; totalDm: number; totalCleanSheets: number; totalSaves: number }> = [];
     
-    // Add userId-based stats
-    leaderboardByUserId.forEach(row => {
-      const teamId = row.userId ? userTeamMap.get(row.userId) || null : null;
-      const team = teamId ? teamMap.get(teamId) : null;
+    // Convert statsByNormalizedName to combinedLeaderboard format
+    statsByNormalizedName.forEach((stats, normalizedName) => {
+      const team = stats.teamId ? teamMap.get(stats.teamId) : null;
       
       combinedLeaderboard.push({
-        userId: row.userId,
-        username: row.username || '',
+        userId: stats.userId,
+        username: stats.username,
         teamId: team?.id || null,
         teamName: team?.name || null,
         teamLogo: team?.logo || null,
-        totalGoals: Number(row.totalGoals) || 0,
-        totalAssists: Number(row.totalAssists) || 0,
-        totalDm: Number(row.totalDm) || 0,
-        totalCleanSheets: Number(row.totalCleanSheets) || 0,
-        totalSaves: Number(row.totalSaves) || 0,
+        totalGoals: stats.totalGoals,
+        totalAssists: stats.totalAssists,
+        totalDm: stats.totalDm,
+        totalCleanSheets: stats.totalCleanSheets,
+        totalSaves: stats.totalSaves,
       });
-    });
-    
-    // Add playerName-based stats (only if not already in leaderboard by username)
-    // Normalize function for case-insensitive and trimmed comparison
-    const normalizeName = (name: string | null | undefined): string => {
-      return (name || '').trim().toLowerCase();
-    };
-    
-    leaderboardByPlayerName.forEach(row => {
-      const normalizedPlayerName = normalizeName(row.playerName);
-      
-      // Check if this playerName already exists in combinedLeaderboard (by username)
-      // Use case-insensitive and trimmed comparison
-      const existingIndex = combinedLeaderboard.findIndex(p => 
-        normalizeName(p.username) === normalizedPlayerName && normalizedPlayerName !== ''
-      );
-      
-      if (existingIndex >= 0) {
-        // Merge stats if player exists
-        combinedLeaderboard[existingIndex].totalGoals += Number(row.totalGoals) || 0;
-        combinedLeaderboard[existingIndex].totalAssists += Number(row.totalAssists) || 0;
-        combinedLeaderboard[existingIndex].totalDm += Number(row.totalDm) || 0;
-        combinedLeaderboard[existingIndex].totalCleanSheets += Number(row.totalCleanSheets) || 0;
-        combinedLeaderboard[existingIndex].totalSaves += Number(row.totalSaves) || 0;
-        
-        // Update team if not set or if this is more recent
-        if (!combinedLeaderboard[existingIndex].teamId) {
-          const teamId = playerNameTeamMap.get(row.playerName || '') || null;
-          const team = teamId ? teamMap.get(teamId) : null;
-          if (team) {
-            combinedLeaderboard[existingIndex].teamId = team.id;
-            combinedLeaderboard[existingIndex].teamName = team.name;
-            combinedLeaderboard[existingIndex].teamLogo = team.logo;
-          }
-        }
-      } else {
-        // Check if there's a playerName entry with the same normalized name already in the list
-        // (to avoid duplicates when same playerName is added multiple times)
-        const duplicateIndex = combinedLeaderboard.findIndex(p => 
-          !p.userId && normalizeName(p.username) === normalizedPlayerName && normalizedPlayerName !== ''
-        );
-        
-        if (duplicateIndex >= 0) {
-          // Merge with existing playerName entry
-          combinedLeaderboard[duplicateIndex].totalGoals += Number(row.totalGoals) || 0;
-          combinedLeaderboard[duplicateIndex].totalAssists += Number(row.totalAssists) || 0;
-          combinedLeaderboard[duplicateIndex].totalDm += Number(row.totalDm) || 0;
-          combinedLeaderboard[duplicateIndex].totalCleanSheets += Number(row.totalCleanSheets) || 0;
-          combinedLeaderboard[duplicateIndex].totalSaves += Number(row.totalSaves) || 0;
-        } else {
-          // Add new player
-          const teamId = playerNameTeamMap.get(row.playerName || '') || null;
-          const team = teamId ? teamMap.get(teamId) : null;
-          
-          combinedLeaderboard.push({
-            userId: null,
-            username: row.playerName || '',
-            teamId: team?.id || null,
-            teamName: team?.name || null,
-            teamLogo: team?.logo || null,
-            totalGoals: Number(row.totalGoals) || 0,
-            totalAssists: Number(row.totalAssists) || 0,
-            totalDm: Number(row.totalDm) || 0,
-            totalCleanSheets: Number(row.totalCleanSheets) || 0,
-            totalSaves: Number(row.totalSaves) || 0,
-          });
-        }
-      }
     });
     
     // Sort by totalGoals descending
