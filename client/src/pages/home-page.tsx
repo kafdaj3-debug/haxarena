@@ -153,98 +153,210 @@ export default function HomePage() {
                 {/* Ana Başlık - Sayfa 1 */}
                 <div className="relative mb-6">
                   <div className="mb-3">
-                    <span className="inline-block bg-orange-600 dark:bg-orange-700 text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
-                      Özel Haber
+                    <span className="inline-block bg-blue-600 dark:bg-blue-700 text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
+                      Haftanın Komedisi
                     </span>
                   </div>
-                  <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-3 leading-tight text-orange-700 dark:text-orange-400" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    DESERT RAİN'DE ÇÖL FIRTINASI: 8 YEDİLER, BİR DE KENDİ ARALARINDA KAPIŞTILAR!
+                  <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-blue-700 dark:text-blue-400" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    🗞 HAFTANIN FUTBOL KOMEDİSİ: GOL YAĞMURU, DRAM, MUTSUZ YILDIZLAR VE BİR KOVA KALECİ!
                   </h1>
-                  <div className="w-full h-48 md:h-64 bg-gradient-to-br from-orange-600/20 via-red-500/20 to-yellow-500/20 dark:from-orange-900/40 dark:via-red-900/30 dark:to-yellow-900/30 rounded-lg mb-4 overflow-hidden relative border-2 border-orange-800/30 dark:border-orange-600/40">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center p-8">
-                        <div className="text-5xl md:text-7xl mb-4">⚔️</div>
-                        <p className="text-lg md:text-xl font-serif text-black/90 dark:text-amber-100/90 font-bold">
-                          "Kavga ve Gol Yağmuru!"
+                  
+                  {/* Vestel Manisaspor - Ravenclaw Haberi */}
+                  <div className="border-t-2 border-black/20 dark:border-amber-200/20 pt-6 mt-6">
+                    <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4 text-purple-700 dark:text-purple-400" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      ⚡ Vestel Manisaspor 16 – 9 Ravenclaw: "25 Gollü Maçta Defanslar Tatildeydi!"
+                    </h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-6">
+                      <div className="space-y-4">
+                        <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
+                          Vestel Manisaspor resmen "Gol atıyorum, öyle böyle değil!" modunu açtı.
+                        </p>
+                        <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
+                          Takımın gol makinelerinden MADRICHAA tam 5 gol atarken, Min-Jae ise 3 gol + 4 asistle adeta "Ben takımın her şeyi olurum!" dedi.
                         </p>
                       </div>
+                      <div className="space-y-4">
+                        <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
+                          Ravenclaw tarafında ise işler hiç yolunda gitmiyor. 2 haftadır mağlubiyet…
+                        </p>
+                        <div className="bg-red-50 dark:bg-red-950/20 border-l-4 border-red-600 dark:border-red-500 p-4">
+                          <p className="text-base md:text-lg font-bold text-red-800 dark:text-red-300 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                            Ve tabii ki takımın mutsuzluğunun kaynağı:
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                  </div>
-                </div>
 
-                {/* İçerik Kolonları - Sayfa 1 */}
-                <div className="relative mb-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                    <div className="space-y-4">
-                      <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
-                        <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>D</span>
-                        esert Rain'in talihsizlikleri bitmiyor… İki haftadır mağlubiyete abone olan takım, bu hafta Los Infiernos'tan tam 8 tane tokat tadında gol yedi.
-                      </p>
-                      <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
-                        Maçın ortasında ise beklenmedik bir sahne: Specturm ve Machiné birbirine girdi! Tekme, tokat, şemsiye… Her şey var!
-                      </p>
-                      <div className="bg-red-50 dark:bg-red-950/20 border-l-4 border-red-600 dark:border-red-500 p-4 mt-4">
-                        <p className="text-sm md:text-base font-serif text-black/80 dark:text-amber-200/80" style={{ fontFamily: "'Crimson Text', serif" }}>
-                          Specturm sinir katsayısını sıfıra indirip maçı terk etti.
-                        </p>
+                    {/* Alves Dramı Bölümü - Görsel ile */}
+                    <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-950/20 dark:to-pink-950/20 p-6 rounded-lg border-2 border-red-300 dark:border-red-800 mb-6">
+                      <h3 className="text-xl md:text-2xl font-bold mb-4 text-red-800 dark:text-red-300" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        😢 Dramın başrolü: ALVES
+                      </h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                        <div className="space-y-3">
+                          <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
+                            Alves oynamıyor…
+                          </p>
+                          <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
+                            Alves mutsuz…
+                          </p>
+                          <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
+                            Ravenclaw soyunma odası Alves'siz bomboş…
+                          </p>
+                          <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
+                            Tribünler Alves diye ağlıyor…
+                          </p>
+                          <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
+                            Top bile Alves'in yokluğunda sekmiyor…
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-center">
+                          {/* Alves Meme Görseli */}
+                          <div className="relative w-full max-w-md">
+                            <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/40 dark:to-amber-800/40 rounded-lg p-2 border-2 border-amber-300 dark:border-amber-700 shadow-lg overflow-hidden">
+                              {/* Meme görseli - önce dosyadan yüklemeyi dene, yoksa placeholder göster */}
+                              <div className="relative">
+                                <img 
+                                  src="/alves-meme.png" 
+                                  alt="Alves meme - alwés"
+                                  className="w-full h-auto rounded"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    const placeholder = target.parentElement?.querySelector('.meme-placeholder') as HTMLElement;
+                                    if (placeholder) placeholder.style.display = 'block';
+                                  }}
+                                />
+                                {/* CSS ile oluşturulmuş meme placeholder */}
+                                <div className="meme-placeholder hidden">
+                                  {/* Üst kısım - adam */}
+                                  <div className="relative h-48 bg-gradient-to-br from-sky-100 to-sky-200 dark:from-sky-900 dark:to-sky-800 rounded-t overflow-hidden mb-2">
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                      <div className="text-6xl">👤</div>
+                                    </div>
+                                  </div>
+                                  {/* Alt kısım - yeşil arka plan ve X */}
+                                  <div className="bg-green-600 dark:bg-green-800 rounded-b p-6 text-center">
+                                    <div className="bg-white rounded-full w-24 h-24 mx-auto mb-3 flex items-center justify-center border-4 border-black shadow-lg">
+                                      <span className="text-5xl font-black text-black">✗</span>
+                                    </div>
+                                    <p className="text-white text-xl font-bold tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>alwés</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="space-y-4">
-                      <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
-                        Los Infiernos'un piés ORKESTRA ŞEFİ ise yine sazı aldı eline, asistleriyle şov yaptı. "Ben maestroyum kardeşim" bakışıyla sahayı resmen yönetti.
-                      </p>
-                      <div className="bg-orange-50 dark:bg-orange-950/20 border-l-4 border-orange-600 dark:border-orange-500 p-4">
-                        <h3 className="text-lg md:text-xl font-bold text-orange-800 dark:text-orange-300 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          LOS INFIERNOS'TA KIRMIZI ALARM: HEM GOL VAR HEM ALEV
-                        </h3>
-                        <p className="text-sm md:text-base font-serif text-black/80 dark:text-amber-200/80" style={{ fontFamily: "'Crimson Text', serif" }}>
-                          Takım sadece rakipleri değil, istatistik tablolarını da yakıyor. Piés'in asist şovuyla rakip savunmalar psikolojik destek aramaya başladı.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* İkinci Haber - Chelsea */}
-                <div className="relative border-t-2 border-black/20 dark:border-amber-200/20 pt-6 mt-6 mb-6">
-                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-red-700 dark:text-red-400" style={{ fontFamily: "'Playfair Display', serif", lineHeight: '1.1' }}>
-                    CHELSEA'YA GALACTICOS ŞOKU! 3 ATTILAR AMA 7 TANE DE TOPLADILAR
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                    <div className="space-y-4">
-                      <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
-                        Geçen haftanın parlayan yıldızı Chelsea, bu hafta tam anlamıyla yerden topladı topları.
-                      </p>
-                      <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
-                        Galácticos hiç acımadı, 7 tane gümbür gümbür gol yolladı.
-                      </p>
-                    </div>
-                    <div className="space-y-4">
-                      <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
-                        Galácticos'un yıldız topçusu ise Chelsea ağlarını tam 3 kez tıkladı, "Ben buradayım" diye adeta bağırdı.
-                      </p>
-                      <div className="bg-yellow-50 dark:bg-yellow-950/20 border-l-4 border-yellow-600 dark:border-yellow-500 p-4">
+                      
+                      <div className="bg-yellow-50 dark:bg-yellow-950/20 border-l-4 border-yellow-600 dark:border-yellow-500 p-4 mt-4">
                         <p className="text-sm md:text-base font-serif text-black/80 dark:text-amber-200/80 italic" style={{ fontFamily: "'Crimson Text', serif" }}>
-                          Chelsea geçen haftaki şaşalı performansı görünce taraftarlar "Bunlar sahte hesap mıydı?" diye sorgulamaya başladı.
+                          "Alves yokken hayatın ne anlamı var?" — Ravenclaw taraftarının ortak bildirisi
+                        </p>
+                      </div>
+                      
+                      <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90 mt-4" style={{ fontFamily: "'Crimson Text', serif" }}>
+                        Sanki Alves değil, takımdan ayrılan sevgili gibi… Oyuncuların hepsi aynı cümleyi kuruyor: "Abi Alves dönsün, vallahi çok özledik…"
+                      </p>
+                      
+                      <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90 mt-2 italic" style={{ fontFamily: "'Crimson Text', serif" }}>
+                        Ravenclaw'ın bu dramı Shakespeare'i bile kıskandırırdı.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Giresunspor Haberi */}
+                  <div className="border-t-2 border-black/20 dark:border-amber-200/20 pt-6 mt-6">
+                    <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4 text-green-700 dark:text-green-400" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      🌲 Giresunspor 8 – 0 Umbra: "Giresunspor Şov, Umbra Küme Yolcusu!"
+                    </h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                      <div className="space-y-4">
+                        <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
+                          Giresunspor sahaya çıktı ve Umbra'yı görünce tek bir şey düşündü: "Bugün moral depolama günü."
+                        </p>
+                        <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
+                          8 golle rakibini silindir gibi ezen Giresun'da
+                        </p>
+                        <div className="bg-green-50 dark:bg-green-950/20 border-l-4 border-green-600 dark:border-green-500 p-4">
+                          <p className="text-base md:text-lg font-bold text-green-800 dark:text-green-300 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                            💥 OSIMHEN resmen turbo modunda!
+                          </p>
+                          <p className="text-sm md:text-base font-serif text-black/80 dark:text-amber-200/80" style={{ fontFamily: "'Crimson Text', serif" }}>
+                            Savunmayı gördüğü an: "Aaa boşluk var!" deyip dalmış.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
+                          Umbra tarafında ise yıkım büyük… Özellikle kaptan Pasör…
+                        </p>
+                        <div className="bg-orange-50 dark:bg-orange-950/20 border-l-4 border-orange-600 dark:border-orange-500 p-4">
+                          <p className="text-base md:text-lg font-bold text-orange-800 dark:text-orange-300 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                            Pasör mü? Pas mı? Pas geçiyor sadece.
+                          </p>
+                          <p className="text-sm md:text-base font-serif text-black/80 dark:text-amber-200/80 italic" style={{ fontFamily: "'Crimson Text', serif" }}>
+                            "Kaptan neredesin?" — "Ben de bilmiyorum."
+                          </p>
+                        </div>
+                        <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
+                          Umbra'nın durumu açıklamak gerekirse: Geminin kaptanı Pasör ama gemi ters yönde yüzüyor…
+                        </p>
+                        <p className="text-base md:text-lg leading-relaxed font-serif text-red-700 dark:text-red-400 font-bold" style={{ fontFamily: "'Crimson Text', serif" }}>
+                          Küme düşme hattı: "Sizi bekliyoruz ♥"
                         </p>
                       </div>
                     </div>
                   </div>
-                </div>
-
-                {/* Alt Bölüm - Drama */}
-                <div className="relative border-t-2 border-black/20 dark:border-amber-200/20 pt-6 mt-6">
-                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 p-6 rounded-lg border-2 border-purple-200 dark:border-purple-800">
-                    <h3 className="text-xl md:text-2xl font-bold mb-3 text-purple-800 dark:text-purple-300" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      LİGDE DRAMA BİTMİYOR: KAVGALAR, GOL YAĞMURLARI VE KIRILAN REKORLAR
-                    </h3>
-                    <p className="text-base md:text-lg font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
-                      Bu hafta lig; reality show, yarışma programı ve komedi dizisi karışımı bir şeye dönüştü.
-                    </p>
-                    <p className="text-base md:text-lg font-serif text-black/90 dark:text-amber-100/90 mt-2 italic" style={{ fontFamily: "'Crimson Text', serif" }}>
-                      Hakemler "bizi de rahat bırakın" diye dilekçe vermek üzere.
-                    </p>
+                  
+                  {/* Brezilya Haberi */}
+                  <div className="border-t-2 border-black/20 dark:border-amber-200/20 pt-6 mt-6">
+                    <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4 text-blue-700 dark:text-blue-400" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      🇧🇷 Brezilya 3 – 11 FK Bodø/Glimt: "Bodø Durmuyor, Oyunu Turbo Moduna Aldı!"
+                    </h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                      <div className="space-y-4">
+                        <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
+                          FK Bodø/Glimt 2 haftadır resmen gol manyağı gibi takılıyor. Bu hafta da Brezilya'yı yakaladılar ve: "Pardon, geçiyoruz!" diyerek 11 gol bastılar.
+                        </p>
+                        <div className="bg-blue-50 dark:bg-blue-950/20 border-l-4 border-blue-600 dark:border-blue-500 p-4">
+                          <p className="text-base md:text-lg font-bold text-blue-800 dark:text-blue-300 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                            ⭐ Takımın yıldızı Oyassumi
+                          </p>
+                          <p className="text-sm md:text-base font-serif text-black/80 dark:text-amber-200/80" style={{ fontFamily: "'Crimson Text', serif" }}>
+                            5 gol 5 asist… Adam tek başına Brezilya Milli Takımı'nı devirmiş gibi.
+                          </p>
+                        </div>
+                        <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Crimson Text', serif" }}>
+                          Norveç ekibi öyle bir oynuyor ki, rakipler maç bitince eve yürüyerek gidiyor, düşünmek için.
+                        </p>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="bg-red-50 dark:bg-red-950/20 border-l-4 border-red-600 dark:border-red-500 p-4">
+                          <p className="text-base md:text-lg font-bold text-red-800 dark:text-red-300 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                            🧤 Brezilya'nın kalecisi: "Eldiven mi? Eldiven değil, kova takmış."
+                          </p>
+                          <p className="text-sm md:text-base font-serif text-black/80 dark:text-amber-200/80" style={{ fontFamily: "'Crimson Text', serif" }}>
+                            Brezilya kalecisi için söylenecek tek şey: Kova Movaaa! Topu tutamadığı gibi top kendisini tutuyor. Golle burun buruna kaldı, o kadar.
+                          </p>
+                        </div>
+                        <p className="text-base md:text-lg leading-relaxed font-serif text-black/90 dark:text-amber-100/90 italic" style={{ fontFamily: "'Crimson Text', serif" }}>
+                          Rakip futbolcular diyor ki: "Şut çekince gol olacağına o kadar emindik ki pas yerine şut attık."
+                        </p>
+                        <div className="bg-yellow-50 dark:bg-yellow-950/20 border-l-4 border-yellow-600 dark:border-yellow-500 p-4 mt-4">
+                          <p className="text-base md:text-lg font-bold text-yellow-800 dark:text-yellow-300 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                            ⚓ Bermudez'in liderliği?
+                          </p>
+                          <p className="text-sm md:text-base font-serif text-black/80 dark:text-amber-200/80" style={{ fontFamily: "'Crimson Text', serif" }}>
+                            Liderlik değil, yanlış yönlendirilmiş Google Maps gibi. Takım sağa dönecek diyor, sola gidiyorlar. Brezilya sahada resmen kayboldu.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
