@@ -120,7 +120,7 @@ export default function FormationView({ players, teams, onPlayerClick, editable 
                       <>
                         {/* Team logo with enhanced styling */}
                         {teamLogo && (
-                          <div className="absolute -top-2 -right-2 w-12 h-12 rounded-full border-[3px] border-white bg-gradient-to-br from-white to-gray-50 shadow-[0_4px_15px_rgba(0,0,0,0.3)] z-20 flex items-center justify-center p-1.5 group-hover:scale-125 group-hover:rotate-12 transition-all duration-300 group-hover:shadow-[0_6px_20px_rgba(0,0,0,0.4)]">
+                          <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full border-2 border-white bg-gradient-to-br from-white to-gray-50 shadow-[0_3px_10px_rgba(0,0,0,0.3)] z-20 flex items-center justify-center p-0.5 group-hover:scale-125 group-hover:rotate-12 transition-all duration-300 group-hover:shadow-[0_4px_15px_rgba(0,0,0,0.4)]">
                             <img 
                               src={teamLogo} 
                               alt={player.teamName}
