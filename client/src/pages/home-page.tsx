@@ -197,14 +197,20 @@ export default function HomePage() {
 
                 {/* Alt Bölümler */}
                 <div className="relative border-t-2 border-black/20 dark:border-amber-200/20 pt-6 mt-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <h3 className="text-lg md:text-xl font-bold mb-2 border-b border-black/20 dark:border-amber-200/20 pb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
                         Gol Krallığı
                       </h3>
-                      <p className="text-sm md:text-base font-serif text-black/80 dark:text-amber-200/80" style={{ fontFamily: "'Crimson Text', serif" }}>
-                        Ligin en golcü oyuncuları bu hafta da formlarını koruyor. İlk 5 sırada yer alan oyuncular, toplam 200'den fazla gol atmış durumda.
-                      </p>
+                      {topScorers.length > 0 ? (
+                        <p className="text-sm md:text-base font-serif text-black/80 dark:text-amber-200/80" style={{ fontFamily: "'Crimson Text', serif" }}>
+                          Ligin gol kralı <span className="font-bold">{topScorers[0].username || 'Bilinmeyen'}</span> {topScorers[0].totalGoals || 0} gol ile zirvede yer alıyor. {topScorers[0].username || 'Bu oyuncu'} bu sezon gösterdiği performansla taraftarların dikkatini çekiyor ve ligdeki diğer oyuncular için zorlu bir rakip olmaya devam ediyor.
+                        </p>
+                      ) : (
+                        <p className="text-sm md:text-base font-serif text-black/80 dark:text-amber-200/80" style={{ fontFamily: "'Crimson Text', serif" }}>
+                          Ligin en golcü oyuncuları bu hafta da formlarını koruyor. Gol krallığı yarışı kızışmış durumda ve oyuncular arasındaki rekabet her geçen gün artıyor.
+                        </p>
+                      )}
                     </div>
                     <div>
                       <h3 className="text-lg md:text-xl font-bold mb-2 border-b border-black/20 dark:border-amber-200/20 pb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -214,14 +220,6 @@ export default function HomePage() {
                         Günlük ortalama 50+ aktif oda ile topluluk, 7/24 kesintisiz maç imkanı sunuyor. Hazırlık odaları da yoğun ilgi görüyor.
                       </p>
                     </div>
-                    <div>
-                      <h3 className="text-lg md:text-xl font-bold mb-2 border-b border-black/20 dark:border-amber-200/20 pb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        Forum Aktiviteleri
-                      </h3>
-                      <p className="text-sm md:text-base font-serif text-black/80 dark:text-amber-200/80" style={{ fontFamily: "'Crimson Text', serif" }}>
-                        Forum bölümünde son 24 saatte 100+ yeni konu açıldı. Topluluk üyeleri aktif bir şekilde tartışmalara katılıyor.
-                      </p>
-                    </div>
                   </div>
                 </div>
 
@@ -229,7 +227,7 @@ export default function HomePage() {
                 <div className="relative border-t border-black/10 dark:border-amber-200/10 pt-4 mt-6">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-xs md:text-sm font-mono text-black/50 dark:text-amber-200/50">
                     <div>Sayfa 1 | HaxArena V6 Real Soccer</div>
-                    <div>www.haxarena.com</div>
+                    <div>haxarena.web.tr</div>
                   </div>
                 </div>
               </div>
