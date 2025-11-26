@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import FormationView from "@/components/FormationView";
+import { buildApiUrl } from "@/lib/queryClient";
 
 export default function LeaguePage() {
   const { user, logout, isLoading } = useAuth();
@@ -52,10 +53,23 @@ export default function LeaguePage() {
     queryKey: ["/api/league/team-of-week", selectedTotwWeek],
     queryFn: async () => {
       if (!selectedTotwWeek) return null;
-      const res = await fetch(`/api/league/team-of-week/${selectedTotwWeek}`);
+      const url = buildApiUrl(`/api/league/team-of-week/${selectedTotwWeek}`);
+      const res = await fetch(url, {
+        credentials: "include",
+      });
+      
+      // Response'u kontrol et - HTML dönüyorsa hata ver
+      const contentType = res.headers.get("content-type");
+      if (contentType && !contentType.includes("application/json")) {
+        const text = await res.text();
+        console.error("Non-JSON response:", text.substring(0, 200));
+        throw new Error("API'den JSON yerine HTML döndü. Backend URL'i kontrol edin.");
+      }
+      
       if (!res.ok) {
         if (res.status === 404) return null;
-        throw new Error("Kadro yüklenemedi");
+        const errorData = await res.json().catch(() => ({ error: "Kadro yüklenemedi" }));
+        throw new Error(errorData.error || "Kadro yüklenemedi");
       }
       return res.json();
     },
