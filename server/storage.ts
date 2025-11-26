@@ -1565,46 +1565,32 @@ export class DBStorage implements IStorage {
     }>();
     
     allStats.forEach(stat => {
-      // Normalize both username and playerName to find matches
+      // Normalize both username and playerName
       const normalizedUsername = stat.username ? normalizeName(stat.username) : null;
       const normalizedPlayerName = stat.playerName ? normalizeName(stat.playerName) : null;
       
-      // Determine which normalized name to use for grouping
-      // If both exist and match, use that. Otherwise use whichever is available.
-      let normalizedName: string | null = null;
+      // Find the best matching key in statsByNormalizedName
+      // Check if either normalizedUsername or normalizedPlayerName matches any existing entry
+      let matchingKey: string | null = null;
       
-      if (normalizedUsername && normalizedPlayerName) {
-        // Both exist - they should match if it's the same player
-        // Use the username version for consistency
-        normalizedName = normalizedUsername;
-      } else if (normalizedUsername) {
-        normalizedName = normalizedUsername;
-      } else if (normalizedPlayerName) {
-        normalizedName = normalizedPlayerName;
-      }
-      
-      if (!normalizedName) return; // Skip if no name
-      
-      // Check if we should merge with an existing entry
-      // Look for matches by either normalized username or playerName
-      let existingKey: string | null = null;
-      for (const [key, value] of statsByNormalizedName.entries()) {
-        const existingNormalizedUsername = value.username ? normalizeName(value.username) : null;
-        const existingNormalizedPlayerName = value.playerName ? normalizeName(value.playerName) : null;
+      for (const [key, existing] of statsByNormalizedName.entries()) {
+        const existingNormalizedUsername = existing.username ? normalizeName(existing.username) : null;
+        const existingNormalizedPlayerName = existing.playerName ? normalizeName(existing.playerName) : null;
         
+        // Match if any normalized name matches
         if (normalizedUsername && (normalizedUsername === existingNormalizedUsername || normalizedUsername === existingNormalizedPlayerName)) {
-          existingKey = key;
+          matchingKey = key;
           break;
         }
         if (normalizedPlayerName && (normalizedPlayerName === existingNormalizedUsername || normalizedPlayerName === existingNormalizedPlayerName)) {
-          existingKey = key;
+          matchingKey = key;
           break;
         }
       }
       
-      if (existingKey) {
-        const existing = statsByNormalizedName.get(existingKey)!;
-        // Merge stats
+      if (matchingKey) {
+        // Merge with existing entry
+        const existing = statsByNormalizedName.get(matchingKey)!;
         existing.totalGoals += Number(stat.goals) || 0;
         existing.totalAssists += Number(stat.assists) || 0;
         existing.totalDm += Number(stat.dm) || 0;
@@ -1614,16 +1600,17 @@ export class DBStorage implements IStorage {
         // Prefer userId if available
         if (stat.userId && !existing.userId) {
           existing.userId = stat.userId;
-          existing.username = stat.username || stat.playerName || existing.username;
         }
         
         // Prefer username over playerName
-        if (stat.username && !existing.username) {
+        if (stat.username) {
           existing.username = stat.username;
+        } else if (stat.playerName && !existing.username) {
+          existing.username = stat.playerName;
         }
         
-        // Keep playerName if it's more descriptive
-        if (stat.playerName && !existing.playerName) {
+        // Keep playerName if available
+        if (stat.playerName) {
           existing.playerName = stat.playerName;
         }
         
@@ -1633,8 +1620,11 @@ export class DBStorage implements IStorage {
           existing.latestCreatedAt = stat.createdAt;
         }
       } else {
-        // Create new entry
-        statsByNormalizedName.set(normalizedName, {
+        // Create new entry - use the first available normalized name as key
+        const keyToUse = normalizedUsername || normalizedPlayerName;
+        if (!keyToUse) return; // Skip if no name
+        
+        statsByNormalizedName.set(keyToUse, {
           userId: stat.userId,
           username: stat.username || stat.playerName || '',
           playerName: stat.playerName,

@@ -3,6 +3,9 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { db } from "./db";
+import { playerStats, users } from "@shared/schema";
+import { eq, sql } from "drizzle-orm";
 
 function normalizeClientIp(req: any): string {
   let ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
@@ -1833,6 +1836,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error getting leaderboard:", error);
       return res.status(500).json({ error: "Lider tablosu yüklenemedi" });
+    }
+  });
+
+  // Debug endpoint to check player stats for a specific player name (super admin only)
+  app.get("/api/league/stats/debug/:playerName", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { playerName } = req.params;
+      const { sql } = await import("drizzle-orm");
+      
+      // Get all stats for this player name (case-insensitive)
+      const allStats = await db
+        .select({
+          id: playerStats.id,
+          userId: playerStats.userId,
+          username: users.username,
+          playerName: playerStats.playerName,
+          fixtureId: playerStats.fixtureId,
+          goals: playerStats.goals,
+          assists: playerStats.assists,
+          dm: playerStats.dm,
+          cleanSheets: playerStats.cleanSheets,
+          saves: playerStats.saves,
+          createdAt: playerStats.createdAt,
+        })
+        .from(playerStats)
+        .leftJoin(users, eq(playerStats.userId, users.id))
+        .where(
+          sql`LOWER(${playerStats.playerName}) = LOWER(${playerName}) OR LOWER(${users.username}) = LOWER(${playerName})`
+        );
+      
+      return res.json({
+        playerName,
+        totalRecords: allStats.length,
+        records: allStats,
+        totals: {
+          goals: allStats.reduce((sum, s) => sum + (Number(s.goals) || 0), 0),
+          assists: allStats.reduce((sum, s) => sum + (Number(s.assists) || 0), 0),
+          dm: allStats.reduce((sum, s) => sum + (Number(s.dm) || 0), 0),
+          cleanSheets: allStats.reduce((sum, s) => sum + (Number(s.cleanSheets) || 0), 0),
+          saves: allStats.reduce((sum, s) => sum + (Number(s.saves) || 0), 0),
+        }
+      });
+    } catch (error) {
+      console.error("Error in debug endpoint:", error);
+      return res.status(500).json({ error: "Debug bilgisi yüklenemedi" });
     }
   });
 
