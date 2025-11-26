@@ -1565,15 +1565,45 @@ export class DBStorage implements IStorage {
     }>();
     
     allStats.forEach(stat => {
-      // Determine the normalized name to use for grouping
-      const nameToUse = stat.username || stat.playerName || '';
-      const normalizedName = normalizeName(nameToUse);
+      // Normalize both username and playerName to find matches
+      const normalizedUsername = stat.username ? normalizeName(stat.username) : null;
+      const normalizedPlayerName = stat.playerName ? normalizeName(stat.playerName) : null;
+      
+      // Determine which normalized name to use for grouping
+      // If both exist and match, use that. Otherwise use whichever is available.
+      let normalizedName: string | null = null;
+      
+      if (normalizedUsername && normalizedPlayerName) {
+        // Both exist - they should match if it's the same player
+        // Use the username version for consistency
+        normalizedName = normalizedUsername;
+      } else if (normalizedUsername) {
+        normalizedName = normalizedUsername;
+      } else if (normalizedPlayerName) {
+        normalizedName = normalizedPlayerName;
+      }
       
       if (!normalizedName) return; // Skip if no name
       
-      const existing = statsByNormalizedName.get(normalizedName);
+      // Check if we should merge with an existing entry
+      // Look for matches by either normalized username or playerName
+      let existingKey: string | null = null;
+      for (const [key, value] of statsByNormalizedName.entries()) {
+        const existingNormalizedUsername = value.username ? normalizeName(value.username) : null;
+        const existingNormalizedPlayerName = value.playerName ? normalizeName(value.playerName) : null;
+        
+        if (normalizedUsername && (normalizedUsername === existingNormalizedUsername || normalizedUsername === existingNormalizedPlayerName)) {
+          existingKey = key;
+          break;
+        }
+        if (normalizedPlayerName && (normalizedPlayerName === existingNormalizedUsername || normalizedPlayerName === existingNormalizedPlayerName)) {
+          existingKey = key;
+          break;
+        }
+      }
       
-      if (existing) {
+      if (existingKey) {
+        const existing = statsByNormalizedName.get(existingKey)!;
         // Merge stats
         existing.totalGoals += Number(stat.goals) || 0;
         existing.totalAssists += Number(stat.assists) || 0;
@@ -1584,12 +1614,17 @@ export class DBStorage implements IStorage {
         // Prefer userId if available
         if (stat.userId && !existing.userId) {
           existing.userId = stat.userId;
-          existing.username = stat.username || stat.playerName || '';
+          existing.username = stat.username || stat.playerName || existing.username;
         }
         
         // Prefer username over playerName
         if (stat.username && !existing.username) {
           existing.username = stat.username;
+        }
+        
+        // Keep playerName if it's more descriptive
+        if (stat.playerName && !existing.playerName) {
+          existing.playerName = stat.playerName;
         }
         
         // Update latest team
