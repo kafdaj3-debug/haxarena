@@ -3010,31 +3010,33 @@ export default function ManagementPanelPage() {
                           players={totwPlayers} 
                           teams={leagueTeams || []}
                         />
-                        <Button
-                          onClick={() => {
-                            if (totwWeek && totwPlayers.length > 0) {
-                              createTotwMutation.mutate({
-                                week: parseInt(totwWeek),
-                                players: totwPlayers,
-                              });
-                            }
-                          }}
-                          disabled={!totwWeek || totwPlayers.length === 0 || createTotwMutation.isPending}
-                          className="w-full"
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          Kadroyu Kaydet
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setTotwPlayers([]);
-                            setShowFormationEditor(true);
-                          }}
-                          className="w-full"
-                        >
-                          Düzenle
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => {
+                              if (totwWeek && totwPlayers.length > 0) {
+                                createTotwMutation.mutate({
+                                  week: parseInt(totwWeek),
+                                  players: totwPlayers,
+                                });
+                              }
+                            }}
+                            disabled={!totwWeek || totwPlayers.length === 0 || createTotwMutation.isPending}
+                            className="flex-1"
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            Kadroyu Kaydet
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              // Mevcut oyuncuları koruyarak düzenleme moduna geç
+                              setShowFormationEditor(true);
+                            }}
+                            className="flex-1"
+                          >
+                            Düzenle
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </div>

@@ -209,7 +209,7 @@ export default function FormationEditor({ teams, initialPlayers = [], onSave, on
       {/* Save/Cancel buttons */}
       <div className="flex gap-2">
         <Button onClick={handleSave} className="flex-1" disabled={players.length === 0}>
-          Kadroyu Kaydet
+          Dizilimi Kaydet
         </Button>
         {onCancel && (
           <Button variant="outline" onClick={onCancel}>
