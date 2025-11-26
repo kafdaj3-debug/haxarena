@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ActiveRoomCard from "@/components/ActiveRoomCard";
@@ -6,7 +7,7 @@ import LiveChat from "@/components/LiveChat";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Trophy, MessageSquare, Shield, Sparkles, ArrowRight } from "lucide-react";
+import { Trophy, MessageSquare, Shield, Sparkles, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
@@ -14,6 +15,7 @@ import { tr } from "date-fns/locale";
 
 export default function HomePage() {
   const { user, logout } = useAuth();
+  const [currentPage, setCurrentPage] = useState(1);
   const allRooms = [
     {
       matchName: "Galatasaray vs Fenerbahçe",
@@ -92,9 +94,37 @@ export default function HomePage() {
         {/* Gazete Bölümü */}
         <section className="py-12 md:py-16 bg-gradient-to-b from-amber-50/5 to-amber-50/10 dark:from-amber-950/10 dark:to-amber-950/5">
           <div className="container mx-auto px-4">
-            <div className="max-w-5xl mx-auto space-y-8">
+            <div className="max-w-5xl mx-auto">
               
+              {/* Sayfa Geçiş Kontrolü */}
+              <div className="flex items-center justify-center gap-4 mb-6">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                  className="hover-elevate active-elevate-2"
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  Önceki
+                </Button>
+                <div className="text-sm md:text-base font-mono text-black/70 dark:text-amber-200/70 px-4 py-2 bg-amber-100/50 dark:bg-amber-900/30 rounded-lg border border-amber-300 dark:border-amber-700">
+                  Sayfa {currentPage}/2
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(2)}
+                  disabled={currentPage === 2}
+                  className="hover-elevate active-elevate-2"
+                >
+                  Sonraki
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+
               {/* SAYFA 1 */}
+              {currentPage === 1 && (
               <div className="relative bg-gradient-to-br from-amber-50 via-amber-50/95 to-amber-100/90 dark:from-amber-900/30 dark:via-amber-900/20 dark:to-amber-800/30 border-4 border-amber-800/30 dark:border-amber-700/40 shadow-2xl p-6 md:p-10 lg:p-12 transform rotate-0 hover:rotate-0 transition-all duration-300">
                 {/* Eski kağıt dokusu efekti */}
                 <div className="absolute inset-0 opacity-10 dark:opacity-5" style={{
@@ -178,7 +208,7 @@ export default function HomePage() {
 
                 {/* İkinci Haber - Chelsea */}
                 <div className="relative border-t-2 border-black/20 dark:border-amber-200/20 pt-6 mt-6 mb-6">
-                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-red-700 dark:text-red-400" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-red-700 dark:text-red-400" style={{ fontFamily: "'Playfair Display', serif", lineHeight: '1.1' }}>
                     CHELSEA'YA GALACTICOS ŞOKU! 3 ATTILAR AMA 7 TANE DE TOPLADILAR
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
@@ -226,8 +256,10 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
+              )}
 
               {/* SAYFA 2 - Cassé Haberi */}
+              {currentPage === 2 && (
               <div className="relative bg-gradient-to-br from-amber-50 via-amber-50/95 to-amber-100/90 dark:from-amber-900/30 dark:via-amber-900/20 dark:to-amber-800/30 border-4 border-amber-800/30 dark:border-amber-700/40 shadow-2xl p-6 md:p-10 lg:p-12 transform rotate-0 hover:rotate-0 transition-all duration-300">
                 {/* Eski kağıt dokusu efekti */}
                 <div className="absolute inset-0 opacity-10 dark:opacity-5" style={{
@@ -365,6 +397,7 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
+              )}
 
             </div>
           </div>
