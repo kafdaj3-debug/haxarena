@@ -225,7 +225,7 @@ export const playerStats = pgTable("player_stats", {
 export const teamOfWeek = pgTable("team_of_week", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   week: integer("week").notNull().unique(),
-  image: text("image").notNull(), // base64 image
+  players: text("players"), // JSON array of players with positions, names, and team info
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

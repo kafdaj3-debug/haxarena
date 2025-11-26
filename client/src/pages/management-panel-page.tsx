@@ -15,6 +15,8 @@ import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest, buildApiUrl } from "@/lib/queryClient";
 import { Shield, ShieldOff, CheckCircle, XCircle, User, Trash2, Plus, Lock, Unlock, Archive, ArchiveRestore, Calendar, Image as ImageIcon, X, Edit } from "lucide-react";
+import FormationEditor from "@/components/FormationEditor";
+import FormationView from "@/components/FormationView";
 
 const ROLES = ["DIAMOND VIP", "GOLD VIP", "SILVER VIP", "Lig Oyuncusu", "HaxArena Üye"];
 const PLAYER_ROLES = ["Kaleci", "Defans", "Orta Saha", "Forvet", "Yedek"];
@@ -121,7 +123,15 @@ export default function ManagementPanelPage() {
   
   // Team of week state
   const [totwWeek, setTotwWeek] = useState("");
-  const [totwImage, setTotwImage] = useState("");
+  const [totwPlayers, setTotwPlayers] = useState<Array<{
+    position: string;
+    playerNumber: number;
+    playerName: string;
+    teamId: string;
+    teamName: string;
+    teamLogo: string | null;
+  }>>([]);
+  const [showFormationEditor, setShowFormationEditor] = useState(false);
   
   // Manual team edit state
   const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
@@ -768,7 +778,8 @@ export default function ManagementPanelPage() {
       toast({ title: "Başarılı", description: "Haftanın kadrosu eklendi" });
       queryClient.invalidateQueries({ queryKey: ["/api/league/team-of-week"] });
       setTotwWeek("");
-      setTotwImage("");
+      setTotwPlayers([]);
+      setShowFormationEditor(false);
     },
     onError: () => {
       toast({ title: "Hata", description: "Kadro eklenemedi", variant: "destructive" });
@@ -2974,61 +2985,58 @@ export default function ManagementPanelPage() {
                       value={totwWeek}
                       onChange={(e) => setTotwWeek(e.target.value)}
                     />
-                    <div className="space-y-2">
-                      <Label>Kadro Görseli</Label>
-                      {totwImage ? (
-                        <div className="relative inline-block">
-                          <img 
-                            src={totwImage} 
-                            alt="Team of Week" 
-                            className="max-w-full h-auto rounded-md border"
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute -top-2 -right-2 h-6 w-6"
-                            onClick={() => setTotwImage("")}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleImageUpload(e, setTotwImage)}
-                            className="max-w-xs"
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => {
-                              const inputs = document.querySelectorAll<HTMLInputElement>('input[type="file"]');
-                              inputs[inputs.length - 1]?.click();
-                            }}
-                          >
-                            <ImageIcon className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                    <Button
-                      onClick={() => {
-                        if (totwWeek && totwImage) {
-                          createTotwMutation.mutate({
-                            week: parseInt(totwWeek),
-                            image: totwImage,
-                          });
-                        }
-                      }}
-                      disabled={!totwWeek || !totwImage || createTotwMutation.isPending}
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      Kadro Ekle
-                    </Button>
+                    {!showFormationEditor ? (
+                      <Button
+                        onClick={() => setShowFormationEditor(true)}
+                        disabled={!totwWeek}
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Kadro Oluştur
+                      </Button>
+                    ) : (
+                      <FormationEditor
+                        teams={leagueTeams || []}
+                        initialPlayers={totwPlayers}
+                        onSave={(players) => {
+                          setTotwPlayers(players);
+                          setShowFormationEditor(false);
+                        }}
+                        onCancel={() => setShowFormationEditor(false)}
+                      />
+                    )}
+                    {totwPlayers.length > 0 && !showFormationEditor && (
+                      <div className="space-y-4">
+                        <FormationView 
+                          players={totwPlayers} 
+                          teams={leagueTeams || []}
+                        />
+                        <Button
+                          onClick={() => {
+                            if (totwWeek && totwPlayers.length > 0) {
+                              createTotwMutation.mutate({
+                                week: parseInt(totwWeek),
+                                players: totwPlayers,
+                              });
+                            }
+                          }}
+                          disabled={!totwWeek || totwPlayers.length === 0 || createTotwMutation.isPending}
+                          className="w-full"
+                        >
+                          <Plus className="w-4 h-4 mr-1" />
+                          Kadroyu Kaydet
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setTotwPlayers([]);
+                            setShowFormationEditor(true);
+                          }}
+                          className="w-full"
+                        >
+                          Düzenle
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -3036,30 +3044,36 @@ export default function ManagementPanelPage() {
                 <div className="space-y-4">
                   <h3 className="font-semibold">Mevcut Kadrolar</h3>
                   <div className="space-y-3">
-                    {teamsOfWeek?.map((totw: any) => (
-                      <div key={totw.id} className="p-4 border rounded-lg">
-                        <div className="flex items-start justify-between mb-3">
-                          <h4 className="font-medium">Hafta {totw.week}</h4>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              if (confirm("Bu kadroyu silmek istediğinizden emin misiniz?")) {
-                                deleteTotwMutation.mutate(totw.id);
-                              }
-                            }}
-                            disabled={deleteTotwMutation.isPending}
-                          >
-                            <Trash2 className="w-4 h-4 text-destructive" />
-                          </Button>
+                    {teamsOfWeek?.map((totw: any) => {
+                      const players = totw.players ? JSON.parse(totw.players) : [];
+                      return (
+                        <div key={totw.id} className="p-4 border rounded-lg">
+                          <div className="flex items-start justify-between mb-3">
+                            <h4 className="font-medium">Hafta {totw.week}</h4>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                if (confirm("Bu kadroyu silmek istediğinizden emin misiniz?")) {
+                                  deleteTotwMutation.mutate(totw.id);
+                                }
+                              }}
+                              disabled={deleteTotwMutation.isPending}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
+                          {players.length > 0 ? (
+                            <FormationView 
+                              players={players} 
+                              teams={leagueTeams || []}
+                            />
+                          ) : (
+                            <p className="text-center text-muted-foreground py-4">Kadro boş</p>
+                          )}
                         </div>
-                        <img 
-                          src={totw.image} 
-                          alt={`Hafta ${totw.week}`} 
-                          className="max-w-full h-auto rounded-md border"
-                        />
-                      </div>
-                    ))}
+                      );
+                    })}
                     {!teamsOfWeek?.length && (
                       <p className="text-center text-muted-foreground py-4">Henüz kadro eklenmedi</p>
                     )}

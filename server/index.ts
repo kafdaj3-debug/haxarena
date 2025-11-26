@@ -654,6 +654,15 @@ app.use((req, res, next) => {
         )
       `);
       
+      // Migration: Update team_of_week table - add players column, make image nullable
+      try {
+        await db.execute(sql`ALTER TABLE team_of_week ADD COLUMN IF NOT EXISTS players TEXT`);
+        await db.execute(sql`ALTER TABLE team_of_week ALTER COLUMN image DROP NOT NULL`);
+        log("✓ Updated team_of_week table schema");
+      } catch (error) {
+        console.log("Team of week migration:", error instanceof Error ? error.message : String(error));
+      }
+      
       // Add statistics_visible column to settings if missing
       try {
         await db.execute(sql`ALTER TABLE settings ADD COLUMN IF NOT EXISTS statistics_visible BOOLEAN NOT NULL DEFAULT true`);

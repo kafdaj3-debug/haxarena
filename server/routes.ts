@@ -1972,13 +1972,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create or update team of week (super admin only)
   app.post("/api/league/team-of-week", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
     try {
-      const { week, image } = req.body;
+      const { week, players } = req.body;
       
-      if (!week || !image) {
-        return res.status(400).json({ error: "Hafta ve görsel gereklidir" });
+      if (!week) {
+        return res.status(400).json({ error: "Hafta gereklidir" });
       }
       
-      const team = await storage.createOrUpdateTeamOfWeek(week, image);
+      const playersJson = players ? JSON.stringify(players) : null;
+      const team = await storage.createOrUpdateTeamOfWeek(week, playersJson);
       return res.json(team);
     } catch (error) {
       console.error("Error creating/updating team of week:", error);

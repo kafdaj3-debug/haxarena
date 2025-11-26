@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import FormationView from "@/components/FormationView";
 
 export default function LeaguePage() {
   const { user, logout, isLoading } = useAuth();
@@ -1631,11 +1632,14 @@ export default function LeaguePage() {
                     {selectedTotw ? (
                       <div className="mt-6">
                         <h3 className="font-semibold mb-4">Hafta {selectedTotw.week} - Haftanın Kadrosu</h3>
-                        <img 
-                          src={selectedTotw.image} 
-                          alt={`Hafta ${selectedTotw.week} Kadrosu`} 
-                          className="w-full h-auto rounded-lg border shadow-lg"
-                        />
+                        {selectedTotw.players ? (
+                          <FormationView 
+                            players={JSON.parse(selectedTotw.players)} 
+                            teams={teams || []}
+                          />
+                        ) : (
+                          <div className="text-center py-8 text-muted-foreground">Kadro boş</div>
+                        )}
                       </div>
                     ) : selectedTotwWeek ? (
                       <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>

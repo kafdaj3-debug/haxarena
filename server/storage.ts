@@ -175,7 +175,7 @@ export interface IStorage {
   deletePlayerStatsByFixture(fixtureId: string): Promise<void>;
   
   // Team of week operations
-  createOrUpdateTeamOfWeek(week: number, image: string): Promise<TeamOfWeek>;
+  createOrUpdateTeamOfWeek(week: number, players: string | null): Promise<TeamOfWeek>;
   getTeamOfWeek(week: number): Promise<TeamOfWeek | undefined>;
   getAllTeamsOfWeek(): Promise<TeamOfWeek[]>;
   deleteTeamOfWeek(id: string): Promise<void>;
@@ -1569,20 +1569,23 @@ export class DBStorage implements IStorage {
       const normalizedUsername = stat.username ? normalizeName(stat.username) : null;
       const normalizedPlayerName = stat.playerName ? normalizeName(stat.playerName) : null;
       
-      // Find the best matching key in statsByNormalizedName
-      // Check if either normalizedUsername or normalizedPlayerName matches any existing entry
+      // Determine the key to use for grouping - prefer username if available
+      const primaryNormalizedName = normalizedUsername || normalizedPlayerName;
+      if (!primaryNormalizedName) return; // Skip if no name
+      
+      // Find matching entry by checking all possible name combinations
       let matchingKey: string | null = null;
       
       for (const [key, existing] of statsByNormalizedName.entries()) {
         const existingNormalizedUsername = existing.username ? normalizeName(existing.username) : null;
         const existingNormalizedPlayerName = existing.playerName ? normalizeName(existing.playerName) : null;
         
-        // Match if any normalized name matches
-        if (normalizedUsername && (normalizedUsername === existingNormalizedUsername || normalizedUsername === existingNormalizedPlayerName)) {
-          matchingKey = key;
-          break;
-        }
-        if (normalizedPlayerName && (normalizedPlayerName === existingNormalizedUsername || normalizedPlayerName === existingNormalizedPlayerName)) {
+        // Match if any normalized name matches any existing normalized name
+        const matches = 
+          (normalizedUsername && (normalizedUsername === existingNormalizedUsername || normalizedUsername === existingNormalizedPlayerName)) ||
+          (normalizedPlayerName && (normalizedPlayerName === existingNormalizedUsername || normalizedPlayerName === existingNormalizedPlayerName));
+        
+        if (matches) {
           matchingKey = key;
           break;
         }
@@ -1620,11 +1623,8 @@ export class DBStorage implements IStorage {
           existing.latestCreatedAt = stat.createdAt;
         }
       } else {
-        // Create new entry - use the first available normalized name as key
-        const keyToUse = normalizedUsername || normalizedPlayerName;
-        if (!keyToUse) return; // Skip if no name
-        
-        statsByNormalizedName.set(keyToUse, {
+        // Create new entry using primary normalized name as key
+        statsByNormalizedName.set(primaryNormalizedName, {
           userId: stat.userId,
           username: stat.username || stat.playerName || '',
           playerName: stat.playerName,
@@ -1695,18 +1695,18 @@ export class DBStorage implements IStorage {
   }
 
   // Team of week operations
-  async createOrUpdateTeamOfWeek(week: number, image: string): Promise<TeamOfWeek> {
+  async createOrUpdateTeamOfWeek(week: number, players: string | null): Promise<TeamOfWeek> {
     const { sql } = await import("drizzle-orm");
     const existing = await this.getTeamOfWeek(week);
     
     if (existing) {
       const [updated] = await db.update(teamOfWeek)
-        .set({ image, updatedAt: sql`NOW()` })
+        .set({ players, updatedAt: sql`NOW()` })
         .where(eq(teamOfWeek.week, week))
         .returning();
       return updated;
     } else {
-      const [created] = await db.insert(teamOfWeek).values({ week, image }).returning();
+      const [created] = await db.insert(teamOfWeek).values({ week, players }).returning();
       return created;
     }
   }
