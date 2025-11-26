@@ -48,15 +48,19 @@ export default function LeaguePage() {
     queryKey: ["/api/league/team-of-week"],
   });
 
-  const { data: selectedTotw } = useQuery<any>({
+  const { data: selectedTotw, isLoading: selectedTotwLoading, error: selectedTotwError } = useQuery<any>({
     queryKey: ["/api/league/team-of-week", selectedTotwWeek],
     queryFn: async () => {
       if (!selectedTotwWeek) return null;
       const res = await fetch(`/api/league/team-of-week/${selectedTotwWeek}`);
-      if (!res.ok) return null;
+      if (!res.ok) {
+        if (res.status === 404) return null;
+        throw new Error("Kadro yüklenemedi");
+      }
       return res.json();
     },
     enabled: !!selectedTotwWeek,
+    retry: 1,
   });
 
   // Group fixtures by week and sort by date
@@ -1629,20 +1633,44 @@ export default function LeaguePage() {
                       </Select>
                     </div>
 
-                    {selectedTotw ? (
+                    {selectedTotwLoading ? (
+                      <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
+                    ) : selectedTotwError ? (
+                      <div className="text-center py-8 text-destructive">
+                        Hata: {selectedTotwError instanceof Error ? selectedTotwError.message : "Kadro yüklenemedi"}
+                      </div>
+                    ) : selectedTotw ? (
                       <div className="mt-6">
                         <h3 className="font-semibold mb-4">Hafta {selectedTotw.week} - Haftanın Kadrosu</h3>
                         {selectedTotw.players ? (
-                          <FormationView 
-                            players={JSON.parse(selectedTotw.players)} 
-                            teams={teams || []}
-                          />
+                          (() => {
+                            try {
+                              const players = typeof selectedTotw.players === 'string' 
+                                ? JSON.parse(selectedTotw.players) 
+                                : selectedTotw.players;
+                              return players && players.length > 0 ? (
+                                <FormationView 
+                                  players={players} 
+                                  teams={teams || []}
+                                />
+                              ) : (
+                                <div className="text-center py-8 text-muted-foreground">Kadro boş</div>
+                              );
+                            } catch (error) {
+                              console.error("JSON parse error:", error);
+                              return (
+                                <div className="text-center py-8 text-destructive">
+                                  Kadro verisi okunamadı
+                                </div>
+                              );
+                            }
+                          })()
                         ) : (
                           <div className="text-center py-8 text-muted-foreground">Kadro boş</div>
                         )}
                       </div>
                     ) : selectedTotwWeek ? (
-                      <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
+                      <div className="text-center py-8 text-muted-foreground">Kadro bulunamadı</div>
                     ) : (
                       <div className="text-center py-8 text-muted-foreground">
                         {teamsOfWeek?.length ? "Lütfen bir hafta seçin" : "Henüz haftanın kadrosu eklenmedi"}
