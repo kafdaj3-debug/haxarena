@@ -83,8 +83,8 @@ export default function HomePage() {
                 <span className="bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent sparkle">
                   Mutlu Yıllar! 🎄✨
                 </span>
-                <span className="block mt-2 bg-gradient-to-r from-red-400 via-green-400 via-yellow-300 to-red-400 bg-clip-text text-transparent font-bold text-2xl sm:text-3xl md:text-4xl sparkle">
-                  <span className="inline-block">🎉</span> HaxArena V6 Real Soccer'e Hoş Geldiniz <span className="inline-block">🎉</span>
+                <span className="block mt-2 bg-gradient-to-r from-red-500 via-orange-500 via-yellow-500 via-green-500 via-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent font-bold text-2xl sm:text-3xl md:text-4xl sparkle">
+                  HaxArena V6 Real Soccer'e Hoş Geldiniz
                 </span>
               </h1>
             </div>
