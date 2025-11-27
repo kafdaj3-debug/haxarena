@@ -39,6 +39,10 @@ export default function LeaguePage() {
 
   const { data: fixtures, isLoading: fixturesLoading } = useQuery<any[]>({
     queryKey: ["/api/league/fixtures"],
+    staleTime: 30000, // 30 saniye boyunca veriyi fresh tut
+    cacheTime: 300000, // 5 dakika cache'te tut
+    refetchOnWindowFocus: false, // Pencere focus olduğunda yeniden fetch yapma
+    refetchOnMount: false, // Mount olduğunda yeniden fetch yapma (cache'ten kullan)
   });
 
   const { data: leaderboard, isLoading: leaderboardLoading } = useQuery<any[]>({
