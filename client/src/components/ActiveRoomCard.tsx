@@ -19,10 +19,6 @@ export default function ActiveRoomCard({
 }: ActiveRoomCardProps) {
   return (
     <Card className="border-l-4 border-l-primary relative hover-elevate overflow-visible new-year-gradient border-2 border-red-400/20 hover:border-green-400/40 transition-all duration-300">
-      {/* Yılbaşı dekorasyonları */}
-      <div className="absolute top-2 right-2 pointer-events-none">
-        <span className="text-xs sparkle">✨</span>
-      </div>
       {showEditButton && (
         <Button
           variant="ghost"
