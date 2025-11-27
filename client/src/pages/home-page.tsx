@@ -109,7 +109,7 @@ export default function HomePage() {
                   Önceki
                 </Button>
                 <div className="text-sm md:text-base font-mono text-black/70 dark:text-amber-200/70 px-4 py-2 bg-amber-100/50 dark:bg-amber-900/30 rounded-lg border border-amber-300 dark:border-amber-700">
-                  {currentPage}
+                  {currentPage}/2
                 </div>
                 <Button
                   variant="outline"
