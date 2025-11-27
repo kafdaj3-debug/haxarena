@@ -9,7 +9,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useState } from "react";
 import { useDarkMode } from "@/hooks/use-dark-mode";
-import { useSnowMode } from "@/hooks/use-snow-mode";
+import { useSnowMode } from "@/contexts/SnowModeContext";
 
 interface HeaderProps {
   user?: { 

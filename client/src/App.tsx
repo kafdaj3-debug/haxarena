@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "./lib/auth";
 import { useDarkMode } from "@/hooks/use-dark-mode";
-import { useSnowMode } from "@/hooks/use-snow-mode";
+import { SnowModeProvider, useSnowMode } from "@/contexts/SnowModeContext";
 import Snowfall from "@/components/Snowfall";
 import HomePage from "@/pages/home-page";
 import ActiveRoomsPage from "@/pages/active-rooms-page";
@@ -56,20 +56,30 @@ function Router() {
   );
 }
 
+function AppContent() {
+  const { isSnowEnabled } = useSnowMode();
+
+  return (
+    <>
+      <Toaster />
+      {isSnowEnabled && <Snowfall />}
+      <Router />
+    </>
+  );
+}
+
 function App() {
   // Initialize dark mode
   useDarkMode();
-  // Initialize snow mode
-  const { isSnowEnabled } = useSnowMode();
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          {isSnowEnabled && <Snowfall />}
-          <Router />
-        </TooltipProvider>
+        <SnowModeProvider>
+          <TooltipProvider>
+            <AppContent />
+          </TooltipProvider>
+        </SnowModeProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
