@@ -59,7 +59,7 @@ export default function Header({ user, onLogout }: HeaderProps) {
         <Link href="/">
           <div className="flex items-center gap-2 hover-elevate rounded-lg px-3 py-2 active-elevate-2 cursor-pointer" data-testid="link-home">
             <div className="text-2xl font-heading font-bold text-primary relative inline-block">
-              <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-3xl sparkle">🎩</span>
+              <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-3xl sparkle">🎅🏻</span>
               <span>HaxArena V6</span>
             </div>
           </div>
