@@ -391,6 +391,28 @@
     100% { background-position: 0% 50%; }
   }
 
+  @keyframes gradient-flow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .header-gradient-text {
+    background: linear-gradient(
+      90deg,
+      #ef4444 0%,
+      #22c55e 25%,
+      #eab308 50%,
+      #ef4444 75%,
+      #22c55e 100%
+    );
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-flow 3s ease-in-out infinite;
+  }
+
   /* Yılbaşı Işıkları */
   .christmas-light {
     position: relative;
