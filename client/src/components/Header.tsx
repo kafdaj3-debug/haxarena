@@ -58,10 +58,9 @@ export default function Header({ user, onLogout }: HeaderProps) {
       <div className="container mx-auto flex h-16 items-center justify-between px-4 relative z-10">
         <Link href="/">
           <div className="flex items-center gap-2 hover-elevate rounded-lg px-3 py-2 active-elevate-2 cursor-pointer" data-testid="link-home">
-            <div className="text-2xl font-heading font-bold text-primary relative">
-              <span className="sparkle inline-block">🎉</span>
-              <span className="ml-2">HaxArena V6</span>
-              <span className="sparkle inline-block ml-2">🎉</span>
+            <div className="text-2xl font-heading font-bold text-primary relative inline-block">
+              <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-3xl sparkle">🎩</span>
+              <span>HaxArena V6</span>
             </div>
           </div>
         </Link>
