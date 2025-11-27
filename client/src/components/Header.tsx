@@ -4,10 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SiDiscord } from "react-icons/si";
-import { UserCircle, LogOut, Shield, Bell, Trash2, Menu } from "lucide-react";
+import { UserCircle, LogOut, Shield, Bell, Trash2, Menu, Moon, Sun, Snowflake } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useState } from "react";
+import { useDarkMode } from "@/hooks/use-dark-mode";
+import { useSnowMode } from "@/hooks/use-snow-mode";
 
 interface HeaderProps {
   user?: { 
@@ -21,6 +23,8 @@ interface HeaderProps {
 
 export default function Header({ user, onLogout }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isDark, toggle } = useDarkMode();
+  const { isSnowEnabled, toggle: toggleSnow } = useSnowMode();
   
   const { data: notifications } = useQuery<any[]>({
     queryKey: ["/api/notifications"],
@@ -178,6 +182,32 @@ export default function Header({ user, onLogout }: HeaderProps) {
               </div>
             </SheetContent>
           </Sheet>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggle}
+            className="hover-elevate active-elevate-2"
+            data-testid="button-theme-toggle"
+            title={isDark ? "Açık moda geç" : "Karanlık moda geç"}
+          >
+            {isDark ? (
+              <Sun className="w-5 h-5" />
+            ) : (
+              <Moon className="w-5 h-5" />
+            )}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSnow}
+            className={`hover-elevate active-elevate-2 ${isSnowEnabled ? 'text-blue-400' : ''}`}
+            data-testid="button-snow-toggle"
+            title={isSnowEnabled ? "Kar efektini kapat" : "Kar efektini aç"}
+          >
+            <Snowflake className="w-5 h-5" />
+          </Button>
 
           <a
             href="https://discord.gg/haxarena"

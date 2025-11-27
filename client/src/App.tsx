@@ -4,6 +4,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "./lib/auth";
+import { useDarkMode } from "@/hooks/use-dark-mode";
+import { useSnowMode } from "@/hooks/use-snow-mode";
 import Snowfall from "@/components/Snowfall";
 import HomePage from "@/pages/home-page";
 import ActiveRoomsPage from "@/pages/active-rooms-page";
@@ -55,12 +57,17 @@ function Router() {
 }
 
 function App() {
+  // Initialize dark mode
+  useDarkMode();
+  // Initialize snow mode
+  const { isSnowEnabled } = useSnowMode();
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
-          <Snowfall />
+          {isSnowEnabled && <Snowfall />}
           <Router />
         </TooltipProvider>
       </AuthProvider>
