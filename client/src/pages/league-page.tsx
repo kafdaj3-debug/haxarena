@@ -178,14 +178,14 @@ export default function LeaguePage() {
       <main className="flex-1 py-12">
         <div className="container mx-auto px-4">
           <div className="mb-8">
-            <h1 className="text-4xl font-heading font-bold mb-4" data-testid="text-page-title">
+            <h1 className="text-4xl font-heading font-bold mb-4 bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent" data-testid="text-page-title">
               Lig
             </h1>
             <p className="text-muted-foreground">HaxArena Ligi puan durumu ve fikstür bilgileri</p>
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <div className="border rounded-lg p-2 bg-muted/30">
+            <div className="border-2 border-red-400/20 rounded-lg p-2 bg-muted/30 new-year-gradient">
               <TabsList className="w-full h-auto flex flex-wrap gap-2 bg-transparent">
                 <TabsTrigger value="standings" data-testid="tab-standings" className="flex-1 min-w-[140px]">
                   📈 Puan Durumu
@@ -212,9 +212,9 @@ export default function LeaguePage() {
             </div>
 
             <TabsContent value="standings" className="space-y-4">
-              <Card>
+              <Card className="new-year-gradient border-2 border-red-400/10">
                 <CardHeader>
-                  <CardTitle>Puan Durumu</CardTitle>
+                  <CardTitle className="bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent">Puan Durumu</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {teamsLoading ? (
@@ -404,7 +404,7 @@ export default function LeaguePage() {
                   {currentWeekMatches.length > 0 && (
                     <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
                       <CardHeader className="pb-4">
-                        <CardTitle className="text-2xl flex items-center gap-2">
+                        <CardTitle className="text-2xl flex items-center gap-2 bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent">
                           <Calendar className="w-6 h-6 text-primary" />
                           Bu Haftaki Maçlar
                         </CardTitle>
@@ -616,9 +616,9 @@ export default function LeaguePage() {
 
                   {/* Tüm Haftalar */}
                   {weeks.map((week) => (
-                  <Card key={week}>
+                  <Card key={week} className="new-year-gradient border-2 border-red-400/10">
                     <CardHeader>
-                      <CardTitle>{week}. Hafta</CardTitle>
+                      <CardTitle className="bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent">{week}. Hafta</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       {fixturesByWeek[parseInt(week)].map((fixture: any) => {
@@ -982,7 +982,7 @@ export default function LeaguePage() {
                     {sortedPlayers.length > 3 && (
                       <Card className="overflow-hidden">
                         <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
+                          <CardTitle className="flex items-center gap-2 bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent">
                             <span>⚽</span> Diğer Sıralamalar
                           </CardTitle>
                         </CardHeader>
@@ -1187,7 +1187,7 @@ export default function LeaguePage() {
                     {sortedPlayers.length > 3 && (
                       <Card className="overflow-hidden">
                         <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
+                          <CardTitle className="flex items-center gap-2 bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent">
                             <span>🎯</span> Diğer Sıralamalar
                           </CardTitle>
                         </CardHeader>
@@ -1389,7 +1389,7 @@ export default function LeaguePage() {
                     {sortedPlayers.length > 3 && (
                       <Card className="overflow-hidden">
                         <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
+                          <CardTitle className="flex items-center gap-2 bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent">
                             <span>🛡️</span> Diğer Sıralamalar
                           </CardTitle>
                         </CardHeader>
@@ -1591,7 +1591,7 @@ export default function LeaguePage() {
                     {sortedPlayers.length > 3 && (
                       <Card className="overflow-hidden">
                         <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
+                          <CardTitle className="flex items-center gap-2 bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent">
                             <span>🧤</span> Diğer Sıralamalar
                           </CardTitle>
                         </CardHeader>
@@ -1632,9 +1632,9 @@ export default function LeaguePage() {
             </TabsContent>
 
             <TabsContent value="totw" className="space-y-4">
-              <Card>
+              <Card className="new-year-gradient border-2 border-red-400/10">
                 <CardHeader>
-                  <CardTitle>Haftanın Kadrosu</CardTitle>
+                  <CardTitle className="bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent">Haftanın Kadrosu</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
