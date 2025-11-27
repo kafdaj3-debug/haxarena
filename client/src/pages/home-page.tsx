@@ -669,7 +669,9 @@ export default function HomePage() {
             <div className="space-y-8 md:space-y-12">
               {/* Maç Odaları */}
               <div>
-                <h2 className="text-2xl md:text-3xl font-heading font-bold mb-4 md:mb-6">Maç Odaları</h2>
+                <h2 className="text-2xl md:text-3xl font-heading font-bold mb-4 md:mb-6 bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent flex items-center gap-2">
+                  <span className="text-2xl sparkle">⚽</span> Maç Odaları
+                </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                   {allRooms.map((room, index) => (
                     <ActiveRoomCard
@@ -684,7 +686,9 @@ export default function HomePage() {
 
               {/* Hazırlık Odaları */}
               <div>
-                <h2 className="text-2xl md:text-3xl font-heading font-bold mb-4 md:mb-6">Hazırlık Odaları</h2>
+                <h2 className="text-2xl md:text-3xl font-heading font-bold mb-4 md:mb-6 bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent flex items-center gap-2">
+                  <span className="text-2xl sparkle">🎯</span> Hazırlık Odaları
+                </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                   {preparationRooms.map((room, index) => (
                     <ActiveRoomCard
