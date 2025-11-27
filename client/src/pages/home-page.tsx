@@ -81,9 +81,11 @@ export default function HomePage() {
             <div className="mb-4">
               <h1 className="text-3xl sm:text-4xl md:text-6xl font-heading font-bold mb-4 md:mb-6" data-testid="text-hero-title">
                 <span className="bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent">
-                  Mutlu Yıllar!
+                  Mutlu Yıllar! 🎄✨
                 </span>
-                <span className="block text-primary mt-2">HaxArena V6 Real Soccer'e Hoş Geldiniz</span>
+                <span className="block mt-2 bg-gradient-to-r from-red-400 via-green-400 via-yellow-300 to-red-400 bg-clip-text text-transparent font-bold text-2xl sm:text-3xl md:text-4xl sparkle">
+                  <span className="inline-block">🎉</span> HaxArena V6 Real Soccer'e Hoş Geldiniz <span className="inline-block">🎉</span>
+                </span>
               </h1>
             </div>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-6 md:mb-8 max-w-2xl mx-auto px-4">
