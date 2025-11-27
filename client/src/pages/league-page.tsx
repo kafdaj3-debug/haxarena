@@ -6,10 +6,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Trophy, Award, Users, Crown, Medal, Sparkles, Star } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import FormationView from "@/components/FormationView";
 import { buildApiUrl } from "@/lib/queryClient";
+
+// Format minute helper function - moved outside component for performance
+const formatMinute = (seconds: number): string => {
+  if (seconds === 0) return "0";
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  if (minutes > 0 && secs > 0) {
+    return `${minutes}.${String(secs).padStart(2, '0')}'`;
+  } else if (minutes > 0) {
+    return `${minutes}'`;
+  } else {
+    return `${secs}''`;
+  }
+};
 
 export default function LeaguePage() {
   const { user, logout, isLoading } = useAuth();
@@ -81,42 +95,50 @@ export default function LeaguePage() {
     retry: 1,
   });
 
-  // Group fixtures by week and sort by date
-  const fixturesByWeek = fixtures?.reduce((acc, fixture) => {
-    if (!acc[fixture.week]) {
-      acc[fixture.week] = [];
-    }
-    acc[fixture.week].push(fixture);
-    return acc;
-  }, {} as Record<number, any[]>) || {};
-
-  // Sort fixtures within each week by match date and time (earliest first - ascending order)
-  Object.keys(fixturesByWeek).forEach(week => {
-    fixturesByWeek[parseInt(week)].sort((a: any, b: any) => {
-      // Parse dates properly, handling timezone
-      const dateA = a.matchDate ? new Date(a.matchDate).getTime() : 0;
-      const dateB = b.matchDate ? new Date(b.matchDate).getTime() : 0;
-      
-      // If dates are equal, maintain original order or sort by team name
-      if (dateA === dateB) {
-        // If same date, sort by home team name for consistency
-        const nameA = a.homeTeam?.name || '';
-        const nameB = b.homeTeam?.name || '';
-        return nameA.localeCompare(nameB, 'tr');
+  // Group fixtures by week and sort by date - memoized for performance
+  const fixturesByWeek = useMemo(() => {
+    if (!fixtures) return {};
+    
+    const grouped = fixtures.reduce((acc, fixture) => {
+      if (!acc[fixture.week]) {
+        acc[fixture.week] = [];
       }
-      
-      // Earliest date first (ascending order: 4 Ocak before 5 Ocak)
-      return dateA - dateB;
+      acc[fixture.week].push(fixture);
+      return acc;
+    }, {} as Record<number, any[]>);
+
+    // Sort fixtures within each week by match date and time (earliest first - ascending order)
+    Object.keys(grouped).forEach(week => {
+      grouped[parseInt(week)].sort((a: any, b: any) => {
+        // Parse dates properly, handling timezone
+        const dateA = a.matchDate ? new Date(a.matchDate).getTime() : 0;
+        const dateB = b.matchDate ? new Date(b.matchDate).getTime() : 0;
+        
+        // If dates are equal, maintain original order or sort by team name
+        if (dateA === dateB) {
+          // If same date, sort by home team name for consistency
+          const nameA = a.homeTeam?.name || '';
+          const nameB = b.homeTeam?.name || '';
+          return nameA.localeCompare(nameB, 'tr');
+        }
+        
+        // Earliest date first (ascending order: 4 Ocak before 5 Ocak)
+        return dateA - dateB;
+      });
     });
-  });
 
-  // Sort weeks by week number (ascending: 1, 2, 3... 11)
-  const weeks = Object.keys(fixturesByWeek).sort((a, b) => {
-    return parseInt(a) - parseInt(b);
-  });
+    return grouped;
+  }, [fixtures]);
 
-  // Get current week's matches (this week)
-  const getCurrentWeekMatches = () => {
+  // Sort weeks by week number (ascending: 1, 2, 3... 11) - memoized
+  const weeks = useMemo(() => {
+    return Object.keys(fixturesByWeek).sort((a, b) => {
+      return parseInt(a) - parseInt(b);
+    });
+  }, [fixturesByWeek]);
+
+  // Get current week's matches (this week) - memoized for performance
+  const currentWeekMatches = useMemo(() => {
     if (!fixtures) return [];
     const now = new Date();
     const startOfWeek = new Date(now);
@@ -130,9 +152,7 @@ export default function LeaguePage() {
       const matchDate = new Date(fixture.matchDate);
       return matchDate >= startOfWeek && matchDate <= endOfWeek;
     }).sort((a: any, b: any) => new Date(a.matchDate).getTime() - new Date(b.matchDate).getTime());
-  };
-
-  const currentWeekMatches = getCurrentWeekMatches();
+  }, [fixtures]);
 
 
   // Loading state while checking auth
@@ -395,12 +415,25 @@ export default function LeaguePage() {
                       <CardContent className="space-y-4">
                         {currentWeekMatches.map((fixture: any) => {
                           // Ensure matchDate is always available, even after score update
+                          // Cache date calculations for performance
                           const matchDate = fixture.matchDate ? new Date(fixture.matchDate) : new Date();
-                          const isToday = matchDate.toDateString() === new Date().toDateString();
-                          const isPast = matchDate < new Date();
+                          const now = new Date();
+                          const todayString = now.toDateString();
+                          const isToday = matchDate.toDateString() === todayString;
+                          const isPast = matchDate < now;
                           const isBye = fixture.isBye;
                           const isPostponed = fixture.isPostponed;
                           const isForfeit = fixture.isForfeit;
+                          // Pre-format date string to avoid repeated formatting
+                          const formattedDate = matchDate.toLocaleString('tr-TR', {
+                            weekday: 'long',
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            timeZone: 'Europe/Istanbul'
+                          });
                           
                           return (
                             <div 
@@ -431,6 +464,7 @@ export default function LeaguePage() {
                                       src={fixture.homeTeam.logo} 
                                       alt={fixture.homeTeam.name} 
                                       className="w-14 h-14 object-contain"
+                                      loading="lazy"
                                     />
                                   ) : null}
                                   <div className="flex-1 text-right">
@@ -488,6 +522,7 @@ export default function LeaguePage() {
                                       src={fixture.awayTeam.logo} 
                                       alt={fixture.awayTeam.name} 
                                       className="w-14 h-14 object-contain"
+                                      loading="lazy"
                                     />
                                   ) : null}
                                 </div>
@@ -503,20 +538,7 @@ export default function LeaguePage() {
                                       {fixture.goals
                                         .filter((goal: any) => goal.isHomeTeam)
                                         .sort((a: any, b: any) => a.minute - b.minute)
-                                        .map((goal: any, idx: number) => {
-                                          const formatMinute = (seconds: number): string => {
-                                            if (seconds === 0) return "0";
-                                            const minutes = Math.floor(seconds / 60);
-                                            const secs = seconds % 60;
-                                            if (minutes > 0 && secs > 0) {
-                                              return `${minutes}.${String(secs).padStart(2, '0')}'`;
-                                            } else if (minutes > 0) {
-                                              return `${minutes}'`;
-                                            } else {
-                                              return `${secs}''`;
-                                            }
-                                          };
-                                          return (
+                                        .map((goal: any, idx: number) => (
                                             <div key={idx} className="text-xs flex items-center gap-2">
                                               <span className="font-medium">{formatMinute(goal.minute)}</span>
                                               <span>{goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
@@ -526,28 +548,14 @@ export default function LeaguePage() {
                                                 </span>
                                               )}
                                             </div>
-                                          );
-                                        })}
+                                          ))}
                                     </div>
                                     {/* Deplasman Takımı Golleri - Sağ Taraf */}
                                     <div className="space-y-1">
                                       {fixture.goals
                                         .filter((goal: any) => !goal.isHomeTeam)
                                         .sort((a: any, b: any) => a.minute - b.minute)
-                                        .map((goal: any, idx: number) => {
-                                          const formatMinute = (seconds: number): string => {
-                                            if (seconds === 0) return "0";
-                                            const minutes = Math.floor(seconds / 60);
-                                            const secs = seconds % 60;
-                                            if (minutes > 0 && secs > 0) {
-                                              return `${minutes}.${String(secs).padStart(2, '0')}'`;
-                                            } else if (minutes > 0) {
-                                              return `${minutes}'`;
-                                            } else {
-                                              return `${secs}''`;
-                                            }
-                                          };
-                                          return (
+                                        .map((goal: any, idx: number) => (
                                             <div key={idx} className="text-xs flex items-center gap-2 justify-end">
                                               <span>{goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
                                               {(goal.assistPlayerName || goal.assistPlayer) && (
@@ -557,8 +565,7 @@ export default function LeaguePage() {
                                               )}
                                               <span className="font-medium">{formatMinute(goal.minute)}</span>
                                             </div>
-                                          );
-                                        })}
+                                          ))}
                                     </div>
                                   </div>
                                 </div>
@@ -569,15 +576,7 @@ export default function LeaguePage() {
                                 <div className="flex items-center gap-2 text-sm">
                                   <Calendar className="w-4 h-4 text-muted-foreground" />
                                   <span className="font-medium">
-                                    {matchDate.toLocaleString('tr-TR', {
-                                      weekday: 'long',
-                                      day: 'numeric',
-                                      month: 'long',
-                                      year: 'numeric',
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                      timeZone: 'Europe/Istanbul'
-                                    })}
+                                    {formattedDate}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -626,6 +625,15 @@ export default function LeaguePage() {
                         const isBye = fixture.isBye;
                         const isPostponed = fixture.isPostponed;
                         const isForfeit = fixture.isForfeit;
+                        // Pre-format date string to avoid repeated formatting
+                        const formattedDate = fixture.matchDate ? new Date(fixture.matchDate).toLocaleString('tr-TR', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          timeZone: 'Europe/Istanbul'
+                        }) : '';
                         return (
                         <div 
                           key={fixture.id} 
@@ -647,6 +655,7 @@ export default function LeaguePage() {
                                   src={fixture.homeTeam.logo} 
                                   alt={fixture.homeTeam.name} 
                                   className="w-10 h-10 object-contain flex-shrink-0"
+                                  loading="lazy"
                                 />
                               ) : null}
                               <span className="font-medium text-left truncate">
@@ -693,6 +702,7 @@ export default function LeaguePage() {
                                   src={fixture.awayTeam.logo} 
                                   alt={fixture.awayTeam.name} 
                                   className="w-10 h-10 object-contain flex-shrink-0"
+                                  loading="lazy"
                                 />
                               ) : null}
                             </div>
@@ -701,14 +711,7 @@ export default function LeaguePage() {
                             <div className="mt-3 pt-3 border-t space-y-2">
                               <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                                 <Calendar className="w-4 h-4" />
-                                <span>{new Date(fixture.matchDate).toLocaleString('tr-TR', {
-                                  day: 'numeric',
-                                  month: 'long',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                  timeZone: 'Europe/Istanbul'
-                                })}</span>
+                                <span>{formattedDate}</span>
                               </div>
                               {isForfeit && (
                                 <div className="flex justify-center">
