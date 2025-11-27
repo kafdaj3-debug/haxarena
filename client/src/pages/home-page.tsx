@@ -80,7 +80,7 @@ export default function HomePage() {
           <div className="container mx-auto px-4 text-center relative z-10">
             <div className="mb-4">
               <h1 className="text-3xl sm:text-4xl md:text-6xl font-heading font-bold mb-4 md:mb-6" data-testid="text-hero-title">
-                <span className="bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent sparkle">
                   Mutlu Yıllar! 🎄✨
                 </span>
                 <span className="block mt-2 bg-gradient-to-r from-red-400 via-green-400 via-yellow-300 to-red-400 bg-clip-text text-transparent font-bold text-2xl sm:text-3xl md:text-4xl sparkle">
