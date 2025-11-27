@@ -79,14 +79,12 @@ export default function HomePage() {
           </div>
           <div className="container mx-auto px-4 text-center relative z-10">
             <div className="mb-4">
-              <span className="text-4xl md:text-6xl inline-block sparkle">🎉</span>
-              <h1 className="text-3xl sm:text-4xl md:text-6xl font-heading font-bold mb-4 md:mb-6 inline-block mx-4" data-testid="text-hero-title">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl font-heading font-bold mb-4 md:mb-6" data-testid="text-hero-title">
                 <span className="bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent">
                   Mutlu Yıllar!
                 </span>
                 <span className="block text-primary mt-2">HaxArena V6 Real Soccer'e Hoş Geldiniz</span>
               </h1>
-              <span className="text-4xl md:text-6xl inline-block sparkle">🎉</span>
             </div>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-6 md:mb-8 max-w-2xl mx-auto px-4">
               <span className="inline-block twinkle">🎄</span> Türkiye'nin en büyük HaxBall Real Soccer topluluğu <span className="inline-block twinkle">🎄</span>
