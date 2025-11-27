@@ -180,11 +180,6 @@ export default function HomePage() {
                         <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
                           Ravenclaw tarafında ise işler hiç yolunda gitmiyor. <span className="font-bold">2</span> haftadır mağlubiyet…
                         </p>
-                        <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-black dark:border-amber-200 p-4">
-                          <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                            Ve tabii ki takımın mutsuzluğunun kaynağı:
-                          </p>
-                        </div>
                       </div>
                     </div>
 
@@ -315,7 +310,7 @@ export default function HomePage() {
                   {/* Brezilya Haberi */}
                   <div className="border-t-2 border-black/20 dark:border-amber-200/20 pt-6 mt-6">
                     <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4 text-black dark:text-amber-100 leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      🇧🇷 Brezilya <span className="font-bold">3</span> – <span className="font-bold">11</span> FK Bodø/Glimt: "Bodø Durmuyor, Oyunu Turbo Moduna Aldı!"
+                      Brezilya <span className="font-bold">3</span> – <span className="font-bold">11</span> FK Bodø/Glimt: "Bodø Durmuyor, Oyunu Turbo Moduna Aldı!"
                     </h2>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
