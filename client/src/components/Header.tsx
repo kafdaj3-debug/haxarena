@@ -47,12 +47,21 @@ export default function Header({ user, onLogout }: HeaderProps) {
   const unreadCount = notifications?.filter(n => !n.read).length || 0;
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 new-year-gradient relative overflow-hidden">
+      {/* Yılbaşı dekorasyonları */}
+      <div className="absolute inset-0 pointer-events-none">
+        <span className="absolute top-2 left-10 text-yellow-400 text-xl sparkle">✨</span>
+        <span className="absolute top-2 right-20 text-red-500 text-lg twinkle">🎄</span>
+        <span className="absolute top-1 right-40 text-green-500 text-xl float">🎁</span>
+        <span className="absolute top-3 left-32 text-yellow-300 text-lg twinkle">⭐</span>
+      </div>
+      <div className="container mx-auto flex h-16 items-center justify-between px-4 relative z-10">
         <Link href="/">
           <div className="flex items-center gap-2 hover-elevate rounded-lg px-3 py-2 active-elevate-2 cursor-pointer" data-testid="link-home">
-            <div className="text-2xl font-heading font-bold text-primary">
-              HaxArena V6
+            <div className="text-2xl font-heading font-bold text-primary relative">
+              <span className="sparkle inline-block">🎉</span>
+              <span className="ml-2">HaxArena V6</span>
+              <span className="sparkle inline-block ml-2">🎉</span>
             </div>
           </div>
         </Link>

@@ -67,24 +67,39 @@ export default function HomePage() {
       <Header user={user} onLogout={logout} />
       
       <main className="flex-1">
-        <section className="relative bg-gradient-to-b from-card to-background py-12 md:py-20 border-b">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-heading font-bold mb-4 md:mb-6" data-testid="text-hero-title">
-              HaxArena V6 Real Soccer'e
-              <span className="block text-primary mt-2">Hoş Geldiniz</span>
-            </h1>
+        <section className="relative bg-gradient-to-b from-card to-background py-12 md:py-20 border-b new-year-gradient overflow-hidden">
+          {/* Yılbaşı dekorasyonları */}
+          <div className="absolute inset-0 pointer-events-none">
+            <span className="absolute top-10 left-10 text-yellow-400 text-4xl sparkle">✨</span>
+            <span className="absolute top-20 right-20 text-red-500 text-3xl twinkle">🎄</span>
+            <span className="absolute bottom-20 left-20 text-green-500 text-4xl float">🎁</span>
+            <span className="absolute top-40 right-40 text-yellow-300 text-3xl twinkle">⭐</span>
+            <span className="absolute bottom-40 right-10 text-red-400 text-4xl sparkle">🎊</span>
+            <span className="absolute top-60 left-1/4 text-green-400 text-3xl float">🎈</span>
+          </div>
+          <div className="container mx-auto px-4 text-center relative z-10">
+            <div className="mb-4">
+              <span className="text-4xl md:text-6xl inline-block sparkle">🎉</span>
+              <h1 className="text-3xl sm:text-4xl md:text-6xl font-heading font-bold mb-4 md:mb-6 inline-block mx-4" data-testid="text-hero-title">
+                <span className="bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent">
+                  Mutlu Yıllar!
+                </span>
+                <span className="block text-primary mt-2">HaxArena V6 Real Soccer'e Hoş Geldiniz</span>
+              </h1>
+              <span className="text-4xl md:text-6xl inline-block sparkle">🎉</span>
+            </div>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-6 md:mb-8 max-w-2xl mx-auto px-4">
-              Türkiye'nin en büyük HaxBall Real Soccer topluluğu
+              <span className="inline-block twinkle">🎄</span> Türkiye'nin en büyük HaxBall Real Soccer topluluğu <span className="inline-block twinkle">🎄</span>
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 px-4">
               <Link href="/aktif-odalar" className="w-full sm:w-auto">
-                <Button size="lg" className="hover-elevate active-elevate-2 w-full sm:w-auto" data-testid="button-hero-rooms">
-                  Aktif Odalara Katıl
+                <Button size="lg" className="hover-elevate active-elevate-2 w-full sm:w-auto bg-gradient-to-r from-red-500 to-green-500 hover:from-red-600 hover:to-green-600 text-white shadow-lg glow" data-testid="button-hero-rooms">
+                  <span className="mr-2">🎮</span> Aktif Odalara Katıl
                 </Button>
               </Link>
               <a href="https://discord.gg/haxarena" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="hover-elevate active-elevate-2 w-full sm:w-auto" data-testid="button-hero-discord">
-                  Discord'a Katıl
+                <Button size="lg" variant="outline" className="hover-elevate active-elevate-2 w-full sm:w-auto border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-white" data-testid="button-hero-discord">
+                  <span className="mr-2">🎉</span> Discord'a Katıl
                 </Button>
               </a>
             </div>
@@ -510,23 +525,29 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Duyuru Banner */}
-        <section className="relative overflow-hidden bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-y border-primary/20">
-          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] animate-[shimmer_3s_infinite]"></div>
+        {/* Duyuru Banner - Yılbaşı Temalı */}
+        <section className="relative overflow-hidden bg-gradient-to-r from-red-500/20 via-green-500/20 to-yellow-500/20 border-y-2 border-red-400/30 new-year-gradient">
+          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.1)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] animate-[shimmer_3s_infinite]"></div>
+          {/* Yılbaşı dekorasyonları */}
+          <div className="absolute inset-0 pointer-events-none">
+            <span className="absolute top-2 left-10 text-yellow-300 text-2xl sparkle">✨</span>
+            <span className="absolute bottom-2 right-20 text-red-400 text-xl twinkle">🎄</span>
+            <span className="absolute top-4 right-40 text-green-400 text-2xl float">🎁</span>
+          </div>
           <div className="container mx-auto px-4 py-6 md:py-8 relative z-10">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
               <div className="flex items-center gap-3 md:gap-4 flex-1">
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
-                    <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-primary" />
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-to-r from-red-500/30 to-green-500/30 flex items-center justify-center animate-pulse glow">
+                    <span className="text-2xl md:text-3xl sparkle">🎉</span>
                   </div>
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg md:text-xl font-bold text-foreground mb-1">
-                    35.000 TL Ödüllü Lig Başvuruları Devam Ediyor!
+                    <span className="inline-block twinkle">🎄</span> 35.000 TL Ödüllü Lig Başvuruları Devam Ediyor! <span className="inline-block twinkle">🎄</span>
                   </h3>
                   <p className="text-sm md:text-base text-muted-foreground">
-                    Lige katılmak ve detayları öğrenmek için Discord sunucumuza hemen katıl!
+                    Yeni yılda da birlikte! Lige katılmak ve detayları öğrenmek için Discord sunucumuza hemen katıl!
                   </p>
                 </div>
               </div>
@@ -538,10 +559,10 @@ export default function HomePage() {
               >
                 <Button 
                   size="lg" 
-                  className="hover-elevate active-elevate-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 group"
+                  className="hover-elevate active-elevate-2 bg-gradient-to-r from-red-500 to-green-500 hover:from-red-600 hover:to-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 group glow"
                   data-testid="button-announcement-discord"
                 >
-                  Discord'a Katıl
+                  <span className="mr-2">🎉</span> Discord'a Katıl
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </a>

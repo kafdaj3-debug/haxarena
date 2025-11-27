@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "./lib/auth";
+import Snowfall from "@/components/Snowfall";
 import HomePage from "@/pages/home-page";
 import ActiveRoomsPage from "@/pages/active-rooms-page";
 import VIPPage from "@/pages/vip-page";
@@ -59,6 +60,7 @@ function App() {
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
+          <Snowfall />
           <Router />
         </TooltipProvider>
       </AuthProvider>

@@ -109,8 +109,18 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Copyright */}
+        {/* Yılbaşı Mesajı */}
         <div className="mt-6 text-center">
+          <p className="text-lg font-bold mb-2 bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent">
+            <span className="inline-block sparkle">🎉</span> Mutlu Yıllar! <span className="inline-block sparkle">🎉</span>
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Yeni yılda da birlikte nice güzel maçlar oynayalım! <span className="inline-block twinkle">⚽</span>
+          </p>
+        </div>
+
+        {/* Copyright */}
+        <div className="mt-4 text-center">
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} HaxArena V6 Real Soccer. Tüm hakları saklıdır.
           </p>
