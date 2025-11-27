@@ -334,9 +334,19 @@
   }
 
   @keyframes sparkle {
-    0% { transform: rotate(0deg) scale(1); opacity: 1; }
-    50% { transform: rotate(180deg) scale(1.2); opacity: 0.8; }
-    100% { transform: rotate(360deg) scale(1); opacity: 1; }
+    0%, 100% { 
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 
+                   0 0 20px rgba(255, 255, 255, 0.3),
+                   0 0 30px rgba(255, 215, 0, 0.2);
+      opacity: 1; 
+    }
+    50% { 
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 
+                   0 0 30px rgba(255, 255, 255, 0.6),
+                   0 0 40px rgba(255, 215, 0, 0.4),
+                   0 0 50px rgba(220, 38, 38, 0.3);
+      opacity: 1; 
+    }
   }
 
   @keyframes float {
@@ -354,7 +364,7 @@
   }
 
   .sparkle {
-    animation: sparkle 3s linear infinite;
+    animation: sparkle 2s ease-in-out infinite;
   }
 
   .float {
