@@ -24,6 +24,7 @@ import MessagesPage from "@/pages/messages-page";
 import StatisticsPage from "@/pages/statistics-page";
 import PlayerDetailPage from "@/pages/player-detail-page";
 import ManagementLoginPage from "@/pages/management-login-page";
+import NewspaperPage from "@/pages/newspaper-page";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -51,6 +52,7 @@ function Router() {
       <Route path="/istatistikler" component={StatisticsPage} />
       <Route path="/stats" component={StatisticsPage} />
       <Route path="/oyuncu/:username" component={PlayerDetailPage} />
+      <Route path="/gazete" component={NewspaperPage} />
       <Route component={NotFound} />
     </Switch>
   );
