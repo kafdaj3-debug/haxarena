@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ActiveRoomCard from "@/components/ActiveRoomCard";
@@ -76,6 +76,47 @@ export default function HomePage() {
       (homeTeam.includes("gebze") && awayTeam.includes("trebol"))
     );
   });
+
+  // Takım logolarını teams API'sinden al ve maç verisiyle eşleştir
+  const trebolTeam = teams?.find((team: any) => 
+    team.name?.toLowerCase().includes("trebol")
+  );
+  const gebzeTeam = teams?.find((team: any) => 
+    team.name?.toLowerCase().includes("gebze")
+  );
+
+  // Logo yükleme durumları
+  const [homeLogoLoaded, setHomeLogoLoaded] = useState(false);
+  const [homeLogoError, setHomeLogoError] = useState(false);
+  const [awayLogoLoaded, setAwayLogoLoaded] = useState(false);
+  const [awayLogoError, setAwayLogoError] = useState(false);
+
+  // Maç verisindeki takım logolarını güncelle
+  const matchWithLogos = trebolGebzeMatch ? {
+    ...trebolGebzeMatch,
+    homeTeam: {
+      ...trebolGebzeMatch.homeTeam,
+      logo: trebolGebzeMatch.homeTeam?.logo || trebolTeam?.logo || (trebolGebzeMatch.homeTeam?.name?.toLowerCase().includes("trebol") ? trebolTeam?.logo : null)
+    },
+    awayTeam: {
+      ...trebolGebzeMatch.awayTeam,
+      logo: trebolGebzeMatch.awayTeam?.logo || gebzeTeam?.logo || (trebolGebzeMatch.awayTeam?.name?.toLowerCase().includes("gebze") ? gebzeTeam?.logo : null)
+    }
+  } : null;
+
+  const homeLogo = matchWithLogos?.homeTeam?.logo || trebolTeam?.logo;
+  const awayLogo = matchWithLogos?.awayTeam?.logo || gebzeTeam?.logo;
+
+  // Logo değiştiğinde state'i sıfırla
+  useEffect(() => {
+    setHomeLogoLoaded(false);
+    setHomeLogoError(false);
+  }, [homeLogo]);
+
+  useEffect(() => {
+    setAwayLogoLoaded(false);
+    setAwayLogoError(false);
+  }, [awayLogo]);
 
   const topScorers = leaderboard
     .sort((a, b) => b.totalGoals - a.totalGoals)
@@ -213,50 +254,68 @@ export default function HomePage() {
                       <div className="flex items-center justify-center gap-4 md:gap-8">
                         {/* Ev Sahibi Takım */}
                         <div className="flex flex-col items-center gap-2 flex-1">
-                          {trebolGebzeMatch?.homeTeam?.logo ? (
+                          {homeLogo && !homeLogoError ? (
                             <img 
-                              src={trebolGebzeMatch.homeTeam.logo} 
-                              alt={trebolGebzeMatch.homeTeam.name} 
+                              src={homeLogo} 
+                              alt={matchWithLogos?.homeTeam?.name || trebolTeam?.name || "Trebol FC"} 
                               className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                              onLoad={() => setHomeLogoLoaded(true)}
+                              onError={() => setHomeLogoError(true)}
+                              style={{ display: homeLogoLoaded ? 'block' : 'none' }}
                             />
-                          ) : (
+                          ) : null}
+                          {(!homeLogo || homeLogoError) && (
                             <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
                               <span className="text-xl">⚽</span>
                             </div>
                           )}
+                          {homeLogo && !homeLogoLoaded && !homeLogoError && (
+                            <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center animate-pulse">
+                              <span className="text-xl">⚽</span>
+                            </div>
+                          )}
                           <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
-                            {trebolGebzeMatch?.homeTeam?.name || "Trebol FC"}
+                            {matchWithLogos?.homeTeam?.name || trebolTeam?.name || "Trebol FC"}
                           </span>
                         </div>
 
                         {/* Skor */}
                         <div className="flex items-center gap-3">
                           <div className="text-3xl md:text-5xl font-bold text-green-600 dark:text-green-400">
-                            {trebolGebzeMatch?.homeScore ?? 8}
+                            {matchWithLogos?.homeScore ?? trebolGebzeMatch?.homeScore ?? 8}
                           </div>
                           <div className="text-2xl md:text-3xl font-bold text-black dark:text-amber-100">
                             -
                           </div>
                           <div className="text-3xl md:text-5xl font-bold text-red-600 dark:text-red-400">
-                            {trebolGebzeMatch?.awayScore ?? 0}
+                            {matchWithLogos?.awayScore ?? trebolGebzeMatch?.awayScore ?? 0}
                           </div>
                         </div>
 
                         {/* Deplasman Takımı */}
                         <div className="flex flex-col items-center gap-2 flex-1">
-                          {trebolGebzeMatch?.awayTeam?.logo ? (
+                          {awayLogo && !awayLogoError ? (
                             <img 
-                              src={trebolGebzeMatch.awayTeam.logo} 
-                              alt={trebolGebzeMatch.awayTeam.name} 
+                              src={awayLogo} 
+                              alt={matchWithLogos?.awayTeam?.name || gebzeTeam?.name || "Gebzespor"} 
                               className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                              onLoad={() => setAwayLogoLoaded(true)}
+                              onError={() => setAwayLogoError(true)}
+                              style={{ display: awayLogoLoaded ? 'block' : 'none' }}
                             />
-                          ) : (
+                          ) : null}
+                          {(!awayLogo || awayLogoError) && (
                             <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
                               <span className="text-xl">⚽</span>
                             </div>
                           )}
+                          {awayLogo && !awayLogoLoaded && !awayLogoError && (
+                            <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center animate-pulse">
+                              <span className="text-xl">⚽</span>
+                            </div>
+                          )}
                           <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
-                            {trebolGebzeMatch?.awayTeam?.name || "Gebzespor"}
+                            {matchWithLogos?.awayTeam?.name || gebzeTeam?.name || "Gebzespor"}
                           </span>
                         </div>
                       </div>
