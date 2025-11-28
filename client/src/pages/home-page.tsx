@@ -19,15 +19,15 @@ export default function HomePage() {
   const allRooms = [
     {
       matchName: "Galatasaray vs Fenerbahçe",
-      link: "https://www.haxball.com/play?c=ypTYXP0WvG4"
+      link: "https://www.haxball.com/play?c=VTSdPjjhQR4"
     },
     {
       matchName: "Karşıyaka vs Göztepe",
-      link: "https://www.haxball.com/play?c=ZkcM_hKao5I"
+      link: "https://www.haxball.com/play?c=QktKkxbQu2c"
     },
     {
       matchName: "Kocaelispor vs Gaziantepspor",
-      link: "https://www.haxball.com/play?c=NOeHL2fPZ1o"
+      link: "https://www.haxball.com/play?c=os5zawLMUJA"
     }
   ];
 
@@ -42,11 +42,11 @@ export default function HomePage() {
     },
     {
       matchName: "HaxArena Hazırlık Odası 3",
-      link: "https://www.haxball.com/play?c=iGpuVhRM4Uo"
+      link: "https://www.haxball.com/play?c=bNclxMUv1rY"
     },
     {
       matchName: "HaxArena Hazırlık Odası 4",
-      link: "https://www.haxball.com/play?c=BS2BiKgYAGI"
+      link: "https://www.haxball.com/play?c=4vZhwo4j50c"
     }
   ];
 
