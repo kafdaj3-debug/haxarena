@@ -261,19 +261,12 @@ export default function HomePage() {
                               className="w-16 h-16 md:w-20 md:h-20 object-contain"
                               onLoad={() => setHomeLogoLoaded(true)}
                               onError={() => setHomeLogoError(true)}
-                              style={{ display: homeLogoLoaded ? 'block' : 'none' }}
                             />
-                          ) : null}
-                          {(!homeLogo || homeLogoError) && (
+                          ) : (!homeLogo || homeLogoError) ? (
                             <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
                               <span className="text-xl">⚽</span>
                             </div>
-                          )}
-                          {homeLogo && !homeLogoLoaded && !homeLogoError && (
-                            <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center animate-pulse">
-                              <span className="text-xl">⚽</span>
-                            </div>
-                          )}
+                          ) : null}
                           <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
                             {matchWithLogos?.homeTeam?.name || trebolTeam?.name || "Trebol FC"}
                           </span>
@@ -301,19 +294,12 @@ export default function HomePage() {
                               className="w-16 h-16 md:w-20 md:h-20 object-contain"
                               onLoad={() => setAwayLogoLoaded(true)}
                               onError={() => setAwayLogoError(true)}
-                              style={{ display: awayLogoLoaded ? 'block' : 'none' }}
                             />
-                          ) : null}
-                          {(!awayLogo || awayLogoError) && (
+                          ) : (!awayLogo || awayLogoError) ? (
                             <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
                               <span className="text-xl">⚽</span>
                             </div>
-                          )}
-                          {awayLogo && !awayLogoLoaded && !awayLogoError && (
-                            <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center animate-pulse">
-                              <span className="text-xl">⚽</span>
-                            </div>
-                          )}
+                          ) : null}
                           <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
                             {matchWithLogos?.awayTeam?.name || gebzeTeam?.name || "Gebzespor"}
                           </span>
