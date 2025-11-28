@@ -7,7 +7,7 @@ import LiveChat from "@/components/LiveChat";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Trophy, MessageSquare, Shield, Sparkles, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { Trophy, MessageSquare, Shield, Sparkles, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
@@ -15,7 +15,6 @@ import { tr } from "date-fns/locale";
 
 export default function HomePage() {
   const { user, logout } = useAuth();
-  const [currentPage, setCurrentPage] = useState(1);
   const allRooms = [
     {
       matchName: "Galatasaray vs Fenerbahçe",
@@ -58,65 +57,6 @@ export default function HomePage() {
     queryKey: ["/api/league/stats/leaderboard"],
   });
 
-  // Fikstür ve takım verilerini çek
-  const { data: fixtures } = useQuery<any[]>({
-    queryKey: ["/api/league/fixtures"],
-  });
-
-  const { data: teams } = useQuery<any[]>({
-    queryKey: ["/api/league/teams"],
-  });
-
-  // Trebol FC vs Gebzespor maçını bul
-  const trebolGebzeMatch = fixtures?.find((fixture: any) => {
-    const homeTeam = fixture.homeTeam?.name?.toLowerCase() || "";
-    const awayTeam = fixture.awayTeam?.name?.toLowerCase() || "";
-    return (
-      (homeTeam.includes("trebol") && awayTeam.includes("gebze")) ||
-      (homeTeam.includes("gebze") && awayTeam.includes("trebol"))
-    );
-  });
-
-  // Takım logolarını teams API'sinden al ve maç verisiyle eşleştir
-  const trebolTeam = teams?.find((team: any) => 
-    team.name?.toLowerCase().includes("trebol")
-  );
-  const gebzeTeam = teams?.find((team: any) => 
-    team.name?.toLowerCase().includes("gebze")
-  );
-
-  // Logo yükleme durumları
-  const [homeLogoLoaded, setHomeLogoLoaded] = useState(false);
-  const [homeLogoError, setHomeLogoError] = useState(false);
-  const [awayLogoLoaded, setAwayLogoLoaded] = useState(false);
-  const [awayLogoError, setAwayLogoError] = useState(false);
-
-  // Maç verisindeki takım logolarını güncelle
-  const matchWithLogos = trebolGebzeMatch ? {
-    ...trebolGebzeMatch,
-    homeTeam: {
-      ...trebolGebzeMatch.homeTeam,
-      logo: trebolGebzeMatch.homeTeam?.logo || trebolTeam?.logo || (trebolGebzeMatch.homeTeam?.name?.toLowerCase().includes("trebol") ? trebolTeam?.logo : null)
-    },
-    awayTeam: {
-      ...trebolGebzeMatch.awayTeam,
-      logo: trebolGebzeMatch.awayTeam?.logo || gebzeTeam?.logo || (trebolGebzeMatch.awayTeam?.name?.toLowerCase().includes("gebze") ? gebzeTeam?.logo : null)
-    }
-  } : null;
-
-  const homeLogo = matchWithLogos?.homeTeam?.logo || trebolTeam?.logo;
-  const awayLogo = matchWithLogos?.awayTeam?.logo || gebzeTeam?.logo;
-
-  // Logo değiştiğinde state'i sıfırla
-  useEffect(() => {
-    setHomeLogoLoaded(false);
-    setHomeLogoError(false);
-  }, [homeLogo]);
-
-  useEffect(() => {
-    setAwayLogoLoaded(false);
-    setAwayLogoError(false);
-  }, [awayLogo]);
 
   const topScorers = leaderboard
     .sort((a, b) => b.totalGoals - a.totalGoals)
@@ -170,36 +110,6 @@ export default function HomePage() {
         <section className="py-12 md:py-16 bg-gradient-to-b from-amber-50/5 to-amber-50/10 dark:from-amber-950/10 dark:to-amber-950/5">
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto">
-              
-              {/* Sayfa Geçiş Kontrolü */}
-              <div className="flex items-center justify-center gap-4 mb-6">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(1)}
-                  disabled={currentPage === 1}
-                  className="hover-elevate active-elevate-2"
-                >
-                  <ChevronLeft className="w-4 h-4 mr-1" />
-                  Önceki
-                </Button>
-                <div className="text-sm md:text-base font-mono text-black/70 dark:text-amber-200/70 px-4 py-2 bg-amber-100/50 dark:bg-amber-900/30 rounded-lg border border-amber-300 dark:border-amber-700">
-                  {currentPage}/2
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(2)}
-                  disabled={currentPage === 2}
-                  className="hover-elevate active-elevate-2"
-                >
-                  Sonraki
-                  <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </div>
-
-              {/* SAYFA 1 */}
-              {currentPage === 1 && (
               <div className="relative bg-gradient-to-br from-amber-50 via-amber-50/95 to-amber-100/90 dark:from-amber-900/30 dark:via-amber-900/20 dark:to-amber-800/30 border-4 border-amber-800/30 dark:border-amber-700/40 shadow-2xl p-6 md:p-10 lg:p-12 transform rotate-0 hover:rotate-0 transition-all duration-300">
                 {/* Eski kağıt dokusu efekti */}
                 <div className="absolute inset-0 opacity-10 dark:opacity-5" style={{
@@ -225,7 +135,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Ana Başlık - Sayfa 1 */}
+                {/* Ana Başlık */}
                 <div className="relative mb-6">
                   <div className="mb-3">
                     <span className="inline-block bg-black dark:bg-white text-white dark:text-black px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
@@ -233,355 +143,148 @@ export default function HomePage() {
                     </span>
                   </div>
                   
-                  {/* Spot */}
-                  <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500">
-                    <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      Spot: Haftalardır sosyal medyada "atışma ligi" kuran Trebol FC ile Gebzespor, sonunda sahada karşılaştı. Sonuç? Klavyede başlayan rekabet sahada farklı bitti…
+                  <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    🎙️ Dur, Devam Etme! Pause Krizi Sahayı Karıştırdı!
+                  </h1>
+                  <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    Fear The Beard <span className="font-bold text-green-600 dark:text-green-400">5</span> – <span className="font-bold text-red-600 dark:text-red-400">12</span> Strasbourg
+                  </h2>
+
+                  {/* Maç Özeti */}
+                  <div className="mb-6">
+                    <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>D</span>
+                      ün akşam lig tarihinin en tartışmalı, en komik ve en "pause'lu" maçlarından biri oynandı. Skordan çok duraklama tuşunun konuşulduğu bu efsane karşılaşmada, rakipler her golden sonra birbirlerine alaycı şekilde "pause" isteyerek hem seyircileri hem hakemi sinir krizine sürükledi. Hakemlerin tek yaptığı ise çaresizce "Kardeşim bir oynayın ya…" bakışı atmak oldu.
                     </p>
                   </div>
 
-                  <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    ⚽ Klavyede Başlayan Rekabet Sahada Farklı Bitti!
-                  </h1>
-                  <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    Trebol FC <span className="font-bold text-green-600 dark:text-green-400">{trebolGebzeMatch?.homeScore ?? 8}</span> – <span className="font-bold text-red-600 dark:text-red-400">{trebolGebzeMatch?.awayScore ?? 0}</span> Gebzespor: Sosyal Medya Atışmaları Sahada Sonuç Vermedi
-                  </h2>
-
-                  {/* Trebol FC vs Gebzespor Haberi */}
-                  <div className="mt-6">
-                    {/* Maç Skoru Görseli */}
-                    <div className="mb-6 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
-                      <div className="flex items-center justify-center gap-4 md:gap-8">
-                        {/* Ev Sahibi Takım */}
-                        <div className="flex flex-col items-center gap-2 flex-1">
-                          {homeLogo && !homeLogoError ? (
-                            <img 
-                              src={homeLogo} 
-                              alt={matchWithLogos?.homeTeam?.name || trebolTeam?.name || "Trebol FC"} 
-                              className="w-16 h-16 md:w-20 md:h-20 object-contain"
-                              onLoad={() => setHomeLogoLoaded(true)}
-                              onError={() => setHomeLogoError(true)}
-                            />
-                          ) : (!homeLogo || homeLogoError) ? (
-                            <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                              <span className="text-xl">⚽</span>
-                            </div>
-                          ) : null}
-                          <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
-                            {matchWithLogos?.homeTeam?.name || trebolTeam?.name || "Trebol FC"}
-                          </span>
-                        </div>
-
-                        {/* Skor */}
-                        <div className="flex items-center gap-3">
-                          <div className="text-3xl md:text-5xl font-bold text-green-600 dark:text-green-400">
-                            {matchWithLogos?.homeScore ?? trebolGebzeMatch?.homeScore ?? 8}
-                          </div>
-                          <div className="text-2xl md:text-3xl font-bold text-black dark:text-amber-100">
-                            -
-                          </div>
-                          <div className="text-3xl md:text-5xl font-bold text-red-600 dark:text-red-400">
-                            {matchWithLogos?.awayScore ?? trebolGebzeMatch?.awayScore ?? 0}
-                          </div>
-                        </div>
-
-                        {/* Deplasman Takımı */}
-                        <div className="flex flex-col items-center gap-2 flex-1">
-                          {awayLogo && !awayLogoError ? (
-                            <img 
-                              src={awayLogo} 
-                              alt={matchWithLogos?.awayTeam?.name || gebzeTeam?.name || "Gebzespor"} 
-                              className="w-16 h-16 md:w-20 md:h-20 object-contain"
-                              onLoad={() => setAwayLogoLoaded(true)}
-                              onError={() => setAwayLogoError(true)}
-                            />
-                          ) : (!awayLogo || awayLogoError) ? (
-                            <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                              <span className="text-xl">⚽</span>
-                            </div>
-                          ) : null}
-                          <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
-                            {matchWithLogos?.awayTeam?.name || gebzeTeam?.name || "Gebzespor"}
-                          </span>
-                        </div>
-                      </div>
+                  {/* Maçın Özeti Bölümü */}
+                  <div className="mb-6">
+                    <h3 className="text-xl md:text-2xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      📰 Maçın Özeti: Pause Tufanı, Gol Sağanağı
+                    </h3>
+                    <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      Maç daha 3. dakikada "ben buradayım" diye bağırdı. Jélavic–Sergen ikilisinin 2.42'deki golüyle Fear The Beard öne geçer gibi oldu ama Strasbourg'un cevabı gecikmedi.
+                    </p>
+                    <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      Sonra? İşte o andan itibaren maç futbol değil, gol + pause + alay üçgeninde bir tiyatroya dönüştü.
+                    </p>
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 p-4 mt-4">
+                      <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        Tribünler?
+                      </p>
+                      <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        Efsane.
+                      </p>
+                      <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mt-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Her pause istemesinde "PAUSE PAUSE PAUSE!" tezahüratıyla adeta maçın akışını sabote ettiler.
+                      </p>
                     </div>
+                  </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                      <div className="space-y-4">
-                        <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>L</span>
-                          igin başından beri sosyal medyada "tatlı sert" göndermeleriyle gündeme oturan Trebol FC ile Gebzespor, haftanın merakla beklenen maçında karşı karşıya geldi. Ancak karşılaşma, skor tabelasında pek de "tatlı" durmadı: Trebol FC 8 – 0 Gebzespor!
-                        </p>
-                        <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Maç sonrası Trebol cephesi kutlama yaparken, sosyal medyada iddialı açıklamalarıyla bilinen Gebzespor kaptanı, mağlubiyeti şöyle değerlendirdi:
-                        </p>
-                        <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-black dark:border-amber-200 p-4 mt-4">
-                          <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                            "Bir kişi eksiktik, yenmek kolay tabii."
-                          </p>
-                        </div>
-                      </div>
-                      <div className="space-y-4">
-                        <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Bu açıklama sonrası Trebol taraftarları sosyal medyayı salladı. En çok beğeni alan yorumlardan bazıları şöyle:
-                        </p>
-                        <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-black dark:border-amber-200 p-4">
+                  {/* Gol Dakikaları */}
+                  <div className="mb-6 border-t-2 border-black/20 dark:border-amber-200/20 pt-6">
+                    <h3 className="text-xl md:text-2xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      ⚽ Gol Dakikaları – Skordan Fazla Olay Var
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="text-lg md:text-xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                          Fear The Beard Gol Dakikaları:
+                        </h4>
+                        <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-green-500 p-4">
                           <ul className="space-y-2 text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            <li>• "Biz de gol atarken bir kişi eksiktik, kaleciyi kullanmadık zaten."</li>
-                            <li>• "Hocamız devre arasında bir kişiyi daha eksiltelim diye düşündü ama ayıp olur dedik."</li>
-                            <li>• "Biz de 8 gol atarken hep bir kişi fazlaydık: Motivasyon!"</li>
+                            <li>• 2.42' Jélavic (Asist: sergenyalcın)</li>
+                            <li>• 3.25' Dwyte</li>
+                            <li>• 9.24' Gökdeniz</li>
+                            <li>• 33.46' Jélavic (Asist: ross)</li>
+                            <li>• 34.25' sergenyalcın</li>
                           </ul>
                         </div>
-                        <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-black dark:border-amber-200 p-4 mt-4">
-                          <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                            Trebol FC teknik ekibi:
-                          </p>
-                          <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            "Sosyal medyada çok koştular, sahada biraz yorulmuş olabilirler."
-                          </p>
+                      </div>
+                      
+                      <div>
+                        <h4 className="text-lg md:text-xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                          Strasbourg Gol Dakikaları:
+                        </h4>
+                        <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-red-500 p-4">
+                          <ul className="space-y-2 text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            <li>• 2.26' asilsio (Asist: Rafael Leão.)</li>
+                            <li>• 8.13' Rafael Leão (Asist: Yunus Akgün)</li>
+                            <li>• 13.49' Rafael Leão</li>
+                            <li>• 22.49' WZ9 (Asist: Rafael Leão)</li>
+                            <li>• 28.42' Rafael Leão (Asist: Yunus Akgün)</li>
+                            <li>• 30.08' WZ9 (Asist: Rafael Leão)</li>
+                            <li>• 31.27' Friedenreich (KK)</li>
+                            <li>• 33.04' Rafael Leão (Asist: Cherki)</li>
+                            <li>• 35.04' WZ9 (Asist: Yunus Akgün)</li>
+                            <li>• 36.26' Yunus Akgün</li>
+                            <li>• 37.19' Stoycho (KK)</li>
+                            <li>• 39.03' EVELYИ (Asist: myth)</li>
+                          </ul>
                         </div>
-                        <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-orange-500 p-4 mt-4">
-                          <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            Gebzespor taraftarları ise sonuçtan memnun olmasa da takımlarının arkasında durmaya devam ediyor. Ancak camianın ortak görüşü şu şekilde özetlenebilir:
-                          </p>
-                          <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mt-2 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
-                            "Bir sonraki maç tam kadro geliyoruz. Tam kadro gelince 8 olmaz… 7 olur, 6 olur. O kadar da değil."
-                          </p>
-                        </div>
                       </div>
                     </div>
                   </div>
-                  </div>
 
-                  {/* Puan Durumu Tablosu */}
-                  {teams && teams.length > 0 && (
-                    <div className="border-t-2 border-black/20 dark:border-amber-200/20 pt-6 mt-6">
-                      <h3 className="text-xl md:text-2xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        📊 Puan Durumu
-                      </h3>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-xs md:text-sm">
-                          <thead>
-                            <tr className="border-b-2 border-black dark:border-amber-200">
-                              <th className="text-left p-2 font-semibold text-black dark:text-amber-100">#</th>
-                              <th className="text-left p-2 font-semibold text-black dark:text-amber-100">Takım</th>
-                              <th className="text-center p-2 font-semibold text-black dark:text-amber-100">O</th>
-                              <th className="text-center p-2 font-semibold text-black dark:text-amber-100">G</th>
-                              <th className="text-center p-2 font-semibold text-black dark:text-amber-100">B</th>
-                              <th className="text-center p-2 font-semibold text-black dark:text-amber-100">M</th>
-                              <th className="text-center p-2 font-semibold text-black dark:text-amber-100">A</th>
-                              <th className="text-center p-2 font-semibold text-black dark:text-amber-100">Y</th>
-                              <th className="text-center p-2 font-semibold text-black dark:text-amber-100">AV</th>
-                              <th className="text-center p-2 font-semibold text-black dark:text-amber-100">P</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {teams.slice(0, 10).map((team, index) => {
-                              const position = index + 1;
-                              const isChampionsLeague = position <= 4;
-                              const isPlayOff = position >= 5 && position <= 12;
-                              const isEuropaLeague = position >= 13 && position <= 16;
-                              const isRelegation = position >= 17 && position <= 21;
-                              
-                              let rowClass = "hover:bg-muted/50";
-                              
-                              if (isChampionsLeague) {
-                                rowClass = "bg-gradient-to-r from-blue-600/20 to-blue-700/10 border-l-4 border-blue-600";
-                              } else if (isPlayOff) {
-                                rowClass = "bg-gradient-to-r from-blue-400/15 to-blue-500/8 border-l-4 border-blue-400";
-                              } else if (isEuropaLeague) {
-                                rowClass = "bg-gradient-to-r from-orange-500/20 to-orange-600/10 border-l-4 border-orange-500";
-                              } else if (isRelegation) {
-                                rowClass = "bg-gradient-to-r from-red-700/20 to-red-800/10 border-l-4 border-red-700";
-                              }
-                              
-                              return (
-                                <tr 
-                                  key={team.id} 
-                                  className={`border-b transition-colors ${rowClass}`}
-                                >
-                                  <td className="p-2 font-bold text-black dark:text-amber-100">{position}</td>
-                                  <td className="p-2">
-                                    <div className="flex items-center gap-2">
-                                      {team.logo && (
-                                        <img 
-                                          src={team.logo} 
-                                          alt={team.name} 
-                                          className="w-6 h-6 object-contain"
-                                        />
-                                      )}
-                                      <span className="font-medium text-black dark:text-amber-100">{team.name}</span>
-                                    </div>
-                                  </td>
-                                  <td className="p-2 text-center text-black dark:text-amber-100">{team.played || 0}</td>
-                                  <td className="p-2 text-center text-black dark:text-amber-100">{team.won || 0}</td>
-                                  <td className="p-2 text-center text-black dark:text-amber-100">{team.drawn || 0}</td>
-                                  <td className="p-2 text-center text-black dark:text-amber-100">{team.lost || 0}</td>
-                                  <td className="p-2 text-center text-black dark:text-amber-100">{team.goalsFor || 0}</td>
-                                  <td className="p-2 text-center text-black dark:text-amber-100">{team.goalsAgainst || 0}</td>
-                                  <td className="p-2 text-center text-black dark:text-amber-100">{team.goalDifference || 0}</td>
-                                  <td className="p-2 text-center font-bold text-black dark:text-amber-100">{team.points || 0}</td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  )}
-
-                {/* Alt Bilgi - Sayfa 1 */}
-                <div className="relative border-t border-black/10 dark:border-amber-200/10 pt-4 mt-6">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-xs md:text-sm font-mono text-black/50 dark:text-amber-200/50">
-                    <div>Sayfa 1 | HaxArena V6 Real Soccer</div>
-                    <div>haxarena.web.tr</div>
-                  </div>
-                </div>
-              </div>
-              )}
-
-              {/* SAYFA 2 - Cassé Haberi */}
-              {currentPage === 2 && (
-              <div className="relative bg-gradient-to-br from-amber-50 via-amber-50/95 to-amber-100/90 dark:from-amber-900/30 dark:via-amber-900/20 dark:to-amber-800/30 border-4 border-amber-800/30 dark:border-amber-700/40 shadow-2xl p-6 md:p-10 lg:p-12 transform rotate-0 hover:rotate-0 transition-all duration-300">
-                {/* Eski kağıt dokusu efekti */}
-                <div className="absolute inset-0 opacity-10 dark:opacity-5" style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-                  backgroundSize: '200px 200px'
-                }}></div>
-                
-                {/* Gazete Başlığı - Sayfa 2 */}
-                <div className="relative border-b-4 border-black dark:border-amber-100 pb-3 mb-6">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
-                    <div className="text-xs md:text-sm font-mono text-black/70 dark:text-amber-200/70">
-                      {new Date().toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                    </div>
-                    <div className="text-xs md:text-sm font-mono text-black/70 dark:text-amber-200/70">
-                      Fiyat: 2.50 TL
-                    </div>
-                  </div>
-                  <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-center tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    HAXARENA GAZETESİ
-                  </h2>
-                  <div className="text-center text-xs md:text-sm mt-2 text-black/60 dark:text-amber-200/60 font-serif italic">
-                    Türkiye'nin En Büyük HaxBall Real Soccer Haber Kaynağı
-                  </div>
-                </div>
-
-                {/* Ana Başlık ve Görsel - Sayfa 2 */}
-                <div className="relative mb-6">
-                  <div className="mb-3">
-                    <span className="inline-block bg-black dark:bg-white text-white dark:text-black px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
-                      Özel Haber
-                    </span>
-                  </div>
-                  <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-3 leading-tight text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    📰 ŞOK ŞOK ŞOK! Ligin Gol Kralı Cassé Sırra Kadem Bastı!
-                  </h1>
-                  <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    Los Infiernos'un yıldız futbolcusu Cassé, adeta "topu aldı, şehirden çıktı" diyerek ortadan kayboldu!
-                  </h2>
-                  <div className="w-full h-64 md:h-96 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-700 rounded-lg mb-4 overflow-hidden relative border-2 border-black/30 dark:border-amber-200/40">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center p-8">
-                        <div className="text-6xl md:text-8xl mb-4">🔍</div>
-                        <p className="text-lg md:text-xl font-serif text-black/90 dark:text-amber-100/90 font-bold">
-                          "Nerede Olduğu Bilinmiyor!"
-                        </p>
-                        <p className="text-sm md:text-base font-sans text-black/70 dark:text-amber-200/70 mt-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Los Infiernos taraftarları güne şokla uyandı
-                        </p>
-                      </div>
-                    </div>
-                    {/* Görsel üzerine overlay efekti */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                  </div>
-                  <p className="text-xs md:text-sm text-black/60 dark:text-amber-200/60 font-serif mb-4">
-                    Fotoğraf: Los Infiernos Kulübü - Cassé'nin Son Görüldüğü Yer
-                  </p>
-                </div>
-
-                {/* İçerik Kolonları - Sayfa 2 */}
-                <div className="relative mb-6">
-                  <div className="mb-4 pb-2 border-b-2 border-black/30 dark:border-amber-200/30">
-                    <h3 className="text-xl md:text-2xl font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      Haberin Ayrıntıları:
+                  {/* Sahanın En Saçma Anları */}
+                  <div className="mb-6 border-t-2 border-black/20 dark:border-amber-200/20 pt-6">
+                    <h3 className="text-xl md:text-2xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      🤦 Sahanın En Saçma Anları
                     </h3>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mt-6">
+                    
                     <div className="space-y-4">
-                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>L</span>
-                        os Infiernos taraftarları güne şokla uyandı. Ligin gol kralı Cassé, dün akşam antrenmandan sonra "bir hava alıp geleceğim" diyerek tesislerden çıktı ve… bir daha dönmedi!
-                      </p>
-                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-black dark:border-amber-200 p-4 mt-4">
+                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-orange-500 p-4">
                         <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          Nerede olduğu bilinmiyor:
+                          1) Fear The Beard'ın Gol Yedikten Sonra "LAN BI SAHNEYİ DURDURUN!" Demesi
                         </p>
                         <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Kulüp yetkilileri, Cassé'nin izini sürmek için GPS, drone ve mahalle bekçilerine kadar her kaynağı devreye soktu ama sonuç: koskoca bir hiç!
+                          Kaleci yere çöküp "Ben çıkıyorum abi yeter" moduna geçti.
                         </p>
                       </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-black dark:border-amber-200 p-4">
+                      
+                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-orange-500 p-4">
                         <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          Telefonları açmıyor:
+                          2) Strasbourg'un Golden Sonra Rakip Defansa Dönüp "AĞLAMA LAN" İşareti Yapması
                         </p>
-                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Menajeri, "Son aramamda çaldı, sonra bir daha çalmadı… muhtemelen şarjı bitti ya da beni görünce kapattı." diyerek durumu özetledi.
+                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          Defans oyuncusu cevap veriyor:
+                        </p>
+                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans italic" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          "Sende yürek yok, pause'a güveniyorsun!"
                         </p>
                       </div>
-                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-black dark:border-amber-200 p-4 mt-4">
+                      
+                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-orange-500 p-4">
                         <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          Taraftar panikte:
+                          3) Kendi Kalesine Atılan Goller
+                        </p>
+                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          Biri kendi kalesine gol atınca takımı bağırıyor:
+                        </p>
+                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans italic mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          "S**** oğlum ne yaptın!"
                         </p>
                         <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Sosyal medyada taraftarlar <span className="font-bold text-primary">#CasséNerede</span> etiketiyle kampanya başlattı. Bazı kullanıcılar oyuncunun Mars'a taşındığını, bazıları ise gizlice başka takımlarla görüşmeye gittiğini iddia ediyor.
+                          Adam cevap veriyor:
+                        </p>
+                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans italic" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          "Pause sandım lan, beynim dondu!"
                         </p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Alt Bölümler - Sayfa 2 */}
-                <div className="relative border-t-2 border-black/20 dark:border-amber-200/20 pt-6 mt-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                    <div>
-                      <h3 className="text-lg md:text-xl font-bold mb-2 border-b border-black/20 dark:border-amber-200/20 pb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        Gol Krallığı
-                      </h3>
-                      {topScorers.length > 0 ? (
-                        <p className="text-sm md:text-base font-serif text-black/80 dark:text-amber-200/80" style={{ fontFamily: "'Crimson Text', serif" }}>
-                          Ligin gol kralı <span className="font-bold">{topScorers[0].username || 'Bilinmeyen'}</span> {topScorers[0].totalGoals || 0} gol ile zirvede yer alıyor. {topScorers[0].username || 'Bu oyuncu'} bu sezon gösterdiği performansla taraftarların dikkatini çekiyor ve ligdeki diğer oyuncular için zorlu bir rakip olmaya devam ediyor.
-                        </p>
-                      ) : (
-                        <p className="text-sm md:text-base font-serif text-black/80 dark:text-amber-200/80" style={{ fontFamily: "'Crimson Text', serif" }}>
-                          Ligin en golcü oyuncuları bu hafta da formlarını koruyor. Gol krallığı yarışı kızışmış durumda ve oyuncular arasındaki rekabet her geçen gün artıyor.
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="text-lg md:text-xl font-bold mb-2 border-b border-black/20 dark:border-amber-200/20 pb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        Aktif Odalar
-                      </h3>
-                      <p className="text-sm md:text-base font-serif text-black/80 dark:text-amber-200/80" style={{ fontFamily: "'Crimson Text', serif" }}>
-                        Günlük ortalama 50+ aktif oda ile topluluk, 7/24 kesintisiz maç imkanı sunuyor. Hazırlık odaları da yoğun ilgi görüyor.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Alt Bilgi - Sayfa 2 */}
+                {/* Alt Bilgi */}
                 <div className="relative border-t border-black/10 dark:border-amber-200/10 pt-4 mt-6">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-xs md:text-sm font-mono text-black/50 dark:text-amber-200/50">
-                    <div>Sayfa 2 | HaxArena V6 Real Soccer</div>
+                    <div>HaxArena V6 Real Soccer</div>
                     <div>haxarena.web.tr</div>
                   </div>
                 </div>
               </div>
-              )}
-
             </div>
           </div>
         </section>
