@@ -58,6 +58,25 @@ export default function HomePage() {
     queryKey: ["/api/league/stats/leaderboard"],
   });
 
+  // Fikstür ve takım verilerini çek
+  const { data: fixtures } = useQuery<any[]>({
+    queryKey: ["/api/league/fixtures"],
+  });
+
+  const { data: teams } = useQuery<any[]>({
+    queryKey: ["/api/league/teams"],
+  });
+
+  // Trebol FC vs Gebzespor maçını bul
+  const trebolGebzeMatch = fixtures?.find((fixture: any) => {
+    const homeTeam = fixture.homeTeam?.name?.toLowerCase() || "";
+    const awayTeam = fixture.awayTeam?.name?.toLowerCase() || "";
+    return (
+      (homeTeam.includes("trebol") && awayTeam.includes("gebze")) ||
+      (homeTeam.includes("gebze") && awayTeam.includes("trebol"))
+    );
+  });
+
   const topScorers = leaderboard
     .sort((a, b) => b.totalGoals - a.totalGoals)
     .slice(0, 5);
@@ -368,7 +387,199 @@ export default function HomePage() {
                       </div>
                     </div>
                   </div>
-                </div>
+
+                  {/* Trebol FC vs Gebzespor Haberi */}
+                  <div className="border-t-2 border-black/20 dark:border-amber-200/20 pt-6 mt-6">
+                    {/* Spot */}
+                    <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500">
+                      <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        Spot: Haftalardır sosyal medyada "atışma ligi" kuran Trebol FC ile Gebzespor, sonunda sahada karşılaştı. Sonuç? Klavyede başlayan rekabet sahada farklı bitti…
+                      </p>
+                    </div>
+
+                    <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4 text-black dark:text-amber-100 leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      ⚽ Trebol FC <span className="font-bold text-green-600 dark:text-green-400">{trebolGebzeMatch?.homeScore ?? 8}</span> – <span className="font-bold text-red-600 dark:text-red-400">{trebolGebzeMatch?.awayScore ?? 0}</span> Gebzespor: "Klavyede Başlayan Rekabet Sahada Farklı Bitti!"
+                    </h2>
+                    
+                    {/* Maç Skoru Görseli */}
+                    {trebolGebzeMatch && (
+                      <div className="mb-6 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
+                        <div className="flex items-center justify-center gap-4 md:gap-8">
+                          {/* Ev Sahibi Takım */}
+                          <div className="flex flex-col items-center gap-2 flex-1">
+                            {trebolGebzeMatch.homeTeam?.logo ? (
+                              <img 
+                                src={trebolGebzeMatch.homeTeam.logo} 
+                                alt={trebolGebzeMatch.homeTeam.name} 
+                                className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                              />
+                            ) : (
+                              <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                <span className="text-xl">⚽</span>
+                              </div>
+                            )}
+                            <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
+                              {trebolGebzeMatch.homeTeam?.name || "Trebol FC"}
+                            </span>
+                          </div>
+
+                          {/* Skor */}
+                          <div className="flex items-center gap-3">
+                            <div className="text-3xl md:text-5xl font-bold text-green-600 dark:text-green-400">
+                              {trebolGebzeMatch.homeScore ?? 8}
+                            </div>
+                            <div className="text-2xl md:text-3xl font-bold text-black dark:text-amber-100">
+                              -
+                            </div>
+                            <div className="text-3xl md:text-5xl font-bold text-red-600 dark:text-red-400">
+                              {trebolGebzeMatch.awayScore ?? 0}
+                            </div>
+                          </div>
+
+                          {/* Deplasman Takımı */}
+                          <div className="flex flex-col items-center gap-2 flex-1">
+                            {trebolGebzeMatch.awayTeam?.logo ? (
+                              <img 
+                                src={trebolGebzeMatch.awayTeam.logo} 
+                                alt={trebolGebzeMatch.awayTeam.name} 
+                                className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                              />
+                            ) : (
+                              <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                <span className="text-xl">⚽</span>
+                              </div>
+                            )}
+                            <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
+                              {trebolGebzeMatch.awayTeam?.name || "Gebzespor"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                      <div className="space-y-4">
+                        <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>L</span>
+                          igin başından beri sosyal medyada "tatlı sert" göndermeleriyle gündeme oturan Trebol FC ile Gebzespor, haftanın merakla beklenen maçında karşı karşıya geldi. Ancak karşılaşma, skor tabelasında pek de "tatlı" durmadı: Trebol FC 8 – 0 Gebzespor!
+                        </p>
+                        <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          Maç sonrası Trebol cephesi kutlama yaparken, sosyal medyada iddialı açıklamalarıyla bilinen Gebzespor kaptanı, mağlubiyeti şöyle değerlendirdi:
+                        </p>
+                        <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-black dark:border-amber-200 p-4 mt-4">
+                          <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                            "Bir kişi eksiktik, yenmek kolay tabii."
+                          </p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          Bu açıklama sonrası Trebol taraftarları sosyal medyayı salladı. En çok beğeni alan yorumlardan bazıları şöyle:
+                        </p>
+                        <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-black dark:border-amber-200 p-4">
+                          <ul className="space-y-2 text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            <li>• "Biz de gol atarken bir kişi eksiktik, kaleciyi kullanmadık zaten."</li>
+                            <li>• "Hocamız devre arasında bir kişiyi daha eksiltelim diye düşündü ama ayıp olur dedik."</li>
+                            <li>• "Biz de 8 gol atarken hep bir kişi fazlaydık: Motivasyon!"</li>
+                          </ul>
+                        </div>
+                        <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-black dark:border-amber-200 p-4 mt-4">
+                          <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                            Trebol FC teknik ekibi:
+                          </p>
+                          <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            "Sosyal medyada çok koştular, sahada biraz yorulmuş olabilirler."
+                          </p>
+                        </div>
+                        <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-orange-500 p-4 mt-4">
+                          <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            Gebzespor taraftarları ise sonuçtan memnun olmasa da takımlarının arkasında durmaya devam ediyor. Ancak camianın ortak görüşü şu şekilde özetlenebilir:
+                          </p>
+                          <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mt-2 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
+                            "Bir sonraki maç tam kadro geliyoruz. Tam kadro gelince 8 olmaz… 7 olur, 6 olur. O kadar da değil."
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+
+                  {/* Puan Durumu Tablosu */}
+                  {teams && teams.length > 0 && (
+                    <div className="border-t-2 border-black/20 dark:border-amber-200/20 pt-6 mt-6">
+                      <h3 className="text-xl md:text-2xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        📊 Puan Durumu
+                      </h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs md:text-sm">
+                          <thead>
+                            <tr className="border-b-2 border-black dark:border-amber-200">
+                              <th className="text-left p-2 font-semibold text-black dark:text-amber-100">#</th>
+                              <th className="text-left p-2 font-semibold text-black dark:text-amber-100">Takım</th>
+                              <th className="text-center p-2 font-semibold text-black dark:text-amber-100">O</th>
+                              <th className="text-center p-2 font-semibold text-black dark:text-amber-100">G</th>
+                              <th className="text-center p-2 font-semibold text-black dark:text-amber-100">B</th>
+                              <th className="text-center p-2 font-semibold text-black dark:text-amber-100">M</th>
+                              <th className="text-center p-2 font-semibold text-black dark:text-amber-100">A</th>
+                              <th className="text-center p-2 font-semibold text-black dark:text-amber-100">Y</th>
+                              <th className="text-center p-2 font-semibold text-black dark:text-amber-100">AV</th>
+                              <th className="text-center p-2 font-semibold text-black dark:text-amber-100">P</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {teams.slice(0, 10).map((team, index) => {
+                              const position = index + 1;
+                              const isChampionsLeague = position <= 4;
+                              const isPlayOff = position >= 5 && position <= 12;
+                              const isEuropaLeague = position >= 13 && position <= 16;
+                              const isRelegation = position >= 17 && position <= 21;
+                              
+                              let rowClass = "hover:bg-muted/50";
+                              
+                              if (isChampionsLeague) {
+                                rowClass = "bg-gradient-to-r from-blue-600/20 to-blue-700/10 border-l-4 border-blue-600";
+                              } else if (isPlayOff) {
+                                rowClass = "bg-gradient-to-r from-blue-400/15 to-blue-500/8 border-l-4 border-blue-400";
+                              } else if (isEuropaLeague) {
+                                rowClass = "bg-gradient-to-r from-orange-500/20 to-orange-600/10 border-l-4 border-orange-500";
+                              } else if (isRelegation) {
+                                rowClass = "bg-gradient-to-r from-red-700/20 to-red-800/10 border-l-4 border-red-700";
+                              }
+                              
+                              return (
+                                <tr 
+                                  key={team.id} 
+                                  className={`border-b transition-colors ${rowClass}`}
+                                >
+                                  <td className="p-2 font-bold text-black dark:text-amber-100">{position}</td>
+                                  <td className="p-2">
+                                    <div className="flex items-center gap-2">
+                                      {team.logo && (
+                                        <img 
+                                          src={team.logo} 
+                                          alt={team.name} 
+                                          className="w-6 h-6 object-contain"
+                                        />
+                                      )}
+                                      <span className="font-medium text-black dark:text-amber-100">{team.name}</span>
+                                    </div>
+                                  </td>
+                                  <td className="p-2 text-center text-black dark:text-amber-100">{team.matchesPlayed || 0}</td>
+                                  <td className="p-2 text-center text-black dark:text-amber-100">{team.wins || 0}</td>
+                                  <td className="p-2 text-center text-black dark:text-amber-100">{team.draws || 0}</td>
+                                  <td className="p-2 text-center text-black dark:text-amber-100">{team.losses || 0}</td>
+                                  <td className="p-2 text-center text-black dark:text-amber-100">{team.goalsFor || 0}</td>
+                                  <td className="p-2 text-center text-black dark:text-amber-100">{team.goalsAgainst || 0}</td>
+                                  <td className="p-2 text-center text-black dark:text-amber-100">{team.goalDifference || 0}</td>
+                                  <td className="p-2 text-center font-bold text-black dark:text-amber-100">{team.points || 0}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
 
                 {/* Alt Bilgi - Sayfa 1 */}
                 <div className="relative border-t border-black/10 dark:border-amber-200/10 pt-4 mt-6">
