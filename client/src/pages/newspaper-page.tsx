@@ -257,10 +257,10 @@ export default function NewspaperPage() {
                                   <span className="font-medium text-black dark:text-amber-100">{team.name}</span>
                                 </div>
                               </td>
-                              <td className="p-3 text-center text-black dark:text-amber-100">{team.matchesPlayed || 0}</td>
-                              <td className="p-3 text-center text-black dark:text-amber-100">{team.wins || 0}</td>
-                              <td className="p-3 text-center text-black dark:text-amber-100">{team.draws || 0}</td>
-                              <td className="p-3 text-center text-black dark:text-amber-100">{team.losses || 0}</td>
+                              <td className="p-3 text-center text-black dark:text-amber-100">{team.played || 0}</td>
+                              <td className="p-3 text-center text-black dark:text-amber-100">{team.won || 0}</td>
+                              <td className="p-3 text-center text-black dark:text-amber-100">{team.drawn || 0}</td>
+                              <td className="p-3 text-center text-black dark:text-amber-100">{team.lost || 0}</td>
                               <td className="p-3 text-center text-black dark:text-amber-100">{team.goalsFor || 0}</td>
                               <td className="p-3 text-center text-black dark:text-amber-100">{team.goalsAgainst || 0}</td>
                               <td className="p-3 text-center text-black dark:text-amber-100">{team.goalDifference || 0}</td>
