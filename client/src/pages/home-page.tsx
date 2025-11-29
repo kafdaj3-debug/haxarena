@@ -7,7 +7,7 @@ import LiveChat from "@/components/LiveChat";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Trophy, MessageSquare, Shield, Sparkles, ArrowRight } from "lucide-react";
+import { Trophy, MessageSquare, Shield, Sparkles, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
@@ -15,6 +15,7 @@ import { tr } from "date-fns/locale";
 
 export default function HomePage() {
   const { user, logout } = useAuth();
+  const [currentPage, setCurrentPage] = useState(1);
   const allRooms = [
     {
       matchName: "Galatasaray vs Fenerbahçe",
@@ -110,6 +111,36 @@ export default function HomePage() {
         <section className="py-12 md:py-16 bg-gradient-to-b from-amber-50/5 to-amber-50/10 dark:from-amber-950/10 dark:to-amber-950/5">
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto">
+              
+              {/* Sayfa Geçiş Kontrolü */}
+              <div className="flex items-center justify-center gap-4 mb-6">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                  className="hover-elevate active-elevate-2"
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  Önceki
+                </Button>
+                <div className="text-sm md:text-base font-mono text-black/70 dark:text-amber-200/70 px-4 py-2 bg-amber-100/50 dark:bg-amber-900/30 rounded-lg border border-amber-300 dark:border-amber-700">
+                  {currentPage}/2
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(2)}
+                  disabled={currentPage === 2}
+                  className="hover-elevate active-elevate-2"
+                >
+                  Sonraki
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+
+              {/* SAYFA 1 - Fear the Beard – Strasbourg */}
+              {currentPage === 1 && (
               <div className="relative bg-gradient-to-br from-amber-50 via-amber-50/95 to-amber-100/90 dark:from-amber-900/30 dark:via-amber-900/20 dark:to-amber-800/30 border-4 border-amber-800/30 dark:border-amber-700/40 shadow-2xl p-6 md:p-10 lg:p-12 transform rotate-0 hover:rotate-0 transition-all duration-300">
                 {/* Eski kağıt dokusu efekti */}
                 <div className="absolute inset-0 opacity-10 dark:opacity-5" style={{
@@ -135,7 +166,91 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Ana Başlık */}
+                {/* Ana Başlık - Sayfa 1 */}
+                <div className="relative mb-6">
+                  <div className="mb-3">
+                    <span className="inline-block bg-black dark:bg-white text-white dark:text-black px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
+                      Özel Haber
+                    </span>
+                  </div>
+                  
+                  <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    📰 Fear the Beard – Strasbourg Karşılaşmasına "Zorunlu Mola" Damgası
+                  </h1>
+
+                  {/* Haber İçeriği */}
+                  <div className="mb-6">
+                    <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>D</span>
+                      ün oynanan Fear the Beard – Strasbourg karşılaşması, skorundan çok… duraklamalarıyla gündeme oturdu. Mücadele zaman zaman öyle uzun aralar verdi ki, tribündeki bazı taraftarlar "Devre arası bitti mi, yoksa hâlâ moladayız?" diye birbirine sormaya başladı.
+                    </p>
+                    
+                    <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-orange-500 p-4 mt-4 mb-4">
+                      <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        Kulislerde Dolaşan Bilgiler:
+                      </p>
+                      <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Kulislerde dolaşan bilgilere göre Strasbourg cephesinde maç günü bir "mide problemi" krizi yaşandı. Oyuncuların büyük bir kısmının, maç öncesi yedikleri şeye fazla güvenmiş olabileceği konuşuluyor. Bazılarına göre takım otobüsünde başlayan hareketlilik, sahada da devam etti. Hatta bir ara yedek kulübesinde "sıraya girenler" olduğu esprisi bile yayılmış durumda.
+                      </p>
+                    </div>
+
+                    <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      Fear the Beard tarafı ise bu beklenmedik molaları şaşkınlıkla izlerken, bazı oyuncuların duraklamaları fırsat bilip kenarda mini bir taktik sohbeti yaptığı görüldü. Maçın hakemi de sık sık "Devam ediyor muyuz?" bakışı atmak zorunda kaldı.
+                    </p>
+
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 p-4 mt-4 mb-4">
+                      <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        Sosyal Medya Yorumu:
+                      </p>
+                      <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        "Maçın adamı: Tuvalet kapısı."
+                      </p>
+                    </div>
+
+                    <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4 italic" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      Strasbourg cephesi resmi bir açıklama yapmadı ama takımın bir dahaki maç için "daha hafif bir menü" planladığı konuşuluyor.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Alt Bilgi - Sayfa 1 */}
+                <div className="relative border-t border-black/10 dark:border-amber-200/10 pt-4 mt-6">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-xs md:text-sm font-mono text-black/50 dark:text-amber-200/50">
+                    <div>Sayfa 1 | HaxArena V6 Real Soccer</div>
+                    <div>haxarena.web.tr</div>
+                  </div>
+                </div>
+              </div>
+              )}
+
+              {/* SAYFA 2 - Kulislerde Hareketlilik */}
+              {currentPage === 2 && (
+              <div className="relative bg-gradient-to-br from-amber-50 via-amber-50/95 to-amber-100/90 dark:from-amber-900/30 dark:via-amber-900/20 dark:to-amber-800/30 border-4 border-amber-800/30 dark:border-amber-700/40 shadow-2xl p-6 md:p-10 lg:p-12 transform rotate-0 hover:rotate-0 transition-all duration-300">
+                {/* Eski kağıt dokusu efekti */}
+                <div className="absolute inset-0 opacity-10 dark:opacity-5" style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                  backgroundSize: '200px 200px'
+                }}></div>
+                
+                {/* Gazete Başlığı - Sayfa 2 */}
+                <div className="relative border-b-4 border-black dark:border-amber-100 pb-3 mb-6">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
+                    <div className="text-xs md:text-sm font-mono text-black/70 dark:text-amber-200/70">
+                      {new Date().toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    </div>
+                    <div className="text-xs md:text-sm font-mono text-black/70 dark:text-amber-200/70">
+                      Fiyat: 2.50 TL
+                    </div>
+                  </div>
+                  <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-center tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    HAXARENA GAZETESİ
+                  </h2>
+                  <div className="text-center text-xs md:text-sm mt-2 text-black/60 dark:text-amber-200/60 font-serif italic">
+                    Türkiye'nin En Büyük HaxBall Real Soccer Haber Kaynağı
+                  </div>
+                </div>
+
+                {/* Ana Başlık - Sayfa 2 */}
                 <div className="relative mb-6">
                   <div className="mb-3">
                     <span className="inline-block bg-black dark:bg-white text-white dark:text-black px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
@@ -173,14 +288,16 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Alt Bilgi */}
+                {/* Alt Bilgi - Sayfa 2 */}
                 <div className="relative border-t border-black/10 dark:border-amber-200/10 pt-4 mt-6">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-xs md:text-sm font-mono text-black/50 dark:text-amber-200/50">
-                    <div>HaxArena V6 Real Soccer</div>
+                    <div>Sayfa 2 | HaxArena V6 Real Soccer</div>
                     <div>haxarena.web.tr</div>
                   </div>
                 </div>
               </div>
+              )}
+
             </div>
           </div>
         </section>
