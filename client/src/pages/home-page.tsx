@@ -144,136 +144,32 @@ export default function HomePage() {
                   </div>
                   
                   <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    🎙️ Dur, Devam Etme! Pause Krizi Sahayı Karıştırdı!
+                    📰 Kulislerde Hareketlilik: Yeni Takımın Oyuncu Görüşmeleri Sızdı
                   </h1>
-                  <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    Fear The Beard <span className="font-bold text-green-600 dark:text-green-400">5</span> – <span className="font-bold text-red-600 dark:text-red-400">12</span> Strasbourg
-                  </h2>
 
-                  {/* Maç Özeti */}
+                  {/* Haber İçeriği */}
                   <div className="mb-6">
                     <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>D</span>
-                      ün akşam lig tarihinin en tartışmalı, en komik ve en "pause'lu" maçlarından biri oynandı. Skordan çok duraklama tuşunun konuşulduğu bu efsane karşılaşmada, rakipler her golden sonra birbirlerine alaycı şekilde "pause" isteyerek hem seyircileri hem hakemi sinir krizine sürükledi. Hakemlerin tek yaptığı ise çaresizce "Kardeşim bir oynayın ya…" bakışı atmak oldu.
+                      <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>L</span>
+                      ig kulislerinde dikkat çeken yeni bir gelişme yaşandı. Henüz resmi olarak duyurulmayan yeni bir takımın, kadro kurma sürecinde mevcut ekiplerle temasa geçtiğine dair bilgiler spor camiasına sızdı. Gelen söylentilere göre yeni oluşum, birkaç tecrübeli oyuncuyu renklerine bağlamak için görüşmeler yürütüyor.
                     </p>
-                  </div>
+                    
+                    <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      Sızan bilgilere göre, kulislerde konuşulan isimler arasında Ravenclaw ekibinden de bazı oyuncuların geçtiği fısıldanıyor. Ancak bu temasların ne aşamada olduğu veya hangi oyuncuların değerlendirildiği konusunda net bir bilgi bulunmuyor. Aynı şekilde farklı takımlardan da alternatif isimlerin listeye alındığı ifade ediliyor.
+                    </p>
 
-                  {/* Maçın Özeti Bölümü */}
-                  <div className="mb-6">
-                    <h3 className="text-xl md:text-2xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      📰 Maçın Özeti: Pause Tufanı, Gol Sağanağı
-                    </h3>
-                    <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      Maç daha 3. dakikada "ben buradayım" diye bağırdı. Jélavic–Sergen ikilisinin 2.42'deki golüyle Fear The Beard öne geçer gibi oldu ama Strasbourg'un cevabı gecikmedi.
-                    </p>
-                    <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      Sonra? İşte o andan itibaren maç futbol değil, gol + pause + alay üçgeninde bir tiyatroya dönüştü.
-                    </p>
-                    <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 p-4 mt-4">
+                    <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-blue-500 p-4 mt-4 mb-4">
                       <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        Tribünler?
+                        Kulis Söylentileri:
                       </p>
-                      <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        Efsane.
-                      </p>
-                      <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mt-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Her pause istemesinde "PAUSE PAUSE PAUSE!" tezahüratıyla adeta maçın akışını sabote ettiler.
+                      <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Yeni takımın, başvuru dosyasını güçlendirmek adına kadro yapılanmasını hızlandırdığı ve yakın zamanda daha somut adımlar atabileceği konuşuluyor. Buna rağmen ekipten resmi bir açıklama gelmediği için sürecin nasıl ilerleyeceği merak konusu olmaya devam ediyor.
                       </p>
                     </div>
-                  </div>
 
-                  {/* Gol Dakikaları */}
-                  <div className="mb-6 border-t-2 border-black/20 dark:border-amber-200/20 pt-6">
-                    <h3 className="text-xl md:text-2xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      ⚽ Gol Dakikaları – Skordan Fazla Olay Var
-                    </h3>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <h4 className="text-lg md:text-xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          Fear The Beard Gol Dakikaları:
-                        </h4>
-                        <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-green-500 p-4">
-                          <ul className="space-y-2 text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            <li>• 2.42' Jélavic (Asist: sergenyalcın)</li>
-                            <li>• 3.25' Dwyte</li>
-                            <li>• 9.24' Gökdeniz</li>
-                            <li>• 33.46' Jélavic (Asist: ross)</li>
-                            <li>• 34.25' sergenyalcın</li>
-                          </ul>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <h4 className="text-lg md:text-xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          Strasbourg Gol Dakikaları:
-                        </h4>
-                        <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-red-500 p-4">
-                          <ul className="space-y-2 text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            <li>• 2.26' asilsio (Asist: Rafael Leão.)</li>
-                            <li>• 8.13' Rafael Leão (Asist: Yunus Akgün)</li>
-                            <li>• 13.49' Rafael Leão</li>
-                            <li>• 22.49' WZ9 (Asist: Rafael Leão)</li>
-                            <li>• 28.42' Rafael Leão (Asist: Yunus Akgün)</li>
-                            <li>• 30.08' WZ9 (Asist: Rafael Leão)</li>
-                            <li>• 31.27' Friedenreich (KK)</li>
-                            <li>• 33.04' Rafael Leão (Asist: Cherki)</li>
-                            <li>• 35.04' WZ9 (Asist: Yunus Akgün)</li>
-                            <li>• 36.26' Yunus Akgün</li>
-                            <li>• 37.19' Stoycho (KK)</li>
-                            <li>• 39.03' EVELYИ (Asist: myth)</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Sahanın En Saçma Anları */}
-                  <div className="mb-6 border-t-2 border-black/20 dark:border-amber-200/20 pt-6">
-                    <h3 className="text-xl md:text-2xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      🤦 Sahanın En Saçma Anları
-                    </h3>
-                    
-                    <div className="space-y-4">
-                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-orange-500 p-4">
-                        <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          1) Fear The Beard'ın Gol Yedikten Sonra "LAN BI SAHNEYİ DURDURUN!" Demesi
-                        </p>
-                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Kaleci yere çöküp "Ben çıkıyorum abi yeter" moduna geçti.
-                        </p>
-                      </div>
-                      
-                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-orange-500 p-4">
-                        <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          2) Strasbourg'un Golden Sonra Rakip Defansa Dönüp "AĞLAMA LAN" İşareti Yapması
-                        </p>
-                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Defans oyuncusu cevap veriyor:
-                        </p>
-                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans italic" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          "Sende yürek yok, pause'a güveniyorsun!"
-                        </p>
-                      </div>
-                      
-                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-orange-500 p-4">
-                        <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          3) Kendi Kalesine Atılan Goller
-                        </p>
-                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Biri kendi kalesine gol atınca takımı bağırıyor:
-                        </p>
-                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans italic mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          "S**** oğlum ne yaptın!"
-                        </p>
-                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Adam cevap veriyor:
-                        </p>
-                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans italic" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          "Pause sandım lan, beynim dondu!"
-                        </p>
-                      </div>
-                    </div>
+                    <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4 italic" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      Kulislerde dolaşan bilgiler doğrulandıkça ve yeni bilgiler ortaya çıktıkça gelişmeleri aktarmayı sürdüreceğiz.
+                    </p>
                   </div>
                 </div>
 
