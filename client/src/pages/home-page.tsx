@@ -213,6 +213,135 @@ export default function HomePage() {
                   </div>
                 </div>
 
+                {/* Twitter Benzeri Taraftar Yorumları */}
+                <div className="mb-6 border-t-2 border-black/20 dark:border-amber-200/20 pt-6">
+                  <h3 className="text-xl md:text-2xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    📱 Taraftarlar Ne Diyor?
+                  </h3>
+                  
+                  <div className="space-y-3">
+                    {/* Tweet 1 */}
+                    <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-sm">MA</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm text-black dark:text-amber-100">Mehmet Avcı</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">@mehmetavci_ftb</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 2s</span>
+                          </div>
+                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                            Formayı çıkarın siktirin gidin! Böyle maç mı olur? Her 5 dakikada bir tuvalet molası veriyorsunuz!
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span>💬 12</span>
+                            <span>🔄 8</span>
+                            <span>❤️ 45</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tweet 2 */}
+                    <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-sm">AK</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm text-black dark:text-amber-100">Ali Kaya</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">@alikaya_beard</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 5dk</span>
+                          </div>
+                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                            Bu maçı izlemek yerine tuvalet kuyruğunda beklemek daha eğlenceliydi. Strasbourg takımına önerim: Bir dahaki sefere maçtan önce yemek yemeyin!
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span>💬 23</span>
+                            <span>🔄 15</span>
+                            <span>❤️ 67</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tweet 3 */}
+                    <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-sm">CY</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm text-black dark:text-amber-100">Can Yılmaz</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">@canyilmaz_ftb</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 8dk</span>
+                          </div>
+                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                            Maçın en iyi oyuncusu tuvalet kapısı oldu. MVP ödülünü ona verelim! 😂😂😂
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span>💬 89</span>
+                            <span>🔄 34</span>
+                            <span>❤️ 156</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tweet 4 */}
+                    <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-sm">ÖD</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm text-black dark:text-amber-100">Özkan Demir</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">@ozkandemir_ftb</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 12dk</span>
+                          </div>
+                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                            Strasbourg takımı maçtan önce ne yedi acaba? Ben de yiyeyim, belki ben de profesyonel futbolcu olurum! 😂
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span>💬 45</span>
+                            <span>🔄 28</span>
+                            <span>❤️ 98</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tweet 5 */}
+                    <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-sm">BK</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm text-black dark:text-amber-100">Burak Koç</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">@burakkoc_ftb</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 15dk</span>
+                          </div>
+                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                            Hakem maçı durdurdu mu yoksa Strasbourg oyuncuları mı? Artık anlayamıyoruz! Formayı çıkarın, tuvalet takımı kurun!
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span>💬 67</span>
+                            <span>🔄 42</span>
+                            <span>❤️ 123</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Alt Bilgi - Sayfa 1 */}
                 <div className="relative border-t border-black/10 dark:border-amber-200/10 pt-4 mt-6">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-xs md:text-sm font-mono text-black/50 dark:text-amber-200/50">
