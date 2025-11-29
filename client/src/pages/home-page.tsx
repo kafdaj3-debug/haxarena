@@ -233,7 +233,7 @@ export default function HomePage() {
                             <span className="text-xs text-gray-500 dark:text-gray-400">· 2s</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            Formayı çıkarın siktirin gidin! Böyle maç mı olur? Her 5 dakikada bir tuvalet molası veriyorsunuz!
+                            Formayı çıkarın siktirin gidin! Böyle maç mı olur? Her saniye tuvalet molası veriyorsunuz!
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <span>💬 12</span>
@@ -254,7 +254,7 @@ export default function HomePage() {
                           <div className="flex items-center gap-2 mb-1">
                             <span className="font-bold text-sm text-black dark:text-amber-100">Ali Kaya</span>
                             <span className="text-xs text-gray-500 dark:text-gray-400">@alikaya_beard</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 5dk</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 15s</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
                             Bu maçı izlemek yerine tuvalet kuyruğunda beklemek daha eğlenceliydi. Strasbourg takımına önerim: Bir dahaki sefere maçtan önce yemek yemeyin!
@@ -278,7 +278,7 @@ export default function HomePage() {
                           <div className="flex items-center gap-2 mb-1">
                             <span className="font-bold text-sm text-black dark:text-amber-100">Can Yılmaz</span>
                             <span className="text-xs text-gray-500 dark:text-gray-400">@canyilmaz_ftb</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 8dk</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 23s</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
                             Maçın en iyi oyuncusu tuvalet kapısı oldu. MVP ödülünü ona verelim! 😂😂😂
@@ -302,7 +302,7 @@ export default function HomePage() {
                           <div className="flex items-center gap-2 mb-1">
                             <span className="font-bold text-sm text-black dark:text-amber-100">Özkan Demir</span>
                             <span className="text-xs text-gray-500 dark:text-gray-400">@ozkandemir_ftb</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 12dk</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 31s</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
                             Strasbourg takımı maçtan önce ne yedi acaba? Ben de yiyeyim, belki ben de profesyonel futbolcu olurum! 😂
@@ -326,7 +326,7 @@ export default function HomePage() {
                           <div className="flex items-center gap-2 mb-1">
                             <span className="font-bold text-sm text-black dark:text-amber-100">Burak Koç</span>
                             <span className="text-xs text-gray-500 dark:text-gray-400">@burakkoc_ftb</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 15dk</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 42s</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
                             Hakem maçı durdurdu mu yoksa Strasbourg oyuncuları mı? Artık anlayamıyoruz! Formayı çıkarın, tuvalet takımı kurun!
