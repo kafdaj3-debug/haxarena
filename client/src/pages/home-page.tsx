@@ -638,10 +638,10 @@ export default function HomePage() {
                           </div>
                         </div>
 
-                        {/* Övgü Tweet'leri */}
-                        <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
+                        {/* Objektif Tweet'leri */}
+                        <div className="bg-white dark:bg-gray-800 border border-yellow-300 dark:border-yellow-700 rounded-lg p-4 shadow-sm">
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-bold text-sm">DY</span>
                             </div>
                             <div className="flex-1 min-w-0">
@@ -651,12 +651,12 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 1dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Gebzespor bu sezon çok iyi bir performans sergiliyor! Takımın disiplini ve mücadeleci ruhu gerçekten takdire şayan. Bugün de güzel bir maç izleyeceğiz! 🔥⚽
+                                Gebzespor bu sezon beklenen performansı gösteremedi. Takımın formu düşük ve maçlarda zorlanıyor. Bugün de zor bir maç bekliyoruz. Umarım toparlanırlar. 😔⚽
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 124</span>
-                                <span>🔄 67</span>
-                                <span>❤️ 234</span>
+                                <span>💬 89</span>
+                                <span>🔄 34</span>
+                                <span>❤️ 67</span>
                               </div>
                             </div>
                           </div>
@@ -674,20 +674,20 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 2dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Fear The Beard takımının oyun tarzı ve taktik disiplini harika! Sakalları kadar güçlü bir takım. Bugün de harika bir maç bekliyoruz! 💪🏆
+                                Fear The Beard bu sezon iyi bir performans sergiliyor. Takımın oyun tarzı ve taktik disiplini dikkat çekiyor. Bugün de güzel bir maç bekliyoruz! 💪⚽
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 98</span>
-                                <span>🔄 54</span>
-                                <span>❤️ 189</span>
+                                <span>💬 112</span>
+                                <span>🔄 58</span>
+                                <span>❤️ 198</span>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
+                        <div className="bg-white dark:bg-gray-800 border border-blue-300 dark:border-blue-700 rounded-lg p-4 shadow-sm">
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-bold text-sm">SK</span>
                             </div>
                             <div className="flex-1 min-w-0">
@@ -697,12 +697,12 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 3dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Her iki takım da sezon boyunca çok iyi performans gösterdi. Bugünkü maç kesinlikle izlenmeye değer! İki takımın da başarılar diliyorum! ⚽✨
+                                Objektif bakarsak: Fear The Beard formda, Gebzespor ise zorlanıyor. Maçın favorisi açık ama futbol bazen sürprizlerle dolu. İyi bir maç olur umarım. ⚽
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 156</span>
-                                <span>🔄 89</span>
-                                <span>❤️ 312</span>
+                                <span>💬 134</span>
+                                <span>🔄 72</span>
+                                <span>❤️ 156</span>
                               </div>
                             </div>
                           </div>
@@ -783,7 +783,7 @@ export default function HomePage() {
                           </div>
                         </div>
 
-                        {/* Övgü Tweet'leri */}
+                        {/* Objektif Tweet'leri */}
                         <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
                           <div className="flex items-start gap-3">
                             <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
@@ -796,7 +796,7 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 1dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Bodø/Glimt'in oyun tarzı gerçekten etkileyici! Pres yapısı ve takım uyumu harika. Bugün de güzel bir maç izleyeceğiz! 🔥⚽
+                                Bodø/Glimt bu sezon favori konumda. Pres yapısı ve takım uyumu gerçekten etkileyici. Bugün de güzel bir maç izleyeceğiz! 🔥⚽
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                                 <span>💬 145</span>
@@ -807,9 +807,9 @@ export default function HomePage() {
                           </div>
                         </div>
 
-                        <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
+                        <div className="bg-white dark:bg-gray-800 border border-yellow-300 dark:border-yellow-700 rounded-lg p-4 shadow-sm">
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-lime-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-bold text-sm">MT</span>
                             </div>
                             <div className="flex-1 min-w-0">
@@ -819,20 +819,20 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 2dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Trebol FC bu sezon çok iyi bir gelişim gösterdi! Takımın mücadeleci ruhu ve azmi gerçekten takdire şayan. Bugün de güzel bir maç bekliyoruz! 💪🏆
+                                Trebol FC bu sezon zorlanıyor. Takım formu düşük ve maçlarda beklenen performansı gösteremiyor. Bugün de zor bir maç bekliyoruz. 😔⚽
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 112</span>
-                                <span>🔄 63</span>
-                                <span>❤️ 198</span>
+                                <span>💬 78</span>
+                                <span>🔄 32</span>
+                                <span>❤️ 89</span>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
+                        <div className="bg-white dark:bg-gray-800 border border-blue-300 dark:border-blue-700 rounded-lg p-4 shadow-sm">
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-bold text-sm">ZK</span>
                             </div>
                             <div className="flex-1 min-w-0">
@@ -842,12 +842,12 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 3dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                İki takım da sezon boyunca çok iyi performans gösterdi. Bugünkü maç kesinlikle izlenmeye değer! Her iki takımın da başarılar diliyorum! ⚽✨
+                                Objektif bakarsak: Bodø/Glimt favori, Trebol FC ise zorlanıyor. Maçın sonucu belli gibi ama futbol bazen sürprizlerle dolu. ⚽
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 178</span>
-                                <span>🔄 95</span>
-                                <span>❤️ 345</span>
+                                <span>💬 156</span>
+                                <span>🔄 84</span>
+                                <span>❤️ 178</span>
                               </div>
                             </div>
                           </div>
@@ -928,10 +928,10 @@ export default function HomePage() {
                           </div>
                         </div>
 
-                        {/* Övgü Tweet'leri */}
-                        <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
+                        {/* Objektif Tweet'leri */}
+                        <div className="bg-white dark:bg-gray-800 border border-yellow-300 dark:border-yellow-700 rounded-lg p-4 shadow-sm">
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-bold text-sm">EK</span>
                             </div>
                             <div className="flex-1 min-w-0">
@@ -941,20 +941,20 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 1dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Ravenclaw takımının oyun tarzı ve taktik anlayışı gerçekten etkileyici! Bugün de güzel bir maç izleyeceğiz! 🔥⚽
+                                Ravenclaw bu sezon zorlanıyor. Takımın formu düşük ve maçlarda beklenen performansı gösteremiyor. Bugün de zor bir maç bekliyoruz. 😔⚽
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 134</span>
-                                <span>🔄 72</span>
-                                <span>❤️ 256</span>
+                                <span>💬 92</span>
+                                <span>🔄 38</span>
+                                <span>❤️ 78</span>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
+                        <div className="bg-white dark:bg-gray-800 border border-blue-300 dark:border-blue-700 rounded-lg p-4 shadow-sm">
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-lime-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-bold text-sm">CA</span>
                             </div>
                             <div className="flex-1 min-w-0">
@@ -964,20 +964,20 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 2dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Turkish Union bu sezon çok iyi bir performans sergiliyor! Takımın mücadeleci ruhu ve azmi gerçekten takdire şayan. Bugün de güzel bir maç bekliyoruz! 💪🏆
+                                Turkish Union bu sezon orta seviye bir performans sergiliyor. Takım bazen iyi oynuyor bazen zorlanıyor. Bugün nasıl bir maç çıkaracaklar merak ediyorum. ⚽
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 167</span>
-                                <span>🔄 89</span>
-                                <span>❤️ 298</span>
+                                <span>💬 112</span>
+                                <span>🔄 56</span>
+                                <span>❤️ 134</span>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
+                        <div className="bg-white dark:bg-gray-800 border border-blue-300 dark:border-blue-700 rounded-lg p-4 shadow-sm">
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-bold text-sm">NA</span>
                             </div>
                             <div className="flex-1 min-w-0">
@@ -987,12 +987,12 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 3dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Her iki takım da sezon boyunca çok iyi performans gösterdi. Bugünkü maç kesinlikle izlenmeye değer! İki takımın da başarılar diliyorum! ⚽✨
+                                Objektif bakarsak: Her iki takım da zorlanıyor. Ravenclaw daha kötü durumda, Turkish Union ise orta seviye. Maçın sonucu belirsiz ama her iki takım da zor bir sezon geçiriyor. ⚽
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 189</span>
-                                <span>🔄 104</span>
-                                <span>❤️ 367</span>
+                                <span>💬 145</span>
+                                <span>🔄 78</span>
+                                <span>❤️ 167</span>
                               </div>
                             </div>
                           </div>
