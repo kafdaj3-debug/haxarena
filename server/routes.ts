@@ -1742,6 +1742,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update fixture referee (super admin only)
+  app.patch("/api/league/fixtures/:id/referee", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { referee } = req.body;
+      
+      // referee can be string or null
+      if (referee !== null && typeof referee !== "string") {
+        return res.status(400).json({ error: "referee string veya null olmalıdır" });
+      }
+
+      const fixture = await storage.updateLeagueFixtureReferee(id, referee || null);
+      if (!fixture) {
+        return res.status(404).json({ error: "Maç bulunamadı" });
+      }
+      return res.json(fixture);
+    } catch (error) {
+      console.error("Error updating fixture referee:", error);
+      return res.status(500).json({ error: "Hakem bilgisi güncellenemedi" });
+    }
+  });
+
   // Update fixture score with details (super admin only) - this also updates team standings
   app.patch("/api/league/fixtures/:id", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
     try {

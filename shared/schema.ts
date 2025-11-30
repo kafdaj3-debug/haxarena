@@ -190,6 +190,7 @@ export const leagueFixtures = pgTable("league_fixtures", {
   isPostponed: boolean("is_postponed").notNull().default(false), // Ertelenme durumu
   isForfeit: boolean("is_forfeit").notNull().default(false), // Hükmen durumu
   matchRecordingUrl: varchar("match_recording_url"), // Maç kaydı linki (rec)
+  referee: text("referee"), // Hakem ismi
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

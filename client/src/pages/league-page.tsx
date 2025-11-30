@@ -713,6 +713,12 @@ export default function LeaguePage() {
                                 <Calendar className="w-4 h-4" />
                                 <span>{formattedDate}</span>
                               </div>
+                              {fixture.referee && (
+                                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                                  <span className="font-medium">Hakem:</span>
+                                  <span>{fixture.referee}</span>
+                                </div>
+                              )}
                               {isForfeit && (
                                 <div className="flex justify-center">
                                   <span className="text-xs font-semibold text-purple-600 bg-purple-600/20 px-2 py-1 rounded-full">

@@ -107,6 +107,8 @@ export default function ManagementPanelPage() {
   const [isPostponed, setIsPostponed] = useState(false);
   const [editingDateFixtureId, setEditingDateFixtureId] = useState<string | null>(null);
   const [newMatchDate, setNewMatchDate] = useState("");
+  const [editingRefereeFixtureId, setEditingRefereeFixtureId] = useState<string | null>(null);
+  const [newReferee, setNewReferee] = useState("");
   
   // Player stats state
   const [selectedFixtureForStats, setSelectedFixtureForStats] = useState("");
@@ -639,6 +641,21 @@ export default function ManagementPanelPage() {
     },
     onError: () => {
       toast({ title: "Hata", description: "Maç tarihi güncellenemedi", variant: "destructive" });
+    },
+  });
+
+  const updateFixtureRefereeMutation = useMutation({
+    mutationFn: async ({ id, referee }: { id: string; referee: string | null }) => {
+      return await apiRequest("PATCH", `/api/league/fixtures/${id}/referee`, { referee });
+    },
+    onSuccess: () => {
+      toast({ title: "Başarılı", description: "Hakem bilgisi güncellendi" });
+      queryClient.invalidateQueries({ queryKey: ["/api/league/fixtures"] });
+      setEditingRefereeFixtureId(null);
+      setNewReferee("");
+    },
+    onError: () => {
+      toast({ title: "Hata", description: "Hakem bilgisi güncellenemedi", variant: "destructive" });
     },
   });
 
@@ -2190,6 +2207,61 @@ export default function ManagementPanelPage() {
                               )}
                               <span>Hafta {fixture.week}</span>
                             </div>
+                          </div>
+                        )}
+                        {!isBye && (
+                          <div className="flex items-center justify-between text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <span className="font-medium">Hakem:</span>
+                              {editingRefereeFixtureId === fixture.id ? (
+                                <div className="flex items-center gap-2">
+                                  <Input
+                                    type="text"
+                                    placeholder="Hakem ismi"
+                                    value={newReferee}
+                                    onChange={(e) => setNewReferee(e.target.value)}
+                                    className="w-48"
+                                  />
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      updateFixtureRefereeMutation.mutate({
+                                        id: fixture.id,
+                                        referee: newReferee.trim() || null,
+                                      });
+                                    }}
+                                    disabled={updateFixtureRefereeMutation.isPending}
+                                  >
+                                    Kaydet
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      setEditingRefereeFixtureId(null);
+                                      setNewReferee("");
+                                    }}
+                                  >
+                                    İptal
+                                  </Button>
+                                </div>
+                              ) : (
+                                <>
+                                  <span>{fixture.referee || "Atanmadı"}</span>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="ml-2 h-6 px-2"
+                                    onClick={() => {
+                                      setEditingRefereeFixtureId(fixture.id);
+                                      setNewReferee(fixture.referee || "");
+                                    }}
+                                  >
+                                    <Edit className="w-3 h-3" />
+                                  </Button>
+                                </>
+                              )}
+                            </span>
                           </div>
                         )}
                         {isBye && (

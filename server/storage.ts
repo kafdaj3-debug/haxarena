@@ -158,6 +158,7 @@ export interface IStorage {
   updateLeagueFixtureDate(id: string, matchDate: Date): Promise<LeagueFixture | undefined>;
   updateLeagueFixturePostponed(id: string, isPostponed: boolean): Promise<LeagueFixture | undefined>;
   updateLeagueFixtureForfeit(id: string, isForfeit: boolean): Promise<LeagueFixture | undefined>;
+  updateLeagueFixtureReferee(id: string, referee: string | null): Promise<LeagueFixture | undefined>;
   updateLeagueFixtureWithDetails(id: string, homeScore: number, awayScore: number, goals: InsertMatchGoal[], matchRecordingUrl?: string, isPostponed?: boolean): Promise<LeagueFixture | undefined>;
   deleteLeagueFixture(id: string): Promise<void>;
   
@@ -1394,6 +1395,12 @@ export class DBStorage implements IStorage {
 
   async updateLeagueFixtureForfeit(id: string, isForfeit: boolean): Promise<LeagueFixture | undefined> {
     await db.update(leagueFixtures).set({ isForfeit }).where(eq(leagueFixtures.id, id));
+    const [updated] = await db.select().from(leagueFixtures).where(eq(leagueFixtures.id, id)).limit(1);
+    return updated;
+  }
+
+  async updateLeagueFixtureReferee(id: string, referee: string | null): Promise<LeagueFixture | undefined> {
+    await db.update(leagueFixtures).set({ referee }).where(eq(leagueFixtures.id, id));
     const [updated] = await db.select().from(leagueFixtures).where(eq(leagueFixtures.id, id)).limit(1);
     return updated;
   }
