@@ -437,7 +437,7 @@ export default function HomePage() {
 
                       <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-blue-500 p-4 mt-4 mb-4">
                         <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          Hakem Öğetrn için ön yorumlar:
+                          Hakem Doctrin için ön yorumlar:
                         </p>
                         <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
                           Taraftarlar maç başlamadan hakemi eleştirmeye başladı bile. Geçmişteki "avantaj mı düdük mü ben de bilmiyorum" tarzı yönetimi hâlâ unutulmuş değil.
@@ -656,7 +656,7 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 4dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Hakem değil kronometre bile bize çalışmıyor. Öğetrn siktirsin gitsin, bizi rezil ediyor!
+                                Hakem değil kronometre bile bize çalışmıyor. Doctrin siktirsin gitsin, bizi rezil ediyor!
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                                 <span>💬 45</span>
