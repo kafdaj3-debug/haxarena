@@ -547,14 +547,15 @@ export default function LeaguePage() {
                                                 <span className="bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[3rem] text-center">
                                                   {formatMinute(goal.minute)}
                                                 </span>
-                                                <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+                                                <span className="text-base">⚽</span>
+                                                <span className="font-bold text-base text-blue-700 dark:text-blue-300">
                                                   {goal.playerName || goal.player?.username || "Bilinmeyen"}
                                                 </span>
                                               </div>
                                               {(goal.assistPlayerName || goal.assistPlayer) && (
-                                                <div className="flex items-center gap-1.5 ml-0.5 mt-1">
-                                                  <span className="text-xs text-gray-500 dark:text-gray-400">🎯</span>
-                                                  <span className="text-xs text-gray-600 dark:text-gray-300 italic">
+                                                <div className="flex items-center gap-1.5 ml-0.5 mt-1.5">
+                                                  <span className="text-sm">👟</span>
+                                                  <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">
                                                     {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"}
                                                   </span>
                                                 </div>
@@ -570,19 +571,20 @@ export default function LeaguePage() {
                                         .map((goal: any, idx: number) => (
                                             <div key={idx} className="bg-gradient-to-l from-red-50 to-transparent dark:from-red-900/20 dark:to-transparent border-r-[3px] border-red-500 rounded-l-md p-2.5 shadow-sm">
                                               <div className="flex items-center gap-2 justify-end mb-1">
-                                                <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">
-                                                  {goal.playerName || goal.player?.username || "Bilinmeyen"}
-                                                </span>
                                                 <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[3rem] text-center">
                                                   {formatMinute(goal.minute)}
                                                 </span>
+                                                <span className="text-base">⚽</span>
+                                                <span className="font-bold text-base text-red-700 dark:text-red-300">
+                                                  {goal.playerName || goal.player?.username || "Bilinmeyen"}
+                                                </span>
                                               </div>
                                               {(goal.assistPlayerName || goal.assistPlayer) && (
-                                                <div className="flex items-center gap-1.5 justify-end mr-0.5 mt-1">
-                                                  <span className="text-xs text-gray-600 dark:text-gray-300 italic">
+                                                <div className="flex items-center gap-1.5 justify-end mr-0.5 mt-1.5">
+                                                  <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">
                                                     {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"}
                                                   </span>
-                                                  <span className="text-xs text-gray-500 dark:text-gray-400">🎯</span>
+                                                  <span className="text-sm">👟</span>
                                                 </div>
                                               )}
                                             </div>
@@ -810,14 +812,15 @@ export default function LeaguePage() {
                                                 <span className="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[2.5rem] text-center">
                                                   {formatMinute(goal.minute)}
                                                 </span>
-                                                <span className="font-semibold text-[11px] text-gray-900 dark:text-gray-100 truncate">
+                                                <span className="text-xs">⚽</span>
+                                                <span className="font-bold text-xs text-blue-700 dark:text-blue-300 truncate">
                                                   {goal.playerName || goal.player?.username || "Bilinmeyen"}
                                                 </span>
                                               </div>
                                               {(goal.assistPlayerName || goal.assistPlayer) && (
-                                                <div className="flex items-center gap-1 ml-0.5">
-                                                  <span className="text-[9px] text-gray-500 dark:text-gray-400">🎯</span>
-                                                  <span className="text-[10px] text-gray-600 dark:text-gray-300 italic truncate">
+                                                <div className="flex items-center gap-1 ml-0.5 mt-1">
+                                                  <span className="text-[10px]">👟</span>
+                                                  <span className="font-semibold text-[10px] text-gray-700 dark:text-gray-200 truncate">
                                                     {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"}
                                                   </span>
                                                 </div>
@@ -847,19 +850,20 @@ export default function LeaguePage() {
                                           return (
                                             <div key={idx} className="bg-red-50 dark:bg-red-900/20 border-r-2 border-red-500 rounded-l-sm p-1.5">
                                               <div className="flex items-center gap-1.5 justify-end mb-0.5">
-                                                <span className="font-semibold text-[11px] text-gray-900 dark:text-gray-100 truncate">
-                                                  {goal.playerName || goal.player?.username || "Bilinmeyen"}
-                                                </span>
                                                 <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[2.5rem] text-center">
                                                   {formatMinute(goal.minute)}
                                                 </span>
+                                                <span className="text-xs">⚽</span>
+                                                <span className="font-bold text-xs text-red-700 dark:text-red-300 truncate">
+                                                  {goal.playerName || goal.player?.username || "Bilinmeyen"}
+                                                </span>
                                               </div>
                                               {(goal.assistPlayerName || goal.assistPlayer) && (
-                                                <div className="flex items-center gap-1 justify-end mr-0.5">
-                                                  <span className="text-[10px] text-gray-600 dark:text-gray-300 italic truncate">
+                                                <div className="flex items-center gap-1 justify-end mr-0.5 mt-1">
+                                                  <span className="font-semibold text-[10px] text-gray-700 dark:text-gray-200 truncate">
                                                     {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"}
                                                   </span>
-                                                  <span className="text-[9px] text-gray-500 dark:text-gray-400">🎯</span>
+                                                  <span className="text-[10px]">👟</span>
                                                 </div>
                                               )}
                                             </div>
