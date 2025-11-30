@@ -16,6 +16,42 @@ import { tr } from "date-fns/locale";
 export default function HomePage() {
   const { user, logout } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Fikstür verilerini çek
+  const { data: fixtures } = useQuery<any[]>({
+    queryKey: ["/api/league/fixtures"],
+  });
+
+  // Maçları bul
+  const gebzeFearMatch = fixtures?.find((fixture: any) => {
+    const homeTeam = fixture.homeTeam?.name?.toLowerCase() || "";
+    const awayTeam = fixture.awayTeam?.name?.toLowerCase() || "";
+    return (
+      (homeTeam.includes("gebze") && awayTeam.includes("fear")) ||
+      (homeTeam.includes("fear") && awayTeam.includes("gebze"))
+    );
+  });
+
+  const bodoTrebolMatch = fixtures?.find((fixture: any) => {
+    const homeTeam = fixture.homeTeam?.name?.toLowerCase() || "";
+    const awayTeam = fixture.awayTeam?.name?.toLowerCase() || "";
+    return (
+      (homeTeam.includes("bodø") || homeTeam.includes("bodo") || homeTeam.includes("glimt")) && 
+      (awayTeam.includes("trebol") || homeTeam.includes("trebol"))
+    ) || (
+      (awayTeam.includes("bodø") || awayTeam.includes("bodo") || awayTeam.includes("glimt")) && 
+      (homeTeam.includes("trebol") || awayTeam.includes("trebol"))
+    );
+  });
+
+  const ravenclawTurkishMatch = fixtures?.find((fixture: any) => {
+    const homeTeam = fixture.homeTeam?.name?.toLowerCase() || "";
+    const awayTeam = fixture.awayTeam?.name?.toLowerCase() || "";
+    return (
+      (homeTeam.includes("ravenclaw") && (awayTeam.includes("turkish") || awayTeam.includes("union"))) ||
+      ((homeTeam.includes("turkish") || homeTeam.includes("union")) && awayTeam.includes("ravenclaw"))
+    );
+  });
   const allRooms = [
     {
       matchName: "Galatasaray vs Fenerbahçe",
@@ -175,166 +211,459 @@ export default function HomePage() {
                   </div>
                   
                   <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    📰 Fear the Beard – Strasbourg Karşılaşmasına "Zorunlu Mola" Damgası
+                    🗞 MAÇ ÖNCESİ ÖZEL — "DAHA BAŞLAMADAN OLAYLI HAFTA"
                   </h1>
 
                   {/* Haber İçeriği */}
                   <div className="mb-6">
-                    <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>D</span>
-                      ün oynanan Fear the Beard – Strasbourg karşılaşması, skorundan çok… duraklamalarıyla gündeme oturdu. Mücadele zaman zaman öyle uzun aralar verdi ki, tribündeki bazı taraftarlar "Devre arası bitti mi, yoksa hâlâ moladayız?" diye birbirine sormaya başladı.
-                    </p>
-                    
-                    <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-orange-500 p-4 mt-4 mb-4">
-                      <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        Kulislerde Dolaşan Bilgiler:
+                    {/* Maç 1: Gebzespor vs Fear The Beard */}
+                    <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
+                      <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        Gebzespor vs Fear The Beard
+                      </h2>
+                      
+                      {/* Maç Görseli */}
+                      {gebzeFearMatch && (
+                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
+                          <div className="flex items-center justify-center gap-4 md:gap-8">
+                            <div className="flex flex-col items-center gap-2 flex-1">
+                              {gebzeFearMatch.homeTeam?.logo ? (
+                                <img 
+                                  src={gebzeFearMatch.homeTeam.logo} 
+                                  alt={gebzeFearMatch.homeTeam.name || "Gebzespor"} 
+                                  className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                                />
+                              ) : (
+                                <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                  <span className="text-xl">⚽</span>
+                                </div>
+                              )}
+                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
+                                {gebzeFearMatch.homeTeam?.name || "Gebzespor"}
+                              </span>
+                            </div>
+                            <div className="text-2xl md:text-3xl font-bold text-black dark:text-amber-100">VS</div>
+                            <div className="flex flex-col items-center gap-2 flex-1">
+                              {gebzeFearMatch.awayTeam?.logo ? (
+                                <img 
+                                  src={gebzeFearMatch.awayTeam.logo} 
+                                  alt={gebzeFearMatch.awayTeam.name || "Fear The Beard"} 
+                                  className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                                />
+                              ) : (
+                                <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                  <span className="text-xl">⚽</span>
+                                </div>
+                              )}
+                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
+                                {gebzeFearMatch.awayTeam?.name || "Fear The Beard"}
+                              </span>
+                            </div>
+                          </div>
+                          {gebzeFearMatch.referee && (
+                            <div className="mt-3 text-center">
+                              <span className="text-xs md:text-sm text-muted-foreground">Hakem: </span>
+                              <span className="text-xs md:text-sm font-semibold text-black dark:text-amber-100">{gebzeFearMatch.referee}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>M</span>
+                        aç Öncesi Havası: Sakala karşı direnç testi
                       </p>
-                      <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Kulislerde dolaşan bilgilere göre Strasbourg cephesinde maç günü bir "mide problemi" krizi yaşandı. Oyuncuların büyük bir kısmının, maç öncesi yedikleri şeye fazla güvenmiş olabileceği konuşuluyor. Bazılarına göre takım otobüsünde başlayan hareketlilik, sahada da devam etti. Hatta bir ara yedek kulübesinde "sıraya girenler" olduğu esprisi bile yayılmış durumda.
+                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Gebzespor haftaya "en azından gol yemeyelim" mottosuyla hazırlanırken, Fear The Beard cephesi sakal yağlarını sürüp moral depoladı.
                       </p>
+                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Taraftarın beklentisi yüksek değil; çünkü ikili karşılaşınca genelde top değil, sabır sınavı izleniyor.
+                      </p>
+
+                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-red-500 p-4 mt-4 mb-4">
+                        <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                          Hakem Hugo İlleri'ye ön yorumlar:
+                        </p>
+                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          Tribünlerde şimdiden homurdanmalar başladı. Hugo'nun önceki maçlardaki "ne çaldığı belli olmayan düdükleri" yüzünden taraftarlar, maça gelirken kulak tıkacı bile getirmiş.
+                        </p>
+                      </div>
                     </div>
 
-                    <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      Fear the Beard tarafı ise bu beklenmedik molaları şaşkınlıkla izlerken, bazı oyuncuların duraklamaları fırsat bilip kenarda mini bir taktik sohbeti yaptığı görüldü. Maçın hakemi de sık sık "Devam ediyor muyuz?" bakışı atmak zorunda kaldı.
-                    </p>
+                    {/* Maç 2: FK Bodø/Glimt vs Trebol FC */}
+                    <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
+                      <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        FK Bodø/Glimt vs Trebol FC
+                      </h2>
+                      
+                      {/* Maç Görseli */}
+                      {bodoTrebolMatch && (
+                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
+                          <div className="flex items-center justify-center gap-4 md:gap-8">
+                            <div className="flex flex-col items-center gap-2 flex-1">
+                              {bodoTrebolMatch.homeTeam?.logo ? (
+                                <img 
+                                  src={bodoTrebolMatch.homeTeam.logo} 
+                                  alt={bodoTrebolMatch.homeTeam.name || "FK Bodø/Glimt"} 
+                                  className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                                />
+                              ) : (
+                                <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                  <span className="text-xl">⚽</span>
+                                </div>
+                              )}
+                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
+                                {bodoTrebolMatch.homeTeam?.name || "FK Bodø/Glimt"}
+                              </span>
+                            </div>
+                            <div className="text-2xl md:text-3xl font-bold text-black dark:text-amber-100">VS</div>
+                            <div className="flex flex-col items-center gap-2 flex-1">
+                              {bodoTrebolMatch.awayTeam?.logo ? (
+                                <img 
+                                  src={bodoTrebolMatch.awayTeam.logo} 
+                                  alt={bodoTrebolMatch.awayTeam.name || "Trebol FC"} 
+                                  className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                                />
+                              ) : (
+                                <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                  <span className="text-xl">⚽</span>
+                                </div>
+                              )}
+                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
+                                {bodoTrebolMatch.awayTeam?.name || "Trebol FC"}
+                              </span>
+                            </div>
+                          </div>
+                          {bodoTrebolMatch.referee && (
+                            <div className="mt-3 text-center">
+                              <span className="text-xs md:text-sm text-muted-foreground">Hakem: </span>
+                              <span className="text-xs md:text-sm font-semibold text-black dark:text-amber-100">{bodoTrebolMatch.referee}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
 
-                    <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 p-4 mt-4 mb-4">
-                      <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        Sosyal Medya Yorumu:
+                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>M</span>
+                        aç Öncesi Havası: Kuzey Fırtınası vs Taktik Tedirginlik
                       </p>
-                      <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        "Maçın adamı: Tuvalet kapısı."
+                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Bodø/Glimt, sahaya çıkmadan önce bile favori gösteriliyor; Trebol FC ise daha toplantı odasında moral bozmaya başlamış durumda.
                       </p>
+                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        "Topun peşinden koşacağız, gölge gibi değil" açıklaması bile tarafta umut yaratamadı.
+                      </p>
+
+                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-blue-500 p-4 mt-4 mb-4">
+                        <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                          Hakem Öğetrn için ön yorumlar:
+                        </p>
+                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          Taraftarlar maç başlamadan hakemi eleştirmeye başladı bile. Geçmişteki "avantaj mı düdük mü ben de bilmiyorum" tarzı yönetimi hâlâ unutulmuş değil.
+                        </p>
+                      </div>
                     </div>
 
-                    <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4 italic" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      Strasbourg cephesi resmi bir açıklama yapmadı ama takımın bir dahaki maç için "daha hafif bir menü" planladığı konuşuluyor.
-                    </p>
+                    {/* Maç 3: Ravenclaw vs Turkish Union */}
+                    <div className="mb-6">
+                      <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        Ravenclaw vs Turkish Union
+                      </h2>
+                      
+                      {/* Maç Görseli */}
+                      {ravenclawTurkishMatch && (
+                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
+                          <div className="flex items-center justify-center gap-4 md:gap-8">
+                            <div className="flex flex-col items-center gap-2 flex-1">
+                              {ravenclawTurkishMatch.homeTeam?.logo ? (
+                                <img 
+                                  src={ravenclawTurkishMatch.homeTeam.logo} 
+                                  alt={ravenclawTurkishMatch.homeTeam.name || "Ravenclaw"} 
+                                  className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                                />
+                              ) : (
+                                <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                  <span className="text-xl">⚽</span>
+                                </div>
+                              )}
+                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
+                                {ravenclawTurkishMatch.homeTeam?.name || "Ravenclaw"}
+                              </span>
+                            </div>
+                            <div className="text-2xl md:text-3xl font-bold text-black dark:text-amber-100">VS</div>
+                            <div className="flex flex-col items-center gap-2 flex-1">
+                              {ravenclawTurkishMatch.awayTeam?.logo ? (
+                                <img 
+                                  src={ravenclawTurkishMatch.awayTeam.logo} 
+                                  alt={ravenclawTurkishMatch.awayTeam.name || "Turkish Union"} 
+                                  className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                                />
+                              ) : (
+                                <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                  <span className="text-xl">⚽</span>
+                                </div>
+                              )}
+                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
+                                {ravenclawTurkishMatch.awayTeam?.name || "Turkish Union"}
+                              </span>
+                            </div>
+                          </div>
+                          {ravenclawTurkishMatch.referee && (
+                            <div className="mt-3 text-center">
+                              <span className="text-xs md:text-sm text-muted-foreground">Hakem: </span>
+                              <span className="text-xs md:text-sm font-semibold text-black dark:text-amber-100">{ravenclawTurkishMatch.referee}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>M</span>
+                        aç Öncesi Havası: Sihir mi, stres mi?
+                      </p>
+                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Ravenclaw tarafında takıma sihirli değnek lazım; Turkish Union cephesinde ise "bir maçlık toparlanırız" düşüncesi ortalarda dolaşıyor ama kimse çok inanmıyor.
+                      </p>
+
+                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-purple-500 p-4 mt-4 mb-4">
+                        <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                          Hakem Burak için ön yorumlar:
+                        </p>
+                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          Taraftarlar Burak'ın yönetimine güvenmiyor. "Bir korner verir, sonra neden verdiğini unutur" diye dalga geçenler bile var.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {/* Twitter Benzeri Taraftar Yorumları */}
                 <div className="mb-6 border-t-2 border-black/20 dark:border-amber-200/20 pt-6">
                   <h3 className="text-xl md:text-2xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    📱 Taraftarlar Ne Diyor?
+                    📱 Taraftarların Maç Öncesi Lafları
                   </h3>
                   
                   <div className="space-y-3">
-                    {/* Tweet 1 */}
-                    <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">MA</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Mehmet Avcı</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@mehmetavci_ftb</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 2s</span>
+                    {/* Gebzespor vs Fear The Beard Tweet'leri */}
+                    <div className="mb-4">
+                      <h4 className="text-sm md:text-base font-semibold text-black/70 dark:text-amber-200/70 mb-2">Gebzespor vs Fear The Beard</h4>
+                      <div className="space-y-3">
+                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">SK</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Serkan Kaya</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@serkankaya_gebze</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 3dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Hugo yine VAR'a bakmadan karar verirse, ben eve dönerim. Siktirsin gitsin bu hakem!
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 34</span>
+                                <span>🔄 18</span>
+                                <span>❤️ 89</span>
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            Formayı çıkarın siktirin gidin! Böyle maç mı olur? Her saniye tuvalet molası veriyorsunuz!
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 12</span>
-                            <span>🔄 8</span>
-                            <span>❤️ 45</span>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">MA</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Mehmet Arslan</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@mehmetarslan_gebze</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 5dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Gebzespor gol atmaz ama en azından rakibi yorar… belki. Yine de sike sike oynayacağız!
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 56</span>
+                                <span>🔄 23</span>
+                                <span>❤️ 112</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">AK</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Ali Kılıç</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@alikilic_ftb</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 7dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Fear The Beard'in sakalı bile bizden daha disiplinli. Amk sakalları bile daha iyi oynuyor!
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 78</span>
+                                <span>🔄 45</span>
+                                <span>❤️ 156</span>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Tweet 2 */}
-                    <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">AK</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Ali Kaya</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@alikaya_beard</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 15s</span>
+                    {/* FK Bodø/Glimt vs Trebol FC Tweet'leri */}
+                    <div className="mb-4">
+                      <h4 className="text-sm md:text-base font-semibold text-black/70 dark:text-amber-200/70 mb-2">FK Bodø/Glimt vs Trebol FC</h4>
+                      <div className="space-y-3">
+                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">CY</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Can Yıldız</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@canyildiz_trebol</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 4dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Hakem değil kronometre bile bize çalışmıyor. Öğetrn siktirsin gitsin, bizi rezil ediyor!
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 45</span>
+                                <span>🔄 28</span>
+                                <span>❤️ 98</span>
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            Bu maçı izlemek yerine tuvalet kuyruğunda beklemek daha eğlenceliydi. Strasbourg takımına önerim: Bir dahaki sefere maçtan önce yemek yemeyin!
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 23</span>
-                            <span>🔄 15</span>
-                            <span>❤️ 67</span>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">ÖD</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Özkan Demir</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@ozkandemir_trebol</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 6dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Trebol FC bir kere gol atsa havaya fişek patlatırım. Ama atamazlar amk, hiç umut yok!
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 67</span>
+                                <span>🔄 34</span>
+                                <span>❤️ 134</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">BK</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Burak Koç</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@burakkoc_trebol</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 8dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Bodø/Glimt'in presi yüzünden topun oksijeni biter. Bizim oyuncular nefes alamaz, sike sike kaybederiz!
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 89</span>
+                                <span>🔄 52</span>
+                                <span>❤️ 178</span>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Tweet 3 */}
-                    <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">CY</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Can Yılmaz</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@canyilmaz_ftb</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 23s</span>
+                    {/* Ravenclaw vs Turkish Union Tweet'leri */}
+                    <div className="mb-4">
+                      <h4 className="text-sm md:text-base font-semibold text-black/70 dark:text-amber-200/70 mb-2">Ravenclaw vs Turkish Union</h4>
+                      <div className="space-y-3">
+                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">EY</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Emre Yılmaz</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@emreyilmaz_raven</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 2dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Ravenclaw savunması rüzgâr esse dağılır, bakalım bugün kaç dakika dayanacak. Burak hakem de sike sike hata yapacak!
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 56</span>
+                                <span>🔄 32</span>
+                                <span>❤️ 123</span>
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            Maçın en iyi oyuncusu tuvalet kapısı oldu. MVP ödülünü ona verelim! 😂😂😂
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 89</span>
-                            <span>🔄 34</span>
-                            <span>❤️ 156</span>
-                          </div>
                         </div>
-                      </div>
-                    </div>
 
-                    {/* Tweet 4 */}
-                    <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">ÖD</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Özkan Demir</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@ozkandemir_ftb</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 31s</span>
+                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">TA</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Tolga Aydın</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@tolgaaydin_tu</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 5dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Turkish Union'ın hücum hattı çay molasına çok alıştı galiba. Siktirsin gitsinler, oynayamıyorlar!
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 78</span>
+                                <span>🔄 41</span>
+                                <span>❤️ 145</span>
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            Strasbourg takımı maçtan önce ne yedi acaba? Ben de yiyeyim, belki ben de profesyonel futbolcu olurum! 😂
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 45</span>
-                            <span>🔄 28</span>
-                            <span>❤️ 98</span>
-                          </div>
                         </div>
-                      </div>
-                    </div>
 
-                    {/* Tweet 5 */}
-                    <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">BK</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Burak Koç</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@burakkoc_ftb</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 42s</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            Hakem maçı durdurdu mu yoksa Strasbourg oyuncuları mı? Artık anlayamıyoruz! Formayı çıkarın, tuvalet takımı kurun!
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 67</span>
-                            <span>🔄 42</span>
-                            <span>❤️ 123</span>
+                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">MK</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Murat Kaya</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@muratkaya_raven</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 9dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Hakem Burak bugün kartları yanlışlıkla üst üste verir diye korkuyorum. Amk hakemi, hiçbir şey bilmiyor!
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 92</span>
+                                <span>🔄 58</span>
+                                <span>❤️ 201</span>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -388,32 +717,170 @@ export default function HomePage() {
                   </div>
                   
                   <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    📰 Kulislerde Hareketlilik: Yeni Takımın Oyuncu Görüşmeleri Sızdı
+                    📰 Fear the Beard – Strasbourg Karşılaşmasına "Zorunlu Mola" Damgası
                   </h1>
 
                   {/* Haber İçeriği */}
                   <div className="mb-6">
                     <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>L</span>
-                      ig kulislerinde dikkat çeken yeni bir gelişme yaşandı. Henüz resmi olarak duyurulmayan yeni bir takımın, kadro kurma sürecinde mevcut ekiplerle temasa geçtiğine dair bilgiler spor camiasına sızdı. Gelen söylentilere göre yeni oluşum, birkaç tecrübeli oyuncuyu renklerine bağlamak için görüşmeler yürütüyor.
+                      <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>D</span>
+                      ün oynanan Fear the Beard – Strasbourg karşılaşması, skorundan çok… duraklamalarıyla gündeme oturdu. Mücadele zaman zaman öyle uzun aralar verdi ki, tribündeki bazı taraftarlar "Devre arası bitti mi, yoksa hâlâ moladayız?" diye birbirine sormaya başladı.
                     </p>
                     
+                    <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-orange-500 p-4 mt-4 mb-4">
+                      <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        Kulislerde Dolaşan Bilgiler:
+                      </p>
+                      <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Kulislerde dolaşan bilgilere göre Strasbourg cephesinde maç günü bir "mide problemi" krizi yaşandı. Oyuncuların büyük bir kısmının, maç öncesi yedikleri şeye fazla güvenmiş olabileceği konuşuluyor. Bazılarına göre takım otobüsünde başlayan hareketlilik, sahada da devam etti. Hatta bir ara yedek kulübesinde "sıraya girenler" olduğu esprisi bile yayılmış durumda.
+                      </p>
+                    </div>
+
                     <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      Sızan bilgilere göre, kulislerde konuşulan isimler arasında Ravenclaw ekibinden de bazı oyuncuların geçtiği fısıldanıyor. Ancak bu temasların ne aşamada olduğu veya hangi oyuncuların değerlendirildiği konusunda net bir bilgi bulunmuyor. Aynı şekilde farklı takımlardan da alternatif isimlerin listeye alındığı ifade ediliyor.
+                      Fear the Beard tarafı ise bu beklenmedik molaları şaşkınlıkla izlerken, bazı oyuncuların duraklamaları fırsat bilip kenarda mini bir taktik sohbeti yaptığı görüldü. Maçın hakemi de sık sık "Devam ediyor muyuz?" bakışı atmak zorunda kaldı.
                     </p>
 
-                    <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-blue-500 p-4 mt-4 mb-4">
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 p-4 mt-4 mb-4">
                       <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        Kulis Söylentileri:
+                        Sosyal Medya Yorumu:
                       </p>
-                      <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Yeni takımın, başvuru dosyasını güçlendirmek adına kadro yapılanmasını hızlandırdığı ve yakın zamanda daha somut adımlar atabileceği konuşuluyor. Buna rağmen ekipten resmi bir açıklama gelmediği için sürecin nasıl ilerleyeceği merak konusu olmaya devam ediyor.
+                      <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        "Maçın adamı: Tuvalet kapısı."
                       </p>
                     </div>
 
                     <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4 italic" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      Kulislerde dolaşan bilgiler doğrulandıkça ve yeni bilgiler ortaya çıktıkça gelişmeleri aktarmayı sürdüreceğiz.
+                      Strasbourg cephesi resmi bir açıklama yapmadı ama takımın bir dahaki maç için "daha hafif bir menü" planladığı konuşuluyor.
                     </p>
+                  </div>
+
+                  {/* Twitter Benzeri Taraftar Yorumları */}
+                  <div className="mb-6 border-t-2 border-black/20 dark:border-amber-200/20 pt-6">
+                    <h3 className="text-xl md:text-2xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      📱 Taraftarlar Ne Diyor?
+                    </h3>
+                    
+                    <div className="space-y-3">
+                      {/* Tweet 1 */}
+                      <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-white font-bold text-sm">MA</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-bold text-sm text-black dark:text-amber-100">Mehmet Avcı</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">@mehmetavci_ftb</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">· 2s</span>
+                            </div>
+                            <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                              Formayı çıkarın siktirin gidin! Böyle maç mı olur? Her saniye tuvalet molası veriyorsunuz!
+                            </p>
+                            <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                              <span>💬 12</span>
+                              <span>🔄 8</span>
+                              <span>❤️ 45</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Tweet 2 */}
+                      <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-white font-bold text-sm">AK</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-bold text-sm text-black dark:text-amber-100">Ali Kaya</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">@alikaya_beard</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">· 15s</span>
+                            </div>
+                            <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                              Bu maçı izlemek yerine tuvalet kuyruğunda beklemek daha eğlenceliydi. Strasbourg takımına önerim: Bir dahaki sefere maçtan önce yemek yemeyin!
+                            </p>
+                            <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                              <span>💬 23</span>
+                              <span>🔄 15</span>
+                              <span>❤️ 67</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Tweet 3 */}
+                      <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-white font-bold text-sm">CY</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-bold text-sm text-black dark:text-amber-100">Can Yılmaz</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">@canyilmaz_ftb</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">· 23s</span>
+                            </div>
+                            <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                              Maçın en iyi oyuncusu tuvalet kapısı oldu. MVP ödülünü ona verelim! 😂😂😂
+                            </p>
+                            <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                              <span>💬 89</span>
+                              <span>🔄 34</span>
+                              <span>❤️ 156</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Tweet 4 */}
+                      <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-white font-bold text-sm">ÖD</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-bold text-sm text-black dark:text-amber-100">Özkan Demir</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">@ozkandemir_ftb</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">· 31s</span>
+                            </div>
+                            <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                              Strasbourg takımı maçtan önce ne yedi acaba? Ben de yiyeyim, belki ben de profesyonel futbolcu olurum! 😂
+                            </p>
+                            <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                              <span>💬 45</span>
+                              <span>🔄 28</span>
+                              <span>❤️ 98</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Tweet 5 */}
+                      <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-white font-bold text-sm">BK</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-bold text-sm text-black dark:text-amber-100">Burak Koç</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">@burakkoc_ftb</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">· 42s</span>
+                            </div>
+                            <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                              Hakem maçı durdurdu mu yoksa Strasbourg oyuncuları mı? Artık anlayamıyoruz! Formayı çıkarın, tuvalet takımı kurun!
+                            </p>
+                            <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                              <span>💬 67</span>
+                              <span>🔄 42</span>
+                              <span>❤️ 123</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
