@@ -571,42 +571,52 @@ export default function LeaguePage() {
                                 </div>
                               )}
                               
-                              <div className="flex items-center justify-between pt-3 border-t">
-                                <div className="flex-1"></div>
-                                <div className="flex items-center gap-2 text-sm">
-                                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                                  <span className="font-medium">
-                                    {formattedDate}
-                                  </span>
+                              {!isBye && (
+                                <div className="mt-4 pt-3 border-t space-y-2">
+                                  <div className="flex items-center justify-center gap-2 text-sm">
+                                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                                    <span className="font-medium text-muted-foreground">
+                                      {formattedDate}
+                                    </span>
+                                  </div>
+                                  {fixture.referee && (
+                                    <div className="flex items-center justify-center gap-2">
+                                      <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                                        <span className="text-amber-600 font-semibold">⚖️</span>
+                                        <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">Hakem:</span>
+                                        <span className="text-sm font-bold text-amber-800 dark:text-amber-300">{fixture.referee}</span>
+                                      </div>
+                                    </div>
+                                  )}
+                                  <div className="flex items-center justify-center gap-2 flex-wrap">
+                                    {isForfeit && (
+                                      <span className="text-xs font-semibold text-purple-600 bg-purple-600/20 px-2 py-1 rounded-full">
+                                        HÜKMEN
+                                      </span>
+                                    )}
+                                    {isPostponed && !isForfeit && (
+                                      <span className="text-xs font-semibold text-orange-600 bg-orange-600/20 px-2 py-1 rounded-full">
+                                        ERTELENDİ
+                                      </span>
+                                    )}
+                                    {fixture.isPlayed && !isPostponed && !isForfeit && (
+                                      <span className="text-xs font-semibold text-green-600 bg-green-600/20 px-2 py-1 rounded-full">
+                                        OYNANDI
+                                      </span>
+                                    )}
+                                    {fixture.matchRecordingUrl && (
+                                      <a
+                                        href={fixture.matchRecordingUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs font-semibold text-blue-600 bg-blue-600/20 px-2 py-1 rounded-full hover:bg-blue-600/30 transition-colors"
+                                      >
+                                        📹 Maç Kaydı
+                                      </a>
+                                    )}
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  {isForfeit && (
-                                    <span className="text-xs font-semibold text-purple-600 bg-purple-600/20 px-2 py-1 rounded-full">
-                                      HÜKMEN
-                                    </span>
-                                  )}
-                                  {isPostponed && !isForfeit && (
-                                    <span className="text-xs font-semibold text-orange-600 bg-orange-600/20 px-2 py-1 rounded-full">
-                                      ERTELENDİ
-                                    </span>
-                                  )}
-                                  {fixture.isPlayed && !isPostponed && !isForfeit && (
-                                    <span className="text-xs font-semibold text-green-600 bg-green-600/20 px-2 py-1 rounded-full">
-                                      OYNANDI
-                                    </span>
-                                  )}
-                                  {fixture.matchRecordingUrl && (
-                                    <a
-                                      href={fixture.matchRecordingUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-xs font-semibold text-blue-600 bg-blue-600/20 px-2 py-1 rounded-full hover:bg-blue-600/30 transition-colors"
-                                    >
-                                      📹 Maç Kaydı
-                                    </a>
-                                  )}
-                                </div>
-                              </div>
+                              )}
                             </div>
                           );
                         })}
@@ -711,12 +721,15 @@ export default function LeaguePage() {
                             <div className="mt-3 pt-3 border-t space-y-2">
                               <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                                 <Calendar className="w-4 h-4" />
-                                <span>{formattedDate}</span>
+                                <span className="font-medium">{formattedDate}</span>
                               </div>
                               {fixture.referee && (
-                                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                                  <span className="font-medium">Hakem:</span>
-                                  <span>{fixture.referee}</span>
+                                <div className="flex items-center justify-center">
+                                  <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                                    <span className="text-amber-600 font-semibold">⚖️</span>
+                                    <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">Hakem:</span>
+                                    <span className="text-sm font-bold text-amber-800 dark:text-amber-300">{fixture.referee}</span>
+                                  </div>
                                 </div>
                               )}
                               {isForfeit && (
