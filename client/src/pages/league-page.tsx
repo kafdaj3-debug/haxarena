@@ -530,40 +530,61 @@ export default function LeaguePage() {
                               
                               {/* Gol/Asist Bilgileri */}
                               {fixture.goals && fixture.goals.length > 0 && (
-                                <div className="mt-4 pt-3 border-t">
-                                  <h4 className="text-sm font-semibold mb-2">Gol Detayları:</h4>
+                                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                  <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                                    <span className="text-lg">⚽</span>
+                                    <span>Gol Detayları</span>
+                                  </h4>
                                   <div className="grid grid-cols-2 gap-4">
                                     {/* Ev Sahibi Takım Golleri - Sol Taraf */}
-                                    <div className="space-y-1">
+                                    <div className="space-y-2">
                                       {fixture.goals
                                         .filter((goal: any) => goal.isHomeTeam)
                                         .sort((a: any, b: any) => a.minute - b.minute)
                                         .map((goal: any, idx: number) => (
-                                            <div key={idx} className="text-xs flex items-center gap-2">
-                                              <span className="font-medium">{formatMinute(goal.minute)}</span>
-                                              <span>{goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
-                                              {(goal.assistPlayerName || goal.assistPlayer) && (
-                                                <span className="text-muted-foreground">
-                                                  (Asist: {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"})
+                                            <div key={idx} className="bg-gradient-to-r from-blue-50 to-transparent dark:from-blue-900/20 dark:to-transparent border-l-[3px] border-blue-500 rounded-r-md p-2.5 shadow-sm">
+                                              <div className="flex items-center gap-2 mb-1">
+                                                <span className="bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[3rem] text-center">
+                                                  {formatMinute(goal.minute)}
                                                 </span>
+                                                <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+                                                  {goal.playerName || goal.player?.username || "Bilinmeyen"}
+                                                </span>
+                                              </div>
+                                              {(goal.assistPlayerName || goal.assistPlayer) && (
+                                                <div className="flex items-center gap-1.5 ml-0.5 mt-1">
+                                                  <span className="text-xs text-gray-500 dark:text-gray-400">🎯</span>
+                                                  <span className="text-xs text-gray-600 dark:text-gray-300 italic">
+                                                    {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"}
+                                                  </span>
+                                                </div>
                                               )}
                                             </div>
                                           ))}
                                     </div>
                                     {/* Deplasman Takımı Golleri - Sağ Taraf */}
-                                    <div className="space-y-1">
+                                    <div className="space-y-2">
                                       {fixture.goals
                                         .filter((goal: any) => !goal.isHomeTeam)
                                         .sort((a: any, b: any) => a.minute - b.minute)
                                         .map((goal: any, idx: number) => (
-                                            <div key={idx} className="text-xs flex items-center gap-2 justify-end">
-                                              <span>{goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
-                                              {(goal.assistPlayerName || goal.assistPlayer) && (
-                                                <span className="text-muted-foreground">
-                                                  (Asist: {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"})
+                                            <div key={idx} className="bg-gradient-to-l from-red-50 to-transparent dark:from-red-900/20 dark:to-transparent border-r-[3px] border-red-500 rounded-l-md p-2.5 shadow-sm">
+                                              <div className="flex items-center gap-2 justify-end mb-1">
+                                                <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+                                                  {goal.playerName || goal.player?.username || "Bilinmeyen"}
                                                 </span>
+                                                <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[3rem] text-center">
+                                                  {formatMinute(goal.minute)}
+                                                </span>
+                                              </div>
+                                              {(goal.assistPlayerName || goal.assistPlayer) && (
+                                                <div className="flex items-center gap-1.5 justify-end mr-0.5 mt-1">
+                                                  <span className="text-xs text-gray-600 dark:text-gray-300 italic">
+                                                    {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"}
+                                                  </span>
+                                                  <span className="text-xs text-gray-500 dark:text-gray-400">🎯</span>
+                                                </div>
                                               )}
-                                              <span className="font-medium">{formatMinute(goal.minute)}</span>
                                             </div>
                                           ))}
                                     </div>
@@ -759,11 +780,14 @@ export default function LeaguePage() {
                                 </div>
                               )}
                               {fixture.goals && fixture.goals.length > 0 && (
-                                <div className="mt-2 pt-2 border-t">
-                                  <h5 className="text-xs font-semibold mb-1 text-center">Gol Detayları:</h5>
+                                <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                                  <h5 className="text-xs font-semibold mb-2 text-center flex items-center justify-center gap-1">
+                                    <span>⚽</span>
+                                    <span>Gol Detayları</span>
+                                  </h5>
                                   <div className="grid grid-cols-2 gap-2">
                                     {/* Ev Sahibi Takım Golleri - Sol Taraf */}
-                                    <div className="space-y-0.5">
+                                    <div className="space-y-1.5">
                                       {fixture.goals
                                         .filter((goal: any) => goal.isHomeTeam)
                                         .sort((a: any, b: any) => a.minute - b.minute)
@@ -781,20 +805,29 @@ export default function LeaguePage() {
                                             }
                                           };
                                           return (
-                                            <div key={idx} className="text-xs">
-                                              <span className="font-medium">{formatMinute(goal.minute)}</span>
-                                              <span> {goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
-                                              {(goal.assistPlayerName || goal.assistPlayer) && (
-                                                <span className="text-muted-foreground">
-                                                  {" "}(Asist: {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"})
+                                            <div key={idx} className="bg-blue-50 dark:bg-blue-900/20 border-l-2 border-blue-500 rounded-r-sm p-1.5">
+                                              <div className="flex items-center gap-1.5 mb-0.5">
+                                                <span className="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[2.5rem] text-center">
+                                                  {formatMinute(goal.minute)}
                                                 </span>
+                                                <span className="font-semibold text-[11px] text-gray-900 dark:text-gray-100 truncate">
+                                                  {goal.playerName || goal.player?.username || "Bilinmeyen"}
+                                                </span>
+                                              </div>
+                                              {(goal.assistPlayerName || goal.assistPlayer) && (
+                                                <div className="flex items-center gap-1 ml-0.5">
+                                                  <span className="text-[9px] text-gray-500 dark:text-gray-400">🎯</span>
+                                                  <span className="text-[10px] text-gray-600 dark:text-gray-300 italic truncate">
+                                                    {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"}
+                                                  </span>
+                                                </div>
                                               )}
                                             </div>
                                           );
                                         })}
                                     </div>
                                     {/* Deplasman Takımı Golleri - Sağ Taraf */}
-                                    <div className="space-y-0.5">
+                                    <div className="space-y-1.5">
                                       {fixture.goals
                                         .filter((goal: any) => !goal.isHomeTeam)
                                         .sort((a: any, b: any) => a.minute - b.minute)
@@ -812,14 +845,23 @@ export default function LeaguePage() {
                                             }
                                           };
                                           return (
-                                            <div key={idx} className="text-xs text-right">
-                                              <span>{goal.playerName || goal.player?.username || "Bilinmeyen"}</span>
-                                              {(goal.assistPlayerName || goal.assistPlayer) && (
-                                                <span className="text-muted-foreground">
-                                                  {" "}(Asist: {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"})
+                                            <div key={idx} className="bg-red-50 dark:bg-red-900/20 border-r-2 border-red-500 rounded-l-sm p-1.5">
+                                              <div className="flex items-center gap-1.5 justify-end mb-0.5">
+                                                <span className="font-semibold text-[11px] text-gray-900 dark:text-gray-100 truncate">
+                                                  {goal.playerName || goal.player?.username || "Bilinmeyen"}
                                                 </span>
+                                                <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[2.5rem] text-center">
+                                                  {formatMinute(goal.minute)}
+                                                </span>
+                                              </div>
+                                              {(goal.assistPlayerName || goal.assistPlayer) && (
+                                                <div className="flex items-center gap-1 justify-end mr-0.5">
+                                                  <span className="text-[10px] text-gray-600 dark:text-gray-300 italic truncate">
+                                                    {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"}
+                                                  </span>
+                                                  <span className="text-[9px] text-gray-500 dark:text-gray-400">🎯</span>
+                                                </div>
                                               )}
-                                              <span className="font-medium"> {formatMinute(goal.minute)}</span>
                                             </div>
                                           );
                                         })}
