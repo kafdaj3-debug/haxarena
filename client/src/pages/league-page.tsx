@@ -542,13 +542,13 @@ export default function LeaguePage() {
                                         .filter((goal: any) => goal.isHomeTeam)
                                         .sort((a: any, b: any) => a.minute - b.minute)
                                         .map((goal: any, idx: number) => (
-                                            <div key={idx} className="bg-gradient-to-r from-blue-50 to-transparent dark:from-blue-900/20 dark:to-transparent border-l-[3px] border-blue-500 rounded-r-md p-2.5 shadow-sm">
+                                            <div key={idx} className="bg-gradient-to-r from-red-50 to-transparent dark:from-red-900/20 dark:to-transparent border-l-[3px] border-red-500 rounded-r-md p-2.5 shadow-sm">
                                               <div className="flex items-center gap-2 mb-1">
-                                                <span className="bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[3rem] text-center">
+                                                <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[3rem] text-center">
                                                   {formatMinute(goal.minute)}
                                                 </span>
                                                 <span className="text-base">⚽</span>
-                                                <span className="font-bold text-base text-blue-700 dark:text-blue-300">
+                                                <span className="font-bold text-base text-red-700 dark:text-red-300">
                                                   {goal.playerName || goal.player?.username || "Bilinmeyen"}
                                                 </span>
                                               </div>
@@ -569,13 +569,13 @@ export default function LeaguePage() {
                                         .filter((goal: any) => !goal.isHomeTeam)
                                         .sort((a: any, b: any) => a.minute - b.minute)
                                         .map((goal: any, idx: number) => (
-                                            <div key={idx} className="bg-gradient-to-l from-red-50 to-transparent dark:from-red-900/20 dark:to-transparent border-r-[3px] border-red-500 rounded-l-md p-2.5 shadow-sm">
+                                            <div key={idx} className="bg-gradient-to-l from-blue-50 to-transparent dark:from-blue-900/20 dark:to-transparent border-r-[3px] border-blue-500 rounded-l-md p-2.5 shadow-sm">
                                               <div className="flex items-center gap-2 justify-end mb-1">
-                                                <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[3rem] text-center">
+                                                <span className="bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[3rem] text-center">
                                                   {formatMinute(goal.minute)}
                                                 </span>
                                                 <span className="text-base">⚽</span>
-                                                <span className="font-bold text-base text-red-700 dark:text-red-300">
+                                                <span className="font-bold text-base text-blue-700 dark:text-blue-300">
                                                   {goal.playerName || goal.player?.username || "Bilinmeyen"}
                                                 </span>
                                               </div>
@@ -807,13 +807,13 @@ export default function LeaguePage() {
                                             }
                                           };
                                           return (
-                                            <div key={idx} className="bg-blue-50 dark:bg-blue-900/20 border-l-2 border-blue-500 rounded-r-sm p-1.5">
+                                            <div key={idx} className="bg-red-50 dark:bg-red-900/20 border-l-2 border-red-500 rounded-r-sm p-1.5">
                                               <div className="flex items-center gap-1.5 mb-0.5">
-                                                <span className="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[2.5rem] text-center">
+                                                <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[2.5rem] text-center">
                                                   {formatMinute(goal.minute)}
                                                 </span>
                                                 <span className="text-xs">⚽</span>
-                                                <span className="font-bold text-xs text-blue-700 dark:text-blue-300 truncate">
+                                                <span className="font-bold text-xs text-red-700 dark:text-red-300 truncate">
                                                   {goal.playerName || goal.player?.username || "Bilinmeyen"}
                                                 </span>
                                               </div>
@@ -848,13 +848,13 @@ export default function LeaguePage() {
                                             }
                                           };
                                           return (
-                                            <div key={idx} className="bg-red-50 dark:bg-red-900/20 border-r-2 border-red-500 rounded-l-sm p-1.5">
+                                            <div key={idx} className="bg-blue-50 dark:bg-blue-900/20 border-r-2 border-blue-500 rounded-l-sm p-1.5">
                                               <div className="flex items-center gap-1.5 justify-end mb-0.5">
-                                                <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[2.5rem] text-center">
+                                                <span className="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[2.5rem] text-center">
                                                   {formatMinute(goal.minute)}
                                                 </span>
                                                 <span className="text-xs">⚽</span>
-                                                <span className="font-bold text-xs text-red-700 dark:text-red-300 truncate">
+                                                <span className="font-bold text-xs text-blue-700 dark:text-blue-300 truncate">
                                                   {goal.playerName || goal.player?.username || "Bilinmeyen"}
                                                 </span>
                                               </div>
