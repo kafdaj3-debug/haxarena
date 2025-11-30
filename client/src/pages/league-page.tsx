@@ -394,7 +394,7 @@ export default function LeaguePage() {
             <TabsContent value="fixtures" className="space-y-6">
               {fixturesLoading ? (
                 <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
-              ) : !fixtures?.length ? (
+              ) : !fixtures || !Array.isArray(fixtures) || fixtures.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   Henüz maç bulunmamaktadır
                 </div>

@@ -1746,14 +1746,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/league/fixtures/:id/referee", checkIpBan, isAuthenticated, isSuperAdmin, async (req, res) => {
     try {
       const { id } = req.params;
-      const { referee } = req.body;
+      let { referee } = req.body;
       
-      // referee can be string or null
+      // referee can be string or null/undefined
+      // Convert empty string to null
+      if (referee === "" || referee === undefined) {
+        referee = null;
+      }
+      
       if (referee !== null && typeof referee !== "string") {
         return res.status(400).json({ error: "referee string veya null olmalıdır" });
       }
 
-      const fixture = await storage.updateLeagueFixtureReferee(id, referee || null);
+      const fixture = await storage.updateLeagueFixtureReferee(id, referee);
       if (!fixture) {
         return res.status(404).json({ error: "Maç bulunamadı" });
       }
