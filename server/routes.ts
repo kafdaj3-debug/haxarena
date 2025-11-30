@@ -1529,9 +1529,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // getLeagueFixtures now includes goals, so we can directly return it
       const fixtures = await storage.getLeagueFixtures();
       return res.json(fixtures);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error getting fixtures:", error);
-      return res.status(500).json({ error: "Fikstür yüklenemedi" });
+      // Check if error is about missing column
+      const errorMessage = error?.message || String(error);
+      if (errorMessage.includes("referee") || errorMessage.includes("column") || errorMessage.includes("does not exist")) {
+        console.error("⚠️ Database migration needed: 'referee' column is missing in league_fixtures table");
+        console.error("Run: ALTER TABLE league_fixtures ADD COLUMN IF NOT EXISTS referee TEXT;");
+        return res.status(500).json({ 
+          error: "Veritabanı migration'ı gerekli. 'referee' kolonu eksik. Lütfen migration çalıştırın veya SQL: ALTER TABLE league_fixtures ADD COLUMN IF NOT EXISTS referee TEXT;"
+        });
+      }
+      return res.status(500).json({ error: "Fikstür yüklenemedi", details: errorMessage });
     }
   });
 

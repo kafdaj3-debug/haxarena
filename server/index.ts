@@ -330,6 +330,32 @@ app.use((req, res, next) => {
         log(`⚠️  Warning checking forum_replies table: ${e.message}`);
       }
       
+      // League fixtures table - add referee column
+      try {
+        // Check if league_fixtures table exists
+        const leagueFixturesCheck = await db.execute(sql`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'league_fixtures'
+          )
+        `);
+        
+        if (leagueFixturesCheck.rows && leagueFixturesCheck.rows[0] && (leagueFixturesCheck.rows[0] as any).exists) {
+          // Add referee column if it doesn't exist
+          try {
+            await db.execute(sql`ALTER TABLE league_fixtures ADD COLUMN IF NOT EXISTS referee TEXT`);
+            log("✓ Added referee column to league_fixtures");
+          } catch (e: any) {
+            if (!e.message?.includes("already exists") && !e.message?.includes("duplicate")) {
+              log(`⚠️  Warning adding referee to league_fixtures: ${e.message}`);
+            }
+          }
+        }
+      } catch (e: any) {
+        log(`⚠️  Warning checking league_fixtures table: ${e.message}`);
+      }
+      
       // Private messages table columns
       try {
         // Check if private_messages table exists
