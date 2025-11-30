@@ -18,39 +18,40 @@ export default function HomePage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Fikstür verilerini çek
-  const { data: fixtures } = useQuery<any[]>({
+  const { data: fixtures, isLoading: fixturesLoading } = useQuery<any[]>({
     queryKey: ["/api/league/fixtures"],
   });
 
-  // Maçları bul
+  // Maçları bul - daha esnek eşleştirme
   const gebzeFearMatch = fixtures?.find((fixture: any) => {
-    const homeTeam = fixture.homeTeam?.name?.toLowerCase() || "";
-    const awayTeam = fixture.awayTeam?.name?.toLowerCase() || "";
-    return (
-      (homeTeam.includes("gebze") && awayTeam.includes("fear")) ||
-      (homeTeam.includes("fear") && awayTeam.includes("gebze"))
-    );
+    if (fixture.isBye) return false;
+    const homeTeam = (fixture.homeTeam?.name || "").toLowerCase().trim();
+    const awayTeam = (fixture.awayTeam?.name || "").toLowerCase().trim();
+    const hasGebze = homeTeam.includes("gebze") || awayTeam.includes("gebze");
+    const hasFear = homeTeam.includes("fear") || awayTeam.includes("fear") || 
+                    homeTeam.includes("beard") || awayTeam.includes("beard");
+    return hasGebze && hasFear;
   });
 
   const bodoTrebolMatch = fixtures?.find((fixture: any) => {
-    const homeTeam = fixture.homeTeam?.name?.toLowerCase() || "";
-    const awayTeam = fixture.awayTeam?.name?.toLowerCase() || "";
-    return (
-      (homeTeam.includes("bodø") || homeTeam.includes("bodo") || homeTeam.includes("glimt")) && 
-      (awayTeam.includes("trebol") || homeTeam.includes("trebol"))
-    ) || (
-      (awayTeam.includes("bodø") || awayTeam.includes("bodo") || awayTeam.includes("glimt")) && 
-      (homeTeam.includes("trebol") || awayTeam.includes("trebol"))
-    );
+    if (fixture.isBye) return false;
+    const homeTeam = (fixture.homeTeam?.name || "").toLowerCase().trim();
+    const awayTeam = (fixture.awayTeam?.name || "").toLowerCase().trim();
+    const hasBodo = homeTeam.includes("bod") || awayTeam.includes("bod") || 
+                    homeTeam.includes("glimt") || awayTeam.includes("glimt");
+    const hasTrebol = homeTeam.includes("trebol") || awayTeam.includes("trebol");
+    return hasBodo && hasTrebol;
   });
 
   const ravenclawTurkishMatch = fixtures?.find((fixture: any) => {
-    const homeTeam = fixture.homeTeam?.name?.toLowerCase() || "";
-    const awayTeam = fixture.awayTeam?.name?.toLowerCase() || "";
-    return (
-      (homeTeam.includes("ravenclaw") && (awayTeam.includes("turkish") || awayTeam.includes("union"))) ||
-      ((homeTeam.includes("turkish") || homeTeam.includes("union")) && awayTeam.includes("ravenclaw"))
-    );
+    if (fixture.isBye) return false;
+    const homeTeam = (fixture.homeTeam?.name || "").toLowerCase().trim();
+    const awayTeam = (fixture.awayTeam?.name || "").toLowerCase().trim();
+    const hasRavenclaw = homeTeam.includes("ravenclaw") || awayTeam.includes("ravenclaw") ||
+                         homeTeam.includes("raven") || awayTeam.includes("raven");
+    const hasTurkish = homeTeam.includes("turkish") || awayTeam.includes("turkish") ||
+                       homeTeam.includes("union") || awayTeam.includes("union");
+    return hasRavenclaw && hasTurkish;
   });
   const allRooms = [
     {
@@ -223,21 +224,32 @@ export default function HomePage() {
                       </h2>
                       
                       {/* Maç Görseli */}
-                      {gebzeFearMatch && (
+                      {fixturesLoading ? (
+                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
+                          <div className="text-center py-4 text-muted-foreground">Yükleniyor...</div>
+                        </div>
+                      ) : gebzeFearMatch ? (
                         <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
                           <div className="flex items-center justify-center gap-4 md:gap-8">
                             <div className="flex flex-col items-center gap-2 flex-1">
                               {gebzeFearMatch.homeTeam?.logo ? (
                                 <img 
-                                  src={gebzeFearMatch.homeTeam.logo} 
+                                  src={gebzeFearMatch.homeTeam.logo.startsWith('data:') 
+                                    ? gebzeFearMatch.homeTeam.logo 
+                                    : gebzeFearMatch.homeTeam.logo.startsWith('http') 
+                                    ? gebzeFearMatch.homeTeam.logo
+                                    : `data:image/png;base64,${gebzeFearMatch.homeTeam.logo}`} 
                                   alt={gebzeFearMatch.homeTeam.name || "Gebzespor"} 
                                   className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                                  }}
                                 />
-                              ) : (
-                                <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                  <span className="text-xl">⚽</span>
-                                </div>
-                              )}
+                              ) : null}
+                              <div className={`w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center ${gebzeFearMatch.homeTeam?.logo ? 'hidden' : ''}`}>
+                                <span className="text-xl">⚽</span>
+                              </div>
                               <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
                                 {gebzeFearMatch.homeTeam?.name || "Gebzespor"}
                               </span>
@@ -246,15 +258,22 @@ export default function HomePage() {
                             <div className="flex flex-col items-center gap-2 flex-1">
                               {gebzeFearMatch.awayTeam?.logo ? (
                                 <img 
-                                  src={gebzeFearMatch.awayTeam.logo} 
+                                  src={gebzeFearMatch.awayTeam.logo.startsWith('data:') 
+                                    ? gebzeFearMatch.awayTeam.logo 
+                                    : gebzeFearMatch.awayTeam.logo.startsWith('http') 
+                                    ? gebzeFearMatch.awayTeam.logo
+                                    : `data:image/png;base64,${gebzeFearMatch.awayTeam.logo}`} 
                                   alt={gebzeFearMatch.awayTeam.name || "Fear The Beard"} 
                                   className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                                  }}
                                 />
-                              ) : (
-                                <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                  <span className="text-xl">⚽</span>
-                                </div>
-                              )}
+                              ) : null}
+                              <div className={`w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center ${gebzeFearMatch.awayTeam?.logo ? 'hidden' : ''}`}>
+                                <span className="text-xl">⚽</span>
+                              </div>
                               <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
                                 {gebzeFearMatch.awayTeam?.name || "Fear The Beard"}
                               </span>
@@ -266,6 +285,28 @@ export default function HomePage() {
                               <span className="text-xs md:text-sm font-semibold text-black dark:text-amber-100">{gebzeFearMatch.referee}</span>
                             </div>
                           )}
+                        </div>
+                      ) : (
+                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
+                          <div className="flex items-center justify-center gap-4 md:gap-8">
+                            <div className="flex flex-col items-center gap-2 flex-1">
+                              <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                <span className="text-xl">⚽</span>
+                              </div>
+                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
+                                Gebzespor
+                              </span>
+                            </div>
+                            <div className="text-2xl md:text-3xl font-bold text-black dark:text-amber-100">VS</div>
+                            <div className="flex flex-col items-center gap-2 flex-1">
+                              <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                <span className="text-xl">⚽</span>
+                              </div>
+                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
+                                Fear The Beard
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       )}
 
@@ -297,21 +338,32 @@ export default function HomePage() {
                       </h2>
                       
                       {/* Maç Görseli */}
-                      {bodoTrebolMatch && (
+                      {fixturesLoading ? (
+                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
+                          <div className="text-center py-4 text-muted-foreground">Yükleniyor...</div>
+                        </div>
+                      ) : bodoTrebolMatch ? (
                         <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
                           <div className="flex items-center justify-center gap-4 md:gap-8">
                             <div className="flex flex-col items-center gap-2 flex-1">
                               {bodoTrebolMatch.homeTeam?.logo ? (
                                 <img 
-                                  src={bodoTrebolMatch.homeTeam.logo} 
+                                  src={bodoTrebolMatch.homeTeam.logo.startsWith('data:') 
+                                    ? bodoTrebolMatch.homeTeam.logo 
+                                    : bodoTrebolMatch.homeTeam.logo.startsWith('http') 
+                                    ? bodoTrebolMatch.homeTeam.logo
+                                    : `data:image/png;base64,${bodoTrebolMatch.homeTeam.logo}`} 
                                   alt={bodoTrebolMatch.homeTeam.name || "FK Bodø/Glimt"} 
                                   className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                                  }}
                                 />
-                              ) : (
-                                <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                  <span className="text-xl">⚽</span>
-                                </div>
-                              )}
+                              ) : null}
+                              <div className={`w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center ${bodoTrebolMatch.homeTeam?.logo ? 'hidden' : ''}`}>
+                                <span className="text-xl">⚽</span>
+                              </div>
                               <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
                                 {bodoTrebolMatch.homeTeam?.name || "FK Bodø/Glimt"}
                               </span>
@@ -320,15 +372,22 @@ export default function HomePage() {
                             <div className="flex flex-col items-center gap-2 flex-1">
                               {bodoTrebolMatch.awayTeam?.logo ? (
                                 <img 
-                                  src={bodoTrebolMatch.awayTeam.logo} 
+                                  src={bodoTrebolMatch.awayTeam.logo.startsWith('data:') 
+                                    ? bodoTrebolMatch.awayTeam.logo 
+                                    : bodoTrebolMatch.awayTeam.logo.startsWith('http') 
+                                    ? bodoTrebolMatch.awayTeam.logo
+                                    : `data:image/png;base64,${bodoTrebolMatch.awayTeam.logo}`} 
                                   alt={bodoTrebolMatch.awayTeam.name || "Trebol FC"} 
                                   className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                                  }}
                                 />
-                              ) : (
-                                <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                  <span className="text-xl">⚽</span>
-                                </div>
-                              )}
+                              ) : null}
+                              <div className={`w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center ${bodoTrebolMatch.awayTeam?.logo ? 'hidden' : ''}`}>
+                                <span className="text-xl">⚽</span>
+                              </div>
                               <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
                                 {bodoTrebolMatch.awayTeam?.name || "Trebol FC"}
                               </span>
@@ -340,6 +399,28 @@ export default function HomePage() {
                               <span className="text-xs md:text-sm font-semibold text-black dark:text-amber-100">{bodoTrebolMatch.referee}</span>
                             </div>
                           )}
+                        </div>
+                      ) : (
+                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
+                          <div className="flex items-center justify-center gap-4 md:gap-8">
+                            <div className="flex flex-col items-center gap-2 flex-1">
+                              <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                <span className="text-xl">⚽</span>
+                              </div>
+                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
+                                FK Bodø/Glimt
+                              </span>
+                            </div>
+                            <div className="text-2xl md:text-3xl font-bold text-black dark:text-amber-100">VS</div>
+                            <div className="flex flex-col items-center gap-2 flex-1">
+                              <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                <span className="text-xl">⚽</span>
+                              </div>
+                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
+                                Trebol FC
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       )}
 
@@ -371,21 +452,32 @@ export default function HomePage() {
                       </h2>
                       
                       {/* Maç Görseli */}
-                      {ravenclawTurkishMatch && (
+                      {fixturesLoading ? (
+                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
+                          <div className="text-center py-4 text-muted-foreground">Yükleniyor...</div>
+                        </div>
+                      ) : ravenclawTurkishMatch ? (
                         <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
                           <div className="flex items-center justify-center gap-4 md:gap-8">
                             <div className="flex flex-col items-center gap-2 flex-1">
                               {ravenclawTurkishMatch.homeTeam?.logo ? (
                                 <img 
-                                  src={ravenclawTurkishMatch.homeTeam.logo} 
+                                  src={ravenclawTurkishMatch.homeTeam.logo.startsWith('data:') 
+                                    ? ravenclawTurkishMatch.homeTeam.logo 
+                                    : ravenclawTurkishMatch.homeTeam.logo.startsWith('http') 
+                                    ? ravenclawTurkishMatch.homeTeam.logo
+                                    : `data:image/png;base64,${ravenclawTurkishMatch.homeTeam.logo}`} 
                                   alt={ravenclawTurkishMatch.homeTeam.name || "Ravenclaw"} 
                                   className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                                  }}
                                 />
-                              ) : (
-                                <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                  <span className="text-xl">⚽</span>
-                                </div>
-                              )}
+                              ) : null}
+                              <div className={`w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center ${ravenclawTurkishMatch.homeTeam?.logo ? 'hidden' : ''}`}>
+                                <span className="text-xl">⚽</span>
+                              </div>
                               <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
                                 {ravenclawTurkishMatch.homeTeam?.name || "Ravenclaw"}
                               </span>
@@ -394,15 +486,22 @@ export default function HomePage() {
                             <div className="flex flex-col items-center gap-2 flex-1">
                               {ravenclawTurkishMatch.awayTeam?.logo ? (
                                 <img 
-                                  src={ravenclawTurkishMatch.awayTeam.logo} 
+                                  src={ravenclawTurkishMatch.awayTeam.logo.startsWith('data:') 
+                                    ? ravenclawTurkishMatch.awayTeam.logo 
+                                    : ravenclawTurkishMatch.awayTeam.logo.startsWith('http') 
+                                    ? ravenclawTurkishMatch.awayTeam.logo
+                                    : `data:image/png;base64,${ravenclawTurkishMatch.awayTeam.logo}`} 
                                   alt={ravenclawTurkishMatch.awayTeam.name || "Turkish Union"} 
                                   className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                                  }}
                                 />
-                              ) : (
-                                <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                  <span className="text-xl">⚽</span>
-                                </div>
-                              )}
+                              ) : null}
+                              <div className={`w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center ${ravenclawTurkishMatch.awayTeam?.logo ? 'hidden' : ''}`}>
+                                <span className="text-xl">⚽</span>
+                              </div>
                               <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
                                 {ravenclawTurkishMatch.awayTeam?.name || "Turkish Union"}
                               </span>
@@ -414,6 +513,28 @@ export default function HomePage() {
                               <span className="text-xs md:text-sm font-semibold text-black dark:text-amber-100">{ravenclawTurkishMatch.referee}</span>
                             </div>
                           )}
+                        </div>
+                      ) : (
+                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
+                          <div className="flex items-center justify-center gap-4 md:gap-8">
+                            <div className="flex flex-col items-center gap-2 flex-1">
+                              <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                <span className="text-xl">⚽</span>
+                              </div>
+                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
+                                Ravenclaw
+                              </span>
+                            </div>
+                            <div className="text-2xl md:text-3xl font-bold text-black dark:text-amber-100">VS</div>
+                            <div className="flex flex-col items-center gap-2 flex-1">
+                              <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                <span className="text-xl">⚽</span>
+                              </div>
+                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
+                                Turkish Union
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       )}
 
