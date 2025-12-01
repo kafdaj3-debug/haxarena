@@ -212,11 +212,114 @@ export default function HomePage() {
                   </div>
                   
                   <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    🗞 MAÇ ÖNCESİ ÖZEL — "DAHA BAŞLAMADAN OLAYLI HAFTA"
+                    ⚽ Dünün Maçları: Bodø Dominasyonu, Oyasumi Şovu ve Hakem Fırtınası
                   </h1>
+
+                  {/* Spot */}
+                  <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500">
+                    <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      Spot: Dün oynanan üç maçta Bodø/Glimt'in DM sıralamasında üç oyuncusu zirveye oturdu. Oyasumi performansıyla göz doldururken, hakemler taraftarların hedefi oldu.
+                    </p>
+                  </div>
+
+                  {/* Maç Görseli */}
+                  <div className="w-full h-64 md:h-96 bg-gradient-to-br from-blue-200 via-yellow-200 to-red-200 dark:from-blue-900 dark:via-yellow-900 dark:to-red-900 rounded-lg mb-4 overflow-hidden relative border-2 border-black/30 dark:border-amber-200/40">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center p-8">
+                        <div className="text-6xl md:text-8xl mb-4">⚽</div>
+                        <p className="text-lg md:text-xl font-serif text-black/90 dark:text-amber-100/90 font-bold">
+                          "Bodø Fırtınası Devam Ediyor"
+                        </p>
+                        <p className="text-sm md:text-base font-sans text-black/70 dark:text-amber-200/70 mt-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          DM sıralamasında üç oyuncuyla zirvede
+                        </p>
+                      </div>
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                  </div>
+                  <p className="text-xs md:text-sm text-black/60 dark:text-amber-200/60 font-serif mb-4">
+                    Fotoğraf: HaxArena Arşivi - Dünün Maçlarından Kareler
+                  </p>
 
                   {/* Haber İçeriği */}
                   <div className="mb-6">
+                    <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>D</span>
+                      ün oynanan üç maç, ligde yeni bir sayfa açtı. Bodø/Glimt takımı, DM sıralamasında üç oyuncusuyla zirveye oturarak ligdeki gücünü bir kez daha gösterdi. Takımın oyuncuları, maçlarda gösterdikleri performansla taraftarların beğenisini kazandı.
+                    </p>
+
+                    {/* Bodø DM Sıralaması */}
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mt-4 mb-4">
+                      <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        Bodø/Glimt DM Sıralamasında Zirvede:
+                      </p>
+                      <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Dün oynanan maçlardan sonra DM sıralamasında Bodø/Glimt'in üç oyuncusu ilk sıralarda yer aldı. Takımın defansif gücü ve oyuncuların bireysel performansları, ligdeki diğer takımlar için ciddi bir tehdit oluşturuyor. Kulislerde Bodø/Glimt'in bu sezon şampiyonluk yarışında en güçlü aday olduğu konuşuluyor.
+                      </p>
+                    </div>
+
+                    {/* Oyasumi Performansı */}
+                    <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
+                      <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        Oyasumi'nin Muhteşem Performansı
+                      </h2>
+                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Dün oynanan maçlarda Oyasumi, gösterdiği performansla taraftarları büyüledi. Oyuncu, sahadaki hareketleri ve top kontrolüyle takımına büyük katkı sağladı. Maç sonrası yapılan açıklamalarda teknik direktör, Oyasumi'nin bu sezon takımın en önemli oyuncularından biri olduğunu belirtti.
+                      </p>
+                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Taraftarlar ise Oyasumi'nin performansını sosyal medyada övgüyle karşıladı. Bazı taraftarlar, oyuncunun bu sezon ligdeki en iyi performanslarından birini sergilediğini söyledi.
+                      </p>
+                    </div>
+
+                    {/* Dün Oynanan 3 Maç Analizi */}
+                    <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
+                      <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        Dünün Maçları: Genel Analiz
+                      </h2>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="text-lg md:text-xl font-semibold mb-2 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                            Maç 1: Bodø/Glimt vs Trebol FC
+                          </h3>
+                          <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            Bu maçta Bodø/Glimt, taktiksel üstünlüğünü sahaya yansıttı. Trebol FC ise maç boyunca mücadele etse de, rakibinin gücü karşısında yetersiz kaldı. Maçın en dikkat çeken yanı, Bodø/Glimt oyuncularının defansif performansı oldu.
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 className="text-lg md:text-xl font-semibold mb-2 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                            Maç 2: Gebzespor vs Fear The Beard
+                          </h3>
+                          <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            Bu karşılaşmada iki takım da dengeli bir oyun sergiledi. Maç, taraftarlar için heyecan verici anlar yaşattı. Her iki takımın da gol atma fırsatları oldu ancak sonuçlar beklenenin altında kaldı.
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 className="text-lg md:text-xl font-semibold mb-2 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                            Maç 3: Ravenclaw vs Turkish Union
+                          </h3>
+                          <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            Bu maçta Oyasumi'nin performansı öne çıktı. Oyuncu, sahadaki hareketleri ve top kontrolüyle takımına büyük katkı sağladı. Turkish Union ise maç boyunca mücadele etse de, rakibinin gücü karşısında zorlandı.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Transfer Haberleri */}
+                    <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 p-4 mt-4 mb-4">
+                      <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        Transfer Pazarından Son Dakika:
+                      </p>
+                      <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Kulislerde dolaşan bilgilere göre, Bodø/Glimt yönetimi sezon sonunda takıma yeni oyuncular katmak için görüşmelere başladı. Ayrıca, Oyasumi'nin performansından etkilenen birkaç takımın, oyuncuyla ilgilendiği konuşuluyor. Transfer döneminde hangi oyuncuların hangi takımlara gideceği merakla bekleniyor.
+                      </p>
+                      <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Bir başka söylentiye göre, ligdeki bir takım, yurt dışından yıldız bir oyuncuyla anlaşma yapmak üzere. Detaylar henüz netleşmedi ancak transfer pazarının hareketli geçeceği kesin.
+                      </p>
+                    </div>
+
                     {/* Maç 1: Gebzespor vs Fear The Beard */}
                     <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
                       <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -311,22 +414,16 @@ export default function HomePage() {
                       )}
 
                       <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>M</span>
-                        aç Öncesi Havası: Sakala karşı direnç testi
-                      </p>
-                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Gebzespor haftaya "en azından gol yemeyelim" mottosuyla hazırlanırken, Fear The Beard cephesi sakal yağlarını sürüp moral depoladı.
-                      </p>
-                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Taraftarın beklentisi yüksek değil; çünkü ikili karşılaşınca genelde top değil, sabır sınavı izleniyor.
+                        <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>D</span>
+                        ün oynanan bu maçta iki takım da dengeli bir oyun sergiledi. Maç, taraftarlar için heyecan verici anlar yaşattı. Her iki takımın da gol atma fırsatları oldu ancak sonuçlar beklenenin altında kaldı. Maçın en dikkat çeken yanı, hakem kararları oldu.
                       </p>
 
                       <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-red-500 p-4 mt-4 mb-4">
                         <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          Hakem Hugo İlleri'ye ön yorumlar:
+                          Hakem Yorumları:
                         </p>
                         <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Tribünlerde şimdiden homurdanmalar başladı. Hugo'nun önceki maçlardaki "ne çaldığı belli olmayan düdükleri" yüzünden taraftarlar, maça gelirken kulak tıkacı bile getirmiş.
+                          Maç sonrası taraftarlar, hakem kararlarını eleştirdi. Bazı taraftarlar, hakemin maç boyunca verdiği kararların tutarsız olduğunu söyledi. Sosyal medyada hakeme yönelik eleştiriler yoğunlaştı.
                         </p>
                       </div>
                     </div>
@@ -425,22 +522,16 @@ export default function HomePage() {
                       )}
 
                       <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>M</span>
-                        aç Öncesi Havası: Kuzey Fırtınası vs Taktik Tedirginlik
-                      </p>
-                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Bodø/Glimt, sahaya çıkmadan önce bile favori gösteriliyor; Trebol FC ise daha toplantı odasında moral bozmaya başlamış durumda.
-                      </p>
-                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        "Topun peşinden koşacağız, gölge gibi değil" açıklaması bile tarafta umut yaratamadı.
+                        <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>D</span>
+                        ün oynanan bu maçta Bodø/Glimt, taktiksel üstünlüğünü sahaya yansıttı. Trebol FC ise maç boyunca mücadele etse de, rakibinin gücü karşısında yetersiz kaldı. Maçın en dikkat çeken yanı, Bodø/Glimt oyuncularının defansif performansı oldu. Takımın üç oyuncusu DM sıralamasında zirveye oturdu.
                       </p>
 
                       <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-blue-500 p-4 mt-4 mb-4">
                         <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          Hakem Doctrin için ön yorumlar:
+                          Hakem Yorumları:
                         </p>
                         <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Taraftarlar maç başlamadan hakemi eleştirmeye başladı bile. Geçmişteki "avantaj mı düdük mü ben de bilmiyorum" tarzı yönetimi hâlâ unutulmuş değil.
+                          Maç sonrası taraftarlar, hakem kararlarını eleştirdi. Bazı taraftarlar, hakemin maç boyunca verdiği kararların tutarsız olduğunu söyledi. Sosyal medyada hakeme yönelik eleştiriler yoğunlaştı.
                         </p>
                       </div>
                     </div>
@@ -539,19 +630,16 @@ export default function HomePage() {
                       )}
 
                       <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>M</span>
-                        aç Öncesi Havası: Sihir mi, stres mi?
-                      </p>
-                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Ravenclaw tarafında takıma sihirli değnek lazım; Turkish Union cephesinde ise "bir maçlık toparlanırız" düşüncesi ortalarda dolaşıyor ama kimse çok inanmıyor.
+                        <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>D</span>
+                        ün oynanan bu maçta Oyasumi'nin performansı öne çıktı. Oyuncu, sahadaki hareketleri ve top kontrolüyle takımına büyük katkı sağladı. Turkish Union ise maç boyunca mücadele etse de, rakibinin gücü karşısında zorlandı. Maçın en dikkat çeken yanı, Oyasumi'nin gösterdiği performans oldu.
                       </p>
 
                       <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-purple-500 p-4 mt-4 mb-4">
                         <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          Hakem Burak için ön yorumlar:
+                          Hakem Yorumları:
                         </p>
                         <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Taraftarlar Burak'ın yönetimine güvenmiyor. "Bir korner verir, sonra neden verdiğini unutur" diye dalga geçenler bile var.
+                          Maç sonrası taraftarlar, hakem kararlarını eleştirdi. Bazı taraftarlar, hakemin maç boyunca verdiği kararların tutarsız olduğunu söyledi. Sosyal medyada hakeme yönelik eleştiriler yoğunlaştı.
                         </p>
                       </div>
                     </div>
@@ -561,32 +649,32 @@ export default function HomePage() {
                 {/* Twitter Benzeri Taraftar Yorumları */}
                 <div className="mb-6 border-t-2 border-black/20 dark:border-amber-200/20 pt-6">
                   <h3 className="text-xl md:text-2xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    📱 Taraftarların Maç Öncesi Lafları
+                    📱 Taraftarların Dünün Maçları Hakkında Yorumları
                   </h3>
                   
                   <div className="space-y-3">
-                    {/* Gebzespor vs Fear The Beard Tweet'leri */}
+                    {/* Bodø/Glimt DM Sıralaması Tweet'leri */}
                     <div className="mb-4">
-                      <h4 className="text-sm md:text-base font-semibold text-black/70 dark:text-amber-200/70 mb-2">Gebzespor vs Fear The Beard</h4>
+                      <h4 className="text-sm md:text-base font-semibold text-black/70 dark:text-amber-200/70 mb-2">Bodø/Glimt DM Sıralaması</h4>
                       <div className="space-y-3">
                         <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
                           <div className="flex items-start gap-3">
                             <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                              <span className="text-white font-bold text-sm">SK</span>
+                              <span className="text-white font-bold text-sm">BK</span>
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="font-bold text-sm text-black dark:text-amber-100">Serkan Kaya</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">@serkankaya_gebze</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">· 3dk</span>
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Burak Kaya</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@burakkaya_bodo</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 2dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Hugo yine VAR'a bakmadan karar verirse, ben eve dönerim. Siktirsin gitsin bu hakem!
+                                Bodø/Glimt'in üç oyuncusu DM sıralamasında zirvede. Bu takım gerçekten güçlü. Şampiyonluk yarışında en güçlü adaylar.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 34</span>
-                                <span>🔄 18</span>
-                                <span>❤️ 89</span>
+                                <span>💬 145</span>
+                                <span>🔄 78</span>
+                                <span>❤️ 234</span>
                               </div>
                             </div>
                           </div>
@@ -600,22 +688,103 @@ export default function HomePage() {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="font-bold text-sm text-black dark:text-amber-100">Mehmet Arslan</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">@mehmetarslan_gebze</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@mehmetarslan_trebol</span>
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 5dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Gebzespor gol atmaz ama en azından rakibi yorar… belki. Yine de sike sike oynayacağız!
+                                Bodø/Glimt'e karşı oynamak gerçekten zor. Defansif güçleri inanılmaz. Biz de mücadele ettik ama yetersiz kaldık.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 56</span>
-                                <span>🔄 23</span>
-                                <span>❤️ 112</span>
+                                <span>💬 89</span>
+                                <span>🔄 45</span>
+                                <span>❤️ 156</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Oyasumi Performansı Tweet'leri */}
+                    <div className="mb-4">
+                      <h4 className="text-sm md:text-base font-semibold text-black/70 dark:text-amber-200/70 mb-2">Oyasumi Performansı</h4>
+                      <div className="space-y-3">
+                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">CY</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Can Yılmaz</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@canyilmaz_ravenclaw</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 3dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Oyasumi dün gerçekten muhteşem oynadı. Top kontrolü, hareketleri, her şeyi mükemmeldi. Bu sezon ligdeki en iyi performanslarından biriydi.
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 234</span>
+                                <span>🔄 123</span>
+                                <span>❤️ 456</span>
                               </div>
                             </div>
                           </div>
                         </div>
 
                         <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">ÖD</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Özkan Demir</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@ozkandemir_tu</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 7dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Oyasumi'ye karşı oynamak gerçekten zor. Oyuncu çok yetenekli ve maç boyunca bizi zorladı. Tebrikler.
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 67</span>
+                                <span>🔄 34</span>
+                                <span>❤️ 123</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Hakem Yorumları */}
+                    <div className="mb-4">
+                      <h4 className="text-sm md:text-base font-semibold text-black/70 dark:text-amber-200/70 mb-2">Hakem Yorumları</h4>
+                      <div className="space-y-3">
+                        <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">SK</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Serkan Kaya</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@serkankaya_gebze</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 1dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Bu hakemler ne yapıyor anlamadım. Kararları tutarsız, düdükleri yanlış. Siktirsin gitsinler sahadan. Amk hakemleri.
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 456</span>
+                                <span>🔄 234</span>
+                                <span>❤️ 789</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
                           <div className="flex items-start gap-3">
                             <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-bold text-sm">AK</span>
@@ -624,43 +793,44 @@ export default function HomePage() {
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="font-bold text-sm text-black dark:text-amber-100">Ali Kılıç</span>
                                 <span className="text-xs text-gray-500 dark:text-gray-400">@alikilic_ftb</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">· 7dk</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 4dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Fear The Beard'in sakalı bile bizden daha disiplinli. Amk sakalları bile daha iyi oynuyor!
+                                Hakemler bu maçta rezalet. Bir korner veriyor, sonra neden verdiğini unutuyor. Gözleri kör mü bu hakemlerin. Siktirsin gitsinler.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 78</span>
-                                <span>🔄 45</span>
-                                <span>❤️ 156</span>
+                                <span>💬 567</span>
+                                <span>🔄 345</span>
+                                <span>❤️ 890</span>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        {/* Objektif Tweet'leri */}
-                        <div className="bg-white dark:bg-gray-800 border border-yellow-300 dark:border-yellow-700 rounded-lg p-4 shadow-sm">
+                        <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-bold text-sm">DY</span>
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="font-bold text-sm text-black dark:text-amber-100">Deniz Yıldırım</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">@denizyildirim_gebze</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">· 1dk</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@denizyildirim_bodo</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 6dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Gebzespor bu sezon beklenen performansı gösteremedi. Takımın formu düşük ve maçlarda zorlanıyor. Bugün de zor bir maç bekliyoruz. Umarım toparlanırlar. 😔⚽
+                                Hakemler bu ligde gerçekten kötü. Kararları yanlış, düdükleri tutarsız. Bir de maç sonrası açıklama yapmıyorlar. Amk hakemleri.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 89</span>
-                                <span>🔄 34</span>
-                                <span>❤️ 67</span>
+                                <span>💬 678</span>
+                                <span>🔄 456</span>
+                                <span>❤️ 1234</span>
                               </div>
                             </div>
                           </div>
                         </div>
+                      </div>
+                    </div>
 
                         <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
                           <div className="flex items-start gap-3">
@@ -1048,41 +1218,113 @@ export default function HomePage() {
                   </div>
                   
                   <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    📰 Fear the Beard – Strasbourg Karşılaşmasına "Zorunlu Mola" Damgası
+                    ⚽ Dünün Maçları: Bodø Dominasyonu, Oyasumi Şovu ve Hakem Fırtınası
                   </h1>
+
+                  {/* Spot */}
+                  <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500">
+                    <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      Spot: Dün oynanan üç maçta Bodø/Glimt'in DM sıralamasında üç oyuncusu zirveye oturdu. Oyasumi performansıyla göz doldururken, hakemler taraftarların hedefi oldu.
+                    </p>
+                  </div>
+
+                  {/* Maç Görseli */}
+                  <div className="w-full h-64 md:h-96 bg-gradient-to-br from-blue-200 via-yellow-200 to-red-200 dark:from-blue-900 dark:via-yellow-900 dark:to-red-900 rounded-lg mb-4 overflow-hidden relative border-2 border-black/30 dark:border-amber-200/40">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center p-8">
+                        <div className="text-6xl md:text-8xl mb-4">⚽</div>
+                        <p className="text-lg md:text-xl font-serif text-black/90 dark:text-amber-100/90 font-bold">
+                          "Bodø Fırtınası Devam Ediyor"
+                        </p>
+                        <p className="text-sm md:text-base font-sans text-black/70 dark:text-amber-200/70 mt-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          DM sıralamasında üç oyuncuyla zirvede
+                        </p>
+                      </div>
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                  </div>
+                  <p className="text-xs md:text-sm text-black/60 dark:text-amber-200/60 font-serif mb-4">
+                    Fotoğraf: HaxArena Arşivi - Dünün Maçlarından Kareler
+                  </p>
 
                   {/* Haber İçeriği */}
                   <div className="mb-6">
                     <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
                       <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>D</span>
-                      ün oynanan Fear the Beard – Strasbourg karşılaşması, skorundan çok… duraklamalarıyla gündeme oturdu. Mücadele zaman zaman öyle uzun aralar verdi ki, tribündeki bazı taraftarlar "Devre arası bitti mi, yoksa hâlâ moladayız?" diye birbirine sormaya başladı.
+                      ün oynanan üç maç, ligde yeni bir sayfa açtı. Bodø/Glimt takımı, DM sıralamasında üç oyuncusuyla zirveye oturarak ligdeki gücünü bir kez daha gösterdi. Takımın oyuncuları, maçlarda gösterdikleri performansla taraftarların beğenisini kazandı.
                     </p>
-                    
-                    <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-orange-500 p-4 mt-4 mb-4">
+
+                    {/* Bodø DM Sıralaması */}
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mt-4 mb-4">
                       <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        Kulislerde Dolaşan Bilgiler:
+                        Bodø/Glimt DM Sıralamasında Zirvede:
                       </p>
                       <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Kulislerde dolaşan bilgilere göre Strasbourg cephesinde maç günü bir "mide problemi" krizi yaşandı. Oyuncuların büyük bir kısmının, maç öncesi yedikleri şeye fazla güvenmiş olabileceği konuşuluyor. Bazılarına göre takım otobüsünde başlayan hareketlilik, sahada da devam etti. Hatta bir ara yedek kulübesinde "sıraya girenler" olduğu esprisi bile yayılmış durumda.
+                        Dün oynanan maçlardan sonra DM sıralamasında Bodø/Glimt'in üç oyuncusu ilk sıralarda yer aldı. Takımın defansif gücü ve oyuncuların bireysel performansları, ligdeki diğer takımlar için ciddi bir tehdit oluşturuyor. Kulislerde Bodø/Glimt'in bu sezon şampiyonluk yarışında en güçlü aday olduğu konuşuluyor.
                       </p>
                     </div>
 
-                    <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      Fear the Beard tarafı ise bu beklenmedik molaları şaşkınlıkla izlerken, bazı oyuncuların duraklamaları fırsat bilip kenarda mini bir taktik sohbeti yaptığı görüldü. Maçın hakemi de sık sık "Devam ediyor muyuz?" bakışı atmak zorunda kaldı.
-                    </p>
+                    {/* Oyasumi Performansı */}
+                    <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
+                      <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        Oyasumi'nin Muhteşem Performansı
+                      </h2>
+                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Dün oynanan maçlarda Oyasumi, gösterdiği performansla taraftarları büyüledi. Oyuncu, sahadaki hareketleri ve top kontrolüyle takımına büyük katkı sağladı. Maç sonrası yapılan açıklamalarda teknik direktör, Oyasumi'nin bu sezon takımın en önemli oyuncularından biri olduğunu belirtti.
+                      </p>
+                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Taraftarlar ise Oyasumi'nin performansını sosyal medyada övgüyle karşıladı. Bazı taraftarlar, oyuncunun bu sezon ligdeki en iyi performanslarından birini sergilediğini söyledi.
+                      </p>
+                    </div>
 
-                    <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 p-4 mt-4 mb-4">
+                    {/* Dün Oynanan 3 Maç Analizi */}
+                    <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
+                      <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        Dünün Maçları: Genel Analiz
+                      </h2>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="text-lg md:text-xl font-semibold mb-2 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                            Maç 1: Bodø/Glimt vs Trebol FC
+                          </h3>
+                          <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            Bu maçta Bodø/Glimt, taktiksel üstünlüğünü sahaya yansıttı. Trebol FC ise maç boyunca mücadele etse de, rakibinin gücü karşısında yetersiz kaldı. Maçın en dikkat çeken yanı, Bodø/Glimt oyuncularının defansif performansı oldu.
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 className="text-lg md:text-xl font-semibold mb-2 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                            Maç 2: Gebzespor vs Fear The Beard
+                          </h3>
+                          <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            Bu karşılaşmada iki takım da dengeli bir oyun sergiledi. Maç, taraftarlar için heyecan verici anlar yaşattı. Her iki takımın da gol atma fırsatları oldu ancak sonuçlar beklenenin altında kaldı.
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 className="text-lg md:text-xl font-semibold mb-2 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                            Maç 3: Ravenclaw vs Turkish Union
+                          </h3>
+                          <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            Bu maçta Oyasumi'nin performansı öne çıktı. Oyuncu, sahadaki hareketleri ve top kontrolüyle takımına büyük katkı sağladı. Turkish Union ise maç boyunca mücadele etse de, rakibinin gücü karşısında zorlandı.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Transfer Haberleri */}
+                    <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 p-4 mt-4 mb-4">
                       <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        Sosyal Medya Yorumu:
+                        Transfer Pazarından Son Dakika:
                       </p>
-                      <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        "Maçın adamı: Tuvalet kapısı."
+                      <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Kulislerde dolaşan bilgilere göre, Bodø/Glimt yönetimi sezon sonunda takıma yeni oyuncular katmak için görüşmelere başladı. Ayrıca, Oyasumi'nin performansından etkilenen birkaç takımın, oyuncuyla ilgilendiği konuşuluyor. Transfer döneminde hangi oyuncuların hangi takımlara gideceği merakla bekleniyor.
+                      </p>
+                      <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Bir başka söylentiye göre, ligdeki bir takım, yurt dışından yıldız bir oyuncuyla anlaşma yapmak üzere. Detaylar henüz netleşmedi ancak transfer pazarının hareketli geçeceği kesin.
                       </p>
                     </div>
-
-                    <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4 italic" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      Strasbourg cephesi resmi bir açıklama yapmadı ama takımın bir dahaki maç için "daha hafif bir menü" planladığı konuşuluyor.
-                    </p>
                   </div>
 
                   {/* Twitter Benzeri Taraftar Yorumları */}
