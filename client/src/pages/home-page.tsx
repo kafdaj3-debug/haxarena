@@ -344,7 +344,7 @@ export default function HomePage() {
                             <span className="text-xs text-gray-500 dark:text-gray-400">· 5dk</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            dün oynanan maçta takımımız gerçekten muhteşemdi bodø/glimt'in defansif gücü ve taktik disiplini harika üç oyuncumuz dm sıralamasında zirvede gurur duyuyoruz #BodøGlimt
+                            dün oynanan maçta takımımız gerçekten muhteşemdi oyasumi'nin top kontrolü ve pasları harikaydı bodø/glimt'in defansif gücü ve taktik disiplini mükemmeldi üç oyuncumuz dm sıralamasında zirvede gurur duyuyoruz #BodøGlimt
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <span>💬 456</span>
@@ -367,7 +367,7 @@ export default function HomePage() {
                             <span className="text-xs text-gray-500 dark:text-gray-400">· 4dk</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            maçta 15 dakika oynadık sonra topu göremedik bodø/glimt oyuncuları topu bizden çaldı bizim oyuncular ne yapacağını bilmiyor amk #TrebolFC
+                            maçta 15 dakika oynadık sonra topu göremedik bodø/glimt oyuncuları topu bizden çaldı oyasumi bizi mahvetti bizim oyuncular ne yapacağını bilmiyor amk #TrebolFC
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <span>💬 189</span>
@@ -391,7 +391,7 @@ export default function HomePage() {
                             <span className="text-xs text-gray-500 dark:text-gray-400">· 7dk</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            objektif bakarsak bodø/glimt taktiksel olarak çok üstündü trebol fc mücadele etti ama rakibin gücü karşısında yetersiz kaldı maçın en dikkat çeken yanı bodø'nun defansif organizasyonuydu
+                            objektif bakarsak bodø/glimt taktiksel olarak çok üstündü oyasumi'nin performansı dikkat çekiciydi trebol fc mücadele etti ama rakibin gücü karşısında yetersiz kaldı maçın en dikkat çeken yanı bodø'nun defansif organizasyonuydu
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <span>💬 145</span>
@@ -414,7 +414,7 @@ export default function HomePage() {
                             <span className="text-xs text-gray-500 dark:text-gray-400">· 6dk</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            harika bir maçtı takımımız gerçekten muhteşem oynadı defansif disiplinimiz ve takım uyumumuz mükemmeldi üç oyuncumuz dm sıralamasında zirvede bu başarı hepimizi gururlandırdı #BodøGlimt
+                            harika bir maçtı takımımız gerçekten muhteşem oynadı oyasumi'nin performansı mükemmeldi defansif disiplinimiz ve takım uyumumuz harikaydı üç oyuncumuz dm sıralamasında zirvede bu başarı hepimizi gururlandırdı #BodøGlimt
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <span>💬 312</span>
@@ -437,7 +437,7 @@ export default function HomePage() {
                             <span className="text-xs text-gray-500 dark:text-gray-400">· 5dk</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            takım ne yapıyor amk hiçbir şey yapamıyorlar bodø/glimt oyuncuları topu bizden çalıyor bizim oyuncular uyuyor mu ne yapıyorlar anlamadım rezalet bir performans sergilediler #TrebolFC
+                            bodø/glimt karşısında hiçbir şey yapamadık amk topu bile göremedik oyuncular sahada ne arıyor anlamadım böyle oyun olmaz rezalet #TrebolFC
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <span>💬 198</span>
@@ -461,7 +461,7 @@ export default function HomePage() {
                             <span className="text-xs text-gray-500 dark:text-gray-400">· 4dk</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            bu maçta rezalet olduk fear the beard bizi sike sike yendi takım oynayamıyor hiçbir şey yapamıyoruz amk takımı #Gebzespor
+                            fear the beard karşısında rezil olduk amk takım hiçbir şey yapamadı topu kontrol edemedik oyuncular sahada kayboldu böyle oyun olmaz #Gebzespor
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <span>💬 189</span>
@@ -531,7 +531,7 @@ export default function HomePage() {
                             <span className="text-xs text-gray-500 dark:text-gray-400">· 6dk</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            takım ne yapıyor amk hiçbir şey yapamıyorlar fear the beard oyuncuları bizi geçti topu kontrol edemiyoruz oyuncular uyuyor mu ne yapıyorlar anlamadım rezalet bir performans sergilediler #Gebzespor
+                            fear the beard oyuncuları bizi ezip geçti amk bizim oyuncular topu bile tutamadı sahada ne yaptıklarını bilmiyorlar rezalet bir maç oldu #Gebzespor
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <span>💬 189</span>
@@ -555,7 +555,7 @@ export default function HomePage() {
                             <span className="text-xs text-gray-500 dark:text-gray-400">· 5dk</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            takım ne yapıyor amk hiçbir şey yapamıyorlar turkish union oyuncuları bizi geçti topu kontrol edemiyoruz oyuncular uyuyor mu ne yapıyorlar anlamadım rezalet bir performans sergilediler #Ravenclaw
+                            turkish union karşısında hiçbir şey yapamadık amk oyuncular sahada kayboldu topu bile göremedik böyle oyun olmaz rezalet bir performans #Ravenclaw
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <span>💬 278</span>
@@ -577,7 +577,7 @@ export default function HomePage() {
                             <span className="text-xs text-gray-500 dark:text-gray-400">· 9dk</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            objektif bakarsak oyasumi'nin performansı gerçekten dikkat çekiciydi turkish union takım olarak daha organize göründü ravenclaw ise mücadele etti ama rakibin gücü karşısında zorlandı
+                            objektif bakarsak turkish union takım olarak daha organize göründü ravenclaw ise mücadele etti ama rakibin gücü karşısında zorlandı maçın genel kalitesi yüksekti
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <span>💬 198</span>
@@ -600,7 +600,7 @@ export default function HomePage() {
                             <span className="text-xs text-gray-500 dark:text-gray-400">· 8dk</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            takım ne yapıyor amk hiçbir şey yapamıyorlar turkish union oyuncuları çok hızlı topu kontrol ediyorlar bizim oyuncular uyuyor mu ne yapıyorlar anlamadım rezalet bir performans sergilediler #Ravenclaw
+                            turkish union oyuncuları bizi ezip geçti amk bizim oyuncular topu bile tutamadı sahada ne yaptıklarını bilmiyorlar rezalet bir maç oldu #Ravenclaw
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <span>💬 234</span>
@@ -623,7 +623,7 @@ export default function HomePage() {
                             <span className="text-xs text-gray-500 dark:text-gray-400">· 7dk</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            harika bir maçtı takımımız gerçekten muhteşem oynadı oyasumi'nin performansı mükemmeldi top kontrolü pasları ve liderliği harikaydı takım olarak çok iyi oynadık bu performansla devam edersek ligde çok başarılı olacağız #TurkishUnion
+                            harika bir maçtı takımımız gerçekten muhteşem oynadı takım uyumumuz ve oyun tarzımız mükemmeldi ravenclaw karşısında güçlü bir performans sergiledik bu performansla devam edersek ligde çok başarılı olacağız #TurkishUnion
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <span>💬 345</span>
