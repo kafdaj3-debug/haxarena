@@ -292,7 +292,10 @@ export default function HomePage() {
                             Maç 2: Gebzespor vs Fear The Beard
                           </h3>
                           <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            Bu karşılaşmada iki takım da dengeli bir oyun sergiledi. Maç, taraftarlar için heyecan verici anlar yaşattı. Her iki takımın da gol atma fırsatları oldu ancak sonuçlar beklenenin altında kaldı.
+                            Dün oynanan bu karşılaşmada iki takım da dengeli bir oyun sergiledi. Maç, taraftarlar için heyecan verici anlar yaşattı. Her iki takımın da gol atma fırsatları oldu ancak sonuçlar beklenenin altında kaldı. Fear The Beard, maç boyunca taktik disiplinini korurken, Gebzespor ise mücadeleci bir performans sergiledi. Maçın en dikkat çeken yanı, her iki takımın da defansif organizasyonu oldu.
+                          </p>
+                          <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            Maç sonrası yapılan açıklamalarda, her iki takımın teknik direktörü de oyuncularının performansından memnun kaldığını belirtti. Taraftarlar ise maçın kalitesinden övgüyle bahsetti. Ancak hakem kararları taraftarların eleştiri odağı oldu.
                           </p>
                         </div>
 
@@ -301,7 +304,10 @@ export default function HomePage() {
                             Maç 3: Ravenclaw vs Turkish Union
                           </h3>
                           <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            Bu maçta Oyasumi'nin performansı öne çıktı. Oyuncu, sahadaki hareketleri ve top kontrolüyle takımına büyük katkı sağladı. Turkish Union ise maç boyunca mücadele etse de, rakibinin gücü karşısında zorlandı.
+                            Dün oynanan bu maçta Oyasumi'nin performansı öne çıktı. Oyuncu, sahadaki hareketleri ve top kontrolüyle takımına büyük katkı sağladı. Turkish Union ise maç boyunca mücadele etse de, rakibinin gücü karşısında zorlandı. Maçın en dikkat çeken yanı, Oyasumi'nin gösterdiği performans oldu. Oyuncu, maç boyunca takımına liderlik etti ve sahadaki varlığıyla dikkat çekti.
+                          </p>
+                          <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            Ravenclaw tarafında ise takım, Oyasumi'nin performansı sayesinde maçı kontrol altına aldı. Turkish Union ise maç boyunca mücadele etse de, rakibinin gücü karşısında yetersiz kaldı. Maç sonrası yapılan açıklamalarda, Oyasumi'nin performansı övgüyle karşılandı. Taraftarlar ise oyuncunun bu sezon ligdeki en iyi performanslarından birini sergilediğini söyledi.
                           </p>
                         </div>
                       </div>
@@ -320,329 +326,6 @@ export default function HomePage() {
                       </p>
                     </div>
 
-                    {/* Maç 1: Gebzespor vs Fear The Beard */}
-                    <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
-                      <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        Gebzespor vs Fear The Beard
-                      </h2>
-                      
-                      {/* Maç Görseli */}
-                      {fixturesLoading ? (
-                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
-                          <div className="text-center py-4 text-muted-foreground">Yükleniyor...</div>
-                        </div>
-                      ) : gebzeFearMatch ? (
-                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
-                          <div className="flex items-center justify-center gap-4 md:gap-8">
-                            <div className="flex flex-col items-center gap-2 flex-1">
-                              {gebzeFearMatch.homeTeam?.logo ? (
-                                <img 
-                                  src={gebzeFearMatch.homeTeam.logo.startsWith('data:') 
-                                    ? gebzeFearMatch.homeTeam.logo 
-                                    : gebzeFearMatch.homeTeam.logo.startsWith('http') 
-                                    ? gebzeFearMatch.homeTeam.logo
-                                    : `data:image/png;base64,${gebzeFearMatch.homeTeam.logo}`} 
-                                  alt={gebzeFearMatch.homeTeam.name || "Gebzespor"} 
-                                  className="w-16 h-16 md:w-20 md:h-20 object-contain"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display = 'none';
-                                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                                  }}
-                                />
-                              ) : null}
-                              <div className={`w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center ${gebzeFearMatch.homeTeam?.logo ? 'hidden' : ''}`}>
-                                <span className="text-xl">⚽</span>
-                              </div>
-                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
-                                {gebzeFearMatch.homeTeam?.name || "Gebzespor"}
-                              </span>
-                            </div>
-                            <div className="text-2xl md:text-3xl font-bold text-black dark:text-amber-100">VS</div>
-                            <div className="flex flex-col items-center gap-2 flex-1">
-                              {gebzeFearMatch.awayTeam?.logo ? (
-                                <img 
-                                  src={gebzeFearMatch.awayTeam.logo.startsWith('data:') 
-                                    ? gebzeFearMatch.awayTeam.logo 
-                                    : gebzeFearMatch.awayTeam.logo.startsWith('http') 
-                                    ? gebzeFearMatch.awayTeam.logo
-                                    : `data:image/png;base64,${gebzeFearMatch.awayTeam.logo}`} 
-                                  alt={gebzeFearMatch.awayTeam.name || "Fear The Beard"} 
-                                  className="w-16 h-16 md:w-20 md:h-20 object-contain"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display = 'none';
-                                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                                  }}
-                                />
-                              ) : null}
-                              <div className={`w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center ${gebzeFearMatch.awayTeam?.logo ? 'hidden' : ''}`}>
-                                <span className="text-xl">⚽</span>
-                              </div>
-                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
-                                {gebzeFearMatch.awayTeam?.name || "Fear The Beard"}
-                              </span>
-                            </div>
-                          </div>
-                          {gebzeFearMatch.referee && (
-                            <div className="mt-3 text-center">
-                              <span className="text-xs md:text-sm text-muted-foreground">Hakem: </span>
-                              <span className="text-xs md:text-sm font-semibold text-black dark:text-amber-100">{gebzeFearMatch.referee}</span>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
-                          <div className="flex items-center justify-center gap-4 md:gap-8">
-                            <div className="flex flex-col items-center gap-2 flex-1">
-                              <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                <span className="text-xl">⚽</span>
-                              </div>
-                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
-                                Gebzespor
-                              </span>
-                            </div>
-                            <div className="text-2xl md:text-3xl font-bold text-black dark:text-amber-100">VS</div>
-                            <div className="flex flex-col items-center gap-2 flex-1">
-                              <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                <span className="text-xl">⚽</span>
-                              </div>
-                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
-                                Fear The Beard
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>D</span>
-                        ün oynanan bu maçta iki takım da dengeli bir oyun sergiledi. Maç, taraftarlar için heyecan verici anlar yaşattı. Her iki takımın da gol atma fırsatları oldu ancak sonuçlar beklenenin altında kaldı. Maçın en dikkat çeken yanı, hakem kararları oldu.
-                      </p>
-
-                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-red-500 p-4 mt-4 mb-4">
-                        <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          Hakem Yorumları:
-                        </p>
-                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Maç sonrası taraftarlar, hakem kararlarını eleştirdi. Bazı taraftarlar, hakemin maç boyunca verdiği kararların tutarsız olduğunu söyledi. Sosyal medyada hakeme yönelik eleştiriler yoğunlaştı.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Maç 2: FK Bodø/Glimt vs Trebol FC */}
-                    <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
-                      <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        FK Bodø/Glimt vs Trebol FC
-                      </h2>
-                      
-                      {/* Maç Görseli */}
-                      {fixturesLoading ? (
-                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
-                          <div className="text-center py-4 text-muted-foreground">Yükleniyor...</div>
-                        </div>
-                      ) : bodoTrebolMatch ? (
-                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
-                          <div className="flex items-center justify-center gap-4 md:gap-8">
-                            <div className="flex flex-col items-center gap-2 flex-1">
-                              {bodoTrebolMatch.homeTeam?.logo ? (
-                                <img 
-                                  src={bodoTrebolMatch.homeTeam.logo.startsWith('data:') 
-                                    ? bodoTrebolMatch.homeTeam.logo 
-                                    : bodoTrebolMatch.homeTeam.logo.startsWith('http') 
-                                    ? bodoTrebolMatch.homeTeam.logo
-                                    : `data:image/png;base64,${bodoTrebolMatch.homeTeam.logo}`} 
-                                  alt={bodoTrebolMatch.homeTeam.name || "FK Bodø/Glimt"} 
-                                  className="w-16 h-16 md:w-20 md:h-20 object-contain"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display = 'none';
-                                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                                  }}
-                                />
-                              ) : null}
-                              <div className={`w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center ${bodoTrebolMatch.homeTeam?.logo ? 'hidden' : ''}`}>
-                                <span className="text-xl">⚽</span>
-                              </div>
-                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
-                                {bodoTrebolMatch.homeTeam?.name || "FK Bodø/Glimt"}
-                              </span>
-                            </div>
-                            <div className="text-2xl md:text-3xl font-bold text-black dark:text-amber-100">VS</div>
-                            <div className="flex flex-col items-center gap-2 flex-1">
-                              {bodoTrebolMatch.awayTeam?.logo ? (
-                                <img 
-                                  src={bodoTrebolMatch.awayTeam.logo.startsWith('data:') 
-                                    ? bodoTrebolMatch.awayTeam.logo 
-                                    : bodoTrebolMatch.awayTeam.logo.startsWith('http') 
-                                    ? bodoTrebolMatch.awayTeam.logo
-                                    : `data:image/png;base64,${bodoTrebolMatch.awayTeam.logo}`} 
-                                  alt={bodoTrebolMatch.awayTeam.name || "Trebol FC"} 
-                                  className="w-16 h-16 md:w-20 md:h-20 object-contain"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display = 'none';
-                                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                                  }}
-                                />
-                              ) : null}
-                              <div className={`w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center ${bodoTrebolMatch.awayTeam?.logo ? 'hidden' : ''}`}>
-                                <span className="text-xl">⚽</span>
-                              </div>
-                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
-                                {bodoTrebolMatch.awayTeam?.name || "Trebol FC"}
-                              </span>
-                            </div>
-                          </div>
-                          {bodoTrebolMatch.referee && (
-                            <div className="mt-3 text-center">
-                              <span className="text-xs md:text-sm text-muted-foreground">Hakem: </span>
-                              <span className="text-xs md:text-sm font-semibold text-black dark:text-amber-100">{bodoTrebolMatch.referee}</span>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
-                          <div className="flex items-center justify-center gap-4 md:gap-8">
-                            <div className="flex flex-col items-center gap-2 flex-1">
-                              <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                <span className="text-xl">⚽</span>
-                              </div>
-                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
-                                FK Bodø/Glimt
-                              </span>
-                            </div>
-                            <div className="text-2xl md:text-3xl font-bold text-black dark:text-amber-100">VS</div>
-                            <div className="flex flex-col items-center gap-2 flex-1">
-                              <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                <span className="text-xl">⚽</span>
-                              </div>
-                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
-                                Trebol FC
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>D</span>
-                        ün oynanan bu maçta Bodø/Glimt, taktiksel üstünlüğünü sahaya yansıttı. Trebol FC ise maç boyunca mücadele etse de, rakibinin gücü karşısında yetersiz kaldı. Maçın en dikkat çeken yanı, Bodø/Glimt oyuncularının defansif performansı oldu. Takımın üç oyuncusu DM sıralamasında zirveye oturdu.
-                      </p>
-
-                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-blue-500 p-4 mt-4 mb-4">
-                        <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          Hakem Yorumları:
-                        </p>
-                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Maç sonrası taraftarlar, hakem kararlarını eleştirdi. Bazı taraftarlar, hakemin maç boyunca verdiği kararların tutarsız olduğunu söyledi. Sosyal medyada hakeme yönelik eleştiriler yoğunlaştı.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Maç 3: Ravenclaw vs Turkish Union */}
-                    <div className="mb-6">
-                      <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        Ravenclaw vs Turkish Union
-                      </h2>
-                      
-                      {/* Maç Görseli */}
-                      {fixturesLoading ? (
-                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
-                          <div className="text-center py-4 text-muted-foreground">Yükleniyor...</div>
-                        </div>
-                      ) : ravenclawTurkishMatch ? (
-                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
-                          <div className="flex items-center justify-center gap-4 md:gap-8">
-                            <div className="flex flex-col items-center gap-2 flex-1">
-                              {ravenclawTurkishMatch.homeTeam?.logo ? (
-                                <img 
-                                  src={ravenclawTurkishMatch.homeTeam.logo.startsWith('data:') 
-                                    ? ravenclawTurkishMatch.homeTeam.logo 
-                                    : ravenclawTurkishMatch.homeTeam.logo.startsWith('http') 
-                                    ? ravenclawTurkishMatch.homeTeam.logo
-                                    : `data:image/png;base64,${ravenclawTurkishMatch.homeTeam.logo}`} 
-                                  alt={ravenclawTurkishMatch.homeTeam.name || "Ravenclaw"} 
-                                  className="w-16 h-16 md:w-20 md:h-20 object-contain"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display = 'none';
-                                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                                  }}
-                                />
-                              ) : null}
-                              <div className={`w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center ${ravenclawTurkishMatch.homeTeam?.logo ? 'hidden' : ''}`}>
-                                <span className="text-xl">⚽</span>
-                              </div>
-                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
-                                {ravenclawTurkishMatch.homeTeam?.name || "Ravenclaw"}
-                              </span>
-                            </div>
-                            <div className="text-2xl md:text-3xl font-bold text-black dark:text-amber-100">VS</div>
-                            <div className="flex flex-col items-center gap-2 flex-1">
-                              {ravenclawTurkishMatch.awayTeam?.logo ? (
-                                <img 
-                                  src={ravenclawTurkishMatch.awayTeam.logo.startsWith('data:') 
-                                    ? ravenclawTurkishMatch.awayTeam.logo 
-                                    : ravenclawTurkishMatch.awayTeam.logo.startsWith('http') 
-                                    ? ravenclawTurkishMatch.awayTeam.logo
-                                    : `data:image/png;base64,${ravenclawTurkishMatch.awayTeam.logo}`} 
-                                  alt={ravenclawTurkishMatch.awayTeam.name || "Turkish Union"} 
-                                  className="w-16 h-16 md:w-20 md:h-20 object-contain"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display = 'none';
-                                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                                  }}
-                                />
-                              ) : null}
-                              <div className={`w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center ${ravenclawTurkishMatch.awayTeam?.logo ? 'hidden' : ''}`}>
-                                <span className="text-xl">⚽</span>
-                              </div>
-                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
-                                {ravenclawTurkishMatch.awayTeam?.name || "Turkish Union"}
-                              </span>
-                            </div>
-                          </div>
-                          {ravenclawTurkishMatch.referee && (
-                            <div className="mt-3 text-center">
-                              <span className="text-xs md:text-sm text-muted-foreground">Hakem: </span>
-                              <span className="text-xs md:text-sm font-semibold text-black dark:text-amber-100">{ravenclawTurkishMatch.referee}</span>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="mb-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border-2 border-black/30 dark:border-amber-200/30">
-                          <div className="flex items-center justify-center gap-4 md:gap-8">
-                            <div className="flex flex-col items-center gap-2 flex-1">
-                              <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                <span className="text-xl">⚽</span>
-                              </div>
-                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
-                                Ravenclaw
-                              </span>
-                            </div>
-                            <div className="text-2xl md:text-3xl font-bold text-black dark:text-amber-100">VS</div>
-                            <div className="flex flex-col items-center gap-2 flex-1">
-                              <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                                <span className="text-xl">⚽</span>
-                              </div>
-                              <span className="font-bold text-sm md:text-base text-center text-black dark:text-amber-100">
-                                Turkish Union
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>D</span>
-                        ün oynanan bu maçta Oyasumi'nin performansı öne çıktı. Oyuncu, sahadaki hareketleri ve top kontrolüyle takımına büyük katkı sağladı. Turkish Union ise maç boyunca mücadele etse de, rakibinin gücü karşısında zorlandı. Maçın en dikkat çeken yanı, Oyasumi'nin gösterdiği performans oldu.
-                      </p>
-
-                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-purple-500 p-4 mt-4 mb-4">
-                        <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          Hakem Yorumları:
-                        </p>
-                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Maç sonrası taraftarlar, hakem kararlarını eleştirdi. Bazı taraftarlar, hakemin maç boyunca verdiği kararların tutarsız olduğunu söyledi. Sosyal medyada hakeme yönelik eleştiriler yoğunlaştı.
-                        </p>
-                      </div>
-                    </div>
                   </div>
                 </div>
 
@@ -829,6 +512,52 @@ export default function HomePage() {
                             </div>
                           </div>
                         </div>
+
+                        <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">FK</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Fatih Kaya</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@fatihkaya_gebze</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 8dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Bu hakemlerin gözleri kör mü. Penaltı vermiyor, faul çalmıyor. Siktirsin gitsinler sahadan. Amk hakemleri hiçbir şey bilmiyor.
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 789</span>
+                                <span>🔄 567</span>
+                                <span>❤️ 1456</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">YK</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Yusuf Koç</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@yusufkoc_ftb</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 10dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Hakem düdüğü eline aldı mı ne yapacağını bilmiyor. Bir penaltı veriyor, sonra neden verdiğini unutuyor. Siktirsin gitsin bu hakem.
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 890</span>
+                                <span>🔄 678</span>
+                                <span>❤️ 1678</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -957,9 +686,9 @@ export default function HomePage() {
                     <div className="mb-4">
                       <h4 className="text-sm md:text-base font-semibold text-black/70 dark:text-amber-200/70 mb-2">FK Bodø/Glimt vs Trebol FC</h4>
                       <div className="space-y-3">
-                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                        <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-bold text-sm">CY</span>
                             </div>
                             <div className="flex-1 min-w-0">
@@ -969,67 +698,20 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 4dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Hakem değil kronometre bile bize çalışmıyor. Doctrin gitsin, bizi rezil ediyor.
+                                Bu maçta rezalet olduk. Bodø/Glimt bizi sike sike yendi. Takım oynayamıyor, hiçbir şey yapamıyoruz. Amk takımı.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 45</span>
-                                <span>🔄 28</span>
-                                <span>❤️ 98</span>
+                                <span>💬 145</span>
+                                <span>🔄 78</span>
+                                <span>❤️ 234</span>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
-                          <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
-                              <span className="text-white font-bold text-sm">ÖD</span>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-bold text-sm text-black dark:text-amber-100">Özkan Demir</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">@ozkandemir_trebol</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">· 6dk</span>
-                              </div>
-                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Trebol FC bir kere gol atsa havaya fişek patlatırım. Ama atamazlar, hiç umut yok.
-                              </p>
-                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 67</span>
-                                <span>🔄 34</span>
-                                <span>❤️ 134</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
-                          <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
-                              <span className="text-white font-bold text-sm">BK</span>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-bold text-sm text-black dark:text-amber-100">Burak Koç</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">@burakkoc_trebol</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">· 8dk</span>
-                              </div>
-                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Bodø/Glimt'in presi yüzünden topun oksijeni biter. Bizim oyuncular nefes alamaz, kesin kaybederiz.
-                              </p>
-                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 89</span>
-                                <span>🔄 52</span>
-                                <span>❤️ 178</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Objektif Tweet'leri */}
                         <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-bold text-sm">AY</span>
                             </div>
                             <div className="flex-1 min-w-0">
@@ -1039,12 +721,58 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 1dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Bodø/Glimt bu sezon favori konumda. Pres yapısı ve takım uyumu gerçekten etkileyici. Bugün de güzel bir maç izleyeceğiz! 🔥⚽
+                                Bodø/Glimt bu sezon favori konumda. Pres yapısı ve takım uyumu gerçekten etkileyici. Bugün de güzel bir maç izleyeceğiz.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                                 <span>💬 145</span>
                                 <span>🔄 78</span>
                                 <span>❤️ 267</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">ÖD</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Özkan Demir</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@ozkandemir_trebol</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 6dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Trebol FC bir kere gol atsa havaya fişek patlatırım. Ama atamazlar amk, hiç umut yok. Takım rezalet, oyuncular oynayamıyor.
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 167</span>
+                                <span>🔄 134</span>
+                                <span>❤️ 234</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">BK</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Burak Koç</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@burakkoc_trebol</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 8dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Bodø/Glimt'in presi yüzünden topun oksijeni biter. Bizim oyuncular nefes alamaz, sike sike kaybederiz. Takım oynayamıyor.
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 189</span>
+                                <span>🔄 152</span>
+                                <span>❤️ 278</span>
                               </div>
                             </div>
                           </div>
@@ -1062,7 +790,7 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 2dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Trebol FC bu sezon zorlanıyor. Takım formu düşük ve maçlarda beklenen performansı gösteremiyor. Bugün de zor bir maç bekliyoruz. 😔⚽
+                                Trebol FC bu sezon zorlanıyor. Takım formu düşük ve maçlarda beklenen performansı gösteremiyor. Bugün de zor bir maç bekliyoruz.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                                 <span>💬 78</span>
@@ -1102,9 +830,9 @@ export default function HomePage() {
                     <div className="mb-4">
                       <h4 className="text-sm md:text-base font-semibold text-black/70 dark:text-amber-200/70 mb-2">Ravenclaw vs Turkish Union</h4>
                       <div className="space-y-3">
-                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                        <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-bold text-sm">EY</span>
                             </div>
                             <div className="flex-1 min-w-0">
@@ -1114,20 +842,43 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 2dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Ravenclaw savunması rüzgâr esse dağılır, bakalım bugün kaç dakika dayanacak. Burak hakem de kesin hata yapacak.
+                                Ravenclaw savunması rüzgâr esse dağılır amk. Takım oynayamıyor, sike sike kaybediyoruz. Burak hakem de kesin hata yapacak.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 56</span>
-                                <span>🔄 32</span>
-                                <span>❤️ 123</span>
+                                <span>💬 156</span>
+                                <span>🔄 132</span>
+                                <span>❤️ 223</span>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                        <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">AY</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Ayşe Yılmaz</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@ayseyilmaz_ravenclaw</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 3dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Oyasumi dün gerçekten harika oynadı. Top kontrolü, pasları, hareketleri mükemmeldi. Bu sezon ligdeki en iyi performanslarından biriydi. Tebrikler Oyasumi.
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 345</span>
+                                <span>🔄 178</span>
+                                <span>❤️ 567</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-bold text-sm">TA</span>
                             </div>
                             <div className="flex-1 min-w-0">
@@ -1137,20 +888,20 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 5dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Turkish Union'ın hücum hattı çay molasına çok alıştı galiba. Gitsinler, oynayamıyorlar.
+                                Turkish Union'ın hücum hattı çay molasına çok alıştı galiba. Gitsinler amk, oynayamıyorlar. Takım rezalet.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 78</span>
-                                <span>🔄 41</span>
-                                <span>❤️ 145</span>
+                                <span>💬 178</span>
+                                <span>🔄 141</span>
+                                <span>❤️ 245</span>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+                        <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-bold text-sm">MK</span>
                             </div>
                             <div className="flex-1 min-w-0">
@@ -1160,36 +911,12 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 9dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Hakem Burak bugün kartları yanlışlıkla üst üste verir diye korkuyorum. Bu hakem, hiçbir şey bilmiyor.
+                                Bu maçta rezalet olduk. Oyasumi bizi sike sike yendi. Takım oynayamıyor, hiçbir şey yapamıyoruz. Amk takımı.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 92</span>
-                                <span>🔄 58</span>
-                                <span>❤️ 201</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Objektif Tweet'leri */}
-                        <div className="bg-white dark:bg-gray-800 border border-yellow-300 dark:border-yellow-700 rounded-lg p-4 shadow-sm">
-                          <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">
-                              <span className="text-white font-bold text-sm">EK</span>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-bold text-sm text-black dark:text-amber-100">Ege Kılıç</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">@egekilic_raven</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">· 1dk</span>
-                              </div>
-                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Ravenclaw bu sezon zorlanıyor. Takımın formu düşük ve maçlarda beklenen performansı gösteremiyor. Bugün de zor bir maç bekliyoruz. 😔⚽
-                              </p>
-                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 92</span>
-                                <span>🔄 38</span>
-                                <span>❤️ 78</span>
+                                <span>💬 192</span>
+                                <span>🔄 158</span>
+                                <span>❤️ 301</span>
                               </div>
                             </div>
                           </div>
@@ -1207,7 +934,7 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 2dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Turkish Union bu sezon orta seviye bir performans sergiliyor. Takım bazen iyi oynuyor bazen zorlanıyor. Bugün nasıl bir maç çıkaracaklar merak ediyorum. ⚽
+                                Turkish Union bu sezon orta seviye bir performans sergiliyor. Takım bazen iyi oynuyor bazen zorlanıyor. Bugün nasıl bir maç çıkaracaklar merak ediyorum.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                                 <span>💬 112</span>
@@ -1236,6 +963,104 @@ export default function HomePage() {
                                 <span>Yorum 145</span>
                                 <span>Paylas 78</span>
                                 <span>Begeni 167</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Gebzespor vs Fear The Beard Tweet'leri */}
+                    <div className="mb-4">
+                      <h4 className="text-sm md:text-base font-semibold text-black/70 dark:text-amber-200/70 mb-2">Gebzespor vs Fear The Beard</h4>
+                      <div className="space-y-3">
+                        <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">SK</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Serkan Kaya</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@serkankaya_gebze</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 3dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Bu maçta rezalet olduk. Fear The Beard bizi sike sike yendi. Takım oynayamıyor, hiçbir şey yapamıyoruz. Amk takımı.
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 145</span>
+                                <span>🔄 78</span>
+                                <span>❤️ 234</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">FA</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Furkan Aydın</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@furkanaydin_ftb</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 2dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Fear The Beard bu sezon iyi bir performans sergiliyor. Takımın oyun tarzı ve taktik disiplini dikkat çekiyor. Bugün de güzel bir maç bekliyoruz.
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 112</span>
+                                <span>🔄 58</span>
+                                <span>❤️ 198</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">MK</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Mehmet Korkmaz</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@mehmetkorkmaz_gebze</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 5dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Gebzespor oynayamıyor amk. Takım rezalet, oyuncular oynayamıyor. Fear The Beard bizi sike sike yendi. Hiç umut yok.
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 167</span>
+                                <span>🔄 134</span>
+                                <span>❤️ 234</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-800 border border-blue-300 dark:border-blue-700 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">SK</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-bold text-sm text-black dark:text-amber-100">Selin Korkmaz</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">@selinkorkmaz_neutral</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">· 3dk</span>
+                              </div>
+                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                                Objektif bakarsak: Fear The Beard formda, Gebzespor ise zorlanıyor. Maçın favorisi açık ama futbol bazen sürprizlerle dolu. İyi bir maç olur umarım.
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span>💬 134</span>
+                                <span>🔄 72</span>
+                                <span>❤️ 156</span>
                               </div>
                             </div>
                           </div>
