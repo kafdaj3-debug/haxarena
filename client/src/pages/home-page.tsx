@@ -257,31 +257,6 @@ export default function HomePage() {
                           <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                             Bu maçta Bodø/Glimt, taktiksel üstünlüğünü sahaya yansıttı. Trebol FC ise maç boyunca mücadele etse de, rakibinin gücü karşısında yetersiz kaldı. Maçın en dikkat çeken yanı, Bodø/Glimt oyuncularının defansif performansı oldu.
                           </p>
-                          {bodoTrebolMatch?.goals && bodoTrebolMatch.goals.length > 0 && (
-                            <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                              <p className="text-sm md:text-base font-semibold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                                Oyuncu Performansları:
-                              </p>
-                              {bodoTrebolMatch.goals.map((goal: any, idx: number) => {
-                                const playerName = goal.player?.username || goal.playerName || "Bilinmeyen Oyuncu";
-                                const assistName = goal.assistPlayer?.username || goal.assistPlayerName;
-                                const performanceTexts = [
-                                  `${playerName}, maçın kritik anlarında takımına liderlik etti ve sahadaki varlığıyla dikkat çekti.`,
-                                  `${playerName}'ın top kontrolü ve pas kalitesi, takımının hücum oyununu belirleyen faktörlerden biri oldu.`,
-                                  `${playerName}, defansif katkılarıyla takımının arkasında güçlü bir duvar oluşturdu.`,
-                                  `${playerName}'ın hızı ve çevikliği, rakip takımın savunmasını sürekli zorladı.`,
-                                  `${playerName}, maç boyunca gösterdiği kararlılık ve mücadele ruhuyla takımına ilham verdi.`,
-                                  `${playerName}'ın teknik becerileri ve oyun zekası, maçın seyrini değiştiren unsurlardan biriydi.`
-                                ];
-                                const randomText = performanceTexts[idx % performanceTexts.length];
-                                return (
-                                  <p key={idx} className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                    {goal.isHomeGoal ? "Bodø/Glimt" : "Trebol FC"} tarafından {playerName} gol attı{assistName ? `, asist yapan ${assistName} oldu` : ""}. {randomText}
-                                  </p>
-                                );
-                              })}
-                            </div>
-                          )}
                         </div>
 
                         <div>
@@ -291,31 +266,6 @@ export default function HomePage() {
                           <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                             Dün oynanan bu karşılaşmada iki takım da dengeli bir oyun sergiledi. Maç, taraftarlar için heyecan verici anlar yaşattı. Her iki takımın da gol atma fırsatları oldu ancak sonuçlar beklenenin altında kaldı. Fear The Beard, maç boyunca taktik disiplinini korurken, Gebzespor ise mücadeleci bir performans sergiledi. Maçın en dikkat çeken yanı, her iki takımın da defansif organizasyonu oldu.
                           </p>
-                          {gebzeFearMatch?.goals && gebzeFearMatch.goals.length > 0 && (
-                            <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                              <p className="text-sm md:text-base font-semibold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                                Oyuncu Performansları:
-                              </p>
-                              {gebzeFearMatch.goals.map((goal: any, idx: number) => {
-                                const playerName = goal.player?.username || goal.playerName || "Bilinmeyen Oyuncu";
-                                const assistName = goal.assistPlayer?.username || goal.assistPlayerName;
-                                const performanceTexts = [
-                                  `${playerName}, maçın kritik anlarında takımına liderlik etti ve sahadaki varlığıyla dikkat çekti.`,
-                                  `${playerName}'ın top kontrolü ve pas kalitesi, takımının hücum oyununu belirleyen faktörlerden biri oldu.`,
-                                  `${playerName}, defansif katkılarıyla takımının arkasında güçlü bir duvar oluşturdu.`,
-                                  `${playerName}'ın hızı ve çevikliği, rakip takımın savunmasını sürekli zorladı.`,
-                                  `${playerName}, maç boyunca gösterdiği kararlılık ve mücadele ruhuyla takımına ilham verdi.`,
-                                  `${playerName}'ın teknik becerileri ve oyun zekası, maçın seyrini değiştiren unsurlardan biriydi.`
-                                ];
-                                const randomText = performanceTexts[idx % performanceTexts.length];
-                                return (
-                                  <p key={idx} className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                    {goal.isHomeGoal ? "Gebzespor" : "Fear The Beard"} tarafından {playerName} gol attı{assistName ? `, asist yapan ${assistName} oldu` : ""}. {randomText}
-                                  </p>
-                                );
-                              })}
-                            </div>
-                          )}
                           <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2 mt-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                             Maç sonrası yapılan açıklamalarda, her iki takımın teknik direktörü de oyuncularının performansından memnun kaldığını belirtti. Taraftarlar ise maçın kalitesinden övgüyle bahsetti. Ancak hakem kararları taraftarların eleştiri odağı oldu.
                           </p>
@@ -328,39 +278,6 @@ export default function HomePage() {
                           <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                             Dün oynanan bu maçta Oyasumi'nin performansı öne çıktı. Oyuncu, sahadaki hareketleri ve top kontrolüyle takımına büyük katkı sağladı. Turkish Union ise maç boyunca mücadele etse de, rakibinin gücü karşısında zorlandı. Maçın en dikkat çeken yanı, Oyasumi'nin gösterdiği performans oldu. Oyuncu, maç boyunca takımına liderlik etti ve sahadaki varlığıyla dikkat çekti.
                           </p>
-                          {ravenclawTurkishMatch?.goals && ravenclawTurkishMatch.goals.length > 0 && (
-                            <div className="mt-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                              <p className="text-sm md:text-base font-semibold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                                Oyuncu Performansları:
-                              </p>
-                              {ravenclawTurkishMatch.goals.map((goal: any, idx: number) => {
-                                const playerName = goal.player?.username || goal.playerName || "Bilinmeyen Oyuncu";
-                                const assistName = goal.assistPlayer?.username || goal.assistPlayerName;
-                                const isOyasumi = playerName.toLowerCase().includes("oyasumi");
-                                const oyasumiTexts = [
-                                  `${playerName} maç boyunca muhteşem bir performans sergiledi, top kontrolü ve paslarıyla takımına liderlik etti.`,
-                                  `${playerName}'ın oyun zekası ve teknik becerileri, maçın en dikkat çeken unsurlarından biriydi.`,
-                                  `${playerName}, sahadaki her dokunuşunda kalite gösterdi ve takımının hücum oyununu şekillendirdi.`
-                                ];
-                                const regularTexts = [
-                                  `${playerName}, maçın kritik anlarında takımına liderlik etti ve sahadaki varlığıyla dikkat çekti.`,
-                                  `${playerName}'ın top kontrolü ve pas kalitesi, takımının hücum oyununu belirleyen faktörlerden biri oldu.`,
-                                  `${playerName}, defansif katkılarıyla takımının arkasında güçlü bir duvar oluşturdu.`,
-                                  `${playerName}'ın hızı ve çevikliği, rakip takımın savunmasını sürekli zorladı.`,
-                                  `${playerName}, maç boyunca gösterdiği kararlılık ve mücadele ruhuyla takımına ilham verdi.`,
-                                  `${playerName}'ın teknik becerileri ve oyun zekası, maçın seyrini değiştiren unsurlardan biriydi.`
-                                ];
-                                const performanceText = isOyasumi 
-                                  ? oyasumiTexts[idx % oyasumiTexts.length]
-                                  : regularTexts[idx % regularTexts.length];
-                                return (
-                                  <p key={idx} className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                    {goal.isHomeGoal ? "Ravenclaw" : "Turkish Union"} tarafından {playerName} gol attı{assistName ? `, asist yapan ${assistName} oldu` : ""}. {performanceText}
-                                  </p>
-                                );
-                              })}
-                            </div>
-                          )}
                           <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2 mt-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                             Ravenclaw tarafında ise takım, Oyasumi'nin performansı sayesinde maçı kontrol altına aldı. Turkish Union ise maç boyunca mücadele etse de, rakibinin gücü karşısında yetersiz kaldı. Maç sonrası yapılan açıklamalarda, Oyasumi'nin performansı övgüyle karşılandı. Taraftarlar ise oyuncunun bu sezon ligdeki en iyi performanslarından birini sergilediğini söyledi.
                           </p>
