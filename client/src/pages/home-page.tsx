@@ -265,9 +265,18 @@ export default function HomePage() {
                               {bodoTrebolMatch.goals.map((goal: any, idx: number) => {
                                 const playerName = goal.player?.username || goal.playerName || "Bilinmeyen Oyuncu";
                                 const assistName = goal.assistPlayer?.username || goal.assistPlayerName;
+                                const performanceTexts = [
+                                  `${playerName}, maçın kritik anlarında takımına liderlik etti ve sahadaki varlığıyla dikkat çekti.`,
+                                  `${playerName}'ın top kontrolü ve pas kalitesi, takımının hücum oyununu belirleyen faktörlerden biri oldu.`,
+                                  `${playerName}, defansif katkılarıyla takımının arkasında güçlü bir duvar oluşturdu.`,
+                                  `${playerName}'ın hızı ve çevikliği, rakip takımın savunmasını sürekli zorladı.`,
+                                  `${playerName}, maç boyunca gösterdiği kararlılık ve mücadele ruhuyla takımına ilham verdi.`,
+                                  `${playerName}'ın teknik becerileri ve oyun zekası, maçın seyrini değiştiren unsurlardan biriydi.`
+                                ];
+                                const randomText = performanceTexts[idx % performanceTexts.length];
                                 return (
                                   <p key={idx} className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                    {goal.isHomeGoal ? "Bodø/Glimt" : "Trebol FC"} tarafından {playerName} gol attı{assistName ? `, asist yapan ${assistName} oldu` : ""}. {playerName} maç boyunca etkili bir performans sergiledi ve takımına önemli katkı sağladı.
+                                    {goal.isHomeGoal ? "Bodø/Glimt" : "Trebol FC"} tarafından {playerName} gol attı{assistName ? `, asist yapan ${assistName} oldu` : ""}. {randomText}
                                   </p>
                                 );
                               })}
@@ -290,9 +299,18 @@ export default function HomePage() {
                               {gebzeFearMatch.goals.map((goal: any, idx: number) => {
                                 const playerName = goal.player?.username || goal.playerName || "Bilinmeyen Oyuncu";
                                 const assistName = goal.assistPlayer?.username || goal.assistPlayerName;
+                                const performanceTexts = [
+                                  `${playerName}, maçın kritik anlarında takımına liderlik etti ve sahadaki varlığıyla dikkat çekti.`,
+                                  `${playerName}'ın top kontrolü ve pas kalitesi, takımının hücum oyununu belirleyen faktörlerden biri oldu.`,
+                                  `${playerName}, defansif katkılarıyla takımının arkasında güçlü bir duvar oluşturdu.`,
+                                  `${playerName}'ın hızı ve çevikliği, rakip takımın savunmasını sürekli zorladı.`,
+                                  `${playerName}, maç boyunca gösterdiği kararlılık ve mücadele ruhuyla takımına ilham verdi.`,
+                                  `${playerName}'ın teknik becerileri ve oyun zekası, maçın seyrini değiştiren unsurlardan biriydi.`
+                                ];
+                                const randomText = performanceTexts[idx % performanceTexts.length];
                                 return (
                                   <p key={idx} className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                    {goal.isHomeGoal ? "Gebzespor" : "Fear The Beard"} tarafından {playerName} gol attı{assistName ? `, asist yapan ${assistName} oldu` : ""}. {playerName} maç boyunca etkili bir performans sergiledi ve takımına önemli katkı sağladı.
+                                    {goal.isHomeGoal ? "Gebzespor" : "Fear The Beard"} tarafından {playerName} gol attı{assistName ? `, asist yapan ${assistName} oldu` : ""}. {randomText}
                                   </p>
                                 );
                               })}
@@ -319,9 +337,25 @@ export default function HomePage() {
                                 const playerName = goal.player?.username || goal.playerName || "Bilinmeyen Oyuncu";
                                 const assistName = goal.assistPlayer?.username || goal.assistPlayerName;
                                 const isOyasumi = playerName.toLowerCase().includes("oyasumi");
+                                const oyasumiTexts = [
+                                  `${playerName} maç boyunca muhteşem bir performans sergiledi, top kontrolü ve paslarıyla takımına liderlik etti.`,
+                                  `${playerName}'ın oyun zekası ve teknik becerileri, maçın en dikkat çeken unsurlarından biriydi.`,
+                                  `${playerName}, sahadaki her dokunuşunda kalite gösterdi ve takımının hücum oyununu şekillendirdi.`
+                                ];
+                                const regularTexts = [
+                                  `${playerName}, maçın kritik anlarında takımına liderlik etti ve sahadaki varlığıyla dikkat çekti.`,
+                                  `${playerName}'ın top kontrolü ve pas kalitesi, takımının hücum oyununu belirleyen faktörlerden biri oldu.`,
+                                  `${playerName}, defansif katkılarıyla takımının arkasında güçlü bir duvar oluşturdu.`,
+                                  `${playerName}'ın hızı ve çevikliği, rakip takımın savunmasını sürekli zorladı.`,
+                                  `${playerName}, maç boyunca gösterdiği kararlılık ve mücadele ruhuyla takımına ilham verdi.`,
+                                  `${playerName}'ın teknik becerileri ve oyun zekası, maçın seyrini değiştiren unsurlardan biriydi.`
+                                ];
+                                const performanceText = isOyasumi 
+                                  ? oyasumiTexts[idx % oyasumiTexts.length]
+                                  : regularTexts[idx % regularTexts.length];
                                 return (
                                   <p key={idx} className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                    {goal.isHomeGoal ? "Ravenclaw" : "Turkish Union"} tarafından {playerName} gol attı{assistName ? `, asist yapan ${assistName} oldu` : ""}. {isOyasumi ? `${playerName} maç boyunca muhteşem bir performans sergiledi, top kontrolü ve paslarıyla takımına liderlik etti` : `${playerName} maç boyunca etkili bir performans sergiledi ve takımına önemli katkı sağladı`}.
+                                    {goal.isHomeGoal ? "Ravenclaw" : "Turkish Union"} tarafından {playerName} gol attı{assistName ? `, asist yapan ${assistName} oldu` : ""}. {performanceText}
                                   </p>
                                 );
                               })}
@@ -422,29 +456,6 @@ export default function HomePage() {
                             <span>💬 189</span>
                             <span>🔄 134</span>
                             <span>❤️ 267</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-gray-800 border border-blue-300 dark:border-blue-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">MA</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Mehmet Arslan</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@mehmetarslan_neutral</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 3dk</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            objektif bakarsak bodø/glimt favori trebol fc ise zorlanıyor maçın sonucu belli gibi ama futbol bazen sürprizlerle dolu
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 178</span>
-                            <span>🔄 89</span>
-                            <span>❤️ 234</span>
                           </div>
                         </div>
                       </div>
