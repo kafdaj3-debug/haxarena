@@ -555,7 +555,7 @@ export default function HomePage() {
                             <span className="text-xs text-gray-500 dark:text-gray-400">· 5dk</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            takım ne yapıyor amk hiçbir şey yapamıyorlar sike sike yeniliyoruz oyuncular uyuyor mu ne yapıyorlar anlamadım rezalet bir performans sergilediler #Ravenclaw
+                            takım ne yapıyor amk hiçbir şey yapamıyorlar turkish union oyuncuları bizi geçti topu kontrol edemiyoruz oyuncular uyuyor mu ne yapıyorlar anlamadım rezalet bir performans sergilediler #Ravenclaw
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <span>💬 278</span>
@@ -577,7 +577,7 @@ export default function HomePage() {
                             <span className="text-xs text-gray-500 dark:text-gray-400">· 9dk</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            objektif bakarsak oyasumi'nin performansı gerçekten dikkat çekiciydi ravenclaw takım olarak daha organize göründü turkish union ise mücadele etti ama rakibin gücü karşısında zorlandı
+                            objektif bakarsak oyasumi'nin performansı gerçekten dikkat çekiciydi turkish union takım olarak daha organize göründü ravenclaw ise mücadele etti ama rakibin gücü karşısında zorlandı
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <span>💬 198</span>
@@ -588,9 +588,9 @@ export default function HomePage() {
                       </div>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
+                    <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
                           <span className="text-white font-bold text-sm">BK</span>
                         </div>
                         <div className="flex-1 min-w-0">
@@ -600,20 +600,20 @@ export default function HomePage() {
                             <span className="text-xs text-gray-500 dark:text-gray-400">· 8dk</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            oyasumi gerçekten harika oynadı top kontrolü pasları ve liderliği mükemmeldi takımımız bu performansla devam ederse ligde çok başarılı olacağız #Ravenclaw
+                            takım ne yapıyor amk hiçbir şey yapamıyorlar turkish union oyuncuları çok hızlı topu kontrol ediyorlar bizim oyuncular uyuyor mu ne yapıyorlar anlamadım rezalet bir performans sergilediler #Ravenclaw
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 345</span>
-                            <span>🔄 201</span>
-                            <span>❤️ 456</span>
+                            <span>💬 234</span>
+                            <span>🔄 156</span>
+                            <span>❤️ 345</span>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
+                    <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
                           <span className="text-white font-bold text-sm">MK</span>
                         </div>
                         <div className="flex-1 min-w-0">
@@ -623,12 +623,12 @@ export default function HomePage() {
                             <span className="text-xs text-gray-500 dark:text-gray-400">· 7dk</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            takım ne yapıyor amk hiçbir şey yapamıyorlar ravenclaw oyuncuları çok hızlı topu kontrol ediyorlar bizim oyuncular uyuyor mu ne yapıyorlar anlamadım oyasumi bizi geçti rezalet bir performans sergilediler #TurkishUnion
+                            harika bir maçtı takımımız gerçekten muhteşem oynadı oyasumi'nin performansı mükemmeldi top kontrolü pasları ve liderliği harikaydı takım olarak çok iyi oynadık bu performansla devam edersek ligde çok başarılı olacağız #TurkishUnion
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 201</span>
-                            <span>🔄 134</span>
-                            <span>❤️ 278</span>
+                            <span>💬 345</span>
+                            <span>🔄 201</span>
+                            <span>❤️ 456</span>
                           </div>
                         </div>
                       </div>
