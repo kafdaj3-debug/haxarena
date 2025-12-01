@@ -378,6 +378,76 @@ export default function HomePage() {
                       </div>
                     </div>
 
+                    {/* Bodø/Glimt vs Trebol FC - Yeni Tweet'ler */}
+                    <div className="bg-white dark:bg-gray-800 border border-blue-300 dark:border-blue-700 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-sm">AK</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm text-black dark:text-amber-100">Ali Kaya</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">@alikaya_neutral</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 7dk</span>
+                          </div>
+                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                            objektif bakarsak bodø/glimt taktiksel olarak çok üstündü trebol fc mücadele etti ama rakibin gücü karşısında yetersiz kaldı maçın en dikkat çeken yanı bodø'nun defansif organizasyonuydu
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span>💬 145</span>
+                            <span>🔄 67</span>
+                            <span>❤️ 198</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-sm">MD</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm text-black dark:text-amber-100">Mehmet Demir</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">@mehmetdemir_bodo</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 6dk</span>
+                          </div>
+                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                            harika bir maçtı takımımız gerçekten muhteşem oynadı defansif disiplinimiz ve takım uyumumuz mükemmeldi üç oyuncumuz dm sıralamasında zirvede bu başarı hepimizi gururlandırdı #BodøGlimt
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span>💬 312</span>
+                            <span>🔄 189</span>
+                            <span>❤️ 445</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-sm">TY</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm text-black dark:text-amber-100">Tolga Yıldız</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">@tolgayildiz_trebol</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 5dk</span>
+                          </div>
+                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                            takım ne yapıyor amk hiçbir şey yapamıyorlar bodø/glimt oyuncuları topu bizden çalıyor bizim oyuncular uyuyor mu ne yapıyorlar anlamadım rezalet bir performans sergilediler #TrebolFC
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span>💬 198</span>
+                            <span>🔄 134</span>
+                            <span>❤️ 267</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Gebzespor vs Fear The Beard */}
                     <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
                       <div className="flex items-start gap-3">
@@ -402,25 +472,163 @@ export default function HomePage() {
                       </div>
                     </div>
 
-                    {/* Ravenclaw vs Turkish Union */}
-                    <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
+                    {/* Gebzespor vs Fear The Beard - Yeni Tweet'ler */}
+                    <div className="bg-white dark:bg-gray-800 border border-blue-300 dark:border-blue-700 rounded-lg p-4 shadow-sm">
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">EY</span>
+                        <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-sm">ÖK</span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Emre Yılmaz</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@emreyilmaz_raven</span>
+                            <span className="font-bold text-sm text-black dark:text-amber-100">Özkan Kılıç</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">@ozkankilic_neutral</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 8dk</span>
+                          </div>
+                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                            objektif bakarsak her iki takım da dengeli bir oyun sergiledi fear the beard taktik disiplinini korurken gebzespor mücadeleci bir performans gösterdi maçın kalitesi yüksekti
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span>💬 167</span>
+                            <span>🔄 89</span>
+                            <span>❤️ 223</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-sm">HY</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm text-black dark:text-amber-100">Hakan Yılmaz</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">@hakanyilmaz_ftb</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 7dk</span>
+                          </div>
+                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                            muhteşem bir maçtı takımımız gerçekten harika oynadı oyun tarzımız ve takım uyumumuz mükemmeldi bu performansla devam edersek ligde çok başarılı olacağız #FearTheBeard
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span>💬 289</span>
+                            <span>🔄 156</span>
+                            <span>❤️ 378</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-sm">DK</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm text-black dark:text-amber-100">Deniz Kaya</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">@denizkaya_gebze</span>
                             <span className="text-xs text-gray-500 dark:text-gray-400">· 6dk</span>
                           </div>
                           <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            ravenclaw savunması rüzgâr esse dağılır amk takım oynayamıyor sike sike kaybediyoruz burak hakem de kesin hata yapacak #Ravenclaw
+                            takım ne yapıyor amk hiçbir şey yapamıyorlar fear the beard oyuncuları bizi geçti topu kontrol edemiyoruz oyuncular uyuyor mu ne yapıyorlar anlamadım rezalet bir performans sergilediler #Gebzespor
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 234</span>
-                            <span>🔄 156</span>
-                            <span>❤️ 345</span>
+                            <span>💬 189</span>
+                            <span>🔄 123</span>
+                            <span>❤️ 245</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Ravenclaw vs Turkish Union - Yeni Tweet'ler */}
+                    <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-sm">AY</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm text-black dark:text-amber-100">Ahmet Yıldız</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">@ahmetyildiz_raven</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 5dk</span>
+                          </div>
+                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                            takım ne yapıyor amk hiçbir şey yapamıyorlar sike sike yeniliyoruz oyuncular uyuyor mu ne yapıyorlar anlamadım rezalet bir performans sergilediler #Ravenclaw
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span>💬 278</span>
+                            <span>🔄 167</span>
+                            <span>❤️ 312</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 border border-blue-300 dark:border-blue-700 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-sm">SK</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm text-black dark:text-amber-100">Selin Kılıç</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">@selinkilic_neutral</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 9dk</span>
+                          </div>
+                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                            objektif bakarsak oyasumi'nin performansı gerçekten dikkat çekiciydi ravenclaw takım olarak daha organize göründü turkish union ise mücadele etti ama rakibin gücü karşısında zorlandı
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span>💬 198</span>
+                            <span>🔄 112</span>
+                            <span>❤️ 267</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-sm">BK</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm text-black dark:text-amber-100">Berk Kaya</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">@berkkaya_raven</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 8dk</span>
+                          </div>
+                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                            oyasumi gerçekten harika oynadı top kontrolü pasları ve liderliği mükemmeldi takımımız bu performansla devam ederse ligde çok başarılı olacağız #Ravenclaw
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span>💬 345</span>
+                            <span>🔄 201</span>
+                            <span>❤️ 456</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold text-sm">MK</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-sm text-black dark:text-amber-100">Mert Korkmaz</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">@mertkorkmaz_tu</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">· 7dk</span>
+                          </div>
+                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
+                            takım ne yapıyor amk hiçbir şey yapamıyorlar ravenclaw oyuncuları çok hızlı topu kontrol ediyorlar bizim oyuncular uyuyor mu ne yapıyorlar anlamadım oyasumi bizi geçti rezalet bir performans sergilediler #TurkishUnion
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span>💬 201</span>
+                            <span>🔄 134</span>
+                            <span>❤️ 278</span>
                           </div>
                         </div>
                       </div>
