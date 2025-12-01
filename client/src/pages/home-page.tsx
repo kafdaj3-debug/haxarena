@@ -773,7 +773,7 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 1dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Bu hakemler ne yapıyor anlamadım. Kararları tutarsız, düdükleri yanlış. Siktirsin gitsinler sahadan. Amk hakemleri.
+                                Bu hakemler ne yapıyor anlamadım. Kararları tutarsız, düdükleri yanlış. Gitsinler sahadan. Bu hakemler rezalet.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                                 <span>💬 456</span>
@@ -796,7 +796,7 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 4dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Hakemler bu maçta rezalet. Bir korner veriyor, sonra neden verdiğini unutuyor. Gözleri kör mü bu hakemlerin. Siktirsin gitsinler.
+                                Hakemler bu maçta rezalet. Bir korner veriyor, sonra neden verdiğini unutuyor. Gözleri kör mü bu hakemlerin. Gitsinler sahadan.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                                 <span>💬 567</span>
@@ -819,60 +819,12 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 6dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Hakemler bu ligde gerçekten kötü. Kararları yanlış, düdükleri tutarsız. Bir de maç sonrası açıklama yapmıyorlar. Amk hakemleri.
+                                Hakemler bu ligde gerçekten kötü. Kararları yanlış, düdükleri tutarsız. Bir de maç sonrası açıklama yapmıyorlar. Bu hakemler rezalet.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                                 <span>💬 678</span>
                                 <span>🔄 456</span>
                                 <span>❤️ 1234</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                        <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
-                          <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-lime-500 rounded-full flex items-center justify-center flex-shrink-0">
-                              <span className="text-white font-bold text-sm">FA</span>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-bold text-sm text-black dark:text-amber-100">Furkan Aydın</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">@furkanaydin_ftb</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">· 2dk</span>
-                              </div>
-                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Fear The Beard bu sezon iyi bir performans sergiliyor. Takımın oyun tarzı ve taktik disiplini dikkat çekiyor. Bugün de güzel bir maç bekliyoruz! 💪⚽
-                              </p>
-                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 112</span>
-                                <span>🔄 58</span>
-                                <span>❤️ 198</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="bg-white dark:bg-gray-800 border border-blue-300 dark:border-blue-700 rounded-lg p-4 shadow-sm">
-                          <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                              <span className="text-white font-bold text-sm">SK</span>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-bold text-sm text-black dark:text-amber-100">Selin Korkmaz</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">@selinkorkmaz_neutral</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">· 3dk</span>
-                              </div>
-                              <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Objektif bakarsak: Fear The Beard formda, Gebzespor ise zorlanıyor. Maçın favorisi açık ama futbol bazen sürprizlerle dolu. İyi bir maç olur umarım. ⚽
-                              </p>
-                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 134</span>
-                                <span>🔄 72</span>
-                                <span>❤️ 156</span>
                               </div>
                             </div>
                           </div>
@@ -1017,7 +969,7 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 4dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Hakem değil kronometre bile bize çalışmıyor. Doctrin siktirsin gitsin, bizi rezil ediyor!
+                                Hakem değil kronometre bile bize çalışmıyor. Doctrin gitsin, bizi rezil ediyor.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                                 <span>💬 45</span>
@@ -1040,7 +992,7 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 6dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Trebol FC bir kere gol atsa havaya fişek patlatırım. Ama atamazlar amk, hiç umut yok!
+                                Trebol FC bir kere gol atsa havaya fişek patlatırım. Ama atamazlar, hiç umut yok.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                                 <span>💬 67</span>
@@ -1063,7 +1015,7 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 8dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Bodø/Glimt'in presi yüzünden topun oksijeni biter. Bizim oyuncular nefes alamaz, sike sike kaybederiz!
+                                Bodø/Glimt'in presi yüzünden topun oksijeni biter. Bizim oyuncular nefes alamaz, kesin kaybederiz.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                                 <span>💬 89</span>
@@ -1162,7 +1114,7 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 2dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Ravenclaw savunması rüzgâr esse dağılır, bakalım bugün kaç dakika dayanacak. Burak hakem de sike sike hata yapacak!
+                                Ravenclaw savunması rüzgâr esse dağılır, bakalım bugün kaç dakika dayanacak. Burak hakem de kesin hata yapacak.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                                 <span>💬 56</span>
@@ -1185,7 +1137,7 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 5dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Turkish Union'ın hücum hattı çay molasına çok alıştı galiba. Siktirsin gitsinler, oynayamıyorlar!
+                                Turkish Union'ın hücum hattı çay molasına çok alıştı galiba. Gitsinler, oynayamıyorlar.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                                 <span>💬 78</span>
@@ -1208,7 +1160,7 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 9dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Hakem Burak bugün kartları yanlışlıkla üst üste verir diye korkuyorum. Amk hakemi, hiçbir şey bilmiyor!
+                                Hakem Burak bugün kartları yanlışlıkla üst üste verir diye korkuyorum. Bu hakem, hiçbir şey bilmiyor.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                                 <span>💬 92</span>
@@ -1278,12 +1230,12 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-500 dark:text-gray-400">· 3dk</span>
                               </div>
                               <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                                Objektif bakarsak: Her iki takım da zorlanıyor. Ravenclaw daha kötü durumda, Turkish Union ise orta seviye. Maçın sonucu belirsiz ama her iki takım da zor bir sezon geçiriyor. ⚽
+                                Objektif bakarsak: Her iki takım da zorlanıyor. Ravenclaw daha kötü durumda, Turkish Union ise orta seviye. Maçın sonucu belirsiz ama her iki takım da zor bir sezon geçiriyor.
                               </p>
                               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                                <span>💬 145</span>
-                                <span>🔄 78</span>
-                                <span>❤️ 167</span>
+                                <span>Yorum 145</span>
+                                <span>Paylas 78</span>
+                                <span>Begeni 167</span>
                               </div>
                             </div>
                           </div>
@@ -1468,7 +1420,7 @@ export default function HomePage() {
                               <span className="text-xs text-gray-500 dark:text-gray-400">· 2s</span>
                             </div>
                             <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                              Formayı çıkarın siktirin gidin! Böyle maç mı olur? Her saniye tuvalet molası veriyorsunuz!
+                              Formayı çıkarın gidin. Böyle maç mı olur. Her saniye tuvalet molası veriyorsunuz.
                             </p>
                             <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                               <span>💬 12</span>
