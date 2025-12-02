@@ -162,35 +162,37 @@ export default function LeaguePage() {
     
     let filtered = fixtures;
     
-    // Filter by week
-    if (selectedWeek === "current") {
-      // Use current week logic
-      const now = new Date();
-      const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
-      startOfWeek.setHours(0, 0, 0, 0);
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
-      endOfWeek.setHours(23, 59, 59, 999);
-      
-      filtered = filtered.filter((fixture: any) => {
-        const matchDate = new Date(fixture.matchDate);
-        return matchDate >= startOfWeek && matchDate <= endOfWeek;
-      });
-    } else if (selectedWeek && selectedWeek !== "all") {
-      // Filter by specific week number
-      const weekNum = parseInt(selectedWeek);
-      filtered = filtered.filter((fixture: any) => fixture.week === weekNum);
-    }
-    
-    // Filter by team
+    // If team is selected, show all matches for that team (ignore week filter)
+    // Otherwise, filter by week
     if (selectedTeamId && selectedTeamId !== "all") {
+      // Filter by team - show all matches for this team across all weeks
       filtered = filtered.filter((fixture: any) => {
         return fixture.homeTeamId === selectedTeamId || fixture.awayTeamId === selectedTeamId;
       });
+    } else {
+      // Filter by week only when no team is selected
+      if (selectedWeek === "current") {
+        // Use current week logic
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
+        startOfWeek.setHours(0, 0, 0, 0);
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
+        endOfWeek.setHours(23, 59, 59, 999);
+        
+        filtered = filtered.filter((fixture: any) => {
+          const matchDate = new Date(fixture.matchDate);
+          return matchDate >= startOfWeek && matchDate <= endOfWeek;
+        });
+      } else if (selectedWeek && selectedWeek !== "all") {
+        // Filter by specific week number
+        const weekNum = parseInt(selectedWeek);
+        filtered = filtered.filter((fixture: any) => fixture.week === weekNum);
+      }
     }
     
-    // Sort by date
+    // Sort by date (earliest first)
     return filtered.sort((a: any, b: any) => {
       const dateA = a.matchDate ? new Date(a.matchDate).getTime() : 0;
       const dateB = b.matchDate ? new Date(b.matchDate).getTime() : 0;
@@ -496,21 +498,25 @@ export default function LeaguePage() {
                       <CardHeader className="pb-4">
                         <CardTitle className="text-2xl flex items-center gap-2 bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent">
                           <Calendar className="w-6 h-6 text-primary" />
-                          {selectedWeek === "current" 
-                            ? "Bu Haftaki Maçlar" 
-                            : `${selectedWeek}. Hafta Maçları`}
-                          {selectedTeamId && selectedTeamId !== "all" && teams?.find((t: any) => t.id === selectedTeamId) && (
-                            <span className="text-lg ml-2">
-                              - {teams.find((t: any) => t.id === selectedTeamId)?.name}
-                            </span>
+                          {selectedTeamId && selectedTeamId !== "all" && teams?.find((t: any) => t.id === selectedTeamId) ? (
+                            <>
+                              {teams.find((t: any) => t.id === selectedTeamId)?.name} - Tüm Maçlar
+                            </>
+                          ) : selectedWeek === "current" ? (
+                            "Bu Haftaki Maçlar"
+                          ) : (
+                            `${selectedWeek}. Hafta Maçları`
                           )}
                         </CardTitle>
                         <p className="text-sm text-muted-foreground mt-1">
-                          {selectedWeek === "current" 
-                            ? "Bu hafta oynanacak tüm maçlar ve detayları"
-                            : `${selectedWeek}. hafta maçları ve detayları`}
-                          {selectedTeamId && selectedTeamId !== "all" && teams?.find((t: any) => t.id === selectedTeamId) && (
-                            <span> - {teams.find((t: any) => t.id === selectedTeamId)?.name} takımının fikstürü</span>
+                          {selectedTeamId && selectedTeamId !== "all" && teams?.find((t: any) => t.id === selectedTeamId) ? (
+                            <>
+                              {teams.find((t: any) => t.id === selectedTeamId)?.name} takımının tüm haftalardaki maçları, sonuçları ve detayları
+                            </>
+                          ) : selectedWeek === "current" ? (
+                            "Bu hafta oynanacak tüm maçlar ve detayları"
+                          ) : (
+                            `${selectedWeek}. hafta maçları ve detayları`
                           )}
                         </p>
                       </CardHeader>
