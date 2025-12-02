@@ -31,7 +31,7 @@ export default function LeaguePage() {
   const [selectedTotwWeek, setSelectedTotwWeek] = useState("");
   const [activeTab, setActiveTab] = useState("standings");
   const [selectedWeek, setSelectedWeek] = useState<string>("current"); // "current" veya hafta numarası
-  const [selectedTeamId, setSelectedTeamId] = useState<string>(""); // Takım ID'si
+  const [selectedTeamId, setSelectedTeamId] = useState<string>("all"); // Takım ID'si veya "all"
 
   // Giriş yapmamış kullanıcıları giriş sayfasına yönlendir
   useEffect(() => {
@@ -184,7 +184,7 @@ export default function LeaguePage() {
     }
     
     // Filter by team
-    if (selectedTeamId) {
+    if (selectedTeamId && selectedTeamId !== "all") {
       filtered = filtered.filter((fixture: any) => {
         return fixture.homeTeamId === selectedTeamId || fixture.awayTeamId === selectedTeamId;
       });
@@ -477,7 +477,7 @@ export default function LeaguePage() {
                               <SelectValue placeholder="Tüm takımlar" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">Tüm Takımlar</SelectItem>
+                              <SelectItem value="all">Tüm Takımlar</SelectItem>
                               {teams?.map((team: any) => (
                                 <SelectItem key={team.id} value={team.id}>
                                   {team.name}
@@ -499,7 +499,7 @@ export default function LeaguePage() {
                           {selectedWeek === "current" 
                             ? "Bu Haftaki Maçlar" 
                             : `${selectedWeek}. Hafta Maçları`}
-                          {selectedTeamId && teams?.find((t: any) => t.id === selectedTeamId) && (
+                          {selectedTeamId && selectedTeamId !== "all" && teams?.find((t: any) => t.id === selectedTeamId) && (
                             <span className="text-lg ml-2">
                               - {teams.find((t: any) => t.id === selectedTeamId)?.name}
                             </span>
@@ -509,7 +509,7 @@ export default function LeaguePage() {
                           {selectedWeek === "current" 
                             ? "Bu hafta oynanacak tüm maçlar ve detayları"
                             : `${selectedWeek}. hafta maçları ve detayları`}
-                          {selectedTeamId && teams?.find((t: any) => t.id === selectedTeamId) && (
+                          {selectedTeamId && selectedTeamId !== "all" && teams?.find((t: any) => t.id === selectedTeamId) && (
                             <span> - {teams.find((t: any) => t.id === selectedTeamId)?.name} takımının fikstürü</span>
                           )}
                         </p>
@@ -751,7 +751,7 @@ export default function LeaguePage() {
                     <Card className="border-2 border-primary/20">
                       <CardContent className="py-8">
                         <div className="text-center text-muted-foreground">
-                          {selectedTeamId 
+                          {selectedTeamId && selectedTeamId !== "all"
                             ? "Seçilen takım için bu hafta/seçilen haftada maç bulunmamaktadır"
                             : "Seçilen hafta için maç bulunmamaktadır"}
                         </div>
