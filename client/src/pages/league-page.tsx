@@ -30,6 +30,8 @@ export default function LeaguePage() {
   const [location, navigate] = useLocation();
   const [selectedTotwWeek, setSelectedTotwWeek] = useState("");
   const [activeTab, setActiveTab] = useState("standings");
+  const [selectedWeek, setSelectedWeek] = useState<string>("current"); // "current" veya hafta numarası
+  const [selectedTeamId, setSelectedTeamId] = useState<string>(""); // Takım ID'si
 
   // Giriş yapmamış kullanıcıları giriş sayfasına yönlendir
   useEffect(() => {
@@ -153,6 +155,48 @@ export default function LeaguePage() {
       return matchDate >= startOfWeek && matchDate <= endOfWeek;
     }).sort((a: any, b: any) => new Date(a.matchDate).getTime() - new Date(b.matchDate).getTime());
   }, [fixtures]);
+
+  // Filtered fixtures based on selected week and team - memoized for performance
+  const filteredFixtures = useMemo(() => {
+    if (!fixtures) return [];
+    
+    let filtered = fixtures;
+    
+    // Filter by week
+    if (selectedWeek === "current") {
+      // Use current week logic
+      const now = new Date();
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
+      startOfWeek.setHours(0, 0, 0, 0);
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
+      endOfWeek.setHours(23, 59, 59, 999);
+      
+      filtered = filtered.filter((fixture: any) => {
+        const matchDate = new Date(fixture.matchDate);
+        return matchDate >= startOfWeek && matchDate <= endOfWeek;
+      });
+    } else if (selectedWeek && selectedWeek !== "all") {
+      // Filter by specific week number
+      const weekNum = parseInt(selectedWeek);
+      filtered = filtered.filter((fixture: any) => fixture.week === weekNum);
+    }
+    
+    // Filter by team
+    if (selectedTeamId) {
+      filtered = filtered.filter((fixture: any) => {
+        return fixture.homeTeamId === selectedTeamId || fixture.awayTeamId === selectedTeamId;
+      });
+    }
+    
+    // Sort by date
+    return filtered.sort((a: any, b: any) => {
+      const dateA = a.matchDate ? new Date(a.matchDate).getTime() : 0;
+      const dateB = b.matchDate ? new Date(b.matchDate).getTime() : 0;
+      return dateA - dateB;
+    });
+  }, [fixtures, selectedWeek, selectedTeamId]);
 
 
   // Loading state while checking auth
@@ -400,20 +444,78 @@ export default function LeaguePage() {
                 </div>
               ) : (
                 <>
-                  {/* Bu Haftaki Maçlar - Özel Bölüm */}
-                  {currentWeekMatches.length > 0 && (
+                  {/* Hafta ve Takım Seçimi */}
+                  <Card className="border-2 border-primary/20">
+                    <CardHeader>
+                      <CardTitle className="text-xl flex items-center gap-2">
+                        <Calendar className="w-5 h-5" />
+                        Filtrele
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Hafta Seç</label>
+                          <Select value={selectedWeek} onValueChange={setSelectedWeek}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Hafta seçin" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="current">Bu Hafta</SelectItem>
+                              {weeks.map((week) => (
+                                <SelectItem key={week} value={week}>
+                                  {week}. Hafta
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Takım Seç (Opsiyonel)</label>
+                          <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Tüm takımlar" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="">Tüm Takımlar</SelectItem>
+                              {teams?.map((team: any) => (
+                                <SelectItem key={team.id} value={team.id}>
+                                  {team.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Filtrelenmiş Maçlar */}
+                  {filteredFixtures.length > 0 ? (
                     <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
                       <CardHeader className="pb-4">
                         <CardTitle className="text-2xl flex items-center gap-2 bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent">
                           <Calendar className="w-6 h-6 text-primary" />
-                          Bu Haftaki Maçlar
+                          {selectedWeek === "current" 
+                            ? "Bu Haftaki Maçlar" 
+                            : `${selectedWeek}. Hafta Maçları`}
+                          {selectedTeamId && teams?.find((t: any) => t.id === selectedTeamId) && (
+                            <span className="text-lg ml-2">
+                              - {teams.find((t: any) => t.id === selectedTeamId)?.name}
+                            </span>
+                          )}
                         </CardTitle>
                         <p className="text-sm text-muted-foreground mt-1">
-                          Bu hafta oynanacak tüm maçlar ve detayları
+                          {selectedWeek === "current" 
+                            ? "Bu hafta oynanacak tüm maçlar ve detayları"
+                            : `${selectedWeek}. hafta maçları ve detayları`}
+                          {selectedTeamId && teams?.find((t: any) => t.id === selectedTeamId) && (
+                            <span> - {teams.find((t: any) => t.id === selectedTeamId)?.name} takımının fikstürü</span>
+                          )}
                         </p>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {currentWeekMatches.map((fixture: any) => {
+                        {filteredFixtures.map((fixture: any) => {
                           // Ensure matchDate is always available, even after score update
                           // Cache date calculations for performance
                           const matchDate = fixture.matchDate ? new Date(fixture.matchDate) : new Date();
@@ -645,242 +747,17 @@ export default function LeaguePage() {
                         })}
                       </CardContent>
                     </Card>
-                  )}
-
-                  {/* Tüm Haftalar */}
-                  {weeks.map((week) => (
-                  <Card key={week} className="new-year-gradient border-2 border-red-400/10">
-                    <CardHeader>
-                      <CardTitle className="bg-gradient-to-r from-red-500 via-green-500 to-yellow-500 bg-clip-text text-transparent">{week}. Hafta</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {fixturesByWeek[parseInt(week)].map((fixture: any) => {
-                        const isBye = fixture.isBye;
-                        const isPostponed = fixture.isPostponed;
-                        const isForfeit = fixture.isForfeit;
-                        // Pre-format date string to avoid repeated formatting
-                        const formattedDate = fixture.matchDate ? new Date(fixture.matchDate).toLocaleString('tr-TR', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          timeZone: 'Europe/Istanbul'
-                        }) : '';
-                        return (
-                        <div 
-                          key={fixture.id} 
-                          className={`p-4 border rounded-lg hover:bg-muted/50 transition-colors ${
-                            isBye ? "border-blue-500/30 bg-blue-500/10" : 
-                            isForfeit ? "border-purple-500/30 bg-purple-500/10" :
-                            isPostponed ? "border-orange-500/30 bg-orange-500/10" : ""
-                          }`}
-                          data-testid={`fixture-${fixture.id}`}
-                        >
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                              {isBye && fixture.byeSide === "home" ? (
-                                <div className="w-10 h-10 flex items-center justify-center bg-blue-500/20 rounded border border-blue-500/50 flex-shrink-0">
-                                  <span className="font-bold text-blue-600 text-xs">BAY</span>
-                                </div>
-                              ) : fixture.homeTeam?.logo ? (
-                                <img 
-                                  src={fixture.homeTeam.logo} 
-                                  alt={fixture.homeTeam.name} 
-                                  className="w-10 h-10 object-contain flex-shrink-0"
-                                  loading="lazy"
-                                />
-                              ) : null}
-                              <span className="font-medium text-left truncate">
-                                {isBye && fixture.byeSide === "home" ? (
-                                  <span className="text-blue-600 font-bold">BAY</span>
-                                ) : (
-                                  fixture.homeTeam?.name || "BAY"
-                                )}
-                              </span>
-                            </div>
-                            
-                            <div className="flex items-center justify-center min-w-[100px] flex-shrink-0">
-                              {isBye ? (
-                                <span className="text-blue-600 font-bold text-sm bg-blue-500/20 px-3 py-1 rounded border border-blue-500/50 whitespace-nowrap">BAY GEÇME</span>
-                              ) : fixture.isPlayed ? (
-                                <div className="text-2xl font-bold flex items-center gap-2">
-                                  <span className={fixture.homeScore > fixture.awayScore ? "text-green-600" : fixture.homeScore < fixture.awayScore ? "text-muted-foreground" : ""}>
-                                    {fixture.homeScore}
-                                  </span>
-                                  <span className="text-muted-foreground">-</span>
-                                  <span className={fixture.awayScore > fixture.homeScore ? "text-green-600" : fixture.awayScore < fixture.homeScore ? "text-muted-foreground" : ""}>
-                                    {fixture.awayScore}
-                                  </span>
-                                </div>
-                              ) : (
-                                <span className="text-muted-foreground font-medium whitespace-nowrap">VS</span>
-                              )}
-                            </div>
-                            
-                            <div className="flex items-center gap-3 flex-1 min-w-0 justify-end">
-                              <span className="font-medium text-right truncate">
-                                {isBye && fixture.byeSide === "away" ? (
-                                  <span className="text-blue-600 font-bold">BAY</span>
-                                ) : (
-                                  fixture.awayTeam?.name || "BAY"
-                                )}
-                              </span>
-                              {isBye && fixture.byeSide === "away" ? (
-                                <div className="w-10 h-10 flex items-center justify-center bg-blue-500/20 rounded border border-blue-500/50 flex-shrink-0">
-                                  <span className="font-bold text-blue-600 text-xs">BAY</span>
-                                </div>
-                              ) : fixture.awayTeam?.logo ? (
-                                <img 
-                                  src={fixture.awayTeam.logo} 
-                                  alt={fixture.awayTeam.name} 
-                                  className="w-10 h-10 object-contain flex-shrink-0"
-                                  loading="lazy"
-                                />
-                              ) : null}
-                            </div>
-                          </div>
-                          {!isBye && (
-                            <div className="mt-3 pt-3 border-t space-y-2">
-                              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                                <Calendar className="w-4 h-4" />
-                                <span className="font-medium">{formattedDate}</span>
-                              </div>
-                              {fixture.referee && (
-                                <div className="flex items-center justify-center">
-                                  <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-                                    <span className="text-amber-600 font-semibold">⚖️</span>
-                                    <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">Hakem:</span>
-                                    <span className="text-sm font-bold text-amber-800 dark:text-amber-300">{fixture.referee}</span>
-                                  </div>
-                                </div>
-                              )}
-                              {isForfeit && (
-                                <div className="flex justify-center">
-                                  <span className="text-xs font-semibold text-purple-600 bg-purple-600/20 px-2 py-1 rounded-full">
-                                    HÜKMEN
-                                  </span>
-                                </div>
-                              )}
-                              {isPostponed && !isForfeit && (
-                                <div className="flex justify-center">
-                                  <span className="text-xs font-semibold text-orange-600 bg-orange-600/20 px-2 py-1 rounded-full">
-                                    ERTELENDİ
-                                  </span>
-                                </div>
-                              )}
-                              {fixture.matchRecordingUrl && (
-                                <div className="flex justify-center">
-                                  <a
-                                    href={fixture.matchRecordingUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-xs font-semibold text-blue-600 bg-blue-600/20 px-2 py-1 rounded-full hover:bg-blue-600/30 transition-colors"
-                                  >
-                                    📹 Maç Kaydı
-                                  </a>
-                                </div>
-                              )}
-                              {fixture.goals && fixture.goals.length > 0 && (
-                                <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                                  <h5 className="text-xs font-semibold mb-2 text-center flex items-center justify-center gap-1">
-                                    <span>⚽</span>
-                                    <span>Gol Detayları</span>
-                                  </h5>
-                                  <div className="grid grid-cols-2 gap-2">
-                                    {/* Ev Sahibi Takım Golleri - Sol Taraf */}
-                                    <div className="space-y-1.5">
-                                      {fixture.goals
-                                        .filter((goal: any) => goal.isHomeTeam)
-                                        .sort((a: any, b: any) => a.minute - b.minute)
-                                        .map((goal: any, idx: number) => {
-                                          const formatMinute = (seconds: number): string => {
-                                            if (seconds === 0) return "0";
-                                            const minutes = Math.floor(seconds / 60);
-                                            const secs = seconds % 60;
-                                            if (minutes > 0 && secs > 0) {
-                                              return `${minutes}.${String(secs).padStart(2, '0')}'`;
-                                            } else if (minutes > 0) {
-                                              return `${minutes}'`;
-                                            } else {
-                                              return `${secs}''`;
-                                            }
-                                          };
-                                          return (
-                                            <div key={idx} className="bg-red-50 dark:bg-red-900/20 border-l-2 border-red-500 rounded-r-sm p-1.5">
-                                              <div className="flex items-center gap-1.5 mb-0.5">
-                                                <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[2.5rem] text-center">
-                                                  {formatMinute(goal.minute)}
-                                                </span>
-                                                <span className="text-xs">⚽</span>
-                                                <span className="font-bold text-xs text-red-700 dark:text-red-300 truncate">
-                                                  {goal.playerName || goal.player?.username || "Bilinmeyen"}
-                                                </span>
-                                              </div>
-                                              {(goal.assistPlayerName || goal.assistPlayer) && (
-                                                <div className="flex items-center gap-1 ml-0.5 mt-1">
-                                                  <span className="text-[10px]">👟</span>
-                                                  <span className="font-semibold text-[10px] text-gray-700 dark:text-gray-200 truncate">
-                                                    {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"}
-                                                  </span>
-                                                </div>
-                                              )}
-                                            </div>
-                                          );
-                                        })}
-                                    </div>
-                                    {/* Deplasman Takımı Golleri - Sağ Taraf */}
-                                    <div className="space-y-1.5">
-                                      {fixture.goals
-                                        .filter((goal: any) => !goal.isHomeTeam)
-                                        .sort((a: any, b: any) => a.minute - b.minute)
-                                        .map((goal: any, idx: number) => {
-                                          const formatMinute = (seconds: number): string => {
-                                            if (seconds === 0) return "0";
-                                            const minutes = Math.floor(seconds / 60);
-                                            const secs = seconds % 60;
-                                            if (minutes > 0 && secs > 0) {
-                                              return `${minutes}.${String(secs).padStart(2, '0')}'`;
-                                            } else if (minutes > 0) {
-                                              return `${minutes}'`;
-                                            } else {
-                                              return `${secs}''`;
-                                            }
-                                          };
-                                          return (
-                                            <div key={idx} className="bg-blue-50 dark:bg-blue-900/20 border-r-2 border-blue-500 rounded-l-sm p-1.5">
-                                              <div className="flex items-center gap-1.5 justify-end mb-0.5">
-                                                <span className="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[2.5rem] text-center">
-                                                  {formatMinute(goal.minute)}
-                                                </span>
-                                                <span className="text-xs">⚽</span>
-                                                <span className="font-bold text-xs text-blue-700 dark:text-blue-300 truncate">
-                                                  {goal.playerName || goal.player?.username || "Bilinmeyen"}
-                                                </span>
-                                              </div>
-                                              {(goal.assistPlayerName || goal.assistPlayer) && (
-                                                <div className="flex items-center gap-1 justify-end mr-0.5 mt-1">
-                                                  <span className="font-semibold text-[10px] text-gray-700 dark:text-gray-200 truncate">
-                                                    {goal.assistPlayerName || goal.assistPlayer?.username || "Bilinmeyen"}
-                                                  </span>
-                                                  <span className="text-[10px]">👟</span>
-                                                </div>
-                                              )}
-                                            </div>
-                                          );
-                                        })}
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
+                  ) : (
+                    <Card className="border-2 border-primary/20">
+                      <CardContent className="py-8">
+                        <div className="text-center text-muted-foreground">
+                          {selectedTeamId 
+                            ? "Seçilen takım için bu hafta/seçilen haftada maç bulunmamaktadır"
+                            : "Seçilen hafta için maç bulunmamaktadır"}
                         </div>
-                        );
-                      })}
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  )}
                 </>
               )}
             </TabsContent>
