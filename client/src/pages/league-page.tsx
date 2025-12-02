@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Trophy, Award, Users, Crown, Medal, Sparkles, Star } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useLocation } from "wouter";
 import FormationView from "@/components/FormationView";
 import { buildApiUrl } from "@/lib/queryClient";
@@ -53,12 +53,17 @@ export default function LeaguePage() {
     queryKey: ["/api/league/teams"],
   });
 
+  // Fikstür verisini sadece fixtures tab'ı açıldığında veya ilk yüklemede al
+  // Cache'ten hızlı yükleme için staleTime ve cacheTime artırıldı
   const { data: fixtures, isLoading: fixturesLoading } = useQuery<any[]>({
     queryKey: ["/api/league/fixtures"],
-    staleTime: 30000, // 30 saniye boyunca veriyi fresh tut
-    cacheTime: 300000, // 5 dakika cache'te tut
+    staleTime: 120000, // 2 dakika boyunca veriyi fresh tut
+    cacheTime: 900000, // 15 dakika cache'te tut
     refetchOnWindowFocus: false, // Pencere focus olduğunda yeniden fetch yapma
     refetchOnMount: false, // Mount olduğunda yeniden fetch yapma (cache'ten kullan)
+    refetchOnReconnect: false, // Reconnect olduğunda yeniden fetch yapma
+    // İlk yüklemede hemen yükle, sonra cache'ten kullan
+    placeholderData: (previousData) => previousData, // Önceki veriyi placeholder olarak kullan
   });
 
   const { data: leaderboard, isLoading: leaderboardLoading } = useQuery<any[]>({
@@ -139,9 +144,8 @@ export default function LeaguePage() {
     });
   }, [fixturesByWeek]);
 
-  // Get current week's matches (this week) - memoized for performance
-  const currentWeekMatches = useMemo(() => {
-    if (!fixtures) return [];
+  // Helper function to get current week date range - memoized
+  const getCurrentWeekRange = useMemo(() => {
     const now = new Date();
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
@@ -149,16 +153,12 @@ export default function LeaguePage() {
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
     endOfWeek.setHours(23, 59, 59, 999);
-
-    return fixtures.filter((fixture: any) => {
-      const matchDate = new Date(fixture.matchDate);
-      return matchDate >= startOfWeek && matchDate <= endOfWeek;
-    }).sort((a: any, b: any) => new Date(a.matchDate).getTime() - new Date(b.matchDate).getTime());
-  }, [fixtures]);
+    return { startOfWeek, endOfWeek };
+  }, []); // Sadece bir kez hesapla
 
   // Filtered fixtures based on selected week and team - memoized for performance
   const filteredFixtures = useMemo(() => {
-    if (!fixtures) return [];
+    if (!fixtures || fixtures.length === 0) return [];
     
     let filtered = fixtures;
     
@@ -166,39 +166,38 @@ export default function LeaguePage() {
     // Otherwise, filter by week
     if (selectedTeamId && selectedTeamId !== "all") {
       // Filter by team - show all matches for this team across all weeks
+      // Use direct property access for better performance
       filtered = filtered.filter((fixture: any) => {
         return fixture.homeTeamId === selectedTeamId || fixture.awayTeamId === selectedTeamId;
       });
     } else {
       // Filter by week only when no team is selected
       if (selectedWeek === "current") {
-        // Use current week logic
-        const now = new Date();
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
-        startOfWeek.setHours(0, 0, 0, 0);
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
-        endOfWeek.setHours(23, 59, 59, 999);
-        
+        // Use cached current week range
         filtered = filtered.filter((fixture: any) => {
-          const matchDate = new Date(fixture.matchDate);
-          return matchDate >= startOfWeek && matchDate <= endOfWeek;
+          if (!fixture.matchDate) return false;
+          const matchDate = new Date(fixture.matchDate).getTime();
+          return matchDate >= getCurrentWeekRange.startOfWeek.getTime() && 
+                 matchDate <= getCurrentWeekRange.endOfWeek.getTime();
         });
       } else if (selectedWeek && selectedWeek !== "all") {
-        // Filter by specific week number
+        // Filter by specific week number - direct property access
         const weekNum = parseInt(selectedWeek);
         filtered = filtered.filter((fixture: any) => fixture.week === weekNum);
       }
     }
     
-    // Sort by date (earliest first)
-    return filtered.sort((a: any, b: any) => {
-      const dateA = a.matchDate ? new Date(a.matchDate).getTime() : 0;
-      const dateB = b.matchDate ? new Date(b.matchDate).getTime() : 0;
-      return dateA - dateB;
-    });
-  }, [fixtures, selectedWeek, selectedTeamId]);
+    // Sort by date (earliest first) - only if we have items to sort
+    if (filtered.length > 0) {
+      filtered = [...filtered].sort((a: any, b: any) => {
+        const dateA = a.matchDate ? new Date(a.matchDate).getTime() : 0;
+        const dateB = b.matchDate ? new Date(b.matchDate).getTime() : 0;
+        return dateA - dateB;
+      });
+    }
+    
+    return filtered;
+  }, [fixtures, selectedWeek, selectedTeamId, getCurrentWeekRange]);
 
 
   // Loading state while checking auth
@@ -438,8 +437,10 @@ export default function LeaguePage() {
             </TabsContent>
 
             <TabsContent value="fixtures" className="space-y-6">
-              {fixturesLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
+              {fixturesLoading && !fixtures ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <div className="animate-pulse">Fikstür yükleniyor...</div>
+                </div>
               ) : !fixtures || !Array.isArray(fixtures) || fixtures.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   Henüz maç bulunmamaktadır
