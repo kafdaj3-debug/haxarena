@@ -21,37 +21,36 @@ export default function HomePage() {
     queryKey: ["/api/league/fixtures"],
   });
 
-  // Maçları bul - daha esnek eşleştirme
-  const gebzeFearMatch = fixtures?.find((fixture: any) => {
-    if (fixture.isBye) return false;
-    const homeTeam = (fixture.homeTeam?.name || "").toLowerCase().trim();
-    const awayTeam = (fixture.awayTeam?.name || "").toLowerCase().trim();
-    const hasGebze = homeTeam.includes("gebze") || awayTeam.includes("gebze");
-    const hasFear = homeTeam.includes("fear") || awayTeam.includes("fear") || 
-                    homeTeam.includes("beard") || awayTeam.includes("beard");
-    return hasGebze && hasFear;
+  // Takım verilerini çek (puan durumu için)
+  const { data: teams } = useQuery<any[]>({
+    queryKey: ["/api/league/teams"],
   });
 
-  const bodoTrebolMatch = fixtures?.find((fixture: any) => {
-    if (fixture.isBye) return false;
-    const homeTeam = (fixture.homeTeam?.name || "").toLowerCase().trim();
-    const awayTeam = (fixture.awayTeam?.name || "").toLowerCase().trim();
-    const hasBodo = homeTeam.includes("bod") || awayTeam.includes("bod") || 
-                    homeTeam.includes("glimt") || awayTeam.includes("glimt");
-    const hasTrebol = homeTeam.includes("trebol") || awayTeam.includes("trebol");
-    return hasBodo && hasTrebol;
+  const { data: leaderboard = [] } = useQuery<any[]>({
+    queryKey: ["/api/league/stats/leaderboard"],
   });
 
-  const ravenclawTurkishMatch = fixtures?.find((fixture: any) => {
-    if (fixture.isBye) return false;
-    const homeTeam = (fixture.homeTeam?.name || "").toLowerCase().trim();
-    const awayTeam = (fixture.awayTeam?.name || "").toLowerCase().trim();
-    const hasRavenclaw = homeTeam.includes("ravenclaw") || awayTeam.includes("ravenclaw") ||
-                         homeTeam.includes("raven") || awayTeam.includes("raven");
-    const hasTurkish = homeTeam.includes("turkish") || awayTeam.includes("turkish") ||
-                       homeTeam.includes("union") || awayTeam.includes("union");
-    return hasRavenclaw && hasTurkish;
+  // Aralık 2 tarihinde oynanan maçları filtrele (hükmen olanlar hariç)
+  const december2Matches = fixtures?.filter((fixture: any) => {
+    if (!fixture.matchDate || fixture.isBye || fixture.isForfeit) return false;
+    const matchDate = new Date(fixture.matchDate);
+    // Aralık 2 tarihini kontrol et (yıl önemli değil, sadece ay ve gün)
+    return matchDate.getMonth() === 11 && matchDate.getDate() === 2 && fixture.isPlayed;
+  }) || [];
+
+  // Bol gollü maçları bul (toplam 5 veya daha fazla gol)
+  const highScoringMatches = december2Matches.filter((fixture: any) => {
+    const totalGoals = (fixture.homeScore || 0) + (fixture.awayScore || 0);
+    return totalGoals >= 5;
   });
+
+  // Puan durumu lideri
+  const leagueLeader = teams && teams.length > 0 ? teams[0] : null;
+
+  // Gol lideri
+  const goalLeader = leaderboard
+    .filter((p: any) => p.totalGoals > 0)
+    .sort((a: any, b: any) => b.totalGoals - a.totalGoals)[0] || null;
   const allRooms = [
     {
       matchName: "Galatasaray vs Fenerbahçe",
@@ -88,10 +87,6 @@ export default function HomePage() {
 
   const { data: forumPosts = [] } = useQuery<any[]>({
     queryKey: ["/api/forum-posts"],
-  });
-
-  const { data: leaderboard = [] } = useQuery<any[]>({
-    queryKey: ["/api/league/stats/leaderboard"],
   });
 
 
@@ -148,8 +143,7 @@ export default function HomePage() {
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto">
               
-              {/* SAYFA 1 - Fear the Beard – Strasbourg */}
-              {(
+              {/* Yeni Gazete */}
               <div className="relative bg-gradient-to-br from-amber-50 via-amber-50/95 to-amber-100/90 dark:from-amber-900/30 dark:via-amber-900/20 dark:to-amber-800/30 border-4 border-amber-800/30 dark:border-amber-700/40 shadow-2xl p-6 md:p-10 lg:p-12 transform rotate-0 hover:rotate-0 transition-all duration-300">
                 {/* Eski kağıt dokusu efekti */}
                 <div className="absolute inset-0 opacity-10 dark:opacity-5" style={{
@@ -184,13 +178,13 @@ export default function HomePage() {
                   </div>
                   
                   <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    ⚽ Dünün Maçları: Bodø Dominasyonu, Oyasumi Şovu ve Hakem Fırtınası
+                    🏆 Lig Lideri Zirvede! Aralık 2'de Göz Alıcı Maçlar ve Gol Şovları
                   </h1>
 
                   {/* Spot */}
                   <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500">
                     <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      Spot: Dün oynanan üç maçta Bodø/Glimt'in DM sıralamasında üç oyuncusu zirveye oturdu. Oyasumi performansıyla göz doldururken, hakemler taraftarların hedefi oldu.
+                      Spot: {leagueLeader ? `${leagueLeader.name} ${leagueLeader.points} puanla ligde zirvede! ` : ''}Aralık 2'de oynanan maçlarda bol gollü karşılaşmalar yaşandı. {goalLeader ? `${goalLeader.username} ${goalLeader.totalGoals} golle gol krallığının lideri!` : ''}
                     </p>
                   </div>
 
@@ -198,494 +192,118 @@ export default function HomePage() {
                   <div className="w-full h-64 md:h-96 bg-gradient-to-br from-blue-200 via-yellow-200 to-red-200 dark:from-blue-900 dark:via-yellow-900 dark:to-red-900 rounded-lg mb-4 overflow-hidden relative border-2 border-black/30 dark:border-amber-200/40">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center p-8">
-                        <div className="text-6xl md:text-8xl mb-4">⚽</div>
+                        <div className="text-6xl md:text-8xl mb-4">🏆</div>
                         <p className="text-lg md:text-xl font-serif text-black/90 dark:text-amber-100/90 font-bold">
-                          "Bodø Fırtınası Devam Ediyor"
+                          {leagueLeader ? `"${leagueLeader.name} Zirvede!"` : '"Lig Heyecanı Devam Ediyor"'}
                         </p>
                         <p className="text-sm md:text-base font-sans text-black/70 dark:text-amber-200/70 mt-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          DM sıralamasında üç oyuncuyla zirvede
+                          {leagueLeader ? `${leagueLeader.points} puanla liderlik koltuğunda` : 'Aralık 2 maçlarından kareler'}
                         </p>
                       </div>
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                   </div>
                   <p className="text-xs md:text-sm text-black/60 dark:text-amber-200/60 font-serif mb-4">
-                    Fotoğraf: HaxArena Arşivi - Dünün Maçlarından Kareler
+                    Fotoğraf: HaxArena Arşivi - Aralık 2 Maçlarından Kareler
                   </p>
 
                   {/* Haber İçeriği */}
                   <div className="mb-6">
                     <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>D</span>
-                      ün oynanan üç maç, ligde yeni bir sayfa açtı. Bodø/Glimt takımı, DM sıralamasında üç oyuncusuyla zirveye oturarak ligdeki gücünü bir kez daha gösterdi. Takımın oyuncuları, maçlarda gösterdikleri performansla taraftarların beğenisini kazandı.
+                      <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>L</span>
+                      ig heyecanı tüm hızıyla devam ediyor! Puan durumunda {leagueLeader ? `${leagueLeader.name} takımı ${leagueLeader.points} puanla zirvede yer alırken` : 'şampiyonluk yarışı kızışıyor'}, Aralık 2 tarihinde oynanan maçlarda taraftarlar muhteşem anlara tanık oldu. {highScoringMatches.length > 0 ? `Özellikle bol gollü karşılaşmalar izleyenleri büyüledi. ` : ''}{goalLeader ? `${goalLeader.username} ise ${goalLeader.totalGoals} golle gol krallığının lideri olarak dikkat çekiyor.` : ''} Oyuncuların performansları takdir toplarken, ligdeki rekabet her geçen gün daha da çekişmeli hale geliyor.
                     </p>
 
-                    {/* Bodø DM Sıralaması */}
-                    <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mt-4 mb-4">
-                      <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        Bodø/Glimt DM Sıralamasında Zirvede:
-                      </p>
-                      <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Dün oynanan maçlardan sonra DM sıralamasında Bodø/Glimt'in üç oyuncusu ilk sıralarda yer aldı. Takımın defansif gücü ve oyuncuların bireysel performansları, ligdeki diğer takımlar için ciddi bir tehdit oluşturuyor. Kulislerde Bodø/Glimt'in bu sezon şampiyonluk yarışında en güçlü aday olduğu konuşuluyor.
-                      </p>
-                    </div>
+                    {/* Puan Durumu ve Lider */}
+                    {leagueLeader && (
+                      <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mt-4 mb-4">
+                        <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                          🏆 Lig Lideri: {leagueLeader.name}
+                        </p>
+                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          {leagueLeader.name} takımı, {leagueLeader.points} puanla ligde zirvede yer alıyor. {leagueLeader.played} maçta {leagueLeader.won} galibiyet, {leagueLeader.drawn} beraberlik ve {leagueLeader.lost} mağlubiyet alan takım, {leagueLeader.goalsFor} gol atarken {leagueLeader.goalsAgainst} gol yedi. {leagueLeader.goalDifference > 0 ? `+${leagueLeader.goalDifference}` : leagueLeader.goalDifference} averajla takım, şampiyonluk yarışında en güçlü aday konumunda. Oyuncuların muhteşem performansları ve takım uyumu, {leagueLeader.name}'i ligde zirveye taşıyan en önemli faktörler.
+                        </p>
+                      </div>
+                    )}
 
-                    {/* Oyasumi Performansı */}
-                    <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
-                      <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        Oyasumi'nin Muhteşem Performansı
-                      </h2>
-                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Dün oynanan maçlarda Oyasumi, gösterdiği performansla taraftarları büyüledi. Oyuncu, sahadaki hareketleri ve top kontrolüyle takımına büyük katkı sağladı. Maç sonrası yapılan açıklamalarda teknik direktör, Oyasumi'nin bu sezon takımın en önemli oyuncularından biri olduğunu belirtti.
-                      </p>
-                      <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Taraftarlar ise Oyasumi'nin performansını sosyal medyada övgüyle karşıladı. Bazı taraftarlar, oyuncunun bu sezon ligdeki en iyi performanslarından birini sergilediğini söyledi.
-                      </p>
-                    </div>
+                    {/* Gol Lideri */}
+                    {goalLeader && (
+                      <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
+                        <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                          ⚽ Gol Lideri: {goalLeader.username}'in Muhteşem Performansı
+                        </h2>
+                        <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          {goalLeader.username}, {goalLeader.totalGoals} golle gol krallığının zirvesinde yer alıyor. {goalLeader.teamName ? `${goalLeader.teamName} takımının yıldız oyuncusu ` : 'Oyuncu '}sahadaki muhteşem performansıyla taraftarları büyülüyor. Gol atma yeteneği, top kontrolü ve sahadaki varlığıyla {goalLeader.username}, ligdeki en değerli oyuncular arasında gösteriliyor. Her maçta gösterdiği kararlılık ve yetenek, takımına büyük katkı sağlıyor.
+                        </p>
+                        <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          Taraftarlar ve uzmanlar, {goalLeader.username}'in bu sezon ligdeki en iyi performanslarından birini sergilediğini belirtiyor. Oyuncunun teknik direktörü de, {goalLeader.username}'in takımın en önemli oyuncularından biri olduğunu vurguluyor. Gol krallığı yarışında {goalLeader.username}'in bu formunu sürdürmesi bekleniyor.
+                        </p>
+                      </div>
+                    )}
 
-                    {/* Dün Oynanan 3 Maç Analizi */}
-                    <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
-                      <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        Dünün Maçları: Genel Analiz
-                      </h2>
-                      
-                      <div className="space-y-4">
-                        <div>
-                          <h3 className="text-lg md:text-xl font-semibold mb-2 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                            Maç 1: Bodø/Glimt vs Trebol FC
-                          </h3>
-                          <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            Bu maçta Bodø/Glimt, taktiksel üstünlüğünü sahaya yansıttı. Trebol FC ise maç boyunca mücadele etse de, rakibinin gücü karşısında yetersiz kaldı. Maçın en dikkat çeken yanı, Bodø/Glimt oyuncularının defansif performansı oldu.
-                          </p>
-                        </div>
-
-                        <div>
-                          <h3 className="text-lg md:text-xl font-semibold mb-2 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                            Maç 2: Gebzespor vs Fear The Beard
-                          </h3>
-                          <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            Dün oynanan bu karşılaşmada iki takım da dengeli bir oyun sergiledi. Maç, taraftarlar için heyecan verici anlar yaşattı. Her iki takımın da gol atma fırsatları oldu ancak sonuçlar beklenenin altında kaldı. Fear The Beard, maç boyunca taktik disiplinini korurken, Gebzespor ise mücadeleci bir performans sergiledi. Maçın en dikkat çeken yanı, her iki takımın da defansif organizasyonu oldu.
-                          </p>
-                          <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2 mt-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            Maç sonrası yapılan açıklamalarda, her iki takımın teknik direktörü de oyuncularının performansından memnun kaldığını belirtti. Taraftarlar ise maçın kalitesinden övgüyle bahsetti. Ancak hakem kararları taraftarların eleştiri odağı oldu.
-                          </p>
-                        </div>
-
-                        <div>
-                          <h3 className="text-lg md:text-xl font-semibold mb-2 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                            Maç 3: Ravenclaw vs Turkish Union
-                          </h3>
-                          <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            Dün oynanan bu maçta Oyasumi'nin performansı öne çıktı. Oyuncu, sahadaki hareketleri ve top kontrolüyle takımına büyük katkı sağladı. Turkish Union ise maç boyunca mücadele etse de, rakibinin gücü karşısında zorlandı. Maçın en dikkat çeken yanı, Oyasumi'nin gösterdiği performans oldu. Oyuncu, maç boyunca takımına liderlik etti ve sahadaki varlığıyla dikkat çekti.
-                          </p>
-                          <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2 mt-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            Ravenclaw tarafında ise takım, Oyasumi'nin performansı sayesinde maçı kontrol altına aldı. Turkish Union ise maç boyunca mücadele etse de, rakibinin gücü karşısında yetersiz kaldı. Maç sonrası yapılan açıklamalarda, Oyasumi'nin performansı övgüyle karşılandı. Taraftarlar ise oyuncunun bu sezon ligdeki en iyi performanslarından birini sergilediğini söyledi.
-                          </p>
+                    {/* Aralık 2 Maçları Analizi */}
+                    {december2Matches.length > 0 && (
+                      <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
+                        <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                          📅 Aralık 2 Maçları: Genel Analiz
+                        </h2>
+                        
+                        <div className="space-y-4">
+                          {december2Matches.map((match: any, index: number) => {
+                            const totalGoals = (match.homeScore || 0) + (match.awayScore || 0);
+                            const isHighScoring = totalGoals >= 5;
+                            return (
+                              <div key={match.id || index}>
+                                <h3 className="text-lg md:text-xl font-semibold mb-2 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                                  {match.homeTeam?.name || 'Ev Sahibi'} {match.homeScore} - {match.awayScore} {match.awayTeam?.name || 'Deplasman'} {isHighScoring && <span className="text-red-600">⚽ Bol Gollü!</span>}
+                                </h3>
+                                <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                  {isHighScoring ? `Bu maç, Aralık 2'nin en dikkat çeken karşılaşması oldu! ${totalGoals} gollü bu muhteşem maçta ` : 'Bu karşılaşmada '}{match.homeTeam?.name || 'Ev Sahibi'} ve {match.awayTeam?.name || 'Deplasman'} takımları karşı karşıya geldi. {match.homeScore > match.awayScore ? `${match.homeTeam?.name || 'Ev Sahibi'} takımı, ${match.homeScore} golle maçı kazanarak üstünlüğünü gösterdi.` : match.awayScore > match.homeScore ? `${match.awayTeam?.name || 'Deplasman'} takımı, deplasmanda ${match.awayScore} golle zafere ulaştı.` : `Maç ${match.homeScore}-${match.awayScore} berabere sonuçlandı.`} {isHighScoring ? `Her iki takımın oyuncuları da muhteşem performans sergiledi. Gol festivalleri taraftarları büyülerken, oyuncuların yetenekleri ön plana çıktı.` : 'İki takım da mücadeleci bir oyun sergiledi.'}
+                                </p>
+                                {match.goals && match.goals.length > 0 && (
+                                  <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                    Maçtaki golleri atan oyuncular: {match.goals.slice(0, 3).map((goal: any, gIdx: number) => goal.playerName || goal.player?.username || 'Bilinmeyen').join(', ')}{match.goals.length > 3 ? ` ve ${match.goals.length - 3} oyuncu daha.` : '.'}
+                                  </p>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
-                    </div>
+                    )}
 
-                    {/* Transfer Haberleri */}
-                    <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 p-4 mt-4 mb-4">
-                      <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        Transfer Pazarından Son Dakika:
-                      </p>
-                      <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Kulislerde dolaşan bilgilere göre, Bodø/Glimt yönetimi sezon sonunda takıma yeni oyuncular katmak için görüşmelere başladı. Ayrıca, Oyasumi'nin performansından etkilenen birkaç takımın, oyuncuyla ilgilendiği konuşuluyor. Transfer döneminde hangi oyuncuların hangi takımlara gideceği merakla bekleniyor.
-                      </p>
-                      <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Bir başka söylentiye göre, ligdeki bir takım, yurt dışından yıldız bir oyuncuyla anlaşma yapmak üzere. Detaylar henüz netleşmedi ancak transfer pazarının hareketli geçeceği kesin.
-                      </p>
-                    </div>
+                    {/* Bol Gollü Maçlar Özel Bölümü */}
+                    {highScoringMatches.length > 0 && (
+                      <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
+                        <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                          ⚽ Bol Gollü Maçlar: Gol Şöleni!
+                        </h2>
+                        <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          Aralık 2'de oynanan maçlarda bol gollü karşılaşmalar taraftarları büyüledi! {highScoringMatches.length} maçta toplam {highScoringMatches.reduce((sum, m) => sum + (m.homeScore || 0) + (m.awayScore || 0), 0)} gol atıldı. Bu maçlarda oyuncular muhteşem performanslar sergiledi ve sahadaki yeteneklerini konuşturdular.
+                        </p>
+                        <div className="space-y-3">
+                          {highScoringMatches.map((match: any, index: number) => {
+                            const totalGoals = (match.homeScore || 0) + (match.awayScore || 0);
+                            return (
+                              <div key={match.id || index} className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-3">
+                                <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+                                  {match.homeTeam?.name || 'Ev Sahibi'} {match.homeScore} - {match.awayScore} {match.awayTeam?.name || 'Deplasman'} ({totalGoals} Gol!)
+                                </p>
+                                <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                                  {totalGoals >= 7 ? 'Maç, adeta bir gol şölenine dönüştü! ' : 'Bu maçta '}Her iki takımın oyuncuları da muhteşem goller attı ve taraftarlara unutulmaz anlar yaşattı. Oyuncuların performansları takdire şayan!
+                                </p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
 
                   </div>
                 </div>
 
-                {/* Twitter Benzeri Taraftar Yorumları */}
-                <div className="mb-6 border-t-2 border-black/20 dark:border-amber-200/20 pt-6">
-                  <h3 className="text-xl md:text-2xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    📱 Taraftarların Dünün Maçları Hakkında Yorumları
-                  </h3>
-                  
-                  <div className="space-y-3">
-                    {/* Bodø/Glimt vs Trebol FC */}
-                    <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">CY</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Can Yıldız</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@canyildiz_trebol</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 3dk</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            bu maçta rezalet olduk bodø/glimt bizi sike sike yendi takım oynayamıyor hiçbir şey yapamıyoruz amk takımı #TrebolFC
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 234</span>
-                            <span>🔄 156</span>
-                            <span>❤️ 345</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">EK</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Emre Kaya</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@emrekaya_bodo</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 5dk</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            dün oynanan maçta takımımız gerçekten muhteşemdi oyasumi'nin top kontrolü ve pasları harikaydı bodø/glimt'in defansif gücü ve taktik disiplini mükemmeldi üç oyuncumuz dm sıralamasında zirvede gurur duyuyoruz #BodøGlimt
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 456</span>
-                            <span>🔄 234</span>
-                            <span>❤️ 567</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">BK</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Burak Koç</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@burakkoc_trebol</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 4dk</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            maçta 15 dakika oynadık sonra topu göremedik bodø/glimt oyuncuları topu bizden çaldı oyasumi bizi mahvetti bizim oyuncular ne yapacağını bilmiyor amk #TrebolFC
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 189</span>
-                            <span>🔄 134</span>
-                            <span>❤️ 267</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Bodø/Glimt vs Trebol FC - Yeni Tweet'ler */}
-                    <div className="bg-white dark:bg-gray-800 border border-blue-300 dark:border-blue-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">AK</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Ali Kaya</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@alikaya_neutral</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 7dk</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            objektif bakarsak bodø/glimt taktiksel olarak çok üstündü oyasumi'nin performansı dikkat çekiciydi trebol fc mücadele etti ama rakibin gücü karşısında yetersiz kaldı maçın en dikkat çeken yanı bodø'nun defansif organizasyonuydu
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 145</span>
-                            <span>🔄 67</span>
-                            <span>❤️ 198</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">MD</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Mehmet Demir</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@mehmetdemir_bodo</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 6dk</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            harika bir maçtı takımımız gerçekten muhteşem oynadı oyasumi'nin performansı mükemmeldi defansif disiplinimiz ve takım uyumumuz harikaydı üç oyuncumuz dm sıralamasında zirvede bu başarı hepimizi gururlandırdı #BodøGlimt
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 312</span>
-                            <span>🔄 189</span>
-                            <span>❤️ 445</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">TY</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Tolga Yıldız</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@tolgayildiz_trebol</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 5dk</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            bodø/glimt karşısında hiçbir şey yapamadık amk topu bile göremedik oyuncular sahada ne arıyor anlamadım böyle oyun olmaz rezalet #TrebolFC
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 198</span>
-                            <span>🔄 134</span>
-                            <span>❤️ 267</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Gebzespor vs Fear The Beard */}
-                    <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">SK</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Serkan Kaya</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@serkankaya_gebze</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 4dk</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            fear the beard karşısında rezil olduk amk takım hiçbir şey yapamadı topu kontrol edemedik oyuncular sahada kayboldu böyle oyun olmaz #Gebzespor
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 189</span>
-                            <span>🔄 134</span>
-                            <span>❤️ 267</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Gebzespor vs Fear The Beard - Yeni Tweet'ler */}
-                    <div className="bg-white dark:bg-gray-800 border border-blue-300 dark:border-blue-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">ÖK</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Özkan Kılıç</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@ozkankilic_neutral</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 8dk</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            objektif bakarsak her iki takım da dengeli bir oyun sergiledi fear the beard taktik disiplinini korurken gebzespor mücadeleci bir performans gösterdi maçın kalitesi yüksekti
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 167</span>
-                            <span>🔄 89</span>
-                            <span>❤️ 223</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">HY</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Hakan Yılmaz</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@hakanyilmaz_ftb</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 7dk</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            muhteşem bir maçtı takımımız gerçekten harika oynadı oyun tarzımız ve takım uyumumuz mükemmeldi bu performansla devam edersek ligde çok başarılı olacağız #FearTheBeard
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 289</span>
-                            <span>🔄 156</span>
-                            <span>❤️ 378</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">DK</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Deniz Kaya</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@denizkaya_gebze</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 6dk</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            fear the beard oyuncuları bizi ezip geçti amk bizim oyuncular topu bile tutamadı sahada ne yaptıklarını bilmiyorlar rezalet bir maç oldu #Gebzespor
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 189</span>
-                            <span>🔄 123</span>
-                            <span>❤️ 245</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Ravenclaw vs Turkish Union - Yeni Tweet'ler */}
-                    <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">AY</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Ahmet Yıldız</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@ahmetyildiz_raven</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 5dk</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            turkish union karşısında hiçbir şey yapamadık amk oyuncular sahada kayboldu topu bile göremedik böyle oyun olmaz rezalet bir performans #Ravenclaw
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 278</span>
-                            <span>🔄 167</span>
-                            <span>❤️ 312</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 border border-blue-300 dark:border-blue-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">SK</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Selin Kılıç</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@selinkilic_neutral</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 9dk</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            objektif bakarsak turkish union takım olarak daha organize göründü ravenclaw ise mücadele etti ama rakibin gücü karşısında zorlandı maçın genel kalitesi yüksekti
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 198</span>
-                            <span>🔄 112</span>
-                            <span>❤️ 267</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">BK</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Berk Kaya</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@berkkaya_raven</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 8dk</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            turkish union oyuncuları bizi ezip geçti amk bizim oyuncular topu bile tutamadı sahada ne yaptıklarını bilmiyorlar rezalet bir maç oldu #Ravenclaw
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 234</span>
-                            <span>🔄 156</span>
-                            <span>❤️ 345</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-gray-800 border border-green-300 dark:border-green-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">MK</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Mert Korkmaz</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@mertkorkmaz_tu</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 7dk</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            harika bir maçtı takımımız gerçekten muhteşem oynadı takım uyumumuz ve oyun tarzımız mükemmeldi ravenclaw karşısında güçlü bir performans sergiledik bu performansla devam edersek ligde çok başarılı olacağız #TurkishUnion
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 345</span>
-                            <span>🔄 201</span>
-                            <span>❤️ 456</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Hakem Yorumları */}
-                    <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">FK</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Fatih Kaya</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@fatihkaya_gebze</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 8dk</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            bu hakemlerin gözleri kör mü penaltı vermiyor faul çalmıyor siktirsin gitsinler sahadan amk hakemleri hiçbir şey bilmiyor #Gebzespor
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 567</span>
-                            <span>🔄 345</span>
-                            <span>❤️ 789</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-bold text-sm">YK</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-sm text-black dark:text-amber-100">Yusuf Koç</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">@yusufkoc_ftb</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">· 9dk</span>
-                          </div>
-                          <p className="text-sm text-black/90 dark:text-amber-100/90 mb-2">
-                            hakem düdüğü eline aldı mı ne yapacağını bilmiyor bir penaltı veriyor sonra neden verdiğini unutuyor siktirsin gitsin bu hakem #FearTheBeard
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span>💬 678</span>
-                            <span>🔄 456</span>
-                            <span>❤️ 890</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Alt Bilgi - Sayfa 1 */}
-
-                {/* Alt Bilgi - Sayfa 1 */}
+                {/* Alt Bilgi */}
                 <div className="relative border-t border-black/10 dark:border-amber-200/10 pt-4 mt-6">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-xs md:text-sm font-mono text-black/50 dark:text-amber-200/50">
                     <div>HaxArena V6 Real Soccer</div>
@@ -693,8 +311,6 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              )}
-
             </div>
           </div>
         </section>
