@@ -41,6 +41,7 @@ export default function HomePage() {
         highScoringMatches: [],
         leagueLeader: null,
         goalLeader: null,
+        goalLeaders: [],
         hasMultipleLeaders: false,
         topGoalCount: 0,
       };
@@ -79,12 +80,13 @@ export default function HomePage() {
       highScoringMatches,
       leagueLeader,
       goalLeader,
+      goalLeaders,
       hasMultipleLeaders,
       topGoalCount,
     };
   }, [fixtures, teams, leaderboard]);
 
-  const { december2Matches, highScoringMatches, leagueLeader, goalLeader, hasMultipleLeaders, topGoalCount } = newspaperData;
+  const { december2Matches, highScoringMatches, leagueLeader, goalLeader, goalLeaders, hasMultipleLeaders, topGoalCount } = newspaperData;
   const allRooms = [
     {
       matchName: "Galatasaray vs Fenerbahçe",
