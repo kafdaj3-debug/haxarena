@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ActiveRoomCard from "@/components/ActiveRoomCard";
@@ -22,41 +22,69 @@ export default function HomePage() {
   });
 
   // Takım verilerini çek (puan durumu için)
-  const { data: teams } = useQuery<any[]>({
+  const { data: teams, isLoading: teamsLoading } = useQuery<any[]>({
     queryKey: ["/api/league/teams"],
   });
 
-  const { data: leaderboard = [] } = useQuery<any[]>({
+  const { data: leaderboard = [], isLoading: leaderboardLoading } = useQuery<any[]>({
     queryKey: ["/api/league/stats/leaderboard"],
   });
 
-  // Aralık 2 tarihinde oynanan maçları filtrele (hükmen olanlar hariç)
-  const december2Matches = fixtures?.filter((fixture: any) => {
-    if (!fixture.matchDate || fixture.isBye || fixture.isForfeit) return false;
-    const matchDate = new Date(fixture.matchDate);
-    // Aralık 2 tarihini kontrol et (yıl önemli değil, sadece ay ve gün)
-    return matchDate.getMonth() === 11 && matchDate.getDate() === 2 && fixture.isPlayed;
-  }) || [];
+  // Tüm gazete verileri yüklenene kadar bekle
+  const isNewspaperDataLoading = fixturesLoading || teamsLoading || leaderboardLoading;
 
-  // Bol gollü maçları bul (toplam 5 veya daha fazla gol)
-  const highScoringMatches = december2Matches.filter((fixture: any) => {
-    const totalGoals = (fixture.homeScore || 0) + (fixture.awayScore || 0);
-    return totalGoals >= 5;
-  });
+  // Hesaplamaları memoize et - sadece veriler yüklendiğinde hesapla
+  const newspaperData = useMemo(() => {
+    if (!fixtures || !teams || !leaderboard) {
+      return {
+        december2Matches: [],
+        highScoringMatches: [],
+        leagueLeader: null,
+        goalLeader: null,
+        hasMultipleLeaders: false,
+        topGoalCount: 0,
+      };
+    }
 
-  // Puan durumu lideri
-  const leagueLeader = teams && teams.length > 0 ? teams[0] : null;
+    // Aralık 2 tarihinde oynanan maçları filtrele (hükmen olanlar hariç)
+    const december2Matches = fixtures.filter((fixture: any) => {
+      if (!fixture.matchDate || fixture.isBye || fixture.isForfeit) return false;
+      const matchDate = new Date(fixture.matchDate);
+      // Aralık 2 tarihini kontrol et (yıl önemli değil, sadece ay ve gün)
+      return matchDate.getMonth() === 11 && matchDate.getDate() === 2 && fixture.isPlayed;
+    });
 
-  // Gol liderleri (eşit sayıda golü olanlar)
-  const sortedGoalLeaders = leaderboard
-    .filter((p: any) => p.totalGoals > 0)
-    .sort((a: any, b: any) => b.totalGoals - a.totalGoals);
-  
-  const topGoalCount = sortedGoalLeaders.length > 0 ? sortedGoalLeaders[0].totalGoals : 0;
-  const goalLeaders = sortedGoalLeaders.filter((p: any) => p.totalGoals === topGoalCount);
-  
-  const goalLeader = goalLeaders.length > 0 ? goalLeaders[0] : null;
-  const hasMultipleLeaders = goalLeaders.length > 1;
+    // Bol gollü maçları bul (toplam 5 veya daha fazla gol)
+    const highScoringMatches = december2Matches.filter((fixture: any) => {
+      const totalGoals = (fixture.homeScore || 0) + (fixture.awayScore || 0);
+      return totalGoals >= 5;
+    });
+
+    // Puan durumu lideri
+    const leagueLeader = teams.length > 0 ? teams[0] : null;
+
+    // Gol liderleri (eşit sayıda golü olanlar)
+    const sortedGoalLeaders = leaderboard
+      .filter((p: any) => p.totalGoals > 0)
+      .sort((a: any, b: any) => b.totalGoals - a.totalGoals);
+    
+    const topGoalCount = sortedGoalLeaders.length > 0 ? sortedGoalLeaders[0].totalGoals : 0;
+    const goalLeaders = sortedGoalLeaders.filter((p: any) => p.totalGoals === topGoalCount);
+    
+    const goalLeader = goalLeaders.length > 0 ? goalLeaders[0] : null;
+    const hasMultipleLeaders = goalLeaders.length > 1;
+
+    return {
+      december2Matches,
+      highScoringMatches,
+      leagueLeader,
+      goalLeader,
+      hasMultipleLeaders,
+      topGoalCount,
+    };
+  }, [fixtures, teams, leaderboard]);
+
+  const { december2Matches, highScoringMatches, leagueLeader, goalLeader, hasMultipleLeaders, topGoalCount } = newspaperData;
   const allRooms = [
     {
       matchName: "Galatasaray vs Fenerbahçe",
@@ -149,8 +177,18 @@ export default function HomePage() {
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto">
               
-              {/* Yeni Gazete */}
-              <div className="relative bg-gradient-to-br from-amber-50 via-amber-50/95 to-amber-100/90 dark:from-amber-900/30 dark:via-amber-900/20 dark:to-amber-800/30 border-4 border-amber-800/30 dark:border-amber-700/40 shadow-2xl p-6 md:p-10 lg:p-12 transform rotate-0 hover:rotate-0 transition-all duration-300">
+              {/* Loading State */}
+              {isNewspaperDataLoading ? (
+                <div className="relative bg-gradient-to-br from-amber-50 via-amber-50/95 to-amber-100/90 dark:from-amber-900/30 dark:via-amber-900/20 dark:to-amber-800/30 border-4 border-amber-800/30 dark:border-amber-700/40 shadow-2xl p-6 md:p-10 lg:p-12">
+                  <div className="text-center py-20">
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-amber-800 dark:border-amber-200 mb-4"></div>
+                    <p className="text-lg font-serif text-black dark:text-amber-100">Gazete yükleniyor...</p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Yeni Gazete */}
+                  <div className="relative bg-gradient-to-br from-amber-50 via-amber-50/95 to-amber-100/90 dark:from-amber-900/30 dark:via-amber-900/20 dark:to-amber-800/30 border-4 border-amber-800/30 dark:border-amber-700/40 shadow-2xl p-6 md:p-10 lg:p-12 transform rotate-0 hover:rotate-0 transition-all duration-300">
                 {/* Eski kağıt dokusu efekti */}
                 <div className="absolute inset-0 opacity-10 dark:opacity-5" style={{
                   backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
@@ -332,7 +370,9 @@ export default function HomePage() {
                     <div>haxarena.web.tr</div>
                   </div>
                 </div>
-              </div>
+                </div>
+                </>
+              )}
             </div>
           </div>
         </section>
