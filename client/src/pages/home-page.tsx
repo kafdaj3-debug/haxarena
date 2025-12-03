@@ -47,10 +47,16 @@ export default function HomePage() {
   // Puan durumu lideri
   const leagueLeader = teams && teams.length > 0 ? teams[0] : null;
 
-  // Gol lideri
-  const goalLeader = leaderboard
+  // Gol liderleri (eşit sayıda golü olanlar)
+  const sortedGoalLeaders = leaderboard
     .filter((p: any) => p.totalGoals > 0)
-    .sort((a: any, b: any) => b.totalGoals - a.totalGoals)[0] || null;
+    .sort((a: any, b: any) => b.totalGoals - a.totalGoals);
+  
+  const topGoalCount = sortedGoalLeaders.length > 0 ? sortedGoalLeaders[0].totalGoals : 0;
+  const goalLeaders = sortedGoalLeaders.filter((p: any) => p.totalGoals === topGoalCount);
+  
+  const goalLeader = goalLeaders.length > 0 ? goalLeaders[0] : null;
+  const hasMultipleLeaders = goalLeaders.length > 1;
   const allRooms = [
     {
       matchName: "Galatasaray vs Fenerbahçe",
@@ -184,7 +190,7 @@ export default function HomePage() {
                   {/* Spot */}
                   <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500">
                     <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      Spot: {leagueLeader ? `${leagueLeader.name} ${leagueLeader.points} puanla ligde zirvede! ` : ''}Aralık 2'de oynanan maçlarda bol gollü karşılaşmalar yaşandı. {goalLeader ? `${goalLeader.username} ${goalLeader.totalGoals} golle gol krallığının lideri!` : ''}
+                      Spot: {leagueLeader ? `${leagueLeader.name} ${leagueLeader.points} puanla ligde zirvede! ` : ''}Aralık 2'de oynanan maçlarda bol gollü karşılaşmalar yaşandı. {goalLeader ? (hasMultipleLeaders ? `Oyasumi ve Osimhen ${topGoalCount} golle birlikte gol krallığının zirvesinde!` : `${goalLeader.username} ${goalLeader.totalGoals} golle gol krallığının lideri!`) : ''}
                     </p>
                   </div>
 
@@ -230,13 +236,29 @@ export default function HomePage() {
                     {goalLeader && (
                       <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
                         <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          ⚽ Gol Lideri: {goalLeader.username}'in Muhteşem Performansı
+                          ⚽ Gol Liderliği: {hasMultipleLeaders ? `${goalLeaders.map((p: any) => p.username).join(' ve ')} Birlikte Zirvede!` : `${goalLeader.username}'in Muhteşem Performansı`}
                         </h2>
                         <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          {goalLeader.username}, {goalLeader.totalGoals} golle gol krallığının zirvesinde yer alıyor. {goalLeader.teamName ? `${goalLeader.teamName} takımının yıldız oyuncusu ` : 'Oyuncu '}sahadaki muhteşem performansıyla taraftarları büyülüyor. Gol atma yeteneği, top kontrolü ve sahadaki varlığıyla {goalLeader.username}, ligdeki en değerli oyuncular arasında gösteriliyor. Her maçta gösterdiği kararlılık ve yetenek, takımına büyük katkı sağlıyor.
+                          {hasMultipleLeaders ? (
+                            <>
+                              Gol krallığında eşitlik var! Oyasumi ve Osimhen {topGoalCount} golle birlikte gol krallığının zirvesinde yer alıyor. Bu iki yıldız oyuncu, sahadaki muhteşem performanslarıyla taraftarları büyülüyor. Her ikisi de gol atma yeteneği, top kontrolü ve sahadaki varlıklarıyla ligdeki en değerli oyuncular arasında gösteriliyor. Oyasumi ve Osimhen'in her maçta gösterdikleri kararlılık ve yetenek, takımlarına büyük katkı sağlıyor.
+                            </>
+                          ) : (
+                            <>
+                              {goalLeader.username}, {goalLeader.totalGoals} golle gol krallığının zirvesinde yer alıyor. {goalLeader.teamName ? `${goalLeader.teamName} takımının yıldız oyuncusu ` : 'Oyuncu '}sahadaki muhteşem performansıyla taraftarları büyülüyor. Gol atma yeteneği, top kontrolü ve sahadaki varlığıyla {goalLeader.username}, ligdeki en değerli oyuncular arasında gösteriliyor. Her maçta gösterdiği kararlılık ve yetenek, takımına büyük katkı sağlıyor.
+                            </>
+                          )}
                         </p>
                         <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Taraftarlar ve uzmanlar, {goalLeader.username}'in bu sezon ligdeki en iyi performanslarından birini sergilediğini belirtiyor. Oyuncunun teknik direktörü de, {goalLeader.username}'in takımın en önemli oyuncularından biri olduğunu vurguluyor. Gol krallığı yarışında {goalLeader.username}'in bu formunu sürdürmesi bekleniyor.
+                          {hasMultipleLeaders ? (
+                            <>
+                              Taraftarlar ve uzmanlar, Oyasumi ve Osimhen'in bu sezon ligdeki en iyi performanslarından birini sergilediğini belirtiyor. Her iki oyuncunun teknik direktörleri de, oyuncularının takımlarının en önemli oyuncularından biri olduğunu vurguluyor. Gol krallığı yarışında bu iki yıldız oyuncunun bu formunu sürdürmesi bekleniyor. İkisi de muhteşem bir sezon geçiriyor ve taraftarların gözdesi haline gelmiş durumda!
+                            </>
+                          ) : (
+                            <>
+                              Taraftarlar ve uzmanlar, {goalLeader.username}'in bu sezon ligdeki en iyi performanslarından birini sergilediğini belirtiyor. Oyuncunun teknik direktörü de, {goalLeader.username}'in takımın en önemli oyuncularından biri olduğunu vurguluyor. Gol krallığı yarışında {goalLeader.username}'in bu formunu sürdürmesi bekleniyor.
+                            </>
+                          )}
                         </p>
                       </div>
                     )}
