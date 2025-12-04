@@ -154,7 +154,7 @@ function isNotChatMuted(req: any, res: any, next: any) {
   return next();
 }
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(app: Express, existingServer?: Server): Promise<Server> {
   // Health check endpoint artık server/index.ts'de erken eklendi
   // Burada sadece diğer route'ları ekliyoruz
 
@@ -2135,6 +2135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  const httpServer = createServer(app);
+  // Use existing server if provided, otherwise create new one
+  const httpServer = existingServer || createServer(app);
   return httpServer;
 }

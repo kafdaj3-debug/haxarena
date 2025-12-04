@@ -195,6 +195,26 @@ app.use((req, res, next) => {
   next();
 });
 
+// CRITICAL: Start server IMMEDIATELY for Railway health check
+// Async operations will run in background after server starts
+const port = parseInt(process.env.PORT || '5000', 10);
+const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+
+// Create HTTP server immediately (before async operations)
+import { createServer } from 'http';
+const httpServer = createServer(app);
+
+// Start server IMMEDIATELY - Railway health check needs this
+httpServer.listen(port, host, () => {
+  log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
+  log(`✅ Health check available at: http://${host}:${port}/api/health`);
+  if (process.env.NODE_ENV === 'production') {
+    log(`Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
+    log(`Database: ${process.env.DATABASE_URL ? 'connected' : 'not configured'}`);
+  }
+});
+
+// Now run async operations in background
 (async () => {
   // Ensure required columns exist (development & production)
   try {
@@ -757,7 +777,8 @@ app.use((req, res, next) => {
     }
   }
 
-  const server = await registerRoutes(app);
+  // Register routes - use existing httpServer
+  const server = await registerRoutes(app, httpServer);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -804,26 +825,6 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5000', 10);
-  
-  // Production: Listen on all interfaces (0.0.0.0) for cloud platforms
-  // Development: Use localhost for Windows compatibility
-  const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
-  
-  // Server'ı hemen başlat - Railway health check için kritik
-  server.listen(port, host, () => {
-    log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
-    log(`✅ Health check available at: http://${host}:${port}/api/health`);
-    if (process.env.NODE_ENV === 'production') {
-      log(`Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
-      log(`Database: ${process.env.DATABASE_URL ? 'connected' : 'not configured'}`);
-    }
-  });
-  
-  // Server başladıktan sonra log
-  log(`🚀 Server starting on port ${port}...`);
+  // Server already started above, just setup vite/static
+  // Server is already listening on httpServer
 })();
