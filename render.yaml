@@ -4,7 +4,7 @@ services:
     env: node
     plan: free
     region: frankfurt
-    buildCommand: npm install && npm run build
+    buildCommand: NODE_OPTIONS=--max-old-space-size=2048 npm install && NODE_OPTIONS=--max-old-space-size=2048 npm run build
     startCommand: npm start
     healthCheckPath: /api/health
     autoDeploy: true
@@ -17,6 +17,8 @@ services:
         value: haxarena2025secretkey123456789abcdef
       - key: FRONTEND_URL
         value: https://haxarena.vercel.app
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=1024
       - key: PORT
         fromService:
           type: web
