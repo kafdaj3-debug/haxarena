@@ -52,11 +52,8 @@ let serverReady = true;
 // These MUST respond immediately with 200 OK - no processing, no middleware
 // Railway checks these endpoints to determine if service is healthy
 
-// Root path - PRIMARY health check for Railway
-app.get("/", (req, res) => {
-  // Immediate 200 OK response - Railway just needs a response
-  res.status(200).json({ status: "ok", message: "Backend is running" });
-});
+// Root path (/) is NOT a health check - it serves the frontend
+// Health check is at /api/health (Render uses this)
 
 // /health endpoint - common health check path
 app.get("/health", (req, res) => {
