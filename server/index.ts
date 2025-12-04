@@ -24,12 +24,29 @@ function log(message: string, source = "express") {
 // Serve static files - production version
 function serveStatic(app: express.Express) {
   const distPath = path.join(process.cwd(), "dist", "public");
+  log(`📁 Checking static files at: ${distPath}`);
+  
   if (fs.existsSync(distPath)) {
+    log(`✅ Static files directory found: ${distPath}`);
     app.use(express.static(distPath));
     // Fall through to index.html if the file doesn't exist
-    app.use("*", (_req, res) => {
-      res.sendFile(path.resolve(distPath, "index.html"));
+    // This must be LAST to catch all routes not handled by API
+    app.get("*", (req, res, next) => {
+      // Skip API routes - they should be handled by API middleware
+      if (req.path.startsWith("/api")) {
+        return next();
+      }
+      // Serve index.html for all non-API routes (SPA routing)
+      const indexPath = path.resolve(distPath, "index.html");
+      if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+      } else {
+        log(`⚠️ index.html not found at: ${indexPath}`);
+        next();
+      }
     });
+  } else {
+    log(`⚠️ Static files directory not found: ${distPath}`);
   }
 }
 
@@ -313,6 +330,12 @@ app.use((req, res, next) => {
 // Increase payload limit for base64 images (team logos, etc.)
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: false }));
+
+// CRITICAL: Serve static files EARLY (after health checks, before async operations)
+// This ensures frontend is available immediately when server starts
+if (process.env.NODE_ENV === "production") {
+  serveStatic(app);
+}
 
 // IMPORTANT: setupAuth must be called BEFORE registerRoutes
 // This ensures session middleware is set up before routes are registered
