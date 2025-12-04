@@ -156,6 +156,7 @@ function isNotChatMuted(req: any, res: any, next: any) {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint (for deployment platforms)
+  // Railway ve diğer platformlar için
   app.get("/api/health", async (req, res) => {
     try {
       // Simple health check - just return OK if server is running
@@ -167,6 +168,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       return res.status(500).json({ status: "error" });
     }
+  });
+
+  // Root path health check (Railway için alternatif)
+  app.get("/", async (req, res) => {
+    // Railway health check için root path'e de yanıt ver
+    if (req.headers['user-agent']?.includes('Railway') || req.query.health === 'check') {
+      return res.json({ status: "ok", service: "gamehubarena-backend" });
+    }
+    // Normal istekler için frontend'e yönlendir (production'da serveStatic handle eder)
+    res.status(200).json({ status: "ok", message: "Backend is running" });
   });
 
   // IP ban middleware - tüm route'larda kontrol edilir (health check hariç)
