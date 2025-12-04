@@ -144,6 +144,27 @@ app.use(express.urlencoded({ limit: '10mb', extended: false }));
 // This ensures session middleware is set up before routes are registered
 setupAuth(app);
 
+// Health check endpoint - Railway için erken ekle (server başlamadan önce)
+app.get("/api/health", async (req, res) => {
+  try {
+    return res.json({ 
+      status: "ok", 
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    });
+  } catch (error) {
+    return res.status(500).json({ status: "error" });
+  }
+});
+
+// Root path health check - Railway için
+app.get("/", async (req, res) => {
+  if (req.headers['user-agent']?.includes('Railway') || req.query.health === 'check') {
+    return res.json({ status: "ok", service: "gamehubarena-backend" });
+  }
+  res.status(200).json({ status: "ok", message: "Backend is running" });
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
