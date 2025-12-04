@@ -1,0 +1,43 @@
+═══════════════════════════════════════════════════════════════
+🔍 RAILWAY LOGS KONTROL - HIZLI REHBER
+═══════════════════════════════════════════════════════════════
+
+1. Railway Dashboard → Service → Logs
+
+2. Şunları kontrol et:
+
+✅ İYİ LOG'LAR:
+   - "Server running on 0.0.0.0:PORT (production)"
+   - "Database: connected"
+   - "Database migrations completed"
+
+❌ KÖTÜ LOG'LAR:
+   - "Error: DATABASE_URL must be set"
+   - "Error: Cannot find module"
+   - "Error: connect ECONNREFUSED"
+   - "Error: timeout"
+
+═══════════════════════════════════════════════════════════════
+EN YAYGIN SORUN: DATABASE_URL EKSİK!
+═══════════════════════════════════════════════════════════════
+
+Railway Dashboard → Service → Variables → New Variable
+
+Key: DATABASE_URL
+Value: postgresql://neondb_owner:npg_opHF3Gn6BPXJ@ep-snowy-forest-agexjaet-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+
+⚠️ Neon dashboard'unuzdan gerçek URL'i alın!
+
+═══════════════════════════════════════════════════════════════
+TÜM ENVIRONMENT VARIABLES:
+═══════════════════════════════════════════════════════════════
+
+1. NODE_ENV = production
+2. DATABASE_URL = (Neon URL'iniz)
+3. SESSION_SECRET = haxarena2025secretkey123456789abcdef
+4. FRONTEND_URL = https://haxarena.vercel.app
+
+═══════════════════════════════════════════════════════════════
+DETAYLI REHBER: RAILWAY_SERVICE_UNAVAILABLE_FIX.md
+═══════════════════════════════════════════════════════════════
+
