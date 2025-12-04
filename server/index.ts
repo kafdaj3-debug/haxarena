@@ -8,7 +8,30 @@ import { sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/neon-serverless/migrator";
 import path from "path";
 import { fileURLToPath } from "url";
-import { serveStatic, log } from "./vite";
+import fs from "fs";
+
+// Log function - works in both development and production
+function log(message: string, source = "express") {
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+  console.log(`${formattedTime} [${source}] ${message}`);
+}
+
+// Serve static files - production version
+function serveStatic(app: express.Express) {
+  const distPath = path.join(process.cwd(), "dist", "public");
+  if (fs.existsSync(distPath)) {
+    app.use(express.static(distPath));
+    // Fall through to index.html if the file doesn't exist
+    app.use("*", (_req, res) => {
+      res.sendFile(path.resolve(distPath, "index.html"));
+    });
+  }
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
