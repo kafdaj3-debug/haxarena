@@ -13,10 +13,83 @@ import { serveStatic, log } from "./vite";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// CRITICAL FOR RAILWAY: Create minimal Express app and start server IMMEDIATELY
+// This ensures Railway health check can connect even before any setup completes
 const app = express();
-// Trust first proxy (Replit HTTPS termination)
 app.set('trust proxy', 1);
 
+// Track server readiness
+let serverReady = false;
+
+// CRITICAL: Add health check endpoints FIRST - before ANY other middleware
+// Railway checks these immediately after server starts
+app.get("/api/health", (req, res) => {
+  res.json({ 
+    status: "ok", 
+    ready: serverReady,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+app.get("/", (req, res) => {
+  res.json({ status: "ok", service: "gamehubarena-backend", message: "Backend is running" });
+});
+
+// Start server IMMEDIATELY - before any other setup
+// This is CRITICAL for Railway health checks
+const port = parseInt(process.env.PORT || '5000', 10);
+const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+const httpServer: Server = createServer(app);
+
+console.log(`🚀 Starting server on ${host}:${port}...`);
+log(`🚀 Starting server on ${host}:${port}...`);
+
+httpServer.once('listening', () => {
+  serverReady = true;
+  console.log(`✅ Server listening on ${host}:${port}`);
+  log(`✅ Server listening on ${host}:${port}`);
+});
+
+// Start listening immediately - Railway needs this
+httpServer.listen(port, host, () => {
+  serverReady = true;
+  console.log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
+  console.log(`✅ Health check available at: http://${host}:${port}/api/health`);
+  console.log(`✅ Railway health check ready!`);
+  log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
+  log(`✅ Health check available at: http://${host}:${port}/api/health`);
+  log(`✅ Railway health check ready!`);
+  
+  if (process.env.NODE_ENV === 'production') {
+    log(`Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
+    log(`Database: ${process.env.DATABASE_URL ? 'configured' : 'not configured'}`);
+  }
+});
+
+// Error handling for server
+httpServer.on('error', (error: any) => {
+  console.error(`❌ Server error: ${error.message}`);
+  log(`❌ Server error: ${error.message}`);
+  if (error.code === 'EADDRINUSE') {
+    log(`Port ${port} is already in use`);
+    process.exit(1);
+  }
+});
+
+// Global error handlers to prevent crashes
+process.on('uncaughtException', (error: Error) => {
+  console.error('❌ Uncaught Exception:', error);
+  log(`❌ Uncaught Exception: ${error.message}`);
+  log(`Stack: ${error.stack}`);
+});
+
+process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  log(`❌ Unhandled Rejection: ${reason}`);
+});
+
+// NOW add all other middleware and setup (server is already running)
 // CORS configuration - Allow requests from Netlify, Vercel, Anksoft and localhost
 const allowedOrigins = [
   process.env.FRONTEND_URL, // Frontend URL (Netlify, Vercel, Anksoft, etc.)
@@ -137,27 +210,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// CRITICAL: Health check endpoints MUST be added FIRST, before any middleware
-// Railway health check happens immediately after server starts
-// Track server readiness
-let serverReady = false;
-
-app.get("/api/health", (req, res) => {
-  // Always return 200 OK - Railway just needs to know server is responding
-  // Server is ready if it's listening (even if async operations are still running)
-  res.json({ 
-    status: "ok", 
-    ready: serverReady,
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime()
-  });
-});
-
-// Root path health check - Railway için
-app.get("/", (req, res) => {
-  res.json({ status: "ok", service: "gamehubarena-backend", message: "Backend is running" });
-});
-
 // Increase payload limit for base64 images (team logos, etc.)
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: false }));
@@ -196,60 +248,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// CRITICAL: Start server IMMEDIATELY for Railway health check
-// Async operations will run in background after server starts
-const port = parseInt(process.env.PORT || '5000', 10);
-const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
-
-// Create HTTP server immediately (before async operations)
-const httpServer: Server = createServer(app);
-
-// Mark server as ready once it starts listening
-httpServer.once('listening', () => {
-  serverReady = true;
-});
-
-// Start server IMMEDIATELY - Railway health check needs this
-log(`🚀 Starting server on ${host}:${port}...`);
-
-httpServer.listen(port, host, () => {
-  serverReady = true; // Also set here for immediate readiness
-  console.log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
-  console.log(`✅ Health check available at: http://${host}:${port}/api/health`);
-  log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
-  log(`✅ Health check available at: http://${host}:${port}/api/health`);
-  if (process.env.NODE_ENV === 'production') {
-    log(`Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
-    log(`Database: ${process.env.DATABASE_URL ? 'connected' : 'not configured'}`);
-  }
-});
-
-// Error handling for server
-httpServer.on('error', (error: any) => {
-  console.error(`❌ Server error: ${error.message}`);
-  log(`❌ Server error: ${error.message}`);
-  if (error.code === 'EADDRINUSE') {
-    log(`Port ${port} is already in use`);
-    process.exit(1);
-  }
-  // Don't exit on other errors - let Railway retry
-});
-
-// Global error handlers to prevent crashes
-process.on('uncaughtException', (error: Error) => {
-  console.error('❌ Uncaught Exception:', error);
-  log(`❌ Uncaught Exception: ${error.message}`);
-  log(`Stack: ${error.stack}`);
-  // Don't exit - keep server running for Railway health checks
-});
-
-process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
-  log(`❌ Unhandled Rejection: ${reason}`);
-  // Don't exit - keep server running for Railway health checks
-});
-
-// Now run async operations in background
+// Now run async operations in background (server is already running)
 (async () => {
   // Ensure required columns exist (development & production)
   try {
