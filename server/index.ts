@@ -52,22 +52,17 @@ app.get("/health", (req, res) => {
 });
 
 // Start server IMMEDIATELY - before any other setup
-// This is CRITICAL for Railway health checks
+// This is CRITICAL for Railway - server must start before health check
 const port = parseInt(process.env.PORT || '5000', 10);
 const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
 const httpServer: Server = createServer(app);
 
+// CRITICAL: Start server SYNCHRONOUSLY - no async operations before this
+// Railway will check if server is running, so it must start immediately
 console.log(`🚀 Starting server on ${host}:${port}...`);
-log(`🚀 Starting server on ${host}:${port}...`);
+process.stdout.write(`🚀 Starting server on ${host}:${port}...\n`);
 
-httpServer.once('listening', () => {
-  serverReady = true;
-  console.log(`✅ Server listening on ${host}:${port}`);
-  log(`✅ Server listening on ${host}:${port}`);
-});
-
-// Start listening immediately - Railway needs this
-// Use callback to ensure server is actually listening before continuing
+// Start listening IMMEDIATELY - Railway needs this
 httpServer.listen(port, host, () => {
   serverReady = true;
   
@@ -79,7 +74,8 @@ httpServer.listen(port, host, () => {
   process.stdout.write(`✅ HEALTH CHECK: http://${host}:${port}/\n`);
   process.stdout.write(`✅ HEALTH CHECK: http://${host}:${port}/api/health\n`);
   process.stdout.write(`✅ HEALTH CHECK: http://${host}:${port}/health\n`);
-  process.stdout.write(`✅ RAILWAY HEALTH CHECK READY!\n`);
+  process.stdout.write(`✅ RAILWAY READY - NO HEALTH CHECK CONFIGURED\n`);
+  process.stdout.write(`✅ Railway will only check if process is running\n`);
   process.stdout.write(`\n`);
   
   // Also use console.log for Railway logs
@@ -87,16 +83,19 @@ httpServer.listen(port, host, () => {
   console.log(`✅ Health check available at: http://${host}:${port}/`);
   console.log(`✅ Health check available at: http://${host}:${port}/api/health`);
   console.log(`✅ Health check available at: http://${host}:${port}/health`);
-  console.log(`✅ Railway health check ready!`);
-  
-  log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
-  log(`✅ Health check available at: http://${host}:${port}/api/health`);
-  log(`✅ Railway health check ready!`);
+  console.log(`✅ Railway ready - process monitoring only`);
   
   if (process.env.NODE_ENV === 'production') {
-    log(`Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
-    log(`Database: ${process.env.DATABASE_URL ? 'configured' : 'not configured'}`);
+    console.log(`Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
+    console.log(`Database: ${process.env.DATABASE_URL ? 'configured' : 'not configured'}`);
   }
+});
+
+// Track when server starts listening
+httpServer.once('listening', () => {
+  serverReady = true;
+  console.log(`✅ Server listening on ${host}:${port}`);
+  process.stdout.write(`✅ Server listening on ${host}:${port}\n`);
 });
 
 // Error handling for server
