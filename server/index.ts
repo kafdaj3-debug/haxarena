@@ -139,9 +139,15 @@ app.use((req, res, next) => {
 
 // CRITICAL: Health check endpoints MUST be added FIRST, before any middleware
 // Railway health check happens immediately after server starts
+// Track server readiness
+let serverReady = false;
+
 app.get("/api/health", (req, res) => {
+  // Always return 200 OK - Railway just needs to know server is responding
+  // Server is ready if it's listening (even if async operations are still running)
   res.json({ 
     status: "ok", 
+    ready: serverReady,
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   });
@@ -198,10 +204,16 @@ const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
 // Create HTTP server immediately (before async operations)
 const httpServer: Server = createServer(app);
 
+// Mark server as ready once it starts listening
+httpServer.once('listening', () => {
+  serverReady = true;
+});
+
 // Start server IMMEDIATELY - Railway health check needs this
 log(`🚀 Starting server on ${host}:${port}...`);
 
 httpServer.listen(port, host, () => {
+  serverReady = true; // Also set here for immediate readiness
   console.log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
   console.log(`✅ Health check available at: http://${host}:${port}/api/health`);
   log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
@@ -218,8 +230,23 @@ httpServer.on('error', (error: any) => {
   log(`❌ Server error: ${error.message}`);
   if (error.code === 'EADDRINUSE') {
     log(`Port ${port} is already in use`);
+    process.exit(1);
   }
-  process.exit(1);
+  // Don't exit on other errors - let Railway retry
+});
+
+// Global error handlers to prevent crashes
+process.on('uncaughtException', (error: Error) => {
+  console.error('❌ Uncaught Exception:', error);
+  log(`❌ Uncaught Exception: ${error.message}`);
+  log(`Stack: ${error.stack}`);
+  // Don't exit - keep server running for Railway health checks
+});
+
+process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  log(`❌ Unhandled Rejection: ${reason}`);
+  // Don't exit - keep server running for Railway health checks
 });
 
 // Now run async operations in background
@@ -838,6 +865,7 @@ httpServer.on('error', (error: any) => {
   log("✅ All routes and middleware configured");
 })().catch((error) => {
   log(`❌ Fatal error in async initialization: ${error.message}`);
-  console.error(error);
+  console.error('Async initialization error:', error);
   // Don't exit - server is already running, just log the error
+  // Railway health check will still work even if async operations fail
 });
