@@ -1,0 +1,37 @@
+═══════════════════════════════════════════════════════════════
+🚀 RAILWAY MANUEL DEPLOY - HEMEN YAP
+═══════════════════════════════════════════════════════════════
+
+1. Railway Dashboard'a git:
+   https://railway.app → Projenize gidin
+
+2. Deployments sekmesine git:
+   Sol menü → Deployments
+   VEYA
+   Service → Deployments
+
+3. "Redeploy" butonuna tıkla
+   VEYA
+   "Deploy latest commit" seç
+
+4. Deploy'in bitmesini bekle (3-5 dakika)
+
+5. Logs sekmesinden ilerlemeyi izle:
+   - Building...
+   - Deploying...
+   - Live ✅
+
+═══════════════════════════════════════════════════════════════
+EĞER PROJE YOKSA:
+═══════════════════════════════════════════════════════════════
+
+1. Railway Dashboard → "New Project"
+2. "Deploy from GitHub repo" seç
+3. GameHubArena repository'sini seç
+4. "Deploy Now" tıkla
+5. Environment variables ekle (4 adet)
+
+═══════════════════════════════════════════════════════════════
+DETAYLI REHBER: RAILWAY_MANUAL_DEPLOY.md
+═══════════════════════════════════════════════════════════════
+
