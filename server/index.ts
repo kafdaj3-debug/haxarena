@@ -25,30 +25,44 @@ let serverReady = true;
 // These MUST respond immediately, even before server is fully ready
 // Railway will check these endpoints, so they must work instantly
 
-// Root path - PRIMARY health check for Railway (fastest response)
+// CRITICAL: Health check endpoints - Railway will check these
+// These MUST respond immediately with 200 OK - no processing, no middleware
+// Railway checks these endpoints to determine if service is healthy
+
+// Root path - PRIMARY health check for Railway
 app.get("/", (req, res) => {
-  // Immediate response - no processing
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ status: "ok", message: "Backend is running" }));
+  // Immediate 200 OK response - Railway just needs a response
+  res.status(200).json({ status: "ok", message: "Backend is running" });
 });
 
-// Health check endpoint - also for Railway
+// /health endpoint - common health check path
+app.get("/health", (req, res) => {
+  // Immediate 200 OK response
+  res.status(200).json({ status: "ok", message: "Health check passed" });
+});
+
+// /api/health endpoint - API health check
 app.get("/api/health", (req, res) => {
-  // Immediate response - no processing
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ 
+  // Immediate 200 OK response
+  res.status(200).json({ 
     status: "ok", 
     ready: true,
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
-  }));
+  });
 });
 
-// Additional health check endpoint for Railway
-app.get("/health", (req, res) => {
-  // Immediate response - no processing
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ status: "ok", message: "Health check passed" }));
+// Catch-all for any health check path Railway might use
+app.get("/healthz", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+app.get("/healthcheck", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+app.get("/ping", (req, res) => {
+  res.status(200).json({ status: "ok", message: "pong" });
 });
 
 // Start server IMMEDIATELY - before any other setup
@@ -71,19 +85,26 @@ httpServer.listen(port, host, () => {
   process.stdout.write(`✅✅✅ SERVER STARTED SUCCESSFULLY ✅✅✅\n`);
   process.stdout.write(`✅ PORT: ${port}\n`);
   process.stdout.write(`✅ HOST: ${host}\n`);
-  process.stdout.write(`✅ HEALTH CHECK: http://${host}:${port}/\n`);
-  process.stdout.write(`✅ HEALTH CHECK: http://${host}:${port}/api/health\n`);
-  process.stdout.write(`✅ HEALTH CHECK: http://${host}:${port}/health\n`);
-  process.stdout.write(`✅ RAILWAY READY - NO HEALTH CHECK CONFIGURED\n`);
-  process.stdout.write(`✅ Railway will only check if process is running\n`);
+  process.stdout.write(`✅ HEALTH CHECK ENDPOINTS READY:\n`);
+  process.stdout.write(`   - http://${host}:${port}/\n`);
+  process.stdout.write(`   - http://${host}:${port}/health\n`);
+  process.stdout.write(`   - http://${host}:${port}/api/health\n`);
+  process.stdout.write(`   - http://${host}:${port}/healthz\n`);
+  process.stdout.write(`   - http://${host}:${port}/healthcheck\n`);
+  process.stdout.write(`   - http://${host}:${port}/ping\n`);
+  process.stdout.write(`✅ RAILWAY HEALTH CHECK: / (timeout: 100s)\n`);
   process.stdout.write(`\n`);
   
   // Also use console.log for Railway logs
   console.log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
-  console.log(`✅ Health check available at: http://${host}:${port}/`);
-  console.log(`✅ Health check available at: http://${host}:${port}/api/health`);
-  console.log(`✅ Health check available at: http://${host}:${port}/health`);
-  console.log(`✅ Railway ready - process monitoring only`);
+  console.log(`✅ Health check endpoints ready:`);
+  console.log(`   - http://${host}:${port}/`);
+  console.log(`   - http://${host}:${port}/health`);
+  console.log(`   - http://${host}:${port}/api/health`);
+  console.log(`   - http://${host}:${port}/healthz`);
+  console.log(`   - http://${host}:${port}/healthcheck`);
+  console.log(`   - http://${host}:${port}/ping`);
+  console.log(`✅ Railway health check configured: / (timeout: 100s)`);
   
   if (process.env.NODE_ENV === 'production') {
     console.log(`Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
