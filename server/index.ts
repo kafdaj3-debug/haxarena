@@ -22,18 +22,31 @@ app.set('trust proxy', 1);
 let serverReady = false;
 
 // CRITICAL: Add health check endpoints FIRST - before ANY other middleware
-// Railway checks these immediately after server starts
+// These MUST respond immediately, even before server is fully ready
 app.get("/api/health", (req, res) => {
-  res.json({ 
+  // Always return 200 OK immediately - Railway just needs a response
+  res.status(200).json({ 
     status: "ok", 
     ready: serverReady,
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    message: "Server is running"
   });
 });
 
+// Root path - also for Railway health checks
 app.get("/", (req, res) => {
-  res.json({ status: "ok", service: "gamehubarena-backend", message: "Backend is running" });
+  res.status(200).json({ 
+    status: "ok", 
+    service: "gamehubarena-backend", 
+    message: "Backend is running",
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Additional health check endpoint for Railway
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", message: "Health check passed" });
 });
 
 // Start server IMMEDIATELY - before any other setup
@@ -52,11 +65,22 @@ httpServer.once('listening', () => {
 });
 
 // Start listening immediately - Railway needs this
+// Use callback to ensure server is actually listening before continuing
 httpServer.listen(port, host, () => {
   serverReady = true;
+  
+  // Force flush stdout to ensure logs are visible immediately
   console.log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
   console.log(`✅ Health check available at: http://${host}:${port}/api/health`);
+  console.log(`✅ Root health check: http://${host}:${port}/`);
   console.log(`✅ Railway health check ready!`);
+  
+  // Use process.stdout.write for immediate output
+  process.stdout.write(`\n✅ SERVER STARTED SUCCESSFULLY\n`);
+  process.stdout.write(`✅ PORT: ${port}\n`);
+  process.stdout.write(`✅ HOST: ${host}\n`);
+  process.stdout.write(`✅ HEALTH: http://${host}:${port}/api/health\n\n`);
+  
   log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
   log(`✅ Health check available at: http://${host}:${port}/api/health`);
   log(`✅ Railway health check ready!`);
@@ -65,28 +89,64 @@ httpServer.listen(port, host, () => {
     log(`Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
     log(`Database: ${process.env.DATABASE_URL ? 'configured' : 'not configured'}`);
   }
+  
+  // Keep process alive - prevent Railway from thinking server crashed
+  setInterval(() => {
+    // Heartbeat to keep process alive
+    if (!serverReady) {
+      serverReady = true;
+    }
+  }, 1000);
 });
 
 // Error handling for server
 httpServer.on('error', (error: any) => {
   console.error(`❌ Server error: ${error.message}`);
+  console.error(`❌ Error code: ${error.code}`);
   log(`❌ Server error: ${error.message}`);
+  log(`❌ Error code: ${error.code}`);
+  
   if (error.code === 'EADDRINUSE') {
     log(`Port ${port} is already in use`);
     process.exit(1);
   }
+  
+  // Don't exit on other errors - let Railway retry
+  // Server might recover
 });
 
 // Global error handlers to prevent crashes
 process.on('uncaughtException', (error: Error) => {
-  console.error('❌ Uncaught Exception:', error);
+  console.error('❌ Uncaught Exception:', error.message);
+  console.error('❌ Stack:', error.stack);
   log(`❌ Uncaught Exception: ${error.message}`);
   log(`Stack: ${error.stack}`);
+  // Don't exit - keep server running for Railway
+  // Log the error but continue
 });
 
 process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  console.error('❌ Unhandled Rejection:', reason);
   log(`❌ Unhandled Rejection: ${reason}`);
+  // Don't exit - keep server running for Railway
+  // Log the error but continue
+});
+
+// Keep process alive - prevent Railway from killing the process
+process.on('SIGTERM', () => {
+  console.log('⚠️ SIGTERM received, shutting down gracefully...');
+  httpServer.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('⚠️ SIGINT received, shutting down gracefully...');
+  httpServer.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
 });
 
 // NOW add all other middleware and setup (server is already running)
