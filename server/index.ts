@@ -844,4 +844,9 @@ try {
 
   // Server already started above, just setup vite/static
   // Server is already listening on httpServer
-})();
+  log("✅ All routes and middleware configured");
+})().catch((error) => {
+  log(`❌ Fatal error in async initialization: ${error.message}`);
+  console.error(error);
+  // Don't exit - server is already running, just log the error
+});
