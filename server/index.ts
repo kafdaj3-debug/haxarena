@@ -18,35 +18,37 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.set('trust proxy', 1);
 
-// Track server readiness
-let serverReady = false;
+// Track server readiness - start as ready since we're starting immediately
+let serverReady = true;
 
 // CRITICAL: Add health check endpoints FIRST - before ANY other middleware
 // These MUST respond immediately, even before server is fully ready
-app.get("/api/health", (req, res) => {
-  // Always return 200 OK immediately - Railway just needs a response
-  res.status(200).json({ 
-    status: "ok", 
-    ready: serverReady,
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    message: "Server is running"
-  });
+// Railway will check these endpoints, so they must work instantly
+
+// Root path - PRIMARY health check for Railway (fastest response)
+app.get("/", (req, res) => {
+  // Immediate response - no processing
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ status: "ok", message: "Backend is running" }));
 });
 
-// Root path - also for Railway health checks
-app.get("/", (req, res) => {
-  res.status(200).json({ 
+// Health check endpoint - also for Railway
+app.get("/api/health", (req, res) => {
+  // Immediate response - no processing
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ 
     status: "ok", 
-    service: "gamehubarena-backend", 
-    message: "Backend is running",
-    timestamp: new Date().toISOString()
-  });
+    ready: true,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  }));
 });
 
 // Additional health check endpoint for Railway
 app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok", message: "Health check passed" });
+  // Immediate response - no processing
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ status: "ok", message: "Health check passed" }));
 });
 
 // Start server IMMEDIATELY - before any other setup
@@ -69,17 +71,23 @@ httpServer.once('listening', () => {
 httpServer.listen(port, host, () => {
   serverReady = true;
   
-  // Force flush stdout to ensure logs are visible immediately
-  console.log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
-  console.log(`✅ Health check available at: http://${host}:${port}/api/health`);
-  console.log(`✅ Root health check: http://${host}:${port}/`);
-  console.log(`✅ Railway health check ready!`);
-  
-  // Use process.stdout.write for immediate output
-  process.stdout.write(`\n✅ SERVER STARTED SUCCESSFULLY\n`);
+  // CRITICAL: Output immediately to stdout so Railway sees server started
+  process.stdout.write(`\n`);
+  process.stdout.write(`✅✅✅ SERVER STARTED SUCCESSFULLY ✅✅✅\n`);
   process.stdout.write(`✅ PORT: ${port}\n`);
   process.stdout.write(`✅ HOST: ${host}\n`);
-  process.stdout.write(`✅ HEALTH: http://${host}:${port}/api/health\n\n`);
+  process.stdout.write(`✅ HEALTH CHECK: http://${host}:${port}/\n`);
+  process.stdout.write(`✅ HEALTH CHECK: http://${host}:${port}/api/health\n`);
+  process.stdout.write(`✅ HEALTH CHECK: http://${host}:${port}/health\n`);
+  process.stdout.write(`✅ RAILWAY HEALTH CHECK READY!\n`);
+  process.stdout.write(`\n`);
+  
+  // Also use console.log for Railway logs
+  console.log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
+  console.log(`✅ Health check available at: http://${host}:${port}/`);
+  console.log(`✅ Health check available at: http://${host}:${port}/api/health`);
+  console.log(`✅ Health check available at: http://${host}:${port}/health`);
+  console.log(`✅ Railway health check ready!`);
   
   log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
   log(`✅ Health check available at: http://${host}:${port}/api/health`);
@@ -89,14 +97,6 @@ httpServer.listen(port, host, () => {
     log(`Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
     log(`Database: ${process.env.DATABASE_URL ? 'configured' : 'not configured'}`);
   }
-  
-  // Keep process alive - prevent Railway from thinking server crashed
-  setInterval(() => {
-    // Heartbeat to keep process alive
-    if (!serverReady) {
-      serverReady = true;
-    }
-  }, 1000);
 });
 
 // Error handling for server
