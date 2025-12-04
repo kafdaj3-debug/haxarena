@@ -1,0 +1,34 @@
+# Railway Environment Variables - Kopyala Yapıştır
+
+Aşağıdaki variable'ları Railway Dashboard → Service → Variables → New Variable ile ekleyin:
+
+---
+
+NODE_ENV=production
+
+---
+
+DATABASE_URL=postgresql://neondb_owner:npg_opHF3Gn6BPXJ@ep-snowy-forest-agexjaet-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+
+⚠️ NOT: Eğer Neon dashboard'unuzda farklı bir URL varsa, onu kullanın!
+
+---
+
+SESSION_SECRET=haxarena2025secretkey123456789abcdef
+
+---
+
+FRONTEND_URL=https://haxarena.vercel.app
+
+⚠️ NOT: Frontend'iniz farklı bir URL'deyse (Netlify, vb.), onu yazın!
+
+---
+
+## Nasıl Eklenir?
+
+1. Railway Dashboard → Service → Variables
+2. "New Variable" butonuna tıklayın
+3. Key ve Value'yu yukarıdaki gibi doldurun
+4. "Add" butonuna tıklayın
+5. Her variable için tekrarlayın
+

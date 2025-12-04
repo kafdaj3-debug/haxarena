@@ -1,13 +1,9 @@
 import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";
-import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
-import viteConfig from "../vite.config";
-import { nanoid } from "nanoid";
 
-const viteLogger = createLogger();
-
+// Log function - can be used in production without vite
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -19,7 +15,15 @@ export function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
+// setupVite only imports vite in development (dynamic import in index.ts)
 export async function setupVite(app: Express, server: Server) {
+  // Dynamic import to avoid bundling vite in production builds
+  const { createServer: createViteServer, createLogger } = await import("vite");
+  const viteConfig = (await import("../vite.config")).default;
+  const { nanoid } = await import("nanoid");
+  
+  const viteLogger = createLogger();
+  
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
@@ -68,7 +72,7 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "public");
+  const distPath = path.resolve(import.meta.dirname, "..", "dist", "public");
 
   if (!fs.existsSync(distPath)) {
     throw new Error(

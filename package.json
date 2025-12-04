@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx server/index.ts",
     "dev:unix": "NODE_ENV=development tsx server/index.ts",
-    "build": "npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "build": "npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --external:vite",
     "build:render": "npm install --include=dev && npm run build",
     "postinstall": "echo 'Build completed'",
     "build:netlify": "vite build",
@@ -15,7 +15,9 @@
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "setup:netlify": "node setup-netlify-env.js",
-    "setup:backend": "node setup-backend.js"
+    "setup:backend": "node setup-backend.js",
+    "backup:db": "node scripts/backup-database.js",
+    "export:env": "node scripts/export-env-vars.js"
   },
   "dependencies": {
     "@emoji-mart/data": "^1.2.1",
