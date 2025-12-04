@@ -137,6 +137,21 @@ app.use((req, res, next) => {
   next();
 });
 
+// CRITICAL: Health check endpoints MUST be added FIRST, before any middleware
+// Railway health check happens immediately after server starts
+app.get("/api/health", (req, res) => {
+  res.json({ 
+    status: "ok", 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+// Root path health check - Railway için
+app.get("/", (req, res) => {
+  res.json({ status: "ok", service: "gamehubarena-backend", message: "Backend is running" });
+});
+
 // Increase payload limit for base64 images (team logos, etc.)
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: false }));
@@ -144,27 +159,6 @@ app.use(express.urlencoded({ limit: '10mb', extended: false }));
 // IMPORTANT: setupAuth must be called BEFORE registerRoutes
 // This ensures session middleware is set up before routes are registered
 setupAuth(app);
-
-// Health check endpoint - Railway için erken ekle (server başlamadan önce)
-app.get("/api/health", async (req, res) => {
-  try {
-    return res.json({ 
-      status: "ok", 
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime()
-    });
-  } catch (error) {
-    return res.status(500).json({ status: "error" });
-  }
-});
-
-// Root path health check - Railway için
-app.get("/", async (req, res) => {
-  if (req.headers['user-agent']?.includes('Railway') || req.query.health === 'check') {
-    return res.json({ status: "ok", service: "gamehubarena-backend" });
-  }
-  res.status(200).json({ status: "ok", message: "Backend is running" });
-});
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -205,31 +199,28 @@ const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
 const httpServer: Server = createServer(app);
 
 // Start server IMMEDIATELY - Railway health check needs this
-try {
-  httpServer.listen(port, host, () => {
-    log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
-    log(`✅ Health check available at: http://${host}:${port}/api/health`);
-    if (process.env.NODE_ENV === 'production') {
-      log(`Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
-      log(`Database: ${process.env.DATABASE_URL ? 'connected' : 'not configured'}`);
-    }
-  });
-  
-  // Error handling for server
-  httpServer.on('error', (error: any) => {
-    log(`❌ Server error: ${error.message}`);
-    if (error.code === 'EADDRINUSE') {
-      log(`Port ${port} is already in use`);
-    }
-    process.exit(1);
-  });
-  
-  log(`🚀 Starting server on port ${port}...`);
-} catch (error: any) {
-  log(`❌ Failed to start server: ${error.message}`);
-  console.error(error);
+log(`🚀 Starting server on ${host}:${port}...`);
+
+httpServer.listen(port, host, () => {
+  console.log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
+  console.log(`✅ Health check available at: http://${host}:${port}/api/health`);
+  log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
+  log(`✅ Health check available at: http://${host}:${port}/api/health`);
+  if (process.env.NODE_ENV === 'production') {
+    log(`Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
+    log(`Database: ${process.env.DATABASE_URL ? 'connected' : 'not configured'}`);
+  }
+});
+
+// Error handling for server
+httpServer.on('error', (error: any) => {
+  console.error(`❌ Server error: ${error.message}`);
+  log(`❌ Server error: ${error.message}`);
+  if (error.code === 'EADDRINUSE') {
+    log(`Port ${port} is already in use`);
+  }
   process.exit(1);
-}
+});
 
 // Now run async operations in background
 (async () => {
