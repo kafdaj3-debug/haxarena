@@ -956,11 +956,15 @@ app.use((req, res, next) => {
   // doesn't interfere with the other routes
   if (app.get("env") === "development") {
     // Dynamic import to avoid bundling vite in production builds
-    // Import vite and setupVite inline to avoid ./vite module dependency
+    // Use string literal to prevent esbuild from seeing the import at build time
     try {
-      const { createServer: createViteServer, createLogger } = await import("vite");
-      const viteConfig = (await import("../vite.config")).default;
-      const { nanoid } = await import("nanoid");
+      // Use dynamic import with string to avoid esbuild bundling
+      const viteModule = await import(/* @vite-ignore */ "vite");
+      const { createServer: createViteServer, createLogger } = viteModule;
+      const viteConfigModule = await import(/* @vite-ignore */ "../vite.config");
+      const viteConfig = viteConfigModule.default;
+      const nanoidModule = await import(/* @vite-ignore */ "nanoid");
+      const { nanoid } = nanoidModule;
       
       const viteLogger = createLogger();
       
@@ -1009,10 +1013,16 @@ app.use((req, res, next) => {
           next(e);
         }
       });
-    } catch (error) {
-      log(`⚠️ Vite setup failed (development only): ${error}`);
-      // Fall back to static files in development if vite fails
-      serveStatic(app);
+    } catch (error: any) {
+      // In production, vite won't be available - this is expected
+      if (process.env.NODE_ENV === "production") {
+        log("✅ Production mode - using static files");
+        serveStatic(app);
+      } else {
+        log(`⚠️ Vite setup failed (development only): ${error?.message || error}`);
+        // Fall back to static files in development if vite fails
+        serveStatic(app);
+      }
     }
   } else {
     serveStatic(app);
