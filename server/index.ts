@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
+import { createServer, type Server } from "http";
 import { registerRoutes } from "./routes";
 import { setupAuth } from "./auth";
 import { db } from "./db";
@@ -201,18 +202,34 @@ const port = parseInt(process.env.PORT || '5000', 10);
 const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
 
 // Create HTTP server immediately (before async operations)
-import { createServer } from 'http';
-const httpServer = createServer(app);
+const httpServer: Server = createServer(app);
 
 // Start server IMMEDIATELY - Railway health check needs this
-httpServer.listen(port, host, () => {
-  log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
-  log(`✅ Health check available at: http://${host}:${port}/api/health`);
-  if (process.env.NODE_ENV === 'production') {
-    log(`Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
-    log(`Database: ${process.env.DATABASE_URL ? 'connected' : 'not configured'}`);
-  }
-});
+try {
+  httpServer.listen(port, host, () => {
+    log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
+    log(`✅ Health check available at: http://${host}:${port}/api/health`);
+    if (process.env.NODE_ENV === 'production') {
+      log(`Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
+      log(`Database: ${process.env.DATABASE_URL ? 'connected' : 'not configured'}`);
+    }
+  });
+  
+  // Error handling for server
+  httpServer.on('error', (error: any) => {
+    log(`❌ Server error: ${error.message}`);
+    if (error.code === 'EADDRINUSE') {
+      log(`Port ${port} is already in use`);
+    }
+    process.exit(1);
+  });
+  
+  log(`🚀 Starting server on port ${port}...`);
+} catch (error: any) {
+  log(`❌ Failed to start server: ${error.message}`);
+  console.error(error);
+  process.exit(1);
+}
 
 // Now run async operations in background
 (async () => {
