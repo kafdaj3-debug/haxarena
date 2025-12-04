@@ -813,11 +813,17 @@ app.use((req, res, next) => {
   // Production: Listen on all interfaces (0.0.0.0) for cloud platforms
   // Development: Use localhost for Windows compatibility
   const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+  
+  // Server'ı hemen başlat - Railway health check için kritik
   server.listen(port, host, () => {
-    log(`Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
+    log(`✅ Server running on ${host}:${port} (${process.env.NODE_ENV || 'development'})`);
+    log(`✅ Health check available at: http://${host}:${port}/api/health`);
     if (process.env.NODE_ENV === 'production') {
       log(`Frontend URL: ${process.env.FRONTEND_URL || 'not set'}`);
       log(`Database: ${process.env.DATABASE_URL ? 'connected' : 'not configured'}`);
     }
   });
+  
+  // Server başladıktan sonra log
+  log(`🚀 Server starting on port ${port}...`);
 })();
