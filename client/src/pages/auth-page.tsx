@@ -114,15 +114,34 @@ export default function AuthPage() {
           description: errorMessage,
           variant: "destructive",
         });
+        setIsLoading(false);
         return;
       }
 
+      const userData = await response.json();
+      
+      // JWT token'ı localStorage'a kaydet
+      if (userData.token) {
+        localStorage.setItem('auth_token', userData.token);
+        console.log("✅ Register - JWT token saved to localStorage");
+      }
+
+      // Auth context'i güncelle
+      queryClient.setQueryData(["/api/auth/me"], userData);
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+
       setRegisterSuccess(true);
       setRegisterData({ username: "", password: "" });
+      
       toast({
         title: "Kayıt Başarılı",
-        description: "Hesabınız oluşturuldu, şimdi giriş yapabilirsiniz",
+        description: "Hesabınız oluşturuldu ve giriş yaptınız!",
       });
+
+      // Ana sayfaya yönlendir
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
     } catch (error) {
       toast({
         title: "Hata",

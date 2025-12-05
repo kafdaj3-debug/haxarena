@@ -3,17 +3,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { buildApiUrl } from "@/lib/queryClient";
+import { buildApiUrl, queryClient } from "@/lib/queryClient";
 
 export default function RegisterPage() {
   const [registerData, setRegisterData] = useState({ username: "", password: "" });
   const [registerSuccess, setRegisterSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const [, navigate] = useLocation();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,12 +51,30 @@ export default function RegisterPage() {
         return;
       }
 
+      const userData = await response.json();
+      
+      // JWT token'ı localStorage'a kaydet
+      if (userData.token) {
+        localStorage.setItem('auth_token', userData.token);
+        console.log("✅ Register - JWT token saved to localStorage");
+      }
+
+      // Auth context'i güncelle
+      queryClient.setQueryData(["/api/auth/me"], userData);
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+
       setRegisterSuccess(true);
       setRegisterData({ username: "", password: "" });
+      
       toast({
         title: "Kayıt Başarılı",
-        description: "Hesabınız oluşturuldu. Yöneticiler tarafından onaylandıktan sonra giriş yapabilirsiniz.",
+        description: "Hesabınız oluşturuldu ve giriş yaptınız!",
       });
+
+      // Ana sayfaya yönlendir
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
     } catch (error: any) {
       console.error("Register error:", error);
       
@@ -102,7 +121,7 @@ export default function RegisterPage() {
                 <Alert>
                   <AlertCircle className="w-4 h-4" />
                   <AlertDescription data-testid="text-register-success">
-                    Kaydınız yetkililere iletilmiştir. Onay sürecinin tamamlanmasının ardından giriş yapabilirsiniz.
+                    Kayıt başarılı! Ana sayfaya yönlendiriliyorsunuz...
                   </AlertDescription>
                 </Alert>
               )}

@@ -203,14 +203,71 @@ export function setupAuth(app: Express) {
         }
         registrationAttempts.set(ip, Date.now());
       }
-      
-      return res.json({
-        id: approvedUser?.id || user.id,
-        username: approvedUser?.username || user.username,
-        isAdmin: approvedUser?.isAdmin || user.isAdmin,
-        isSuperAdmin: approvedUser?.isSuperAdmin || user.isSuperAdmin,
-        isApproved: approvedUser?.isApproved ?? true,
-        role: approvedUser?.role || user.role,
+
+      // Otomatik login yap - kayıt sonrası direkt giriş
+      const finalUser = approvedUser || user;
+      const loginUser = {
+        id: finalUser.id,
+        username: finalUser.username,
+        profilePicture: finalUser.profilePicture,
+        isAdmin: finalUser.isAdmin,
+        isSuperAdmin: finalUser.isSuperAdmin,
+        isApproved: finalUser.isApproved ?? true,
+        role: finalUser.role,
+        isBanned: finalUser.isBanned,
+        isChatMuted: finalUser.isChatMuted,
+      };
+
+      // Session oluştur
+      req.login(loginUser, async (err) => {
+        if (err) {
+          console.error("❌ REGISTER AUTO-LOGIN ERROR:", err);
+          // Session hatası olsa bile kullanıcıyı döndür
+          return res.json({
+            ...loginUser,
+            token: null,
+          });
+        }
+
+        // IP adresini güncelle
+        if (ip && typeof ip === 'string') {
+          await storage.updateUser(finalUser.id, { lastIpAddress: ip });
+        }
+
+        // JWT token oluştur
+        const jwtSecret = process.env.JWT_SECRET || process.env.SESSION_SECRET || "haxarena-v6-secret-key";
+        const token = jwt.sign(
+          {
+            id: loginUser.id,
+            username: loginUser.username,
+            isAdmin: loginUser.isAdmin,
+            isSuperAdmin: loginUser.isSuperAdmin,
+            isApproved: loginUser.isApproved,
+            role: loginUser.role,
+            isBanned: loginUser.isBanned,
+            isChatMuted: loginUser.isChatMuted,
+          },
+          jwtSecret,
+          { expiresIn: '30d' }
+        );
+
+        console.log("✅ REGISTER AUTO-LOGIN SUCCESS - User logged in:", loginUser.username);
+
+        // CORS headers'ı set et
+        const origin = req.headers.origin;
+        if (origin) {
+          const normalizedOrigin = origin.replace(/\/$/, '');
+          res.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
+          res.setHeader('Access-Control-Allow-Credentials', 'true');
+          res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        }
+
+        // Response gönder - JWT token ile birlikte
+        return res.json({
+          ...loginUser,
+          token, // JWT token'ı response'da döndür
+        });
       });
     } catch (error) {
       console.error("❌ REGISTER ERROR:", error);
