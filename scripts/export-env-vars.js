@@ -22,7 +22,7 @@ const __dirname = dirname(__filename);
 // Render'dan alınan environment variables (render.yaml'dan)
 const envVars = {
   NODE_ENV: 'production',
-  DATABASE_URL: process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_opHF3Gn6BPXJ@ep-snowy-forest-agexjaet-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
+  DATABASE_URL: process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_PCEFMaJ46Rgo@ep-shiny-haze-aglx4c8n-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
   SESSION_SECRET: process.env.SESSION_SECRET || 'haxarena2025secretkey123456789abcdef',
   FRONTEND_URL: process.env.FRONTEND_URL || 'https://haxarena.vercel.app',
   PORT: process.env.PORT || '5000',

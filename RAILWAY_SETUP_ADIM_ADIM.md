@@ -55,7 +55,7 @@ Value: production
 #### Variable 2: DATABASE_URL
 ```
 Key: DATABASE_URL
-Value: postgresql://neondb_owner:npg_opHF3Gn6BPXJ@ep-snowy-forest-agexjaet-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+Value: postgresql://neondb_owner:npg_PCEFMaJ46Rgo@ep-shiny-haze-aglx4c8n-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
 ```
 **⚠️ ÖNEMLİ:** Eğer Neon dashboard'unuzda farklı bir URL varsa, onu kullanın!
 

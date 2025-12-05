@@ -184,7 +184,12 @@ export function setupAuth(app: Express) {
         password: hashedPassword,
       });
 
-      console.log("✅ REGISTER success:", user.username);
+      // Yeni kayıt olanları otomatik onayla
+      const approvedUser = await storage.updateUser(user.id, {
+        isApproved: true,
+      });
+
+      console.log("✅ REGISTER success:", approvedUser?.username || user.username);
       
       // IP-based rate limiting: Sadece başarılı kayıttan sonra IP'yi kaydet
       let ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
@@ -200,12 +205,12 @@ export function setupAuth(app: Express) {
       }
       
       return res.json({
-        id: user.id,
-        username: user.username,
-        isAdmin: user.isAdmin,
-        isSuperAdmin: user.isSuperAdmin,
-        isApproved: user.isApproved,
-        role: user.role,
+        id: approvedUser?.id || user.id,
+        username: approvedUser?.username || user.username,
+        isAdmin: approvedUser?.isAdmin || user.isAdmin,
+        isSuperAdmin: approvedUser?.isSuperAdmin || user.isSuperAdmin,
+        isApproved: approvedUser?.isApproved ?? true,
+        role: approvedUser?.role || user.role,
       });
     } catch (error) {
       console.error("❌ REGISTER ERROR:", error);

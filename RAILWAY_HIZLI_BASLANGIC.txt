@@ -22,7 +22,7 @@ ADIM 2: ENVIRONMENT VARIABLES EKLE
 Service → Variables → New Variable
 
 1. NODE_ENV = production
-2. DATABASE_URL = postgresql://neondb_owner:npg_opHF3Gn6BPXJ@ep-snowy-forest-agexjaet-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+2. DATABASE_URL = postgresql://neondb_owner:npg_PCEFMaJ46Rgo@ep-shiny-haze-aglx4c8n-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
 3. SESSION_SECRET = haxarena2025secretkey123456789abcdef
 4. FRONTEND_URL = https://haxarena.vercel.app
 

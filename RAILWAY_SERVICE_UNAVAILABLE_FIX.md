@@ -54,7 +54,7 @@ Error: DATABASE_URL must be set. Did you forget to provision a database?
 3. Eğer yoksa ekleyin:
    ```
    Key: DATABASE_URL
-   Value: postgresql://neondb_owner:npg_opHF3Gn6BPXJ@ep-snowy-forest-agexjaet-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+   Value: postgresql://neondb_owner:npg_PCEFMaJ46Rgo@ep-shiny-haze-aglx4c8n-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
    ```
 4. **⚠️ ÖNEMLİ:** Neon dashboard'unuzdan gerçek DATABASE_URL'inizi alın!
 

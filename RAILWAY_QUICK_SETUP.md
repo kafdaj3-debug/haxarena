@@ -25,7 +25,7 @@ Railway otomatik olarak deploy başlatır, ama environment variables eklemeniz g
 
 ```
 NODE_ENV = production
-DATABASE_URL = postgresql://neondb_owner:npg_opHF3Gn6BPXJ@ep-snowy-forest-agexjaet-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+DATABASE_URL = postgresql://neondb_owner:npg_PCEFMaJ46Rgo@ep-shiny-haze-aglx4c8n-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
 SESSION_SECRET = haxarena2025secretkey123456789abcdef
 FRONTEND_URL = https://haxarena.vercel.app
 ```

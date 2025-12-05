@@ -1189,13 +1189,20 @@ export async function registerRoutes(app: Express, existingServer?: Server): Pro
         storage.getUser(req.user!.id)
       ]);
 
+      if (!user) {
+        console.error("❌ Chat message: User not found after creation");
+        return res.status(500).json({ error: "Kullanıcı bilgisi alınamadı" });
+      }
+
       return res.json({ ...chatMessage, user });
     } catch (error) {
+      console.error("❌ Chat message send error:", error);
+      console.error("Error details:", error instanceof Error ? error.message : String(error));
       return res.status(500).json({ error: "Mesaj gönderilemedi" });
     }
   });
 
-  app.delete("/api/chat/messages/:id", async (req, res) => {
+  app.delete("/api/chat/messages/:id", isAuthenticated, async (req, res) => {
     try {
       if (!req.user || (!req.user.isAdmin && !req.user.isSuperAdmin)) {
         return res.status(403).json({ error: "Yetkiniz yok" });
@@ -1204,6 +1211,7 @@ export async function registerRoutes(app: Express, existingServer?: Server): Pro
       await storage.deleteChatMessage(req.params.id);
       return res.json({ message: "Mesaj silindi" });
     } catch (error) {
+      console.error("Chat message delete error:", error);
       return res.status(500).json({ error: "Mesaj silinemedi" });
     }
   });

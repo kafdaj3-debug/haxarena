@@ -31,7 +31,7 @@ Render Dashboard'da `DATABASE_URL` environment variable'ını eklemeniz gerekiyo
    ```
 3. **Value** alanına:
    ```
-   postgresql://neondb_owner:npg_opHF3Gn6BPXJ@ep-snowy-forest-agexjaet-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+   postgresql://neondb_owner:npg_PCEFMaJ46Rgo@ep-shiny-haze-aglx4c8n-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
    ```
 4. **"Save Changes"** butonuna tıklayın
 
@@ -45,7 +45,7 @@ Aşağıdaki environment variable'ların hepsinin ekli olduğundan emin olun:
 
 #### DATABASE_URL
 - **Key:** `DATABASE_URL`
-- **Value:** `postgresql://neondb_owner:npg_opHF3Gn6BPXJ@ep-snowy-forest-agexjaet-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require`
+- **Value:** `postgresql://neondb_owner:npg_PCEFMaJ46Rgo@ep-shiny-haze-aglx4c8n-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require`
 
 #### SESSION_SECRET
 - **Key:** `SESSION_SECRET`
@@ -92,7 +92,7 @@ Render Dashboard'da şu environment variable'lar olmalı:
 | Key | Value |
 |-----|-------|
 | `NODE_ENV` | `production` |
-| `DATABASE_URL` | `postgresql://neondb_owner:npg_opHF3Gn6BPXJ@ep-snowy-forest-agexjaet-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require` |
+| `DATABASE_URL` | `postgresql://neondb_owner:npg_PCEFMaJ46Rgo@ep-shiny-haze-aglx4c8n-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require` |
 | `SESSION_SECRET` | `haxarena2025secretkey123456789abcdef` |
 | `FRONTEND_URL` | `https://haxarena.vercel.app` |
 
