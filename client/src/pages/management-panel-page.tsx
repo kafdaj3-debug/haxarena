@@ -924,8 +924,18 @@ export default function ManagementPanelPage() {
     return null;
   }
 
-  const pendingUsers = users?.filter(u => !u.isApproved) || [];
-  const approvedUsers = users?.filter(u => u.isApproved) || [];
+  const pendingUsers = users?.filter(u => !u.isApproved || u.isApproved === false) || [];
+  const approvedUsers = users?.filter(u => u.isApproved === true || u.isApproved === "true") || [];
+  
+  // Debug log
+  if (users) {
+    console.log("📊 Management Panel - Users:", {
+      total: users.length,
+      approved: approvedUsers.length,
+      pending: pendingUsers.length,
+      sample: users.slice(0, 3).map(u => ({ username: u.username, isApproved: u.isApproved, type: typeof u.isApproved }))
+    });
+  }
   const pendingApplications = adminApplications?.filter(a => a.status === "pending") || [];
 
   return (

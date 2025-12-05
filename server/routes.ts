@@ -519,6 +519,8 @@ export async function registerRoutes(app: Express, existingServer?: Server): Pro
   app.get("/api/management/users", isSuperAdmin, async (req, res) => {
     try {
       const users = await storage.getAllUsers();
+      console.log(`📊 Management users: ${users.length} total users found`);
+      
       // Her kullanıcı için custom role'lerini getir
       const usersWithRoles = await Promise.all(
         users.map(async (user) => {
@@ -526,12 +528,21 @@ export async function registerRoutes(app: Express, existingServer?: Server): Pro
           const customRoles = await storage.getUserCustomRoles(user.id);
           return {
             ...userWithoutPassword,
+            // isApproved değerini açıkça boolean'a çevir
+            isApproved: Boolean(user.isApproved),
             customRoles: customRoles.map(cr => cr.role),
           };
         })
       );
+      
+      const approvedCount = usersWithRoles.filter(u => u.isApproved).length;
+      const pendingCount = usersWithRoles.filter(u => !u.isApproved).length;
+      console.log(`✅ Management users response: ${approvedCount} approved, ${pendingCount} pending`);
+      
       return res.json(usersWithRoles);
     } catch (error) {
+      console.error("❌ Management users error:", error);
+      console.error("Error details:", error instanceof Error ? error.message : String(error));
       return res.status(500).json({ error: "Kullanıcılar yüklenemedi" });
     }
   });
