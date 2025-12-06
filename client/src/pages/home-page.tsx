@@ -6,6 +6,7 @@ import ForumPostCard from "@/components/ForumPostCard";
 import LiveChat from "@/components/LiveChat";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Link } from "wouter";
 import { Trophy, MessageSquare, Shield, Sparkles, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth";
@@ -15,10 +16,245 @@ import { tr } from "date-fns/locale";
 
 export default function HomePage() {
   const { user, logout } = useAuth();
+  const [isNewspaperOpen, setIsNewspaperOpen] = useState(true);
 
   const { data: leaderboard = [] } = useQuery<any[]>({
     queryKey: ["/api/league/stats/leaderboard"],
   });
+
+  // Gazete içeriği component'i
+  const NewspaperContent = () => (
+    <div className="relative bg-gradient-to-br from-amber-50 via-amber-50/95 to-amber-100/90 dark:from-amber-900/30 dark:via-amber-900/20 dark:to-amber-800/30 border-4 border-amber-800/30 dark:border-amber-700/40 shadow-2xl p-6 md:p-10 lg:p-12 transform rotate-0 hover:rotate-0 transition-all duration-300">
+      {/* Eski kağıt dokusu efekti */}
+      <div className="absolute inset-0 opacity-10 dark:opacity-5" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        backgroundSize: '200px 200px'
+      }}></div>
+      
+      {/* Gazete Başlığı */}
+      <div className="relative border-b-4 border-black dark:border-amber-100 pb-3 mb-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
+          <div className="text-xs md:text-sm font-mono text-black/70 dark:text-amber-200/70">
+            {new Date().toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </div>
+          <div className="text-xs md:text-sm font-mono text-black/70 dark:text-amber-200/70">
+            Fiyat: 2.50 TL
+          </div>
+        </div>
+        <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-center tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+          📰 SPOR EKSPRES
+        </h2>
+        <div className="text-center text-xs md:text-sm mt-2 text-black/60 dark:text-amber-200/60 font-serif italic">
+          "Gol Fırtınası, Mizah Dalgası!"
+        </div>
+      </div>
+
+      {/* Ana Başlık */}
+      <div className="mb-6">
+        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+          Gol Fırtınası, Mizah Dalgası!
+        </h1>
+      </div>
+
+      {/* Haftanın Süperstarı: AEJEN */}
+      <div className="mb-6">
+        <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border-2 border-yellow-500 dark:border-yellow-400 p-4 md:p-6 rounded-lg">
+          <div className="mb-3">
+            <span className="inline-block bg-yellow-500 dark:bg-yellow-600 text-black dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
+              ⭐ Haftanın Süperstarı
+            </span>
+          </div>
+          <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+            AEJEN – Holstein Kiel'in Yürüyen Çekici Kuvveti
+          </h2>
+          <div className="space-y-3">
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Holstein Kiel bu hafta da coştu, 4/4 yaparak resmen "Biz şampiyonluk trenini sürdürüyoruz, binmeyen koşsun" mesajı verdi.
+            </p>
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Bu başarıyı kim sürüklüyor?
+            </p>
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Tabii ki sahada fizik kurallarını büküp rakip savunmayı mikrodalgada ısıtır gibi dağıtan Aején.
+            </p>
+            <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-yellow-500 dark:border-yellow-400 p-3 mt-3">
+              <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+                "Aején'i tutmak için üç kişiyi gönderdik, üçü de geri dönmedi."
+              </p>
+              <p className="text-xs text-black/70 dark:text-amber-200/70 italic">— Manifest'in analiz ekibi</p>
+            </div>
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Holstein Kiel tarafında herkes keyifli, hatta kulübün sosyal medya yöneticisi bile "İki saatlik Aején highlights videosu hazırladım, paylaşmaya elim titriyor," dedi.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Los Infiernos */}
+      <div className="mb-6">
+        <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-2 border-red-500 dark:border-red-400 p-4 md:p-6 rounded-lg">
+          <div className="mb-3">
+            <span className="inline-block bg-red-500 dark:bg-red-600 text-white dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
+              🔥 Los Infiernos
+            </span>
+          </div>
+          <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+            4/4 ve Alev Alev!
+          </h2>
+          <div className="space-y-3">
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Los Infiernos da haftayı 4/4 yaparak tamamladı.
+            </p>
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Nasıl mı?
+            </p>
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
+              "Rakip kim?" diye bakmadan her maç 8 soyma, 12 dilimleme modunda sahaya çıkarak.
+            </p>
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Shamrock Rovers maçında 12 gol atarak öyle bir mesaj verdiler ki, rakip tribünleri maç sonunda "biz nereye geldik?" diye birbirine bakarken buldular.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Shamrock Rovers */}
+      <div className="mb-6">
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-2 border-gray-500 dark:border-gray-400 p-4 md:p-6 rounded-lg">
+          <div className="mb-3">
+            <span className="inline-block bg-gray-500 dark:bg-gray-600 text-white dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
+              😬 Shamrock Rovers
+            </span>
+          </div>
+          <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Gelen Geçen Saldırıyor, Gol Atan Atana
+          </h2>
+          <div className="space-y-3">
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Shamrock Rovers'ın durumu gerçekten… hmmm…
+            </p>
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Hani bazı oyunlarda zorluk seviyesi yanlışlıkla "Acemi Bot"a alınır ya?
+            </p>
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
+              İşte öyle.
+            </p>
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Son haftalarda kim gelmişse gol atmış, kimi bulmuşsa vurmuş.
+            </p>
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Bir ara rakip forvetlerin aralarında "kendi aramızda paylaşalım, ayıp olmasın şimdi" diye konuştuğu bile iddia edildi.
+            </p>
+            <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-gray-500 dark:border-gray-400 p-3 mt-3">
+              <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+                "Eldivenleri artık yıkamıyorum, yırtılıyor. Direkt yenisini alıyorum."
+              </p>
+              <p className="text-xs text-black/70 dark:text-amber-200/70 italic">— Shamrock'ın kalecisi</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Antiran */}
+      <div className="mb-6">
+        <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-2 border-orange-500 dark:border-orange-400 p-4 md:p-6 rounded-lg">
+          <div className="mb-3">
+            <span className="inline-block bg-orange-500 dark:bg-orange-600 text-white dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
+              🐂⚔ ANTIRAN
+            </span>
+          </div>
+          <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Haftanın Davet Edilmemiş Patronu
+          </h2>
+          <div className="space-y-3">
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Antiran tam bir gizli favori vibe'ı veriyor… ama artık gizli falan değiller: adamlar çok iyiler.
+            </p>
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+              FC Toros Bravos maçında 6 gol atıp "Biz buradayız kardeşim, hem de çok ciddiyiz" dediler.
+            </p>
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Cristiano'nun 2 gol + 1 kendi kalesine gol karışık menülü performansı bile takımı yavaşlatamadı, kül yutmayan bir hücum merkezi var.
+            </p>
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Retegui, Pablo Martín, Cristiano…
+            </p>
+            <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Bu üçlü sahada öyle bir dolaşıyor ki, rakip savunma "ben bunu daha önce hesaplamamıştım" diye titreye titreye duruyor.
+            </p>
+            <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-orange-500 dark:border-orange-400 p-3 mt-3">
+              <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+                "Takım bu formda giderse, sezon sonu kupa almaya değil, kupa seçmeye gideriz."
+              </p>
+              <p className="text-xs text-black/70 dark:text-amber-200/70 italic">— Teknik direktör</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Genel Durum */}
+      <div className="mb-6">
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-2 border-blue-500 dark:border-blue-400 p-4 md:p-6 rounded-lg">
+          <div className="mb-3">
+            <span className="inline-block bg-blue-500 dark:bg-blue-600 text-white dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
+              🌪 Genel Durum
+            </span>
+          </div>
+          <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Kısa Özet, Uzun Mizah
+          </h2>
+          <div className="space-y-3">
+            <div className="bg-white dark:bg-gray-800 p-3 rounded border-l-4 border-green-500">
+              <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1">
+                Holstein Kiel → 4/4
+              </p>
+              <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80">
+                Rakipleri adeta "Sana gol göstereceğim" belgeseli izliyor.
+              </p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-3 rounded border-l-4 border-red-500">
+              <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1">
+                Los Infiernos → 4/4
+              </p>
+              <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80">
+                Gol atmak onlar için yürüyüş yapmak kadar doğal.
+              </p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-3 rounded border-l-4 border-gray-500">
+              <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1">
+                Shamrock Rovers → 0/sonsuz
+              </p>
+              <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80">
+                Rakip seçmiyorlar, herkese gol ikram ediyorlar.
+              </p>
+              <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80 italic mt-1">
+                Savunma: "Bizim branş yanlış olabilir mi?"
+              </p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-3 rounded border-l-4 border-orange-500">
+              <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1">
+                Antiran → tehlikeli derecede formda
+              </p>
+              <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80">
+                Hani biri gelir, kapıyı çalmaz, direkt içeri girer ya…
+              </p>
+              <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80 font-bold mt-1">
+                İşte Antiran o takım.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Alt Bilgi */}
+      <div className="relative border-t border-black/10 dark:border-amber-200/10 pt-4 mt-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-xs md:text-sm font-mono text-black/50 dark:text-amber-200/50">
+          <div>HaxArena V6 Real Soccer</div>
+          <div>haxarena.web.tr</div>
+        </div>
+      </div>
+    </div>
+  );
   const allRooms = [
     {
       matchName: "Galatasaray vs Fenerbahçe",
@@ -66,6 +302,15 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen">
       <Header user={user} onLogout={logout} />
       
+      {/* Gazete Modal */}
+      <Dialog open={isNewspaperOpen} onOpenChange={setIsNewspaperOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto p-0">
+          <div className="p-4 md:p-6">
+            <NewspaperContent />
+          </div>
+        </DialogContent>
+      </Dialog>
+      
       <main className="flex-1">
         <section className="relative bg-gradient-to-b from-card to-background py-12 md:py-20 border-b new-year-gradient overflow-hidden">
           {/* Yılbaşı dekorasyonları */}
@@ -110,237 +355,7 @@ export default function HomePage() {
         <section className="py-12 md:py-16 bg-gradient-to-b from-amber-50/5 to-amber-50/10 dark:from-amber-950/10 dark:to-amber-950/5">
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto">
-              {/* Yeni Gazete */}
-              <div className="relative bg-gradient-to-br from-amber-50 via-amber-50/95 to-amber-100/90 dark:from-amber-900/30 dark:via-amber-900/20 dark:to-amber-800/30 border-4 border-amber-800/30 dark:border-amber-700/40 shadow-2xl p-6 md:p-10 lg:p-12 transform rotate-0 hover:rotate-0 transition-all duration-300">
-                {/* Eski kağıt dokusu efekti */}
-                <div className="absolute inset-0 opacity-10 dark:opacity-5" style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-                  backgroundSize: '200px 200px'
-                }}></div>
-                
-                {/* Gazete Başlığı */}
-                <div className="relative border-b-4 border-black dark:border-amber-100 pb-3 mb-6">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
-                    <div className="text-xs md:text-sm font-mono text-black/70 dark:text-amber-200/70">
-                      {new Date().toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                    </div>
-                    <div className="text-xs md:text-sm font-mono text-black/70 dark:text-amber-200/70">
-                      Fiyat: 2.50 TL
-                    </div>
-                  </div>
-                  <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-center tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    📰 SPOR EKSPRES
-                  </h2>
-                  <div className="text-center text-xs md:text-sm mt-2 text-black/60 dark:text-amber-200/60 font-serif italic">
-                    "Gol Fırtınası, Mizah Dalgası!"
-                  </div>
-                </div>
-
-                {/* Ana Başlık */}
-                <div className="mb-6">
-                  <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    Gol Fırtınası, Mizah Dalgası!
-                  </h1>
-                </div>
-
-                {/* Haftanın Süperstarı: AEJEN */}
-                <div className="mb-6">
-                  <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border-2 border-yellow-500 dark:border-yellow-400 p-4 md:p-6 rounded-lg">
-                    <div className="mb-3">
-                      <span className="inline-block bg-yellow-500 dark:bg-yellow-600 text-black dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
-                        ⭐ Haftanın Süperstarı
-                      </span>
-                    </div>
-                    <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      AEJEN – Holstein Kiel'in Yürüyen Çekici Kuvveti
-                    </h2>
-                    <div className="space-y-3">
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Holstein Kiel bu hafta da coştu, 4/4 yaparak resmen "Biz şampiyonluk trenini sürdürüyoruz, binmeyen koşsun" mesajı verdi.
-                      </p>
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Bu başarıyı kim sürüklüyor?
-                      </p>
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Tabii ki sahada fizik kurallarını büküp rakip savunmayı mikrodalgada ısıtır gibi dağıtan Aején.
-                      </p>
-                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-yellow-500 dark:border-yellow-400 p-3 mt-3">
-                        <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          "Aején'i tutmak için üç kişiyi gönderdik, üçü de geri dönmedi."
-                        </p>
-                        <p className="text-xs text-black/70 dark:text-amber-200/70 italic">— Manifest'in analiz ekibi</p>
-                      </div>
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Holstein Kiel tarafında herkes keyifli, hatta kulübün sosyal medya yöneticisi bile "İki saatlik Aején highlights videosu hazırladım, paylaşmaya elim titriyor," dedi.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Los Infiernos */}
-                <div className="mb-6">
-                  <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-2 border-red-500 dark:border-red-400 p-4 md:p-6 rounded-lg">
-                    <div className="mb-3">
-                      <span className="inline-block bg-red-500 dark:bg-red-600 text-white dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
-                        🔥 Los Infiernos
-                      </span>
-                    </div>
-                    <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      4/4 ve Alev Alev!
-                    </h2>
-                    <div className="space-y-3">
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Los Infiernos da haftayı 4/4 yaparak tamamladı.
-                      </p>
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Nasıl mı?
-                      </p>
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        "Rakip kim?" diye bakmadan her maç 8 soyma, 12 dilimleme modunda sahaya çıkarak.
-                      </p>
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Shamrock Rovers maçında 12 gol atarak öyle bir mesaj verdiler ki, rakip tribünleri maç sonunda "biz nereye geldik?" diye birbirine bakarken buldular.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Shamrock Rovers */}
-                <div className="mb-6">
-                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-2 border-gray-500 dark:border-gray-400 p-4 md:p-6 rounded-lg">
-                    <div className="mb-3">
-                      <span className="inline-block bg-gray-500 dark:bg-gray-600 text-white dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
-                        😬 Shamrock Rovers
-                      </span>
-                    </div>
-                    <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      Gelen Geçen Saldırıyor, Gol Atan Atana
-                    </h2>
-                    <div className="space-y-3">
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Shamrock Rovers'ın durumu gerçekten… hmmm…
-                      </p>
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Hani bazı oyunlarda zorluk seviyesi yanlışlıkla "Acemi Bot"a alınır ya?
-                      </p>
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        İşte öyle.
-                      </p>
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Son haftalarda kim gelmişse gol atmış, kimi bulmuşsa vurmuş.
-                      </p>
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Bir ara rakip forvetlerin aralarında "kendi aramızda paylaşalım, ayıp olmasın şimdi" diye konuştuğu bile iddia edildi.
-                      </p>
-                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-gray-500 dark:border-gray-400 p-3 mt-3">
-                        <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          "Eldivenleri artık yıkamıyorum, yırtılıyor. Direkt yenisini alıyorum."
-                        </p>
-                        <p className="text-xs text-black/70 dark:text-amber-200/70 italic">— Shamrock'ın kalecisi</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Antiran */}
-                <div className="mb-6">
-                  <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-2 border-orange-500 dark:border-orange-400 p-4 md:p-6 rounded-lg">
-                    <div className="mb-3">
-                      <span className="inline-block bg-orange-500 dark:bg-orange-600 text-white dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
-                        🐂⚔ ANTIRAN
-                      </span>
-                    </div>
-                    <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      Haftanın Davet Edilmemiş Patronu
-                    </h2>
-                    <div className="space-y-3">
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Antiran tam bir gizli favori vibe'ı veriyor… ama artık gizli falan değiller: adamlar çok iyiler.
-                      </p>
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        FC Toros Bravos maçında 6 gol atıp "Biz buradayız kardeşim, hem de çok ciddiyiz" dediler.
-                      </p>
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Cristiano'nun 2 gol + 1 kendi kalesine gol karışık menülü performansı bile takımı yavaşlatamadı, kül yutmayan bir hücum merkezi var.
-                      </p>
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Retegui, Pablo Martín, Cristiano…
-                      </p>
-                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Bu üçlü sahada öyle bir dolaşıyor ki, rakip savunma "ben bunu daha önce hesaplamamıştım" diye titreye titreye duruyor.
-                      </p>
-                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-orange-500 dark:border-orange-400 p-3 mt-3">
-                        <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          "Takım bu formda giderse, sezon sonu kupa almaya değil, kupa seçmeye gideriz."
-                        </p>
-                        <p className="text-xs text-black/70 dark:text-amber-200/70 italic">— Teknik direktör</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Genel Durum */}
-                <div className="mb-6">
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-2 border-blue-500 dark:border-blue-400 p-4 md:p-6 rounded-lg">
-                    <div className="mb-3">
-                      <span className="inline-block bg-blue-500 dark:bg-blue-600 text-white dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
-                        🌪 Genel Durum
-                      </span>
-                    </div>
-                    <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      Kısa Özet, Uzun Mizah
-                    </h2>
-                    <div className="space-y-3">
-                      <div className="bg-white dark:bg-gray-800 p-3 rounded border-l-4 border-green-500">
-                        <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1">
-                          Holstein Kiel → 4/4
-                        </p>
-                        <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80">
-                          Rakipleri adeta "Sana gol göstereceğim" belgeseli izliyor.
-                        </p>
-                      </div>
-                      <div className="bg-white dark:bg-gray-800 p-3 rounded border-l-4 border-red-500">
-                        <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1">
-                          Los Infiernos → 4/4
-                        </p>
-                        <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80">
-                          Gol atmak onlar için yürüyüş yapmak kadar doğal.
-                        </p>
-                      </div>
-                      <div className="bg-white dark:bg-gray-800 p-3 rounded border-l-4 border-gray-500">
-                        <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1">
-                          Shamrock Rovers → 0/sonsuz
-                        </p>
-                        <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80">
-                          Rakip seçmiyorlar, herkese gol ikram ediyorlar.
-                        </p>
-                        <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80 italic mt-1">
-                          Savunma: "Bizim branş yanlış olabilir mi?"
-                        </p>
-                      </div>
-                      <div className="bg-white dark:bg-gray-800 p-3 rounded border-l-4 border-orange-500">
-                        <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1">
-                          Antiran → tehlikeli derecede formda
-                        </p>
-                        <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80">
-                          Hani biri gelir, kapıyı çalmaz, direkt içeri girer ya…
-                        </p>
-                        <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80 font-bold mt-1">
-                          İşte Antiran o takım.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Alt Bilgi */}
-                <div className="relative border-t border-black/10 dark:border-amber-200/10 pt-4 mt-6">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-xs md:text-sm font-mono text-black/50 dark:text-amber-200/50">
-                    <div>HaxArena V6 Real Soccer</div>
-                    <div>haxarena.web.tr</div>
-                  </div>
-                </div>
-              </div>
+              <NewspaperContent />
             </div>
           </div>
         </section>
