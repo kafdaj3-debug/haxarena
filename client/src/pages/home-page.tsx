@@ -411,7 +411,6 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
-                </div>
 
                 {/* Alt Bilgi */}
                 <div className="relative border-t border-black/10 dark:border-amber-200/10 pt-4 mt-6">
