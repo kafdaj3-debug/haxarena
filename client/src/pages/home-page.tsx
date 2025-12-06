@@ -6,9 +6,9 @@ import ForumPostCard from "@/components/ForumPostCard";
 import LiveChat from "@/components/LiveChat";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 import { Link } from "wouter";
-import { Trophy, MessageSquare, Shield, Sparkles, ArrowRight } from "lucide-react";
+import { Trophy, MessageSquare, Shield, Sparkles, ArrowRight, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
@@ -16,7 +16,23 @@ import { tr } from "date-fns/locale";
 
 export default function HomePage() {
   const { user, logout } = useAuth();
-  const [isNewspaperOpen, setIsNewspaperOpen] = useState(true);
+  
+  // localStorage'dan gazete gösterilip gösterilmediğini kontrol et
+  const [isNewspaperOpen, setIsNewspaperOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const hasSeenNewspaper = localStorage.getItem('hasSeenNewspaper');
+      return !hasSeenNewspaper; // Eğer daha önce görmediyse true, gördüyse false
+    }
+    return true;
+  });
+
+  // Modal kapandığında localStorage'a kaydet
+  const handleCloseNewspaper = () => {
+    setIsNewspaperOpen(false);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('hasSeenNewspaper', 'true');
+    }
+  };
 
   const { data: leaderboard = [] } = useQuery<any[]>({
     queryKey: ["/api/league/stats/leaderboard"],
@@ -303,8 +319,25 @@ export default function HomePage() {
       <Header user={user} onLogout={logout} />
       
       {/* Gazete Modal */}
-      <Dialog open={isNewspaperOpen} onOpenChange={setIsNewspaperOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto p-0">
+      <Dialog open={isNewspaperOpen} onOpenChange={(open) => {
+        if (!open) {
+          handleCloseNewspaper();
+        } else {
+          setIsNewspaperOpen(true);
+        }
+      }}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto p-0 [&>button]:hidden">
+          {/* Özel Kapatma Butonu */}
+          <DialogClose asChild>
+            <button
+              onClick={handleCloseNewspaper}
+              className="absolute right-4 top-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-2xl hover:shadow-red-500/50 transition-all duration-300 hover:scale-110 active:scale-95 group animate-pulse hover:animate-none border-2 border-white/20 hover:border-white/40"
+              aria-label="Gazeteyi Kapat"
+            >
+              <X className="h-7 w-7 font-bold group-hover:rotate-90 transition-transform duration-300" strokeWidth={3.5} />
+              <span className="absolute inset-0 rounded-full bg-red-400 opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300"></span>
+            </button>
+          </DialogClose>
           <div className="p-4 md:p-6">
             <NewspaperContent />
           </div>
