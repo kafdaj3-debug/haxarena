@@ -3,29 +3,13 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
-import { buildApiUrl } from "@/lib/queryClient";
 
 export default function NewspaperPage() {
   const { user, logout } = useAuth();
 
-  // Fikstür verilerini çek
-  const { data: fixtures, isLoading: fixturesLoading } = useQuery<any[]>({
-    queryKey: ["/api/league/fixtures"],
-  });
-
   // Takım verilerini çek (puan durumu için)
   const { data: teams, isLoading: teamsLoading } = useQuery<any[]>({
     queryKey: ["/api/league/teams"],
-  });
-
-  // Trebol FC vs Gebzespor maçını bul
-  const trebolGebzeMatch = fixtures?.find((fixture: any) => {
-    const homeTeam = fixture.homeTeam?.name?.toLowerCase() || "";
-    const awayTeam = fixture.awayTeam?.name?.toLowerCase() || "";
-    return (
-      (homeTeam.includes("trebol") && awayTeam.includes("gebze")) ||
-      (homeTeam.includes("gebze") && awayTeam.includes("trebol"))
-    );
   });
 
   if (!user) {
@@ -49,144 +33,218 @@ export default function NewspaperPage() {
               </div>
             </div>
             <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-center tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-              HAXARENA GAZETESİ
+              📰 SPOR EKSPRES
             </h2>
             <div className="text-center text-xs md:text-sm mt-2 text-black/60 dark:text-amber-200/60 font-serif italic">
-              Türkiye'nin En Büyük HaxBall Real Soccer Haber Kaynağı
+              "Gol Fırtınası, Mizah Dalgası!"
             </div>
-          </div>
-
-          {/* Spot */}
-          <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500">
-            <p className="text-lg md:text-xl font-bold text-black dark:text-amber-100 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
-              Spot: Haftalardır sosyal medyada "atışma ligi" kuran Trebol FC ile Gebzespor, sonunda sahada karşılaştı. Sonuç? Klavyede başlayan rekabet sahada farklı bitti…
-            </p>
           </div>
 
           {/* Ana Başlık */}
           <div className="mb-6">
-            <div className="mb-3">
-              <span className="inline-block bg-black dark:bg-white text-white dark:text-black px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
-                Özel Haber
-              </span>
-            </div>
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-3 leading-tight text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-              Klavyede Başlayan Rekabet Sahada Farklı Bitti!
+              Gol Fırtınası, Mizah Dalgası!
             </h1>
-            <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 text-black/90 dark:text-amber-100/90" style={{ fontFamily: "'Playfair Display', serif" }}>
-              Trebol FC 8 – 0 Gebzespor: Sosyal Medya Atışmaları Sahada Sonuç Vermedi
-            </h2>
           </div>
 
-          {/* Maç Skoru Görseli */}
+          {/* Haftanın Süperstarı: AEJEN */}
+          <div className="mb-8">
+            <Card className="border-2 border-black dark:border-amber-200 bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20">
+              <CardContent className="p-6">
+                <div className="mb-4">
+                  <span className="inline-block bg-yellow-500 dark:bg-yellow-600 text-black dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
+                    ⭐ Haftanın Süperstarı
+                  </span>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  AEJEN – Holstein Kiel'in Yürüyen Çekici Kuvveti
+                </h2>
+                <div className="space-y-4">
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Holstein Kiel bu hafta da coştu, 4/4 yaparak resmen "Biz şampiyonluk trenini sürdürüyoruz, binmeyen koşsun" mesajı verdi.
+                  </p>
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Bu başarıyı kim sürüklüyor?
+                  </p>
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Tabii ki sahada fizik kurallarını büküp rakip savunmayı mikrodalgada ısıtır gibi dağıtan Aején.
+                  </p>
+                  <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-yellow-500 dark:border-yellow-400 p-4 mt-4">
+                    <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      "Aején'i tutmak için üç kişiyi gönderdik, üçü de geri dönmedi."
+                    </p>
+                    <p className="text-sm text-black/70 dark:text-amber-200/70 italic">— Manifest'in analiz ekibi</p>
+                  </div>
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Holstein Kiel tarafında herkes keyifli, hatta kulübün sosyal medya yöneticisi bile "İki saatlik Aején highlights videosu hazırladım, paylaşmaya elim titriyor," dedi.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Los Infiernos */}
+          <div className="mb-8">
+            <Card className="border-2 border-black dark:border-amber-200 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20">
+              <CardContent className="p-6">
+                <div className="mb-4">
+                  <span className="inline-block bg-red-500 dark:bg-red-600 text-white dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
+                    🔥 Los Infiernos
+                  </span>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  4/4 ve Alev Alev!
+                </h2>
+                <div className="space-y-4">
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Los Infiernos da haftayı 4/4 yaparak tamamladı.
+                  </p>
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Nasıl mı?
+                  </p>
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    "Rakip kim?" diye bakmadan her maç 8 soyma, 12 dilimleme modunda sahaya çıkarak.
+                  </p>
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Shamrock Rovers maçında 12 gol atarak öyle bir mesaj verdiler ki, rakip tribünleri maç sonunda "biz nereye geldik?" diye birbirine bakarken buldular.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Shamrock Rovers */}
           <div className="mb-8">
             <Card className="border-2 border-black dark:border-amber-200 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900">
               <CardContent className="p-6">
-                <h3 className="text-xl font-bold mb-4 text-center text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  Maç Sonucu
-                </h3>
-                <div className="flex items-center justify-center gap-6 md:gap-12">
-                  {/* Ev Sahibi Takım */}
-                  <div className="flex flex-col items-center gap-3 flex-1">
-                    {trebolGebzeMatch?.homeTeam?.logo ? (
-                      <img 
-                        src={trebolGebzeMatch.homeTeam.logo} 
-                        alt={trebolGebzeMatch.homeTeam.name} 
-                        className="w-20 h-20 md:w-24 md:h-24 object-contain"
-                      />
-                    ) : (
-                      <div className="w-20 h-20 md:w-24 md:h-24 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                        <span className="text-2xl">⚽</span>
-                      </div>
-                    )}
-                    <span className="font-bold text-lg md:text-xl text-center text-black dark:text-amber-100">
-                      {trebolGebzeMatch?.homeTeam?.name || "Trebol FC"}
-                    </span>
-                  </div>
-
-                  {/* Skor */}
-                  <div className="flex items-center gap-4">
-                    <div className="text-5xl md:text-7xl font-bold text-green-600 dark:text-green-400">
-                      {trebolGebzeMatch?.homeScore ?? 8}
-                    </div>
-                    <div className="text-3xl md:text-5xl font-bold text-black dark:text-amber-100">
-                      -
-                    </div>
-                    <div className="text-5xl md:text-7xl font-bold text-red-600 dark:text-red-400">
-                      {trebolGebzeMatch?.awayScore ?? 0}
-                    </div>
-                  </div>
-
-                  {/* Deplasman Takımı */}
-                  <div className="flex flex-col items-center gap-3 flex-1">
-                    {trebolGebzeMatch?.awayTeam?.logo ? (
-                      <img 
-                        src={trebolGebzeMatch.awayTeam.logo} 
-                        alt={trebolGebzeMatch.awayTeam.name} 
-                        className="w-20 h-20 md:w-24 md:h-24 object-contain"
-                      />
-                    ) : (
-                      <div className="w-20 h-20 md:w-24 md:h-24 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                        <span className="text-2xl">⚽</span>
-                      </div>
-                    )}
-                    <span className="font-bold text-lg md:text-xl text-center text-black dark:text-amber-100">
-                      {trebolGebzeMatch?.awayTeam?.name || "Gebzespor"}
-                    </span>
+                <div className="mb-4">
+                  <span className="inline-block bg-gray-500 dark:bg-gray-600 text-white dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
+                    😬 Shamrock Rovers
+                  </span>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  Gelen Geçen Saldırıyor, Gol Atan Atana
+                </h2>
+                <div className="space-y-4">
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Shamrock Rovers'ın durumu gerçekten… hmmm…
+                  </p>
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Hani bazı oyunlarda zorluk seviyesi yanlışlıkla "Acemi Bot"a alınır ya?
+                  </p>
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    İşte öyle.
+                  </p>
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Son haftalarda kim gelmişse gol atmış, kimi bulmuşsa vurmuş.
+                  </p>
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Bir ara rakip forvetlerin aralarında "kendi aramızda paylaşalım, ayıp olmasın şimdi" diye konuştuğu bile iddia edildi.
+                  </p>
+                  <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-gray-500 dark:border-gray-400 p-4 mt-4">
+                    <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      "Eldivenleri artık yıkamıyorum, yırtılıyor. Direkt yenisini alıyorum."
+                    </p>
+                    <p className="text-sm text-black/70 dark:text-amber-200/70 italic">— Shamrock'ın kalecisi</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* İçerik Kolonları */}
+          {/* Antiran */}
           <div className="mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-              <div className="space-y-4">
-                <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>L</span>
-                  igin başından beri sosyal medyada "tatlı sert" göndermeleriyle gündeme oturan Trebol FC ile Gebzespor, haftanın merakla beklenen maçında karşı karşıya geldi. Ancak karşılaşma, skor tabelasında pek de "tatlı" durmadı: Trebol FC 8 – 0 Gebzespor!
-                </p>
-                <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  Maç sonrası Trebol cephesi kutlama yaparken, sosyal medyada iddialı açıklamalarıyla bilinen Gebzespor kaptanı, mağlubiyeti şöyle değerlendirdi:
-                </p>
-                <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-black dark:border-amber-200 p-4 mt-4">
-                  <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    "Bir kişi eksiktik, yenmek kolay tabii."
-                  </p>
+            <Card className="border-2 border-black dark:border-amber-200 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20">
+              <CardContent className="p-6">
+                <div className="mb-4">
+                  <span className="inline-block bg-orange-500 dark:bg-orange-600 text-white dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
+                    🐂⚔ ANTIRAN
+                  </span>
                 </div>
-              </div>
-              <div className="space-y-4">
-                <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  Bu açıklama sonrası Trebol taraftarları sosyal medyayı salladı. En çok beğeni alan yorumlardan bazıları şöyle:
-                </p>
-                <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-black dark:border-amber-200 p-4">
-                  <ul className="space-y-2 text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    <li>• "Biz de gol atarken bir kişi eksiktik, kaleciyi kullanmadık zaten."</li>
-                    <li>• "Hocamız devre arasında bir kişiyi daha eksiltelim diye düşündü ama ayıp olur dedik."</li>
-                    <li>• "Biz de 8 gol atarken hep bir kişi fazlaydık: Motivasyon!"</li>
-                  </ul>
-                </div>
-                <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-black dark:border-amber-200 p-4 mt-4">
-                  <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    Trebol FC teknik ekibi:
+                <h2 className="text-2xl md:text-3xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  Haftanın Davet Edilmemiş Patronu
+                </h2>
+                <div className="space-y-4">
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Antiran tam bir gizli favori vibe'ı veriyor… ama artık gizli falan değiller: adamlar çok iyiler.
                   </p>
-                  <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    "Sosyal medyada çok koştular, sahada biraz yorulmuş olabilirler."
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    FC Toros Bravos maçında 6 gol atıp "Biz buradayız kardeşim, hem de çok ciddiyiz" dediler.
                   </p>
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Cristiano'nun 2 gol + 1 kendi kalesine gol karışık menülü performansı bile takımı yavaşlatamadı, kül yutmayan bir hücum merkezi var.
+                  </p>
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Retegui, Pablo Martín, Cristiano…
+                  </p>
+                  <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Bu üçlü sahada öyle bir dolaşıyor ki, rakip savunma "ben bunu daha önce hesaplamamıştım" diye titreye titreye duruyor.
+                  </p>
+                  <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-orange-500 dark:border-orange-400 p-4 mt-4">
+                    <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      "Takım bu formda giderse, sezon sonu kupa almaya değil, kupa seçmeye gideriz."
+                    </p>
+                    <p className="text-sm text-black/70 dark:text-amber-200/70 italic">— Teknik direktör</p>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Gebzespor Taraftarları Yorumu */}
-          <div className="mb-8 p-4 bg-gray-100 dark:bg-gray-800 border-l-4 border-orange-500">
-            <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Gebzespor taraftarları ise sonuçtan memnun olmasa da takımlarının arkasında durmaya devam ediyor. Ancak camianın ortak görüşü şu şekilde özetlenebilir:
-            </p>
-            <p className="text-lg md:text-xl font-bold text-black dark:text-amber-100 mt-3 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
-              "Bir sonraki maç tam kadro geliyoruz. Tam kadro gelince 8 olmaz… 7 olur, 6 olur. O kadar da değil."
-            </p>
+          {/* Genel Durum */}
+          <div className="mb-8">
+            <Card className="border-2 border-black dark:border-amber-200 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
+              <CardContent className="p-6">
+                <div className="mb-4">
+                  <span className="inline-block bg-blue-500 dark:bg-blue-600 text-white dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
+                    🌪 Genel Durum
+                  </span>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  Kısa Özet, Uzun Mizah
+                </h2>
+                <div className="space-y-4">
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded border-l-4 border-green-500">
+                    <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2">
+                      Holstein Kiel → 4/4
+                    </p>
+                    <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80">
+                      Rakipleri adeta "Sana gol göstereceğim" belgeseli izliyor.
+                    </p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded border-l-4 border-red-500">
+                    <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2">
+                      Los Infiernos → 4/4
+                    </p>
+                    <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80">
+                      Gol atmak onlar için yürüyüş yapmak kadar doğal.
+                    </p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded border-l-4 border-gray-500">
+                    <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2">
+                      Shamrock Rovers → 0/sonsuz
+                    </p>
+                    <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80">
+                      Rakip seçmiyorlar, herkese gol ikram ediyorlar.
+                    </p>
+                    <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 italic mt-2">
+                      Savunma: "Bizim branş yanlış olabilir mi?"
+                    </p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded border-l-4 border-orange-500">
+                    <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2">
+                      Antiran → tehlikeli derecede formda
+                    </p>
+                    <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80">
+                      Hani biri gelir, kapıyı çalmaz, direkt içeri girer ya…
+                    </p>
+                    <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-bold mt-2">
+                      İşte Antiran o takım.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Puan Durumu Görseli */}
@@ -276,32 +334,6 @@ export default function NewspaperPage() {
             </Card>
           </div>
 
-          {/* Yorum Bölümü */}
-          <div className="mb-8 p-6 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-2 border-blue-300 dark:border-blue-600">
-            <h3 className="text-2xl font-bold mb-4 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-              Editör Yorumu
-            </h3>
-            <div className="space-y-4">
-              <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>S</span>
-                osyal medya çağında futbol, artık sadece sahada oynanmıyor. Trebol FC ile Gebzespor arasındaki bu maç, dijital dünyada başlayan rekabetin gerçek sahaya nasıl yansıdığının en net örneği oldu.
-              </p>
-              <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                Klavyede cesur olmak kolay, ancak sahada performans göstermek bambaşka bir şey. Trebol FC, sosyal medyadaki iddialarını sahada kanıtladı. 8-0'lık skor, sadece bir sayı değil, aynı zamanda hazırlığın, takım ruhunun ve motivasyonun ne kadar önemli olduğunun göstergesi.
-              </p>
-              <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                Gebzespor'un "bir kişi eksiktik" açıklaması, mağlubiyeti kabul etmek yerine bahaneler üretmek olarak yorumlanabilir. Ancak taraftarlarının takımlarının arkasında durması, gerçek bir camia ruhunu gösteriyor. Bir sonraki maçta tam kadro gelmeleri durumunda farklı bir sonuç görebiliriz.
-              </p>
-              <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
-                Sonuç olarak, bu maç bize şunu gösterdi: Sosyal medyada atışmak eğlenceli olabilir, ancak gerçek başarı sahada kazanılır. Trebol FC bunu kanıtladı, Gebzespor ise bir sonraki maçta kendini kanıtlama şansı bulacak.
-              </p>
-            </div>
-            <div className="mt-6 pt-4 border-t border-blue-300 dark:border-blue-600">
-              <p className="text-sm text-black/70 dark:text-amber-200/70 font-serif italic">
-                — HaxArena Gazetesi Editörü
-              </p>
-            </div>
-          </div>
         </div>
       </main>
       
