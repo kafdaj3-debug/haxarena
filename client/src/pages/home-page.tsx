@@ -208,161 +208,209 @@ export default function HomePage() {
                     </div>
                   </div>
                   <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-center tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    HAXARENA GAZETESİ
+                    📰 SPOR EKSPRES
                   </h2>
                   <div className="text-center text-xs md:text-sm mt-2 text-black/60 dark:text-amber-200/60 font-serif italic">
-                    Türkiye'nin En Büyük HaxBall Real Soccer Haber Kaynağı
+                    "Gol Fırtınası, Mizah Dalgası!"
                   </div>
                 </div>
 
-                {/* Ana Başlık - Sayfa 1 */}
-                <div className="relative mb-6">
-                  <div className="mb-3">
-                    <span className="inline-block bg-black dark:bg-white text-white dark:text-black px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
-                      Özel Haber
-                    </span>
-                  </div>
-                  
+                {/* Ana Başlık */}
+                <div className="mb-6">
                   <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    🏆 Lig Lideri Zirvede! Aralık 2'de Göz Alıcı Maçlar ve Gol Şovları
+                    Gol Fırtınası, Mizah Dalgası!
                   </h1>
+                </div>
 
-                  {/* Spot */}
-                  <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500">
-                    <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      Spot: {leagueLeader ? `${leagueLeader.name} ${leagueLeader.points} puanla ligde zirvede! ` : ''}Aralık 2'de oynanan maçlarda bol gollü karşılaşmalar yaşandı. {goalLeader ? (hasMultipleLeaders ? `Oyasumi ve Osimhen ${topGoalCount} golle birlikte gol krallığının zirvesinde!` : `${goalLeader.username} ${goalLeader.totalGoals} golle gol krallığının lideri!`) : ''}
-                    </p>
-                  </div>
-
-                  {/* Maç Görseli */}
-                  <div className="w-full h-64 md:h-96 bg-gradient-to-br from-blue-200 via-yellow-200 to-red-200 dark:from-blue-900 dark:via-yellow-900 dark:to-red-900 rounded-lg mb-4 overflow-hidden relative border-2 border-black/30 dark:border-amber-200/40">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center p-8">
-                        <div className="text-6xl md:text-8xl mb-4">🏆</div>
-                        <p className="text-lg md:text-xl font-serif text-black/90 dark:text-amber-100/90 font-bold">
-                          {leagueLeader ? `"${leagueLeader.name} Zirvede!"` : '"Lig Heyecanı Devam Ediyor"'}
+                {/* Haftanın Süperstarı: AEJEN */}
+                <div className="mb-6">
+                  <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border-2 border-yellow-500 dark:border-yellow-400 p-4 md:p-6 rounded-lg">
+                    <div className="mb-3">
+                      <span className="inline-block bg-yellow-500 dark:bg-yellow-600 text-black dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
+                        ⭐ Haftanın Süperstarı
+                      </span>
+                    </div>
+                    <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      AEJEN – Holstein Kiel'in Yürüyen Çekici Kuvveti
+                    </h2>
+                    <div className="space-y-3">
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Holstein Kiel bu hafta da coştu, 4/4 yaparak resmen "Biz şampiyonluk trenini sürdürüyoruz, binmeyen koşsun" mesajı verdi.
+                      </p>
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Bu başarıyı kim sürüklüyor?
+                      </p>
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Tabii ki sahada fizik kurallarını büküp rakip savunmayı mikrodalgada ısıtır gibi dağıtan Aején.
+                      </p>
+                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-yellow-500 dark:border-yellow-400 p-3 mt-3">
+                        <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+                          "Aején'i tutmak için üç kişiyi gönderdik, üçü de geri dönmedi."
                         </p>
-                        <p className="text-sm md:text-base font-sans text-black/70 dark:text-amber-200/70 mt-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          {leagueLeader ? `${leagueLeader.points} puanla liderlik koltuğunda` : 'Aralık 2 maçlarından kareler'}
+                        <p className="text-xs text-black/70 dark:text-amber-200/70 italic">— Manifest'in analiz ekibi</p>
+                      </div>
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Holstein Kiel tarafında herkes keyifli, hatta kulübün sosyal medya yöneticisi bile "İki saatlik Aején highlights videosu hazırladım, paylaşmaya elim titriyor," dedi.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Los Infiernos */}
+                <div className="mb-6">
+                  <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-2 border-red-500 dark:border-red-400 p-4 md:p-6 rounded-lg">
+                    <div className="mb-3">
+                      <span className="inline-block bg-red-500 dark:bg-red-600 text-white dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
+                        🔥 Los Infiernos
+                      </span>
+                    </div>
+                    <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      4/4 ve Alev Alev!
+                    </h2>
+                    <div className="space-y-3">
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Los Infiernos da haftayı 4/4 yaparak tamamladı.
+                      </p>
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Nasıl mı?
+                      </p>
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        "Rakip kim?" diye bakmadan her maç 8 soyma, 12 dilimleme modunda sahaya çıkarak.
+                      </p>
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Shamrock Rovers maçında 12 gol atarak öyle bir mesaj verdiler ki, rakip tribünleri maç sonunda "biz nereye geldik?" diye birbirine bakarken buldular.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Shamrock Rovers */}
+                <div className="mb-6">
+                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-2 border-gray-500 dark:border-gray-400 p-4 md:p-6 rounded-lg">
+                    <div className="mb-3">
+                      <span className="inline-block bg-gray-500 dark:bg-gray-600 text-white dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
+                        😬 Shamrock Rovers
+                      </span>
+                    </div>
+                    <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      Gelen Geçen Saldırıyor, Gol Atan Atana
+                    </h2>
+                    <div className="space-y-3">
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Shamrock Rovers'ın durumu gerçekten… hmmm…
+                      </p>
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Hani bazı oyunlarda zorluk seviyesi yanlışlıkla "Acemi Bot"a alınır ya?
+                      </p>
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        İşte öyle.
+                      </p>
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Son haftalarda kim gelmişse gol atmış, kimi bulmuşsa vurmuş.
+                      </p>
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Bir ara rakip forvetlerin aralarında "kendi aramızda paylaşalım, ayıp olmasın şimdi" diye konuştuğu bile iddia edildi.
+                      </p>
+                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-gray-500 dark:border-gray-400 p-3 mt-3">
+                        <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+                          "Eldivenleri artık yıkamıyorum, yırtılıyor. Direkt yenisini alıyorum."
+                        </p>
+                        <p className="text-xs text-black/70 dark:text-amber-200/70 italic">— Shamrock'ın kalecisi</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Antiran */}
+                <div className="mb-6">
+                  <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-2 border-orange-500 dark:border-orange-400 p-4 md:p-6 rounded-lg">
+                    <div className="mb-3">
+                      <span className="inline-block bg-orange-500 dark:bg-orange-600 text-white dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
+                        🐂⚔ ANTIRAN
+                      </span>
+                    </div>
+                    <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      Haftanın Davet Edilmemiş Patronu
+                    </h2>
+                    <div className="space-y-3">
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Antiran tam bir gizli favori vibe'ı veriyor… ama artık gizli falan değiller: adamlar çok iyiler.
+                      </p>
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        FC Toros Bravos maçında 6 gol atıp "Biz buradayız kardeşim, hem de çok ciddiyiz" dediler.
+                      </p>
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Cristiano'nun 2 gol + 1 kendi kalesine gol karışık menülü performansı bile takımı yavaşlatamadı, kül yutmayan bir hücum merkezi var.
+                      </p>
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Retegui, Pablo Martín, Cristiano…
+                      </p>
+                      <p className="text-sm md:text-base leading-relaxed text-black/90 dark:text-amber-100/90 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Bu üçlü sahada öyle bir dolaşıyor ki, rakip savunma "ben bunu daha önce hesaplamamıştım" diye titreye titreye duruyor.
+                      </p>
+                      <div className="bg-gray-100 dark:bg-gray-800 border-l-4 border-orange-500 dark:border-orange-400 p-3 mt-3">
+                        <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+                          "Takım bu formda giderse, sezon sonu kupa almaya değil, kupa seçmeye gideriz."
+                        </p>
+                        <p className="text-xs text-black/70 dark:text-amber-200/70 italic">— Teknik direktör</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Genel Durum */}
+                <div className="mb-6">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-2 border-blue-500 dark:border-blue-400 p-4 md:p-6 rounded-lg">
+                    <div className="mb-3">
+                      <span className="inline-block bg-blue-500 dark:bg-blue-600 text-white dark:text-white px-3 py-1 text-xs md:text-sm font-bold tracking-wider uppercase">
+                        🌪 Genel Durum
+                      </span>
+                    </div>
+                    <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      Kısa Özet, Uzun Mizah
+                    </h2>
+                    <div className="space-y-3">
+                      <div className="bg-white dark:bg-gray-800 p-3 rounded border-l-4 border-green-500">
+                        <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1">
+                          Holstein Kiel → 4/4
+                        </p>
+                        <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80">
+                          Rakipleri adeta "Sana gol göstereceğim" belgeseli izliyor.
+                        </p>
+                      </div>
+                      <div className="bg-white dark:bg-gray-800 p-3 rounded border-l-4 border-red-500">
+                        <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1">
+                          Los Infiernos → 4/4
+                        </p>
+                        <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80">
+                          Gol atmak onlar için yürüyüş yapmak kadar doğal.
+                        </p>
+                      </div>
+                      <div className="bg-white dark:bg-gray-800 p-3 rounded border-l-4 border-gray-500">
+                        <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1">
+                          Shamrock Rovers → 0/sonsuz
+                        </p>
+                        <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80">
+                          Rakip seçmiyorlar, herkese gol ikram ediyorlar.
+                        </p>
+                        <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80 italic mt-1">
+                          Savunma: "Bizim branş yanlış olabilir mi?"
+                        </p>
+                      </div>
+                      <div className="bg-white dark:bg-gray-800 p-3 rounded border-l-4 border-orange-500">
+                        <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1">
+                          Antiran → tehlikeli derecede formda
+                        </p>
+                        <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80">
+                          Hani biri gelir, kapıyı çalmaz, direkt içeri girer ya…
+                        </p>
+                        <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80 font-bold mt-1">
+                          İşte Antiran o takım.
                         </p>
                       </div>
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                   </div>
-                  <p className="text-xs md:text-sm text-black/60 dark:text-amber-200/60 font-serif mb-4">
-                    Fotoğraf: HaxArena Arşivi - Aralık 2 Maçlarından Kareler
-                  </p>
-
-                  {/* Haber İçeriği */}
-                  <div className="mb-6">
-                    <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      <span className="text-4xl md:text-5xl float-left mr-2 leading-none font-bold text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>L</span>
-                      ig heyecanı tüm hızıyla devam ediyor! Puan durumunda {leagueLeader ? `${leagueLeader.name} takımı ${leagueLeader.points} puanla zirvede yer alırken` : 'şampiyonluk yarışı kızışıyor'}, Aralık 2 tarihinde oynanan maçlarda taraftarlar muhteşem anlara tanık oldu. {highScoringMatches.length > 0 ? `Özellikle bol gollü karşılaşmalar izleyenleri büyüledi. ` : ''}{goalLeader ? `${goalLeader.username} ise ${goalLeader.totalGoals} golle gol krallığının lideri olarak dikkat çekiyor.` : ''} Oyuncuların performansları takdir toplarken, ligdeki rekabet her geçen gün daha da çekişmeli hale geliyor.
-                    </p>
-
-                    {/* Puan Durumu ve Lider */}
-                    {leagueLeader && (
-                      <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mt-4 mb-4">
-                        <p className="text-base md:text-lg font-bold text-black dark:text-amber-100 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          🏆 Lig Lideri: {leagueLeader.name}
-                        </p>
-                        <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          {leagueLeader.name} takımı, {leagueLeader.points} puanla ligde zirvede yer alıyor. {leagueLeader.played} maçta {leagueLeader.won} galibiyet, {leagueLeader.drawn} beraberlik ve {leagueLeader.lost} mağlubiyet alan takım, {leagueLeader.goalsFor} gol atarken {leagueLeader.goalsAgainst} gol yedi. {leagueLeader.goalDifference > 0 ? `+${leagueLeader.goalDifference}` : leagueLeader.goalDifference} averajla takım, şampiyonluk yarışında en güçlü aday konumunda. Oyuncuların muhteşem performansları ve takım uyumu, {leagueLeader.name}'i ligde zirveye taşıyan en önemli faktörler.
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Gol Lideri */}
-                    {goalLeader && (
-                      <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
-                        <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          ⚽ Gol Liderliği: {hasMultipleLeaders ? `${goalLeaders.map((p: any) => p.username).join(' ve ')} Birlikte Zirvede!` : `${goalLeader.username}'in Muhteşem Performansı`}
-                        </h2>
-                        <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          {hasMultipleLeaders ? (
-                            <>
-                              Gol krallığında eşitlik var! Oyasumi ve Osimhen {topGoalCount} golle birlikte gol krallığının zirvesinde yer alıyor. Bu iki yıldız oyuncu, sahadaki muhteşem performanslarıyla taraftarları büyülüyor. Her ikisi de gol atma yeteneği, top kontrolü ve sahadaki varlıklarıyla ligdeki en değerli oyuncular arasında gösteriliyor. Oyasumi ve Osimhen'in her maçta gösterdikleri kararlılık ve yetenek, takımlarına büyük katkı sağlıyor.
-                            </>
-                          ) : (
-                            <>
-                              {goalLeader.username}, {goalLeader.totalGoals} golle gol krallığının zirvesinde yer alıyor. {goalLeader.teamName ? `${goalLeader.teamName} takımının yıldız oyuncusu ` : 'Oyuncu '}sahadaki muhteşem performansıyla taraftarları büyülüyor. Gol atma yeteneği, top kontrolü ve sahadaki varlığıyla {goalLeader.username}, ligdeki en değerli oyuncular arasında gösteriliyor. Her maçta gösterdiği kararlılık ve yetenek, takımına büyük katkı sağlıyor.
-                            </>
-                          )}
-                        </p>
-                        <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          {hasMultipleLeaders ? (
-                            <>
-                              Taraftarlar ve uzmanlar, Oyasumi ve Osimhen'in bu sezon ligdeki en iyi performanslarından birini sergilediğini belirtiyor. Her iki oyuncunun teknik direktörleri de, oyuncularının takımlarının en önemli oyuncularından biri olduğunu vurguluyor. Gol krallığı yarışında bu iki yıldız oyuncunun bu formunu sürdürmesi bekleniyor. İkisi de muhteşem bir sezon geçiriyor ve taraftarların gözdesi haline gelmiş durumda!
-                            </>
-                          ) : (
-                            <>
-                              Taraftarlar ve uzmanlar, {goalLeader.username}'in bu sezon ligdeki en iyi performanslarından birini sergilediğini belirtiyor. Oyuncunun teknik direktörü de, {goalLeader.username}'in takımın en önemli oyuncularından biri olduğunu vurguluyor. Gol krallığı yarışında {goalLeader.username}'in bu formunu sürdürmesi bekleniyor.
-                            </>
-                          )}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Aralık 2 Maçları Analizi */}
-                    {december2Matches.length > 0 && (
-                      <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
-                        <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          📅 Aralık 2 Maçları: Genel Analiz
-                        </h2>
-                        
-                        <div className="space-y-4">
-                          {december2Matches.map((match: any, index: number) => {
-                            const totalGoals = (match.homeScore || 0) + (match.awayScore || 0);
-                            const isHighScoring = totalGoals >= 5;
-                            return (
-                              <div key={match.id || index}>
-                                <h3 className="text-lg md:text-xl font-semibold mb-2 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                                  {match.homeTeam?.name || 'Ev Sahibi'} {match.homeScore} - {match.awayScore} {match.awayTeam?.name || 'Deplasman'} {isHighScoring && <span className="text-red-600">⚽ Bol Gollü!</span>}
-                                </h3>
-                                <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                  {isHighScoring ? `Bu maç, Aralık 2'nin en dikkat çeken karşılaşması oldu! ${totalGoals} gollü bu muhteşem maçta ` : 'Bu karşılaşmada '}{match.homeTeam?.name || 'Ev Sahibi'} ve {match.awayTeam?.name || 'Deplasman'} takımları karşı karşıya geldi. {match.homeScore > match.awayScore ? `${match.homeTeam?.name || 'Ev Sahibi'} takımı, ${match.homeScore} golle maçı kazanarak üstünlüğünü gösterdi.` : match.awayScore > match.homeScore ? `${match.awayTeam?.name || 'Deplasman'} takımı, deplasmanda ${match.awayScore} golle zafere ulaştı.` : `Maç ${match.homeScore}-${match.awayScore} berabere sonuçlandı.`} {isHighScoring ? `Her iki takımın oyuncuları da muhteşem performans sergiledi. Gol festivalleri taraftarları büyülerken, oyuncuların yetenekleri ön plana çıktı.` : 'İki takım da mücadeleci bir oyun sergiledi.'}
-                                </p>
-                                {match.goals && match.goals.length > 0 && (
-                                  <p className="text-sm md:text-base text-black/80 dark:text-amber-200/80 font-sans mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                    Maçtaki golleri atan oyuncular: {match.goals.slice(0, 3).map((goal: any, gIdx: number) => goal.playerName || goal.player?.username || 'Bilinmeyen').join(', ')}{match.goals.length > 3 ? ` ve ${match.goals.length - 3} oyuncu daha.` : '.'}
-                                  </p>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Bol Gollü Maçlar Özel Bölümü */}
-                    {highScoringMatches.length > 0 && (
-                      <div className="mb-6 border-b-2 border-black/20 dark:border-amber-200/20 pb-6">
-                        <h2 className="text-xl md:text-2xl font-bold mb-3 text-black dark:text-amber-100" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          ⚽ Bol Gollü Maçlar: Gol Şöleni!
-                        </h2>
-                        <p className="text-base md:text-lg leading-relaxed text-black/90 dark:text-amber-100/90 font-sans mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Aralık 2'de oynanan maçlarda bol gollü karşılaşmalar taraftarları büyüledi! {highScoringMatches.length} maçta toplam {highScoringMatches.reduce((sum, m) => sum + (m.homeScore || 0) + (m.awayScore || 0), 0)} gol atıldı. Bu maçlarda oyuncular muhteşem performanslar sergiledi ve sahadaki yeteneklerini konuşturdular.
-                        </p>
-                        <div className="space-y-3">
-                          {highScoringMatches.map((match: any, index: number) => {
-                            const totalGoals = (match.homeScore || 0) + (match.awayScore || 0);
-                            return (
-                              <div key={match.id || index} className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-3">
-                                <p className="text-sm md:text-base font-bold text-black dark:text-amber-100 mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-                                  {match.homeTeam?.name || 'Ev Sahibi'} {match.homeScore} - {match.awayScore} {match.awayTeam?.name || 'Deplasman'} ({totalGoals} Gol!)
-                                </p>
-                                <p className="text-xs md:text-sm text-black/80 dark:text-amber-200/80 font-sans" style={{ fontFamily: "'Inter', sans-serif" }}>
-                                  {totalGoals >= 7 ? 'Maç, adeta bir gol şölenine dönüştü! ' : 'Bu maçta '}Her iki takımın oyuncuları da muhteşem goller attı ve taraftarlara unutulmaz anlar yaşattı. Oyuncuların performansları takdire şayan!
-                                </p>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-
-                  </div>
+                </div>
                 </div>
 
                 {/* Alt Bilgi */}
